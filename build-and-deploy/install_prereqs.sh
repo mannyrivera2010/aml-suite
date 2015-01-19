@@ -72,4 +72,4 @@ mysql -u root -ppassword -Bse "grant all on ozp.* to 'ozp'@'localhost';"
 sudo sed -i '/#cluster.name: elasticsearch/c\cluster.name: ozpdemo04' /etc/elasticsearch/elasticsearch.yml
 
 # TODO: what are we doing here?
-sudo keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore
+# sudo keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore
