@@ -109,12 +109,11 @@ keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore
 
 # Search and Replace Script
 # -------------------------
-# TODO: get name/location of vagrant_patterns.txt
 # TODO: where to do this search and replace from?
 cd ${HOMEDIR}
 while read pattern replacement; do
   find . -type f | xargs -i perl -pi -e "s[$pattern][$replacement]g" "{}";
-done < vagrant_patterns.txt
+done < /vagrant/vagrant-configs/build-and-deploy/patterns_to_replace.txt
 
 cd ${HOMEDIR}/ozp-rest
 grails war
@@ -170,6 +169,5 @@ newman -k -c postman/createSampleListings.json -e env/localDev.json -n 28 -d pos
 ###########################################################
 # Deploy static resources (IWC bus, Center, HUD, Webtop)
 ###########################################################
-# TODO: get location of nginx config
-cp vagrant_nginx.conf /etc/nginx/conf.d/
+cp /vagrant/vagrant-configs/build-and-deploy/static_nginx.conf /etc/nginx/conf.d/
 sudo nginx -s reload
