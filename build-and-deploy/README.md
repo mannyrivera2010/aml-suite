@@ -12,3 +12,4 @@ Clones, compiles, configures, and launches:
 ## Helpful Hints:
     * nginx error logs:  `/var/log/nginx/error.log`
     * restart nginx: `nginx -s reload`
+    * stop a running grails app: `grails stop-app`
