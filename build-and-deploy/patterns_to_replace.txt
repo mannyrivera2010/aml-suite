@@ -1,0 +1,10 @@
+http://ozone-development.github.io/center-ui http://localhost:9000
+http://ozone-development.github.io/ozp-webtop http://localhost:9002
+http://ozone-development.github.io/hud-ui http://localhost:9001
+http://ozone-development.github.io/ozp-demo http://localhost:9004
+http://ozone-development.github.io http://localhost:9003
+https://www.owfgoss.org/ng/dev/mp/api https://localhost:8443/marketplace/api
+https://www.owfgoss.org/ng/dev-alpha/mp/api https://localhost:8443/marketplace/api
+https://www.owfgoss.org:10443/dev/metrics/piwik.php https://localhost:8443/metrics/piwik.php
+https://raw.githubusercontent.com/ozone-development/center-ui/master https://localhost:8443/images
+http://fonts.googleapis.com/css?family=Ubuntu:light&subset=Latin http://fonts.googleapis.com/css?family=Ubuntu:light&subset=Latin
