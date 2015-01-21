@@ -6,6 +6,18 @@ VM
 ## Use
 You must have Vagrant and VirtualBox installed on your host machine
 
+```bash
+vagrant up
+vagrant ssh
+cd ~/ozp-rest; grails run-app https
+```
+(in another terminal)
+```bash
+vagrant ssh
+cd ~/ozp-rest; # run newman commands at end of backend.sh
+```
+
+
 
 `bootstrap.sh` is the primary provisioning script run by Vagrant (result of 
 running `vagrant up`. It consists of 3 parts:
