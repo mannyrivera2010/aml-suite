@@ -30,7 +30,7 @@ running `vagrant up`. It consists of 3 parts:
     deploy them via nginx
     
 ## Links (from host)
-    * [ozp-rest API](https://localhost:5443/marketplace/api)
+    [ozp-rest API](https://localhost:5443/marketplace/api)
     * [Center](http://localhost:8000)
     * [HUD](http://localhost:8001)
     * [Webtop](http://localhost:8002?ozpIwc.peer=http://localhost:8003)
