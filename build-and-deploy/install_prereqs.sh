@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Install pre-reqs for the following:
 #   ozp-rest
-#   metrics/analytics
-#   Center, HUD, Webtop
+#   metrics/analytics (piwik)
+#   Center, HUD, Webtop, IWC
 echo '##########    Install Prereqs for OZP Build and Deployment    ##########'
 HOMEDIR=/home/vagrant
 
@@ -15,7 +15,7 @@ sudo apt-get update
 # remove current version of mysql
 sudo apt-get purge mysql-client-core-5.5
 
-# install mysql with root password 'password'
+# install mysql with root password 'password' (database used for ozp-rest backend)
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password password'
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password password'
 sudo apt-get -y install mysql-server
@@ -31,14 +31,8 @@ sudo update-rc.d elasticsearch defaults 95 10
 # fix nodejs on ubuntu as per http://stackoverflow.com/questions/26320901/cannot-install-nodejs-usr-bin-env-node-no-such-file-or-directory
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 
-# install newman for adding test data
-sudo npm install newman -g
-# install grunt for building front-end apps
-sudo npm install -g grunt-cli
-# install bower for building front-end apps
-sudo npm install -g bower
-# instal gulp for building hud and center
-sudo npm install -g gulp
+# install newman for adding test data and other front-end tools
+sudo npm install newman grunt-cli bower gulp -g
 
 # set JAVA_HOME env var
 echo 'export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64' >> ${HOMEDIR}/.bashrc
@@ -59,7 +53,7 @@ gvm_suggestive_selfupdate=true
 gvm_auto_selfupdate=false" > ${HOMEDIR}/.gvm/etc/config
 
 # install grails (latest version available. Can also do gvm install grails 2.2.0 for example)
-# TODO: why is this printing to STDERR?
+# NOTE: This prints to STDERR, don't know why
 gvm install grails 2.3.7
 gvm use grails 2.3.7
 

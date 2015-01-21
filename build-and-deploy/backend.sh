@@ -3,23 +3,25 @@
 # clean, clone, configure, install, and deploy backend
 echo '##########    Backend    ##########'
 HOMEDIR=/home/vagrant
-# TODO: where is this deployed?
-WARLOC=/var/lib/tomcat7/webapps
 
 cd ${HOMEDIR}
 rm -rf ozp-rest
-rm -rf
 git clone https://github.com/ozone-development/ozp-rest.git
+echo 'git clone of ozp-rest complete'
 cd ozp-rest
 
 # re-create the ozp-rest database
 mysql -u root -ppassword -Bse "DROP DATABASE ozp;"
 mysql -u root -ppassword -Bse "CREATE DATABASE ozp;"
 mysql -u ozp -pozp ozp < mysqlCreate.sql
+echo 'created ozp database'
 
-####################
-# Tomcat Config
-####################
+########################################
+# If Tomcat deployment:
+########################################
+# TODO: where is this deployed?
+WARLOC=/var/lib/tomcat7/webapps/marketplace
+
 # change location of log files
 # TODO: what and where?
 # /var/lib/tomcat7/webapps/marketplace/WEB-INF/classes/mp-log4j.xml
@@ -34,26 +36,25 @@ mysql -u ozp -pozp ozp < mysqlCreate.sql
 # Modify /etc/default/tomcat7 to increase memory
 
 # Build
+# NOTE: This currently requires resources (like the security plugin) that exist
+#       exclusively on Next Century servers
 cd ${HOMEDIR}/ozp-rest
-# grails war
-
-# TODO: what directory to do this for?
-/vagrant/pattern_replace.sh ${HOMEDIR}/ozp-rest
+grails war
 
 # deploy war to tomcat server
 # TODO: where to copy this to?
 sudo /etc/init.d/tomcat7 stop
-sudo rm -rf ${WARLOC}/marketplace.war ${WARLOC}/marketplace
+sudo rm -rf ${WARLOC}/marketplace.war ${WARLOC}
 sudo cp target/marketplace.war ${WARLOC}
 # Restart tomcat
-# sudo /etc/init.d/tomcat7 restart
+sudo /etc/init.d/tomcat7 restart
 
 
-####################
-# Grails dev deployment
-####################
-grails stop-app
-grails run-app -https --non-interactive
+########################################
+# If Grails dev deployment
+########################################
+# grails run-app -https --non-interactive
+
 
 # load sample data
 # TODO: these won't get run since the grails run-app cmd eats the console

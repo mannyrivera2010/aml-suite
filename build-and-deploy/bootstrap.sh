@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # install prereqs
-./install_prereqs.sh
+/vagrant/install_prereqs.sh
 
 # backend
-./backend.sh
+/vagrant/backend.sh
 
 # frontend
-./frontend.sh
+/vagrant/frontend.sh
