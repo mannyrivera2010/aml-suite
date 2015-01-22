@@ -9,15 +9,14 @@ You must have Vagrant and VirtualBox installed on your host machine
 ```bash
 vagrant up
 vagrant ssh
-cd ~/ozp-rest; grails run-app https
+cd ~/ozp-rest; grails run-app -https
 ```
 (in another terminal)
 ```bash
 vagrant ssh
 cd ~/ozp-rest; # run newman commands at end of backend.sh
+/vagrant/frontend.sh
 ```
-
-
 
 `bootstrap.sh` is the primary provisioning script run by Vagrant (result of 
 running `vagrant up`. It consists of 3 parts:
@@ -37,6 +36,7 @@ running `vagrant up`. It consists of 3 parts:
     * [OZP Data Utility](http://localhost:8004/ozpDataUtility/index.html)
     * [IWC Bus](http://localhost:8003)
     * [IWC Debugger](http://localhost:8003/debugger.html)
+    * [HAL Browser](http://ozone-development.github.io/hal-browser/browser.html#https://localhost:5443/marketplace/api)
 
 ## Helpful Hints:
     * nginx error logs:  `/var/log/nginx/error.log`
