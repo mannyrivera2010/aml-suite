@@ -47,7 +47,7 @@ sudo /etc/init.d/tomcat7 stop
 sudo rm -rf ${WARLOC}/marketplace.war ${WARLOC}
 sudo cp target/marketplace.war ${WARLOC}
 # Restart tomcat
-sudo /etc/init.d/tomcat7 restart
+# sudo /etc/init.d/tomcat7 restart
 
 
 ########################################
