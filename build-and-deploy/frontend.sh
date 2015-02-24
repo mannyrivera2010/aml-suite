@@ -51,17 +51,18 @@ sed -i "/'url': 'http:\/\/ozone-development.github.io\/iwc'\,/c\'url': 'http:\/\
 
 ### HUD
 cd ${HOMEDIR}/hud-ui
-sed -i '/var API_URL = process.env.API_URL || "https:\/\/localhost:8443\/marketplace";/c\var API_URL = process.env.API_URL || "https:\/\/localhost:5443\/marketplace";' ${HOMEDIR}/hud-ui/webpack.config.js
 npm install
 npm run build
+# TODO: metrics, HUD URLs
+sed -i "/API_URL/c\'API_URL': 'https://localhost:5443/marketplace'," dist/OzoneConfig.js
 cp -rf dist/* ${HOMEDIR}/static-deployment/hud
 
 ### Center
 cd ${HOMEDIR}/center-ui
 npm install
-sed -i '/var API_URL = process.env.API_URL || "https:\/\/localhost:8443\/marketplace";/c\var API_URL = process.env.API_URL || "https:\/\/localhost:5443\/marketplace";' ${HOMEDIR}/center-ui/webpack.config.js
-# TODO: metrics, HUD URLs
 npm run build
+sed -i "/API_URL/c\'API_URL': 'https://localhost:5443/marketplace'," dist/OzoneConfig.js
+# TODO: metrics, HUD URLs
 cp -rf dist/* ${HOMEDIR}/static-deployment/center
 # TODO: where to do this?
 # cd /vagrant

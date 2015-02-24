@@ -60,10 +60,30 @@ gvm use grails 2.3.7
 # configure mariadb/mysql
 mysql -u root -ppassword -Bse "create user 'ozp'@'localhost' identified by 'ozp';"
 mysql -u root -ppassword -Bse "create database ozp;"
-mysql -u root -ppassword -Bse "grant all on ozp.* to 'ozp'@'localhost';"
+mysql -u root -ppassword -Bse "grant all privileges on *.* to 'ozp'@'localhost';"
 
-# change elastic search cluster name to ozpdemo04
+echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+echo "Now do the following things manually..."
+echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+
+# change elastic search cluster name to ozpdemo04 in /etc/elasticsearch/elasticsearch.yml
+# cluster.name: ozpdemo04
 sudo sed -i '/#cluster.name: elasticsearch/c\cluster.name: ozpdemo04' /etc/elasticsearch/elasticsearch.yml
 
-# TODO: what are we doing here?
-# sudo keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore
+# create the temp directory used by elasticsearch and set permissiosn
+sudo mkdir -p /usr/share/tomcat7/temp
+sudo chown -R tomcat7 /usr/share/tomcat7/temp
+
+# create /usr/share/tomcat7/logs dir and chown -r tomcat7 logs/
+sudo mkdir -p /usr/share/tomcat7/logs
+sudo chown -R tomcat7 /usr/share/tomcat7/logs
+
+echo "increase tomcat7 memory from 128MB to 512MB in /etc/default/tomcat7 - look for -Xmx128m"
+
+echo "add user 'tomcat' to /var/lib/tomcat7/conf/tomcat-users.xml (for logging into the tomcat web application manager)"
+echo "<user name="tomcat" password="password" roles="admin,manager-gui" />"
+
+# Create certs for tomcat use
+# TODO: requires user interaction
+echo "creating certs ..."
+sudo keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore

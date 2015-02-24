@@ -17,7 +17,7 @@ echo "******************************\n hud-ui SLOCcount\n***********************
 echo "******************************\n center-ui SLOCcount\n******************************"
 ./cloc center-ui
 echo "******************************\n ozp-rest SLOCcount\n******************************"
-./cloc ozp-rest --exclude-dir=plugins,wrapper,web-app
+./cloc ozp-rest --exclude-dir=plugins,wrapper,web-app,test
 echo "******************************\n ozp-iwc SLOCcount\n******************************"
 ./cloc ozp-iwc --exclude-dir=data-schemas,dist,demo,test
 echo "******************************\n ozp-webtop SLOCcount\n******************************"

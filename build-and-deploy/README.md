@@ -40,8 +40,11 @@ running `vagrant up`. It consists of 3 parts:
     * [IWC Bus](http://localhost:8003)
     * [IWC Debugger](http://localhost:8003/debugger.html)
     * [HAL Browser](http://ozone-development.github.io/hal-browser/browser.html#https://localhost:5443/marketplace/api)
+    
+    * [Tomcat web UI](http://localhost:5808/manager/html/) (username: tomcat, password: password)
 
 ## Helpful Hints:
     * nginx error logs:  `/var/log/nginx/error.log`
     * restart nginx: `nginx -s reload`
     * stop a running grails app: `grails stop-app`
+    * Logs (backend): /var/log/tomcat7/, /usr/share/tomcat7/logs/

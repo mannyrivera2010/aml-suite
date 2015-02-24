@@ -19,21 +19,26 @@ echo 'created ozp database'
 ########################################
 # If Tomcat deployment:
 ########################################
-# TODO: where is this deployed?
-WARLOC=/var/lib/tomcat7/webapps/marketplace
 
-# change location of log files
-# TODO: what and where?
-# /var/lib/tomcat7/webapps/marketplace/WEB-INF/classes/mp-log4j.xml
+# copy MarketplaceConfig.groovy to tomcat
+sudo cp /vagrant/MarketplaceConfig.groovy /usr/share/tomcat7/lib
 
-# TODO: everything in Config dir? What exactly gets copied?
-# ehcache, MarketplaceConfig.groovy, etc go to /usr/share/tomcat7/lib/
+# copy OzoneConfig.properties to tomcat
+sudo cp ${HOMEDIR}/ozp-rest/grails-app/conf/OzoneConfig.properties /usr/share/tomcat7/lib
 
-# TODO: what/where is server.xml?
-# Update server.xml to all https
+# copy the security plugin files to tomcat
+sudo cp -r ${HOMEDIR}/ozp-rest/grails-app/conf/ozone-security-beans /usr/share/tomcat7/lib
+sudo cp ${HOMEDIR}/ozp-rest/grails-app/conf/SecurityContext.xml /usr/share/tomcat7/lib
+sudo cp ${HOMEDIR}/ozp-rest/grails-app/conf/users.properties /usr/share/tomcat7/lib
 
-# TODO: can we accomplish this using the catalina script with options instead of modifying the config file?
-# Modify /etc/default/tomcat7 to increase memory
+# update /var/lib/tomcat7/conf/server.xml, specifically the Connector for
+# port 8443 (this assumes the password to the keystore file is 'password'):
+
+# <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
+#    maxThreads="150" scheme="https" secure="true" clientAuth="false"
+#    sslProtocol="TLS" keystoreFile="/usr/share/tomcat7/.keystore"
+#    keystorePass="password" />
+
 
 # Build
 # NOTE: This currently requires resources (like the security plugin) that exist
@@ -42,12 +47,9 @@ cd ${HOMEDIR}/ozp-rest
 grails war
 
 # deploy war to tomcat server
-# TODO: where to copy this to?
-sudo /etc/init.d/tomcat7 stop
-sudo rm -rf ${WARLOC}/marketplace.war ${WARLOC}
-sudo cp target/marketplace.war ${WARLOC}
+sudo cp target/marketplace.war /var/lib/tomcat7/webapps/marketplace
 # Restart tomcat
-# sudo /etc/init.d/tomcat7 restart
+sudo /etc/init.d/tomcat7 restart
 
 
 ########################################
@@ -57,6 +59,7 @@ sudo cp target/marketplace.war ${WARLOC}
 
 
 # load sample data
-# TODO: these won't get run since the grails run-app cmd eats the console
+# NOTE: these won't get run if using grails, since the grails run-app cmd eats the console
 newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
 newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 28 -d postman/data/listingData.json
+newman -k -c postman/createSampleNotifications.json -e postman/env/localDev.json
