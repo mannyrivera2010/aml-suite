@@ -21,7 +21,7 @@ sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again p
 sudo apt-get -y install mysql-server
 
 # (default-jdk installs java 7 as of Dec 2014 (JDK includes JRE)
-sudo apt-get install curl unzip nodejs npm git default-jdk tomcat7 tomcat7-admin mysql-client-core-5.5 nginx  -y
+sudo apt-get install curl unzip nodejs npm git default-jdk tomcat7 tomcat7-admin mysql-client-core-5.5 nginx multitail  -y
 
 # download elasticsearch
 wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.2.deb
@@ -86,6 +86,7 @@ echo "Now do the following things manually..."
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 
 echo "increase tomcat7 memory from 128MB to 512MB in /etc/default/tomcat7 - look for -Xmx128m"
+echo "in the same file, append this to the same place (JAVA_OPTS): -XX:MaxPermSize=256MB"
 
 echo "add user 'tomcat' to /var/lib/tomcat7/conf/tomcat-users.xml (for logging into the tomcat web application manager)"
 echo "<user name="tomcat" password="password" roles="admin,manager-gui" />"

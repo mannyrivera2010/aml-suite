@@ -45,7 +45,7 @@ Currently, all three scripts require some user interaction
 and thus cannot be fully automated
 
 ## Links (from host)
-    * [ozp-rest API](https://localhost:5443/marketplace/api)
+    * [ozp-rest API](https://localhost:5443/marketplace/api) - user: testAdmin1, password: password
     * [Center](http://localhost:8000)
     * [HUD](http://localhost:8001)
     * [Webtop](http://localhost:8002/#/?ozpIwc.peer=http://localhost:8003)
@@ -61,3 +61,4 @@ and thus cannot be fully automated
     * stop a running grails app: `grails stop-app`
     * Logs (backend): /var/log/tomcat7/, /usr/share/tomcat7/logs/
     * verify that elasticsearch is running: `sudo netstat -lnp | grep 9300`
+    * sudo multitail -i /usr/share/tomcat7/logs/marketplace.log -i /usr/share/tomcat7/logs/stacktrace.log -i /var/lib/tomcat7/logs/localhost_access_log.2015-02-25.txt -i /var/lib/tomcat7/logs/catalina.out -i /var/lib/tomcat7/logs/localhost.2015-02-25.log  -i /var/log/nginx/error.log  -s 2 -sn 3
