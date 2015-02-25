@@ -13,7 +13,7 @@ HOMEDIR=/home/vagrant
 sudo apt-get update
 
 # remove current version of mysql
-sudo apt-get purge mysql-client-core-5.5
+sudo apt-get purge mysql-client-core-5.5 -y
 
 # install mysql with root password 'password' (database used for ozp-rest backend)
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password password'
@@ -26,7 +26,10 @@ sudo apt-get install curl unzip nodejs npm git default-jdk tomcat7 tomcat7-admin
 # download elasticsearch
 wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.2.deb
 sudo dpkg -i elasticsearch-1.4.2.deb
+# start elasticsearch on boot
 sudo update-rc.d elasticsearch defaults 95 10
+# start the elasticsearch service
+sudo /etc/init.d/elasticsearch start
 
 # fix nodejs on ubuntu as per http://stackoverflow.com/questions/26320901/cannot-install-nodejs-usr-bin-env-node-no-such-file-or-directory
 sudo ln -s /usr/bin/nodejs /usr/bin/node
@@ -62,10 +65,6 @@ mysql -u root -ppassword -Bse "create user 'ozp'@'localhost' identified by 'ozp'
 mysql -u root -ppassword -Bse "create database ozp;"
 mysql -u root -ppassword -Bse "grant all privileges on *.* to 'ozp'@'localhost';"
 
-echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
-echo "Now do the following things manually..."
-echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
-
 # change elastic search cluster name to ozpdemo04 in /etc/elasticsearch/elasticsearch.yml
 # cluster.name: ozpdemo04
 sudo sed -i '/#cluster.name: elasticsearch/c\cluster.name: ozpdemo04' /etc/elasticsearch/elasticsearch.yml
@@ -78,6 +77,14 @@ sudo chown -R tomcat7 /usr/share/tomcat7/temp
 sudo mkdir -p /usr/share/tomcat7/logs
 sudo chown -R tomcat7 /usr/share/tomcat7/logs
 
+# create directory to hold images
+sudo mkdir -p /usr/share/tomcat7/images
+sudo chown -R tomcat7 /usr/share/tomcat7/images/
+
+echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+echo "Now do the following things manually..."
+echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+
 echo "increase tomcat7 memory from 128MB to 512MB in /etc/default/tomcat7 - look for -Xmx128m"
 
 echo "add user 'tomcat' to /var/lib/tomcat7/conf/tomcat-users.xml (for logging into the tomcat web application manager)"
@@ -85,5 +92,5 @@ echo "<user name="tomcat" password="password" roles="admin,manager-gui" />"
 
 # Create certs for tomcat use
 # TODO: requires user interaction
-echo "creating certs ..."
-sudo keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore
+echo "create your certs using this cmd: "
+echo "sudo keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore"

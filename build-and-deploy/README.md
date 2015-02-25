@@ -1,42 +1,54 @@
 # Complete Build and Deployment for OZP
 
 Clones, compiles, configures, and launches all OZP projects in an Ubuntu 14.04
-VM
+VM (REST service, Center, HUD, Webtop, and IWC). The backend REST service uses 
+a MySQL database and standalone elasticsearch instance (as opposed to an H2 
+in-memory database and in-memory elasticsearch). In addition, the rest service
+is deployed to tomcat as a WAR, as opposed to being run with `grails run-app`.
+In this way, this development VM is reasonably well aligned with the 
+production version of the software (though there are still non-trivial differences).
 
 ## Use
-You must have Vagrant and VirtualBox installed on your host machine
+First, you must have Vagrant and VirtualBox installed on your host machine
 
 ```bash
 vagrant up
 vagrant ssh
-cd ~/ozp-rest; grails run-app -https
-```
-(in another terminal)
-```bash
-vagrant ssh
-cd ~/ozp-rest; # run newman commands at end of backend.sh
+# Follow the instructions to manually complete the install_prereqs.sh script (update tomcat memory, add tomcat user, generate SSL certs, etc)
+# Modify Tomcat's server.xml file as per the comment in backend.sh
+/vagrant/backend.sh
+# After the server is up and running, run the newman commands to load test data
 /vagrant/frontend.sh
+# now you should be able to hit the resources listed in the Links section below.
+# NOTE: You may need to load the rest API in a browser window first and 
+# click to ignore security warnings before loading other applications
 ```
 
-**Note**: You may need to load the rest API in a browser window first and 
-click to ignore security warnings before loading other applications
+### Details
+The bootstrap process consists of the custom scripts that are executed after
+the basic vagrant box has been started (in this case, these scripts are what
+clone, compile, configure, and deploy the OZP applications). There are 
+three bootstrap scripts:
 
-`bootstrap.sh` is the primary provisioning script run by Vagrant (result of 
-running `vagrant up`. It consists of 3 parts:
-
-* `install_prereqs.sh`: install third-party dependencies (JDK, Grails, MySQL, etc)
-* `backend.sh`: clone `ozp-rest`, configure, compile, and deploy using either
-     Tomcat or the Grails development script. NOTE: Tomcat functionality doesn't
-     work yet.
-* `frontend.sh`: clone all front-end projects (IWC, Center, HUD, Webtop) and 
-    deploy them via nginx
+1. `install_prereqs.sh` - installs software (tomcat, mysql, node, grails, etc)
+required for OZP applications and makes various configuration changes that should
+only need to be done once (adjust Tomcat heap memory, create SSL certs, create
+database users, etc)
+2. `backend.sh` - clone, build, configure, and deploy the REST backend (ozp-rest)
+3. `frontend.sh` - clone, build, configure, and deploy OZP front-end apps including:
+ * Center
+ * Webtop
+ * HUD
+ * IWC
+ 
+Currently, all three scripts require some user interaction
+and thus cannot be fully automated
 
 ## Links (from host)
     * [ozp-rest API](https://localhost:5443/marketplace/api)
     * [Center](http://localhost:8000)
     * [HUD](http://localhost:8001)
     * [Webtop](http://localhost:8002/#/?ozpIwc.peer=http://localhost:8003)
-    * [OZP Data Utility](http://localhost:8004/ozpDataUtility/index.html)
     * [IWC Bus](http://localhost:8003)
     * [IWC Debugger](http://localhost:8003/debugger.html)
     * [HAL Browser](http://ozone-development.github.io/hal-browser/browser.html#https://localhost:5443/marketplace/api)
@@ -48,3 +60,4 @@ running `vagrant up`. It consists of 3 parts:
     * restart nginx: `nginx -s reload`
     * stop a running grails app: `grails stop-app`
     * Logs (backend): /var/log/tomcat7/, /usr/share/tomcat7/logs/
+    * verify that elasticsearch is running: `sudo netstat -lnp | grep 9300`

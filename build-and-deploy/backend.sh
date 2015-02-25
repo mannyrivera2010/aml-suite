@@ -47,7 +47,7 @@ cd ${HOMEDIR}/ozp-rest
 grails war
 
 # deploy war to tomcat server
-sudo cp target/marketplace.war /var/lib/tomcat7/webapps/marketplace
+sudo cp target/marketplace.war /var/lib/tomcat7/webapps/
 # Restart tomcat
 sudo /etc/init.d/tomcat7 restart
 
@@ -55,11 +55,11 @@ sudo /etc/init.d/tomcat7 restart
 ########################################
 # If Grails dev deployment
 ########################################
-# grails run-app -https --non-interactive
+# grails run-app -https
 
 
 # load sample data
-# NOTE: these won't get run if using grails, since the grails run-app cmd eats the console
-newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
-newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 28 -d postman/data/listingData.json
-newman -k -c postman/createSampleNotifications.json -e postman/env/localDev.json
+echo "After the server is up and running, run these commands to load test data:"
+echo "newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json"
+echo "newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 28 -d postman/data/listingData.json"
+echo "newman -k -c postman/createSampleNotifications.json -e postman/env/localDev.json"
