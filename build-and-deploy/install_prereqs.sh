@@ -35,7 +35,7 @@ sudo /etc/init.d/elasticsearch start
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 
 # install newman for adding test data and other front-end tools
-sudo npm install newman grunt-cli bower gulp -g
+sudo npm install newman grunt-cli bower gulp http-server -g
 
 # set JAVA_HOME env var
 echo 'export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64' >> ${HOMEDIR}/.bashrc
@@ -81,6 +81,10 @@ sudo chown -R tomcat7 /usr/share/tomcat7/logs
 sudo mkdir -p /usr/share/tomcat7/images
 sudo chown -R tomcat7 /usr/share/tomcat7/images/
 
+# set up SSL for nginx reverse proxy
+sudo mkdir /etc/nginx/ssl
+
+
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "Now do the following things manually..."
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
@@ -91,7 +95,20 @@ echo "in the same file, append this to the same place (JAVA_OPTS): -XX:MaxPermSi
 echo "add user 'tomcat' to /var/lib/tomcat7/conf/tomcat-users.xml (for logging into the tomcat web application manager)"
 echo "<user name="tomcat" password="password" roles="admin,manager-gui" />"
 
-# Create certs for tomcat use
+# Create certs for tomcat and nginx use
 # TODO: requires user interaction
-echo "create your certs using this cmd: "
-echo "sudo keytool -genkey -alias tomcat -keyalg RSA -keystore /usr/share/tomcat7/.keystore"
+# first, generate a private key
+echo "openssl genrsa -des3 -out server.key 1024"
+# generate a CSR
+echo "openssl req -new -key server.key -out server.csr"
+# remove passphrase from the key
+echo "cp server.key server.key.org"
+echo "openssl rsa -in server.key.org -out server.key"
+# generate a self-signed certificate
+echo "openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt"
+# now we need to generate a Java keystore for use with Tomcat using these certs
+# convert the x509 cert and key to a pkcs12 file
+echo "openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12 -name ozpdev -CAfile ca.crt -caname root"
+# convert the pkcs12 file into a Java keystore
+echo "keytool -importkeystore -deststorepass password -destkeypass password -destkeystore server.keystore -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass password -alias ozpdev"
+# copy certs to places
