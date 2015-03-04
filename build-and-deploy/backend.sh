@@ -62,5 +62,5 @@ sudo /etc/init.d/tomcat7 restart
 # TODO: these apps must be served locally and the test data changed appropriately!
 echo "After the server is up and running, run these commands to load test data:"
 echo "newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json"
-echo "newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 28 -d postman/data/listingData.json"
+echo "newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 29 -d postman/data/listingData.json"
 echo "newman -k -c postman/createSampleNotifications.json -e postman/env/localDev.json"

@@ -61,7 +61,7 @@ and thus cannot be fully automated
     * stop a running grails app: `grails stop-app`
     * Logs (backend): /var/log/tomcat7/, /usr/share/tomcat7/logs/
     * verify that elasticsearch is running: `sudo netstat -lnp | grep 9300`
-    * sudo multitail -i /usr/share/tomcat7/logs/marketplace.log -i /usr/share/tomcat7/logs/stacktrace.log -i /var/lib/tomcat7/logs/localhost_access_log.2015-02-26.txt -i /var/lib/tomcat7/logs/catalina.out -i /var/lib/tomcat7/logs/localhost.2015-02-26.log  -i /var/log/nginx/error.log -i /var/log/nginx/access.log  -s 2 -sn 4
+    * sudo multitail -i /usr/share/tomcat7/logs/marketplace.log -i /usr/share/tomcat7/logs/stacktrace.log -i /var/lib/tomcat7/logs/localhost_access_log.2015-03-02.txt -i /var/lib/tomcat7/logs/catalina.out -i /var/lib/tomcat7/logs/localhost.2015-03-02.log  -i /var/log/nginx/error.log -i /var/log/nginx/access.log  -s 2 -sn 4
     # multitail: F1 for help, O to clear all windows, o to clear specific window, 0..9 to set a marker in the correspond window to easily see what's changed, B to merge all into one
     * from Modern IE VMs, http://10.0.2.2 to get to host box. This means we need to adjust the paths in OzoneConfig.js to use 10.0.2.2 instead of localhost
     * IE testing: Always enable Cache->Always Refresh From Server option in F12 dev tools

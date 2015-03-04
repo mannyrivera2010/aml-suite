@@ -43,8 +43,8 @@ npm install && bower install
 grunt build
 grunt compile
 # cp -rf bin/* ${HOMEDIR}/static-deployment/webtop
-cp /vagrant/configs/webtop/OzoneConfig.js ${HOMEDIR}/static-deployment/webtop
 cp -rf build/* ${HOMEDIR}/static-deployment/webtop
+cp /vagrant/configs/webtop/OzoneConfig.js ${HOMEDIR}/static-deployment/webtop
 
 ### HUD
 cd ${HOMEDIR}/hud-ui
