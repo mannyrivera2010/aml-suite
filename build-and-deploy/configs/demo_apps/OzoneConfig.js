@@ -1,3 +1,3 @@
 window.OzoneConfig = {
-  iwcUrl: 'https://localhost:8899/iwc'
+  iwcUrl: 'https://localhost:7799/iwc'
 };

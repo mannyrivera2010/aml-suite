@@ -11,8 +11,7 @@ echo 'git clone of ozp-rest complete'
 cd ozp-rest
 
 # re-create the ozp-rest database
-mysql -u root -ppassword -Bse "DROP DATABASE ozp;"
-mysql -u root -ppassword -Bse "CREATE DATABASE ozp;"
+mysql -u root -ppassword -Bse "DROP DATABASE ozp; CREATE DATABASE ozp;"
 mysql -u ozp -pozp ozp < mysqlCreate.sql
 echo 'created ozp database'
 
@@ -60,7 +59,8 @@ sudo /etc/init.d/tomcat7 restart
 
 # load sample data
 # TODO: these apps must be served locally and the test data changed appropriately!
+# sed -i 's/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/130.72.123.33:7799\/demo_apps/g' postman/data/listingData.json
 echo "After the server is up and running, run these commands to load test data:"
 echo "newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json"
-echo "newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 29 -d postman/data/listingData.json"
+echo "newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/listingData.json"
 echo "newman -k -c postman/createSampleNotifications.json -e postman/env/localDev.json"
