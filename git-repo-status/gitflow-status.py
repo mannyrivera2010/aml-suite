@@ -1,15 +1,49 @@
 """
 Provides status information on the repos in ozone-development
 
+NOTE: All this is available via the GitHub API!!!!
+
+CURRENT DATA 
+- - - - - - - - 
 Report errors in workflow, such as:
-   - commits on master that are not in develop or a release branch
+   - commits on master that are not in develop (or a release branch)
    - commits on a release branch not in develop
 
-Report the latest version (tagged release) and date of each project
+Report the latest tagged release version and date of each project (on master), 
+as well as the latest tagged pre-release (on develop)
 
-Report commits on develop not on master
+Links to download tarballs of latest releases and pre-releases for each project
+
+Report number of commits on develop not on master (and provide link to diff?)
 
 Report all feature branches
+
+Running total of user contributions to each repo (# of issues closed per repo or # of PRs merged per repo)
+
+Outstanding PRs for all repos
+
+List all issues in progress (and who is assigned to them)
+
+TIMEBOXED DATA (from x -y)
+- - - - - - - - - - - - - - - 
+Report basic contributor statistics (number of commits this period)
+
+List all PRs merged in during this period and/or list all issues closed during this sprint
+
+Other things maybe
+- - - - - - - - - - 
+Delete all pre-releases
+Trigger Jenkins build
+Link to other resources (huboard, deployment boxes, CI boxes, documentation, GH repos)
+
+
+A generic site to do this, assumptions being:
+1. Uses GitHub
+2. Has several repositories in a single organization
+3. Using single centralized "repository" model (not forks)
+4. Uses GitFlow (historic branches for the latest and for releases)
+5. Uses GitHub Releases functionality
+
 """
 import os.path
 
