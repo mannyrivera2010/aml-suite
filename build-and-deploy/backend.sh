@@ -35,7 +35,7 @@ sudo cp ${HOMEDIR}/ozp-rest/grails-app/conf/users.properties /usr/share/tomcat7/
 
 # <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
 #    maxThreads="150" scheme="https" secure="true" clientAuth="false"
-#    sslProtocol="TLS" keystoreFile="/usr/share/tomcat7/.keystore"
+#    sslProtocol="TLS" keystoreFile="/usr/share/tomcat7/server.keystore"
 #    keystorePass="password" />
 
 

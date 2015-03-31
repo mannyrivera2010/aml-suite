@@ -90,7 +90,7 @@ echo "Now do the following things manually..."
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 
 echo "increase tomcat7 memory from 128MB to 512MB in /etc/default/tomcat7 - look for -Xmx128m"
-echo "in the same file, append this to the same place (JAVA_OPTS): -XX:MaxPermSize=256MB"
+echo "in the same file, append this to the same place (JAVA_OPTS): -XX:MaxPermSize=256m"
 
 echo "add user 'tomcat' to /var/lib/tomcat7/conf/tomcat-users.xml (for logging into the tomcat web application manager)"
 echo "<user name="tomcat" password="password" roles="admin,manager-gui" />"
@@ -99,7 +99,7 @@ echo "<user name="tomcat" password="password" roles="admin,manager-gui" />"
 # TODO: requires user interaction
 # first, generate a private key
 echo "openssl genrsa -des3 -out server.key 1024"
-# generate a CSR
+# generate a CSR (use ozpdev for CN)
 echo "openssl req -new -key server.key -out server.csr"
 # remove passphrase from the key
 echo "cp server.key server.key.org"
@@ -111,4 +111,8 @@ echo "openssl x509 -req -days 365 -in server.csr -signkey server.key -out server
 echo "openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12 -name ozpdev -CAfile ca.crt -caname root"
 # convert the pkcs12 file into a Java keystore
 echo "keytool -importkeystore -deststorepass password -destkeypass password -destkeystore server.keystore -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass password -alias ozpdev"
-# copy certs to places
+# copy keystore file to java place: 
+echo "sudo cp server.keystore /usr/share/tomcat7"
+# copy other keys to nginx place
+echo "sudo cp server.crt /etc/nginx/ssl"
+echo "sudo cp server.key /etc/nginx/ssl"
