@@ -20,7 +20,7 @@ echo 'created ozp database'
 ########################################
 
 # copy MarketplaceConfig.groovy to tomcat
-sudo cp /vagrant//configs/ozp-rest/MarketplaceConfig.groovy /usr/share/tomcat7/lib
+sudo cp /vagrant/configs/ozp-rest/MarketplaceConfig.groovy /usr/share/tomcat7/lib
 
 # copy OzoneConfig.properties to tomcat
 sudo cp ${HOMEDIR}/ozp-rest/grails-app/conf/OzoneConfig.properties /usr/share/tomcat7/lib
@@ -60,6 +60,7 @@ sudo /etc/init.d/tomcat7 restart
 # load sample data
 # TODO: these apps must be served locally and the test data changed appropriately!
 # sed -i 's/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/130.72.123.33:7799\/demo_apps/g' postman/data/listingData.json
+echo "cd ~/ozp-rest"
 echo "After the server is up and running, run these commands to load test data:"
 echo "newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json"
 echo "newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/listingData.json"

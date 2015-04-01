@@ -13,8 +13,8 @@ cd ${HOMEDIR}
 rm -rf static-deployment
 rm -rf hud-ui center-ui ozp-iwc ozp-webtop
 
-git clone https://github.com/ozone-development/hud-ui.git
-git clone https://github.com/ozone-development/center-ui.git
+git clone https://github.com/ozone-development/ozp-hud.git
+git clone https://github.com/ozone-development/ozp-center.git
 git clone https://github.com/ozone-development/ozp-iwc.git
 git clone https://github.com/ozone-development/ozp-webtop.git
 git clone https://github.com/ozone-development/ozp-demo.git
@@ -47,14 +47,14 @@ cp -rf build/* ${HOMEDIR}/static-deployment/webtop
 cp /vagrant/configs/webtop/OzoneConfig.js ${HOMEDIR}/static-deployment/webtop
 
 ### HUD
-cd ${HOMEDIR}/hud-ui
+cd ${HOMEDIR}/ozp-hud
 npm install
 npm run build
 cp -rf dist/* ${HOMEDIR}/static-deployment/hud
 cp /vagrant/configs/hud/OzoneConfig.js ${HOMEDIR}/static-deployment/hud
 
 ### Center
-cd ${HOMEDIR}/center-ui
+cd ${HOMEDIR}/ozp-center
 npm install
 npm run build
 cp -rf dist/* ${HOMEDIR}/static-deployment/center
