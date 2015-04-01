@@ -4,28 +4,15 @@
 # Installation
 # - - - - - - - - - - - - - - -
 
-# remove old mysql
-sudo yum remove mysql mysql-*
-
+# Add other repos
 # Remi dependency on CEntOS 6
 sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
 sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 
-# Install MySQL 5.5 server
-sudo yum --enablerepo=remi,remi-test install mysql mysql-server
+sudo yum --enablerepo=remi,remi-test
 
-# Install JRE
-sudo yum install java-1.7.0-openjdk -y
-
-# Install JDK
-sudo yum install java-1.7.0-openjdk-devel -y
-
-# Install Tomcat 7
-sudo yum install tomcat -y
-
-# Install elasticsearch
+# elasticsearch
 sudo rpm --import https://packages.elasticsearch.org/GPG-KEY-elasticsearch
-
 # Add /etc/yum.repos.d/elasticsearch.repo containing (uncommented):
 
 # [elasticsearch-1.4]
@@ -35,24 +22,17 @@ sudo rpm --import https://packages.elasticsearch.org/GPG-KEY-elasticsearch
 # gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch
 # enabled=1
 
-# Install elasticsearch
-sudo yum install elasticsearch
-
-# Install Node
-# First enable access to EPEL repo
+# enable access to EPEL repo
 sudo yum install epel-release
 
-# Install nodejs and npm
-sudo yum install nodejs npm
+# remove old mysql
+sudo yum remove mysql mysql-*
 
-# Install newman (for adding test data)
-sudo npm install -g newman
+# Install packages
+sudo yum install mysql mysql-server java-1.7.0-openjdk java-1.7.0-openjdk-devel tomcat elasticsearch nodejs npm nginx git -y
 
-# Install nginx
-sudo yum install nginx
-
-# Install git
-sudo yum install git
+# Install newman (for adding test data) and http-server
+sudo npm install -g newman http-server
 
 
 # - - - - - - - - - - - - - - -
@@ -70,7 +50,7 @@ sudo chown -R tomcat7 /usr/share/tomcat7/temp
 sudo chkconfig --add elasticsearch
 
 # Start elasticsearch service
-sudo /etc/init.d/elasticsearch start
+sudo service elasticsearch start
 
 
 
@@ -97,6 +77,9 @@ mysql -u root -ppassword -Bse "grant all privileges on *.* to 'ozp'@'localhost';
 # - - - - - - - - - - - - - - -
 # configure Tomcat 
 # - - - - - - - - - - - - - - -
+
+# TODO: start tomcat on boot
+
 # create directory to hold images
 sudo mkdir -p /usr/share/tomcat7/images
 sudo chown -R tomcat /usr/share/tomcat7/images/
@@ -107,7 +90,28 @@ sudo chown -R tomcat /usr/share/tomcat7/images/
 # add user 'tomcat' to /etc/tomcat/tomcat-users.xml (for logging into the tomcat web application manager)
 # <user name="tomcat" password="password" roles="admin,manager-gui" />
 
-# TODO: start tomcat on boot
+# copy MarketplaceConfig.groovy to tomcat
+git clone https://github.com/ozone-development/dev-tools.git
+git clone https://github.com/ozone-development/ozp-rest.git
+
+sudo cp dev-tools/build-and-deploy/configs/ozp-rest/MarketplaceConfig.groovy /usr/share/tomcat/lib
+
+# copy OzoneConfig.properties to tomcat
+sudo cp dev-tools/build-and-deploy/configs/ozp-rest/OzoneConfig.properties /usr/share/tomcat/lib
+
+# copy the security plugin files to tomcat
+sudo cp -r ozp-rest/grails-app/conf/ozone-security-beans /usr/share/tomcat/lib
+sudo cp ozp-rest/grails-app/conf/SecurityContext.xml /usr/share/tomcat/lib
+sudo cp ozp-rest/grails-app/conf/users.properties /usr/share/tomcat/lib
+
+# update /var/lib/tomcat7/conf/server.xml, specifically the Connector for
+# port 8443 (this assumes the password to the keystore file is 'password'):
+
+# <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
+#    maxThreads="150" scheme="https" secure="true" clientAuth="false"
+#    sslProtocol="TLS" keystoreFile="/usr/share/tomcat/server.keystore"
+#    keystorePass="password" />
+
 
 
 
@@ -143,3 +147,6 @@ echo "sudo cp server.keystore /usr/share/tomcat"
 # copy other keys to nginx place
 echo "sudo cp server.crt /etc/nginx/ssl"
 echo "sudo cp server.key /etc/nginx/ssl"
+
+# configure firewall as per
+# https://www.digitalocean.com/community/tutorials/how-to-setup-a-basic-ip-tables-configuration-on-centos-6

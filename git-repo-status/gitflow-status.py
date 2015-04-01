@@ -3,6 +3,20 @@ Provides status information on the repos in ozone-development
 
 NOTE: All this is available via the GitHub API!!!!
 
+Want to do this totally front-end, no DB. Use React, gulp, wepback(?), flux?, basic auth? Keep "sprint" 
+functionality simple - allow user to enter start date, end date to control what is shown in 
+current sprint
+
+Jenkins job status?
+
+Pages/tabs:
+1. Overview (project names, current versions, links to latest releases)
+2. Project Details (errors in workflow, commits in develop not on mater, outstanding PRs)
+3. User Details (Each person w/ list of assigned, active, and finished issues)
+4. Issues (by repo and by state)?
+5. Sprint summary (num commits by person this sprint, issues closed this sprint, PRs merged this sprint)
+6. Links
+
 CURRENT DATA 
 - - - - - - - - 
 Report errors in workflow, such as:
@@ -41,7 +55,7 @@ A generic site to do this, assumptions being:
 1. Uses GitHub
 2. Has several repositories in a single organization
 3. Using single centralized "repository" model (not forks)
-4. Uses GitFlow (historic branches for the latest and for releases)
+4. Uses GitFlow (historic branches for the latest and for releases) or master /w tags(can we support that?)
 5. Uses GitHub Releases functionality
 
 """
