@@ -69,6 +69,3 @@ cp /vagrant/configs/demo_apps/OzoneConfig.js ${HOMEDIR}/static-deployment/demo_a
 sudo cp /vagrant/configs/nginx/static_nginx.conf /etc/nginx/conf.d/
 sudo nginx -s reload
 
-echo "now start the http-server to serve static files. Ideally this would be done with nginx, but making nginx \
-a web server and a reverse proxy did not work out"
-echo "http-server static-deployment/ -p 9093"
