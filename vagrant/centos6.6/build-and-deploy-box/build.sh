@@ -28,20 +28,28 @@ git clone https://github.com/ozone-development/ozp-iwc.git
 git clone https://github.com/ozone-development/ozp-webtop.git
 git clone https://github.com/ozone-development/ozp-demo.git
 
+# stop Bower from promting user about usage statistics
+# http://stackoverflow.com/questions/22387857/stop-bower-from-asking-for-statistics-when-installing
+export CI=true
+
 # - - - - - - - - - - - - - - - - - - - 
 # 				IWC
 # - - - - - - - - - - - - - - - - - - - 
 cd ${HOMEDIR}/ozp-iwc
-npm install && bower install
-grunt --force
+# TODO: remove this when PR is merged to master!!!!!!!
+git checkout -b add-packaging origin/add-packaging
+npm install
+npm run bower
+npm run build
 
 # - - - - - - - - - - - - - - - - - - - 
 # 				Webtop
 # - - - - - - - - - - - - - - - - - - - 
 cd ${HOMEDIR}/ozp-webtop
-npm install && bower install
-grunt build
-grunt compile
+npm install 
+npm run bower
+npm run build
+npm run compile
 
 # - - - - - - - - - - - - - - - - - - - 
 # 				Center
@@ -61,4 +69,5 @@ npm run build
 # 				Demo apps
 # - - - - - - - - - - - - - - - - - - - 
 cd ${HOMEDIR}/ozp-demo
-npm install && bower install
+npm run postinstall
+npm run prestart

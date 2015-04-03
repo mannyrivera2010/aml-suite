@@ -127,20 +127,19 @@ sudo chown -R tomcat /usr/share/tomcat/images/
 sudo sed -i '0,/^\(JAVA_OPTS=\).*/s//\1"-Xminf0.1 -Xmaxf0.3 -Xmx512m -XX:MaxPermSize=256m"/' /etc/tomcat/tomcat.conf
 
 # add user 'tomcat' to /etc/tomcat/tomcat-users.xml (for logging into the tomcat web application manager)
-sudo sed -i '/<tomcat-users>/a <user name="tomcat" password="password" roles="admin,manager-gui" />' tomcat-users.xml
+sudo sed -i '/<tomcat-users>/a <user name="tomcat" password="password" roles="admin,manager-gui" />' /etc/tomcat/tomcat-users.xml
 # <user name="tomcat" password="password" roles="admin,manager-gui" />
 
-# clone some stuff for setup files and whatnot
-git clone https://github.com/ozone-development/dev-tools.git
-git clone https://github.com/ozone-development/ozp-rest.git
-
 # copy MarketplaceConfig.groovy to tomcat
-sudo cp dev-tools/build-and-deploy/configs/ozp-rest/MarketplaceConfig.groovy /usr/share/tomcat/lib
+sudo cp /vagrant/configs/MarketplaceConfig.groovy /usr/share/tomcat/lib
 sudo chown tomcat /usr/share/tomcat/lib/MarketplaceConfig.groovy
 
 # copy OzoneConfig.properties to tomcat
-sudo cp dev-tools/build-and-deploy/configs/ozp-rest/OzoneConfig.properties /usr/share/tomcat/lib
+sudo cp /vagrant/configs/OzoneConfig.properties /usr/share/tomcat/lib
 sudo chown tomcat /usr/share/tomcat/lib/OzoneConfig.properties
+
+# clone ozp-rest for the security plugin files
+git clone https://github.com/ozone-development/ozp-rest.git
 
 # copy the security plugin files to tomcat
 sudo cp -r ozp-rest/grails-app/conf/ozone-security-beans /usr/share/tomcat/lib
@@ -153,7 +152,7 @@ sudo chown tomcat /usr/share/tomcat/lib/users.properties
 
 # update /usr/share/tomcat/conf/server.xml, specifically the Connector for
 # port 8443 (this assumes the password to the keystore file is 'password'):
-sudo sed -i '/<Service name="Catalina">/a <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true" maxThreads="150" scheme="https" secure="true" clientAuth="false" sslProtocol="TLS" keystoreFile="/usr/share/tomcat/server.keystore" keystorePass="password" />' server.xml
+sudo sed -i '/<Service name="Catalina">/a <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true" maxThreads="150" scheme="https" secure="true" clientAuth="false" sslProtocol="TLS" keystoreFile="/usr/share/tomcat/server.keystore" keystorePass="password" />' /usr/share/tomcat/conf/server.xml
 
 # - - - - - - - - - - - - - - -
 # configure nginx 
@@ -216,4 +215,4 @@ sudo mkdir /ozp-static-deployment/iwc
 # copy and modify nginx conf file
 sudo cp /vagrant/configs/static_nginx.conf /etc/nginx/conf.d/
 
-sudo service nginx restart
+

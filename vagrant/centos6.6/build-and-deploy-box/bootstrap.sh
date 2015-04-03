@@ -6,5 +6,8 @@
 # build ozp apps
 # /vagrant/build.sh
 
+# package ozp apps
+# /vagrant/package.sh
+
 # deploy ozp apps
 # /vagrant/deploy.sh
