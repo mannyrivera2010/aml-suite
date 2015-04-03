@@ -4,6 +4,7 @@ HOMEDIR=/home/vagrant
 PACKAGE_DIR=/ozp-artifacts
 STATIC_DEPLOY_DIR=/ozp-static-deployment
 
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 #						Configure and deploy backend	
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -13,6 +14,24 @@ sudo rm -rf /var/lib/tomcat/webapps/marketplace /var/lib/tomcat/webapps/marketpl
 # install new apps
 sudo cp ${PACKAGE_DIR}/marketplace.war /var/lib/tomcat/webapps/
 sudo chown tomcat /var/lib/tomcat/webapps/marketplace.war
+
+# copy MarketplaceConfig.groovy to tomcat
+sudo cp /vagrant/configs/MarketplaceConfig.groovy /usr/share/tomcat/lib
+sudo chown tomcat /usr/share/tomcat/lib/MarketplaceConfig.groovy
+
+# copy OzoneConfig.properties to tomcat
+sudo cp /vagrant/configs/OzoneConfig.properties /usr/share/tomcat/lib
+sudo chown tomcat /usr/share/tomcat/lib/OzoneConfig.properties
+
+# copy the security plugin files to tomcat
+cd ${HOMEDIR}
+sudo cp -r ozp-rest/grails-app/conf/ozone-security-beans /usr/share/tomcat/lib
+sudo cp ozp-rest/grails-app/conf/SecurityContext.xml /usr/share/tomcat/lib
+sudo cp ozp-rest/grails-app/conf/users.properties /usr/share/tomcat/lib
+
+sudo chown -R tomcat /usr/share/tomcat/lib/ozone-security-beans
+sudo chown tomcat /usr/share/tomcat/lib/SecurityContext.xml
+sudo chown tomcat /usr/share/tomcat/lib/users.properties
 
 # clear the elasticsearch data: 
 curl -XDELETE 'http://localhost:9200/marketplace'
@@ -28,22 +47,24 @@ cd ${HOMEDIR}/ozp-rest
 # the urls for the applications in the test data need to be set accordingly, 
 # perhaps something like this:
 # WARNING: need to use actual IP address for IE9 VM (since it's localhost goes to 10.0.2.2)!!!!!
-sed -i 's/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/localhost:7799\/demo_apps/g' postman/data/listingData.json
+cp postman/data/listingData.json postman/data/modifiedListingData.json
+sed -i 's/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/localhost:7799\/demo_apps/g' postman/data/modifiedListingData.json
 echo "Sleeping for 2 minutes waiting for server to start"
 sleep 2m
 newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
-newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/listingData.json
+newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/modifiedListingData.json
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 #						Configure and deploy frontend	
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-sudo mkdir -p ${STATIC_DEPLOY_DIR}
-sudo rm -rf ${STATIC_DEPLOY_DIR}/center/*
-sudo rm -rf ${STATIC_DEPLOY_DIR}/hud/*
-sudo rm -rf ${STATIC_DEPLOY_DIR}/webtop/*
-sudo rm -rf ${STATIC_DEPLOY_DIR}/iwc/*
-sudo rm -rf ${STATIC_DEPLOY_DIR}/demo_apps/*
+sudo rm -rf ${STATIC_DEPLOY_DIR}
+sudo mkdir ${STATIC_DEPLOY_DIR}
+sudo mkdir ${STATIC_DEPLOY_DIR}/center
+sudo mkdir ${STATIC_DEPLOY_DIR}/hud
+sudo mkdir ${STATIC_DEPLOY_DIR}/webtop
+sudo mkdir ${STATIC_DEPLOY_DIR}/demo_apps
+sudo mkdir ${STATIC_DEPLOY_DIR}/iwc
 
 cd ${HOMEDIR}
 sudo tar -C ${STATIC_DEPLOY_DIR}/center -xzf ${PACKAGE_DIR}/center.tar.gz --strip 2
@@ -60,21 +81,25 @@ sudo sed -i '0,/\(ozpIwc\.apiRootUrl=\).*/s//\1"https:\/\/localhost:7799\/market
 sudo sed -i '0,/\(ozpIwc\.apiRootUrl=\).*/s//\1"https:\/\/localhost:7799\/marketplace\/api"/' ${STATIC_DEPLOY_DIR}/iwc/debugger.html
 
 # Center
-sudo sed -i '0,/\("API_URL":\).*/s//\1"https:\/\/localhost:7799\/marketplace"/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i '0,/\("CENTER_URL":\).*/s//\1"https:\/\/localhost:7799\/center"/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i '0,/\("HUD_URL":\).*/s//\1"https:\/\/localhost:7799\/hud"/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i '0,/\("WEBTOP_URL":\).*/s//\1"https:\/\/localhost:7799\/webtop"/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i '0,/\("API_URL":\).*/s//\1"https:\/\/localhost:7799\/marketplace",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i '0,/\("CENTER_URL":\).*/s//\1"https:\/\/localhost:7799\/center",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i '0,/\("HUD_URL":\).*/s//\1"https:\/\/localhost:7799\/hud",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i '0,/\("WEBTOP_URL":\).*/s//\1"https:\/\/localhost:7799\/webtop",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
 
 # HUD
 # same as Center
 sudo cp ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js ${STATIC_DEPLOY_DIR}/hud/
 
 # Webtop
-sudo sed -i '0,/\("API_URL":\).*/s//\1"https:\/\/localhost:7799\/marketplace\/api"/' ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
-sudo sed -i '0,/\("IWC_URL":\).*/s//\1"https:\/\/localhost:7799\/iwc"/' ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
-sudo sed -i '0,/\("CENTER_URL":\).*/s//\1"https:\/\/localhost:7799\/center"/' ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
-sudo sed -i '0,/\("HUD_URL":\).*/s//\1"https:\/\/localhost:7799\/hud"/' ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
-sudo sed -i '0,/\("WEBTOP_URL":\).*/s//\1"https:\/\/localhost:7799\/webtop"/' ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
+echo "window.OzoneConfig = {
+	'API_URL': 'https://localhost:7799/marketplace/api',
+    'IWC_URL': 'https://localhost:7799/iwc',
+    'CENTER_URL': 'https://localhost:7799/center',
+    'HUD_URL': 'https://localhost:7799/hud',
+    'WEBTOP_URL': 'https://localhost:7799/webtop',
+    'METRICS_URL': '/path/to/metrics'
+};" > ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
+
 
 # Demo Apps
 sudo sed -i '0,/\(iwcUrl:\).*/s//\1"https:\/\/localhost:7799\/iwc"/' ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js

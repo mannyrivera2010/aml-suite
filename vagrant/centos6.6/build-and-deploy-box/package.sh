@@ -10,6 +10,7 @@ HOMEDIR=/home/vagrant
 OUTPUTDIR=/ozp-artifacts
 
 sudo mkdir -p ${OUTPUTDIR}
+sudo rm -rf ${OUTPUTDIR}/*
 sudo chown -R vagrant ${OUTPUTDIR}
 
 cd ${HOMEDIR}
