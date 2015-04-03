@@ -18,12 +18,19 @@ rm -rf /ozp-static-deployment/demo_apps/*
 
 
 # assume all release files are in /ozp-artifacts with common names
-sudo cp /ozp-artifacts/marketplace*.war /var/lib/tomcat/webapps/marketplace
-tar -C /static-deployment/center -xzvf /ozp-artifacts/center.tar.gz --strip 1
-tar -C /static-deployment/hud -xzvf /ozp-artifacts/hud.tar.gz --strip 1
-tar -C /static-deployment/webtop -xzvf /ozp-artifacts/webtop.tar.gz --strip 1
-tar -C /static-deployment/iwc -xzvf /ozp-artifacts/iwc.tar.gz --strip 1
-tar -C /static-deployment/demo_apps -xzvf /ozp-artifacts/demo_apps.tar.gz --strip 1
+sudo cp /ozp-artifacts/marketplace.war /var/lib/tomcat/webapps/
+sudo chown tomcat /var/lib/tomcat/webapps/marketplace.war
+sudo tar -C /ozp-static-deployment/center -xzvf /ozp-artifacts/center.tar.gz --strip 1
+sudo tar -C /ozp-static-deployment/hud -xzvf /ozp-artifacts/hud.tar.gz --strip 1
+sudo tar -C /ozp-static-deployment/webtop -xzvf /ozp-artifacts/webtop.tar.gz --strip 1
+sudo tar -C /ozp-static-deployment/iwc -xzvf /ozp-artifacts/iwc.tar.gz --strip 1
+sudo tar -C /ozp-static-deployment/demo_apps -xzvf /ozp-artifacts/demo_apps.tar.gz --strip 1
+
+# change all OzoneConfig.js files as needed
+
+# copy and modify the nginx conf file to 
+
+sudo chown -R nginx /ozp-static-deployment
 
 sudo service tomcat start
 
