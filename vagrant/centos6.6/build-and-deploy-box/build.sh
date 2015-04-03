@@ -11,7 +11,7 @@ sudo chown -R vagrant ${HOMEDIR}
 cd ${HOMEDIR}
 rm -rf ozp-rest
 git clone https://github.com/ozone-development/ozp-rest.git
-cd ozp-rest
+cd ${HOMEDIR}/ozp-rest/
 grails war
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
