@@ -1,8 +1,12 @@
-# vagrant-configs
-A collection of Vagrant configurations and possibly other tools
+dev-tools
+========================
+A collection of utilities for use with OZP applications and development
 
-## build-and-deploy Vagrant box
-see the build-and-deploy/README.md for details
+## Vagrant 
+Vagrant boxes, including:
+
+* CentOS 6.6 box for build and deployment of all ozp applications
+* Ubuntu 14.04 box for build and deployment of all ozp applications
 
 ## sloc-count
 calculates the sloc count of the ozp applications
