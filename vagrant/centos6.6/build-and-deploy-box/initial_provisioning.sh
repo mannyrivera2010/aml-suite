@@ -8,15 +8,15 @@ sudo yum update -y
 # enable access to EPEL repo
 sudo yum install epel-release -y
 
-printf "\n********************\nfinished inital yum update\n********************\n"
+printf "\n******************\nfinished inital yum update\n******************\n"
 # this should have been installed in the basebox but wasn't. without it, the 
 # virtualbox guest additions will fail to build, and shared folders won't work
 sudo yum install kernel-headers kernel-devel -y
-printf "\n********************\n finished installing kernel headers \n********************\n"
+printf "\n*************\n finished installing kernel headers \n*************\n"
 sudo yum install java-1.7.0-openjdk java-1.7.0-openjdk-devel git unzip vim -y
-printf "\n********************\n finished installing java and such \n********************\n"
+printf "\n**************\n finished installing java and such \n**************\n"
 sudo yum install nodejs npm -y
-printf "\n********************\nfinished installing nodejs and npm\n********************\n"
+printf "\n**************\nfinished installing nodejs and npm\n**************\n"
 # install gvm 
 curl -s get.gvmtool.net | bash
 source ${HOMEDIR}/.gvm/bin/gvm-init.sh
@@ -40,7 +40,7 @@ gvm default grails 2.3.7
 # export PATH=$GRAILS_HOME/bin:$PATH
 # export JAVA_HOME="/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64"
 
-printf "\n********************\nfinished grails installation\n********************\n"
+printf "\n*****************\nfinished grails installation\n*****************\n"
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -69,12 +69,12 @@ sudo yum remove mysql mysql-* -y
 
 # Install packages
 # sudo yum --enablerepo=remi,remi-test install mysql mysql-server java-1.7.0-openjdk java-1.7.0-openjdk-devel tomcat elasticsearch nodejs npm nginx git -y
-sudo yum --enablerepo=remi,remi-test install mysql mysql-server tomcat elasticsearch nginx -y
+sudo yum --enablerepo=remi,remi-test install mysql mysql-server tomcat elasticsearch nginx multitail -y
 
 # Install newman (for adding test data)
 sudo npm install -g newman
 
-printf "\n********************\nfinished deployment installation\n********************\n"
+printf "\n***************\nfinished deployment installation\n***************\n"
 
 # - - - - - - - - - - - - - - -
 # configure elastic search
@@ -93,7 +93,7 @@ sudo chkconfig --add elasticsearch
 # Start elasticsearch service
 sudo service elasticsearch start
 
-printf "\n********************\nfinished elasticsearch config\n********************\n"
+printf "\n*****************\nfinished elasticsearch config\n*****************\n"
 
 # - - - - - - - - - - - - - - -
 # configure MySQL 
@@ -196,12 +196,12 @@ sudo iptables -L -n
 sudo iptables-save | sudo tee /etc/sysconfig/iptables
 sudo service iptables restart
 
-printf "\n********************\nfinished iptables config\n********************\n"
+printf "\n******************\nfinished iptables config\n******************\n"
 
 # TODO: the next time i tried this, i had to just stop iptables altogether :(
 
 # copy and modify nginx conf file
 sudo cp /vagrant/configs/static_nginx.conf /etc/nginx/conf.d/
 
-printf "\n********************\ninitial_provisioning completed\n********************\n"
+printf "\n****************\ninitial_provisioning completed\n****************\n"
 

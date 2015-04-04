@@ -21,7 +21,14 @@ not work on a Windows host)
 
 After that, simply run `vagrant up` in this directory and, after provisioning
 is complete (**typically 35-45 minutes**), access the OZP applications from your 
-host at the URLs listed above.
+host at the URLs listed above. Alternateively, it may be helpful to catpure
+a log output to assist with any problems: `vagrant up 2>&1 | tee vagrant.log` (
+assuming you are running on Linux or OS X host)
+
+By default, the contents of ~/ozp on your host are rsynced with the vagrant 
+box. This is useful for development purposes, where the code you're editing
+lives on your host and needs to get to the VM for execution. Run `vagrant rsync`
+to update the contents of `/home/vagrant/ozp` in the VM
 
 ## Details 
 ozp-rest is run under Tomcat, using an actual MySQL database and Elasticsearch 
@@ -41,13 +48,20 @@ Tomcat. Unlike the other three scripts, this one should only need to be run once
 * `deploy.sh`: move the previously created artifacts to the right places, and 
 perform any configuration required for deployment
 
+## Potential Issues
+1. Firewalls sometimes cause problems - if so, `sudo service iptables stop`
+2. Using `localhost` for IP address in listingsData.json and in OzoneConfig.js
+files will not work for IE VMs that use `10.0.2.2` for `localhost`. 
+3. `deploy.sh` will wait 2 minutes for ozp-rest to start up. On very slow 
+computers, that might not be long enough
+
 ## Helpful Hints:
-    * nginx error logs:  `/var/log/nginx/error.log`
-    * restart nginx: `nginx -s reload`
-    * stop a running grails app: `grails stop-app`
-    * Logs (backend): /var/log/tomcat7/, /usr/share/tomcat7/logs/
+    * nginx error log:  `/var/log/nginx/error.log`
+    * nginx access log:  `/var/log/nginx/access.log`
+    * restart nginx: `nginx -s reload` or `sudo service nginx restart`
+    * Logs (backend): /var/log/tomcat/, /usr/share/tomcat/logs/
     * verify that elasticsearch is running: `sudo netstat -lnp | grep 9300`
-    * sudo multitail -i /usr/share/tomcat7/logs/marketplace.log -i /usr/share/tomcat7/logs/stacktrace.log -i /var/lib/tomcat7/logs/localhost_access_log.2015-03-06.txt -i /var/lib/tomcat7/logs/catalina.out -i /var/lib/tomcat7/logs/localhost.2015-03-06.log  -i /var/log/nginx/error.log -i /var/log/nginx/access.log  -s 2 -sn 4
+    * sudo multitail -i /usr/share/tomcat/logs/marketplace.log -i /usr/share/tomcat/logs/stacktrace.log -i /var/log/tomcat/localhost_access_log.2015-04-04.txt -i /var/log/tomcat/catalina.out -i /var/log/tomcat/localhost.2015-04-04.log  -i /var/log/nginx/error.log -i /var/log/nginx/access.log  -s 2 -sn 4
     # multitail: F1 for help, O to clear all windows, o to clear specific window, 0..9 to set a marker in the correspond window to easily see what's changed, B to merge all into one
     * from Modern IE VMs, http://10.0.2.2 to get to host box. This means we need to adjust the paths in OzoneConfig.js to use 10.0.2.2 instead of localhost
     * IE testing: Always enable Cache->Always Refresh From Server option in F12 dev tools

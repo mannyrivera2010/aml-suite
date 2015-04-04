@@ -8,7 +8,7 @@ STATIC_DEPLOY_DIR=/ozp-static-deployment
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 #						Configure and deploy backend	
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-echo "\n********************\n  Begin deploying backend \n********************\n"
+printf "\n******************\n  Begin deploying backend \n******************\n"
 # stop the server and remove existing apps
 sudo service tomcat stop
 sudo rm -rf /var/lib/tomcat/webapps/marketplace /var/lib/tomcat/webapps/marketplace.war
@@ -50,16 +50,16 @@ cd ${HOMEDIR}/ozp-rest
 # WARNING: need to use actual IP address for IE9 VM (since it's localhost goes to 10.0.2.2)!!!!!
 cp postman/data/listingData.json postman/data/modifiedListingData.json
 sed -i 's/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/localhost:7799\/demo_apps/g' postman/data/modifiedListingData.json
-echo "Sleeping for 2 minutes waiting for server to start"
+printf "Sleeping for 2 minutes waiting for server to start"
 sleep 2m
 newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
 newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/modifiedListingData.json
-echo "\n********************\n  Finished deploying backend \n********************\n"
+printf "\n*****************\n  Finished deploying backend \n*****************\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 #						Configure and deploy frontend	
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-echo "\n********************\n  Begin deploying frontend \n********************\n"
+printf "\n******************\n  Begin deploying frontend \n******************\n"
 
 sudo rm -rf ${STATIC_DEPLOY_DIR}
 sudo mkdir ${STATIC_DEPLOY_DIR}
@@ -109,4 +109,4 @@ sudo sed -i '0,/\(iwcUrl:\).*/s//\1"https:\/\/localhost:7799\/iwc"/' ${STATIC_DE
 
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart
-echo "\n********************\n  Finished deploying frontend \n********************\n"
+printf "\n****************\n  Finished deploying frontend \n****************\n"
