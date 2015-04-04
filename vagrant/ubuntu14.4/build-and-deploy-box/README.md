@@ -1,5 +1,7 @@
 # Complete Build and Deployment for OZP
 
+**WARNING: THIS IS CURRENTLY VERY BROKEN! DO NOT USE!!!!**
+
 Clones, compiles, configures, and launches all OZP projects in an Ubuntu 14.04
 VM (REST service, Center, HUD, Webtop, and IWC). The backend REST service uses 
 a MySQL database and standalone elasticsearch instance (as opposed to an H2 
