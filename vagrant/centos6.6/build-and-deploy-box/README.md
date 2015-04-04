@@ -21,7 +21,7 @@ not work on a Windows host)
 
 After that, simply run `vagrant up` in this directory and, after provisioning
 is complete (**typically 35-45 minutes**), access the OZP applications from your 
-host at the URLs listed above
+host at the URLs listed above.
 
 ## Details 
 ozp-rest is run under Tomcat, using an actual MySQL database and Elasticsearch 

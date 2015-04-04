@@ -8,6 +8,7 @@ STATIC_DEPLOY_DIR=/ozp-static-deployment
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 #						Configure and deploy backend	
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+echo "\n********************\n  Begin deploying backend \n********************\n"
 # stop the server and remove existing apps
 sudo service tomcat stop
 sudo rm -rf /var/lib/tomcat/webapps/marketplace /var/lib/tomcat/webapps/marketplace.war
@@ -53,10 +54,12 @@ echo "Sleeping for 2 minutes waiting for server to start"
 sleep 2m
 newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
 newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/modifiedListingData.json
+echo "\n********************\n  Finished deploying backend \n********************\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 #						Configure and deploy frontend	
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+echo "\n********************\n  Begin deploying frontend \n********************\n"
 
 sudo rm -rf ${STATIC_DEPLOY_DIR}
 sudo mkdir ${STATIC_DEPLOY_DIR}
@@ -73,7 +76,7 @@ sudo tar -C ${STATIC_DEPLOY_DIR}/webtop -xzf ${PACKAGE_DIR}/webtop.tar.gz --stri
 sudo tar -C ${STATIC_DEPLOY_DIR}/iwc -xzf ${PACKAGE_DIR}/iwc.tar.gz --strip 2
 sudo tar -C ${STATIC_DEPLOY_DIR}/demo_apps -xzf ${PACKAGE_DIR}/demo_apps.tar.gz --strip 2
 
-# TODO: change all OzoneConfig.js files as needed
+# modify OzoneConfig.js files
 
 # IWC
 sudo sed -i '0,/\(ozpIwc\.apiRootUrl=\).*/s//\1"https:\/\/localhost:7799\/marketplace\/api"/' ${STATIC_DEPLOY_DIR}/iwc/iframe_peer.html
@@ -106,3 +109,4 @@ sudo sed -i '0,/\(iwcUrl:\).*/s//\1"https:\/\/localhost:7799\/iwc"/' ${STATIC_DE
 
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart
+echo "\n********************\n  Finished deploying frontend \n********************\n"

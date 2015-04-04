@@ -5,16 +5,24 @@ HOMEDIR=/home/vagrant
 #			Install and configure build dependencies
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 sudo yum update -y
+# enable access to EPEL repo
+sudo yum install epel-release -y
+
+printf "\n********************\nfinished inital yum update\n********************\n"
 # this should have been installed in the basebox but wasn't. without it, the 
 # virtualbox guest additions will fail to build, and shared folders won't work
 sudo yum install kernel-headers kernel-devel -y
-sudo yum install java-1.7.0-openjdk java-1.7.0-openjdk-devel git nodejs npm unzip vim -y
+printf "\n********************\n finished installing kernel headers \n********************\n"
+sudo yum install java-1.7.0-openjdk java-1.7.0-openjdk-devel git unzip vim -y
+printf "\n********************\n finished installing java and such \n********************\n"
+sudo yum install nodejs npm -y
+printf "\n********************\nfinished installing nodejs and npm\n********************\n"
 # install gvm 
 curl -s get.gvmtool.net | bash
 source ${HOMEDIR}/.gvm/bin/gvm-init.sh
 # modify .gvm/etc/config to set gvm_auto_answer=true
 # (see options here: http://gvmtool.net/)
-echo "# make gvm non-interactive, great for CI environments
+printf "# make gvm non-interactive, great for CI environments
 gvm_auto_answer=true
 # prompt user to selfupdate on new shell
 gvm_suggestive_selfupdate=true
@@ -32,13 +40,15 @@ gvm default grails 2.3.7
 # export PATH=$GRAILS_HOME/bin:$PATH
 # export JAVA_HOME="/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64"
 
+printf "\n********************\nfinished grails installation\n********************\n"
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 #			Install and configure deployment dependencies
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 # Add other repos
-# Remi dependency on CEntOS 6
+# Remi dependency on CentOS 6
 sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
 sudo rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 
@@ -53,17 +63,18 @@ gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch
 enabled=1" > ${HOMEDIR}/elasticsearch.repo
 sudo mv ${HOMEDIR}/elasticsearch.repo /etc/yum.repos.d/
 
-# enable access to EPEL repo
-sudo yum install epel-release -y
 
 # remove old mysql
 sudo yum remove mysql mysql-* -y
 
 # Install packages
-sudo yum --enablerepo=remi,remi-test install mysql mysql-server java-1.7.0-openjdk java-1.7.0-openjdk-devel tomcat elasticsearch nodejs npm nginx git -y
+# sudo yum --enablerepo=remi,remi-test install mysql mysql-server java-1.7.0-openjdk java-1.7.0-openjdk-devel tomcat elasticsearch nodejs npm nginx git -y
+sudo yum --enablerepo=remi,remi-test install mysql mysql-server tomcat elasticsearch nginx -y
 
 # Install newman (for adding test data)
 sudo npm install -g newman
+
+printf "\n********************\nfinished deployment installation\n********************\n"
 
 # - - - - - - - - - - - - - - -
 # configure elastic search
@@ -82,6 +93,7 @@ sudo chkconfig --add elasticsearch
 # Start elasticsearch service
 sudo service elasticsearch start
 
+printf "\n********************\nfinished elasticsearch config\n********************\n"
 
 # - - - - - - - - - - - - - - -
 # configure MySQL 
@@ -111,6 +123,7 @@ mysql -u root -ppassword -Bse "create database ozp;"
 # grant ozp privs
 mysql -u root -ppassword -Bse "grant all privileges on *.* to 'ozp'@'localhost';"
 
+printf "\n********************\nfinished mysql config\n********************\n"
 # - - - - - - - - - - - - - - -
 # configure Tomcat 
 # - - - - - - - - - - - - - - -
@@ -134,6 +147,7 @@ sudo sed -i '/<tomcat-users>/a <user name="tomcat" password="password" roles="ad
 # port 8443 (this assumes the password to the keystore file is 'password'):
 sudo sed -i '/<Service name="Catalina">/a <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true" maxThreads="150" scheme="https" secure="true" clientAuth="false" sslProtocol="TLS" keystoreFile="/usr/share/tomcat/server.keystore" keystorePass="password" />' /usr/share/tomcat/conf/server.xml
 
+printf "\n********************\nfinished tomcat config\n********************\n"
 # - - - - - - - - - - - - - - -
 # configure nginx 
 # - - - - - - - - - - - - - - -
@@ -182,9 +196,12 @@ sudo iptables -L -n
 sudo iptables-save | sudo tee /etc/sysconfig/iptables
 sudo service iptables restart
 
+printf "\n********************\nfinished iptables config\n********************\n"
+
 # TODO: the next time i tried this, i had to just stop iptables altogether :(
 
 # copy and modify nginx conf file
 sudo cp /vagrant/configs/static_nginx.conf /etc/nginx/conf.d/
 
+printf "\n********************\ninitial_provisioning completed\n********************\n"
 

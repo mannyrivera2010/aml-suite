@@ -8,6 +8,7 @@
 
 HOMEDIR=/home/vagrant
 OUTPUTDIR=/ozp-artifacts
+echo "\n********************\n  Begin packaging \n********************\n"
 
 sudo mkdir -p ${OUTPUTDIR}
 sudo rm -rf ${OUTPUTDIR}/*
@@ -32,3 +33,4 @@ mv webtop.tar.gz ${OUTPUTDIR}
 tar -czf demo_apps.tar.gz ozp-demo/app
 mv demo_apps.tar.gz ${OUTPUTDIR}
 
+echo "\n********************\n  Completed packaging \n********************\n"
