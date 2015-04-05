@@ -3,6 +3,8 @@
 HOMEDIR=/home/vagrant
 PACKAGE_DIR=/ozp-artifacts
 STATIC_DEPLOY_DIR=/ozp-static-deployment
+# WARNING: need to use actual IP address for IE9 VM (since it's localhost goes to 10.0.2.2)!!!!!
+HOST_IP="192.168.1.12"
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -47,9 +49,8 @@ cd ${HOMEDIR}/ozp-rest
 # after the server is up and running, reload test data via newman. Note that 
 # the urls for the applications in the test data need to be set accordingly, 
 # perhaps something like this:
-# WARNING: need to use actual IP address for IE9 VM (since it's localhost goes to 10.0.2.2)!!!!!
 cp postman/data/listingData.json postman/data/modifiedListingData.json
-sed -i 's/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/localhost:7799\/demo_apps/g' postman/data/modifiedListingData.json
+sed -i "s/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/${HOST_IP}:7799\/demo_apps/g" postman/data/modifiedListingData.json
 printf "Sleeping for 2 minutes waiting for server to start"
 sleep 2m
 newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
@@ -79,15 +80,15 @@ sudo tar -C ${STATIC_DEPLOY_DIR}/demo_apps -xzf ${PACKAGE_DIR}/demo_apps.tar.gz 
 # modify OzoneConfig.js files
 
 # IWC
-sudo sed -i '0,/\(ozpIwc\.apiRootUrl=\).*/s//\1"https:\/\/localhost:7799\/marketplace\/api"/' ${STATIC_DEPLOY_DIR}/iwc/iframe_peer.html
-sudo sed -i '0,/\(ozpIwc\.apiRootUrl=\).*/s//\1"https:\/\/localhost:7799\/marketplace\/api"/' ${STATIC_DEPLOY_DIR}/iwc/intentsChooser.html
-sudo sed -i '0,/\(ozpIwc\.apiRootUrl=\).*/s//\1"https:\/\/localhost:7799\/marketplace\/api"/' ${STATIC_DEPLOY_DIR}/iwc/debugger.html
+sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/iframe_peer.html
+sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/intentsChooser.html
+sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/debugger.html
 
 # Center
-sudo sed -i '0,/\("API_URL":\).*/s//\1"https:\/\/localhost:7799\/marketplace",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i '0,/\("CENTER_URL":\).*/s//\1"https:\/\/localhost:7799\/center",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i '0,/\("HUD_URL":\).*/s//\1"https:\/\/localhost:7799\/hud",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i '0,/\("WEBTOP_URL":\).*/s//\1"https:\/\/localhost:7799\/webtop",/' ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i "0,/\(\"API_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/marketplace\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i "0,/\(\"CENTER_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/center\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i "0,/\(\"HUD_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/hud\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+sudo sed -i "0,/\(\"WEBTOP_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/webtop\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
 
 # HUD
 # same as Center
@@ -95,17 +96,17 @@ sudo cp ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js ${STATIC_DEPLOY_DIR}/hud/
 
 # Webtop
 echo "window.OzoneConfig = {
-	'API_URL': 'https://localhost:7799/marketplace/api',
-    'IWC_URL': 'https://localhost:7799/iwc',
-    'CENTER_URL': 'https://localhost:7799/center',
-    'HUD_URL': 'https://localhost:7799/hud',
-    'WEBTOP_URL': 'https://localhost:7799/webtop',
-    'METRICS_URL': '/path/to/metrics'
+	\"API_URL\": \"https://${HOST_IP}:7799/marketplace/api\",
+    \"IWC_URL\": \"https://${HOST_IP}:7799/iwc\",
+    \"CENTER_URL\": \"https://${HOST_IP}:7799/center\",
+    \"HUD_URL\": \"https://${HOST_IP}:7799/hud\",
+    \"WEBTOP_URL\": \"https://${HOST_IP}:7799/webtop\",
+    \"METRICS_URL\": \"/path/to/metrics\"
 };" > ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
 
 
 # Demo Apps
-sudo sed -i '0,/\(iwcUrl:\).*/s//\1"https:\/\/localhost:7799\/iwc"/' ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js
+sudo sed -i "0,/\(iwcUrl:\).*/s//\1\"https:\/\/${HOST_IP}:7799\/iwc\"/" ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js
 
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart
