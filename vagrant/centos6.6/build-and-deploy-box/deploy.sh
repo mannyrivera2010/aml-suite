@@ -106,7 +106,6 @@ echo "window.OzoneConfig = {
 
 
 
-
 # Demo Apps
 sudo sed -i "0,/\(iwcUrl:\).*/s//\1\"https:\/\/${HOST_IP}:7799\/iwc\"/" ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js
 
