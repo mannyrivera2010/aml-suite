@@ -3,8 +3,8 @@
 HOMEDIR=/home/vagrant
 PACKAGE_DIR=/ozp-artifacts
 STATIC_DEPLOY_DIR=/ozp-static-deployment
-# WARNING: need to use actual IP address for IE9 VM (since it's localhost goes to 10.0.2.2)!!!!!
-HOST_IP="192.168.1.12"
+# CHANGE ME to your host's IP address 
+HOST_IP="localhost"
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

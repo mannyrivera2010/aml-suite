@@ -1,6 +1,8 @@
 CentOS 6.6 OZP Build and Deploy Box
 ========================================
-This Vagrant box will build, package, and deploy the following OZP applications:
+This Vagrant box will build, package, and deploy the following OZP applications
+(note that you may need to replace `localhost` with your host's IP address,
+depending on your setup):
 
 * [REST service](https://localhost:7799/marketplace/api)
 * [Center](https://localhost:7799/center)
@@ -19,13 +21,20 @@ You may also wish to install the `vagrant-vbguest` plugin which keeps your
 Guest Additions up to date: `vagrant plugin install vagrant-vbguest` (this may 
 not work on a Windows host)
 
-After that, simply run `vagrant up` in this directory and, after provisioning
-is complete (**typically 35-45 minutes**), access the OZP applications from your 
+If you wish to access this box from machines other than your host (for example, 
+if you are running Modern IE VMs on your host), 
+you'll want to use your host's IP address in a few places (instead of simply
+localhost). Enter your host's IP in `configs/static_nginx.conf` (in the 
+`$host_ip` variable at the top), as well as in `deploy.sh` (the HOST_IP variable
+at the top of the file).
+
+Now, run `vagrant up` in this directory and, after provisioning
+is complete (**typically 35-55 minutes**), access the OZP applications from your 
 host at the URLs listed above. Alternateively, it may be helpful to catpure
 a log output to assist with any problems: `vagrant up 2>&1 | tee vagrant.log` (
 assuming you are running on Linux or OS X host)
 
-By default, the contents of ~/ozp on your host are rsynced with the vagrant 
+By default, the contents of `~/ozp` on your host are rsynced with the vagrant 
 box. This is useful for development purposes, where the code you're editing
 lives on your host and needs to get to the VM for execution. Run `vagrant rsync`
 to update the contents of `/home/vagrant/ozp` in the VM
@@ -50,9 +59,7 @@ perform any configuration required for deployment
 
 ## Potential Issues
 1. Firewalls sometimes cause problems - if so, `sudo service iptables stop`
-2. Using `localhost` for IP address in listingsData.json and in OzoneConfig.js
-files will not work for IE VMs that use `10.0.2.2` for `localhost`. 
-3. `deploy.sh` will wait 2 minutes for ozp-rest to start up. On very slow 
+2. `deploy.sh` will wait 2 minutes for ozp-rest to start up. On very slow 
 computers, that might not be long enough
 
 ## Helpful Hints:
