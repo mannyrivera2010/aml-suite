@@ -102,7 +102,9 @@ echo "window.OzoneConfig = {
     \"HUD_URL\": \"https://${HOST_IP}:7799/hud\",
     \"WEBTOP_URL\": \"https://${HOST_IP}:7799/webtop\",
     \"METRICS_URL\": \"/path/to/metrics\"
-};" > ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
+};" | sudo tee ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
+
+
 
 
 # Demo Apps

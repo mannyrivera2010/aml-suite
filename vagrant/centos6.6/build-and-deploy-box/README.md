@@ -8,7 +8,7 @@ depending on your setup):
 * [Center](https://localhost:7799/center)
 * [HUD](https://localhost:7799/hud)
 * [Webtop](https://localhost:7799/webtop)
-* [IWC](https://localhost:7799/iwc)
+* [IWC (debugger)](https://localhost:7799/iwc/debugger.html)
 * [Demo Apps](https://localhost:7799/demo_apps)
 * [HAL Browser](https://localhost:7799/iwc/debugger.html#hal-browser/https://localhost:5443/marketplace/api)
 * [Tomcat web UI](http://localhost:5808/manager/html/) (username: tomcat, password: password)
