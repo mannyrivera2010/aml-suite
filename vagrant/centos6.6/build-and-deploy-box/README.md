@@ -21,12 +21,10 @@ You may also wish to install the `vagrant-vbguest` plugin which keeps your
 Guest Additions up to date: `vagrant plugin install vagrant-vbguest` (this may 
 not work on a Windows host)
 
-If you wish to access this box from machines other than your host (for example, 
-if you are running Modern IE VMs on your host), 
-you'll want to use your host's IP address in a few places (instead of simply
-localhost). Enter your host's IP in `configs/static_nginx.conf` (in the 
-`$host_ip` variable at the top), as well as in `deploy.sh` (the HOST_IP variable
-at the top of the file).
+In most cases, you'll want to use your host's IP address to access the apps (
+instead of simply localhost, which would only work from your local machine).
+Enter your host's IP in `deploy.sh` (the HOST_IP variable at the top of the
+file).
 
 Now, run `vagrant up` in this directory and, after provisioning
 is complete (**typically 35-55 minutes**), access the OZP applications from your 
@@ -51,7 +49,7 @@ turn runs four scripts:
 
 * `initial_provisioning.sh`: installs dependencies (Java, Grails, MySQL, etc), 
 configures dependencies, and copies **insecure** SSL keys for use by nginx and 
-Tomcat. Unlike the other three scripts, this one should only need to be run once
+Tomcat. Unlike the other three scripts, this one should only be run once
 * `build.sh`: clones the ozp applications from GitHub and builds them
 * `package.sh`: tars and compresses the compiled output from the previous step
 * `deploy.sh`: move the previously created artifacts to the right places, and 
@@ -60,7 +58,7 @@ perform any configuration required for deployment
 ## Potential Issues
 1. Firewalls sometimes cause problems - if so, `sudo service iptables stop`
 2. `deploy.sh` will wait 2 minutes for ozp-rest to start up. On very slow 
-computers, that might not be long enough
+or resource-starved machines, that might not be long enough
 
 ## Helpful Hints:
     * nginx error log:  `/var/log/nginx/error.log`

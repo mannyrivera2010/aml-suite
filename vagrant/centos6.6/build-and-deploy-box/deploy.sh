@@ -109,5 +109,10 @@ echo "window.OzoneConfig = {
 sudo sed -i "0,/\(iwcUrl:\).*/s//\1\"https:\/\/${HOST_IP}:7799\/iwc\"/" ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js
 
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
+
+# copy and modify nginx conf file
+sudo cp /vagrant/configs/static_nginx.conf /etc/nginx/conf.d/
+sudo sed -i "s/\$host_ip/${HOST_IP}/g" /etc/nginx/conf.d/static_nginx.conf
+
 sudo service nginx restart
 printf "\n****************\n  Finished deploying frontend \n****************\n"
