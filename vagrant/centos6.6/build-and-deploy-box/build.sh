@@ -39,6 +39,19 @@ printf "\n**************\n  finished cloning front-end repos \n*************\n"
 export CI=true
 
 # - - - - - - - - - - - - - - - - - - - 
+# 				Webtop
+# - - - - - - - - - - - - - - - - - - -
+# NOTE: for some strange reason, it seems webtop (sometimes) needs to be built
+# first
+printf "\n********************\n  Building Webtop \n********************\n"
+cd ${HOMEDIR}/ozp-webtop
+npm install
+npm run bower
+npm run build
+npm run compile
+printf "\n******************\n  Finished Building Webtop \n******************\n"
+
+# - - - - - - - - - - - - - - - - - - -
 # 				IWC
 # - - - - - - - - - - - - - - - - - - - 
 printf "\n********************\n  Building IWC \n********************\n"
@@ -49,17 +62,6 @@ npm install
 npm run bower
 npm run build
 printf "\n*******************\n  Finished Building IWC \n*******************\n"
-
-# - - - - - - - - - - - - - - - - - - - 
-# 				Webtop
-# - - - - - - - - - - - - - - - - - - - 
-printf "\n********************\n  Building Webtop \n********************\n"
-cd ${HOMEDIR}/ozp-webtop
-npm install 
-npm run bower
-npm run build
-npm run compile
-printf "\n******************\n  Finished Building Webtop \n******************\n"
 
 # - - - - - - - - - - - - - - - - - - - 
 # 				Center
