@@ -3,11 +3,11 @@
 **WARNING: THIS IS CURRENTLY VERY BROKEN! DO NOT USE!!!!**
 
 Clones, compiles, configures, and launches all OZP projects in an Ubuntu 14.04
-VM (REST service, Center, HUD, Webtop, and IWC). The backend REST service uses 
-a MySQL database and standalone elasticsearch instance (as opposed to an H2 
+VM (REST service, Center, HUD, Webtop, and IWC). The backend REST service uses
+a MySQL database and standalone elasticsearch instance (as opposed to an H2
 in-memory database and in-memory elasticsearch). In addition, the rest service
 is deployed to tomcat as a WAR, as opposed to being run with `grails run-app`.
-In this way, this development VM is reasonably well aligned with the 
+In this way, this development VM is reasonably well aligned with the
 production version of the software (though there are still non-trivial differences).
 
 ## Use
@@ -22,14 +22,14 @@ vagrant ssh
 # After the server is up and running, run the newman commands to load test data
 /vagrant/frontend.sh
 # now you should be able to hit the resources listed in the Links section below.
-# NOTE: You may need to load the rest API in a browser window first and 
+# NOTE: You may need to load the rest API in a browser window first and
 # click to ignore security warnings before loading other applications
 ```
 
 ### Details
 The bootstrap process consists of the custom scripts that are executed after
 the basic vagrant box has been started (in this case, these scripts are what
-clone, compile, configure, and deploy the OZP applications). There are 
+clone, compile, configure, and deploy the OZP applications). There are
 three bootstrap scripts:
 
 1. `install_prereqs.sh` - installs software (tomcat, mysql, node, grails, etc)
@@ -42,7 +42,7 @@ database users, etc)
  * Webtop
  * HUD
  * IWC
- 
+
 Currently, all three scripts require some user interaction
 and thus cannot be fully automated
 
@@ -54,7 +54,7 @@ and thus cannot be fully automated
     * [IWC Bus](http://localhost:8003)
     * [IWC Debugger](http://localhost:8003/debugger.html)
     * [HAL Browser](http://ozone-development.github.io/hal-browser/browser.html#https://localhost:5443/marketplace/api)
-    
+
     * [Tomcat web UI](http://localhost:5808/manager/html/) (username: tomcat, password: password)
 
 ## Helpful Hints:

@@ -3,13 +3,13 @@
 HOMEDIR=/home/vagrant
 PACKAGE_DIR=/ozp-artifacts
 STATIC_DEPLOY_DIR=/ozp-static-deployment
-# CHANGE ME to your host's IP address 
+# CHANGE ME to your host's IP address
 HOST_IP="localhost"
 
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-#						Configure and deploy backend	
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#						Configure and deploy backend
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 printf "\n******************\n  Begin deploying backend \n******************\n"
 # stop the server and remove existing apps
 sudo service tomcat stop
@@ -36,7 +36,7 @@ sudo chown -R tomcat /usr/share/tomcat/lib/ozone-security-beans
 sudo chown tomcat /usr/share/tomcat/lib/SecurityContext.xml
 sudo chown tomcat /usr/share/tomcat/lib/users.properties
 
-# clear the elasticsearch data: 
+# clear the elasticsearch data:
 curl -XDELETE 'http://localhost:9200/marketplace'
 # delete the database
 mysql -u root -ppassword -Bse "DROP DATABASE ozp; CREATE DATABASE ozp;"
@@ -46,8 +46,8 @@ mysql -u ozp -pozp ozp < ${PACKAGE_DIR}/mysqlCreate.sql
 sudo service tomcat start
 
 cd ${HOMEDIR}/ozp-rest
-# after the server is up and running, reload test data via newman. Note that 
-# the urls for the applications in the test data need to be set accordingly, 
+# after the server is up and running, reload test data via newman. Note that
+# the urls for the applications in the test data need to be set accordingly,
 # perhaps something like this:
 cp postman/data/listingData.json postman/data/modifiedListingData.json
 sed -i "s/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/${HOST_IP}:7799\/demo_apps/g" postman/data/modifiedListingData.json
@@ -57,9 +57,9 @@ newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
 newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/modifiedListingData.json
 printf "\n*****************\n  Finished deploying backend \n*****************\n"
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-#						Configure and deploy frontend	
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#						Configure and deploy frontend
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 printf "\n******************\n  Begin deploying frontend \n******************\n"
 
 sudo rm -rf ${STATIC_DEPLOY_DIR}

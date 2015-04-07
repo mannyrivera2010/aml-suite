@@ -15,7 +15,9 @@ depending on your setup):
 
 ## Usage
 First, install VirtualBox and Vagrant on your host, which are all available for
-Windows, OS X, and Linux
+Windows, OS X, and Linux. Make sure you have a current version of vagrant, at
+least v1.6 (check this with `vagrant -v`). If not, head over to the Vagrant
+homepage to download the latest version for your OS.
 
 You may also wish to install the `vagrant-vbguest` plugin which keeps your 
 Guest Additions up to date: `vagrant plugin install vagrant-vbguest` (this may 

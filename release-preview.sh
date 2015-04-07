@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # release-preview for center, hud, webtop, ozp-demo, ozp-rest, and (maybe) iwc
-# assumes you have all repos cloned at REPO_DIR, along with master and 
+# assumes you have all repos cloned at REPO_DIR, along with master and
 # develop branches
 
 REPO_DIR=~/ozp-repos

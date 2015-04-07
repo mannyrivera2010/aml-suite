@@ -5,9 +5,9 @@ HOMEDIR=/home/vagrant
 # Not sure what is causing these permission issues, but fix them here
 sudo chown -R vagrant ${HOMEDIR}
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-#							Build backend	
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#							Build backend
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 cd ${HOMEDIR}
 rm -rf ozp-rest
 printf "\n********************\n cloning ozp-rest \n********************\n"
@@ -20,9 +20,9 @@ gvm current grails
 grails war
 printf "\n****************\n  finished compiling war file \n****************\n"
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-#							Build frontend	
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#							Build frontend
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 cd ${HOMEDIR}
 rm -rf ozp-hud ozp-center ozp-iwc ozp-webtop ozp-demo
 
@@ -38,7 +38,7 @@ printf "\n**************\n  finished cloning front-end repos \n*************\n"
 # http://stackoverflow.com/questions/22387857/stop-bower-from-asking-for-statistics-when-installing
 export CI=true
 
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 # 				Webtop
 # - - - - - - - - - - - - - - - - - - -
 # NOTE: for some strange reason, it seems webtop (sometimes) needs to be built
@@ -53,7 +53,7 @@ printf "\n******************\n  Finished Building Webtop \n******************\n"
 
 # - - - - - - - - - - - - - - - - - - -
 # 				IWC
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 printf "\n********************\n  Building IWC \n********************\n"
 cd ${HOMEDIR}/ozp-iwc
 # TODO: remove this when PR is merged to master!!!!!!!
@@ -63,27 +63,27 @@ bower install
 npm run build
 printf "\n*******************\n  Finished Building IWC \n*******************\n"
 
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 # 				Center
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 printf "\n********************\n  Building Center \n********************\n"
 cd ${HOMEDIR}/ozp-center
 npm install
 npm run build
 printf "\n******************\n  Finished Building Center \n******************\n"
 
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 # 				Hud
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 printf "\n********************\n  Building HUD \n********************\n"
 cd ${HOMEDIR}/ozp-hud
 npm install
 npm run build
 printf "\n*******************\n  Finished Building HUD \n*******************\n"
 
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 # 				Demo apps
-# - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - -
 printf "\n********************\n  Building Demo Apps \n********************\n"
 cd ${HOMEDIR}/ozp-demo
 bower install

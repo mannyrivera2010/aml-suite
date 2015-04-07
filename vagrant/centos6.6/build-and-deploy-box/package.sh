@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Creates compressed tarballs for each of the front-end projects and collects
-# the marketplace.war and sql db creation script from ozp-rest all into a 
+# the marketplace.war and sql db creation script from ozp-rest all into a
 # single directory
 
 # Assumes all projects were cloned into HOMEDIR and compiled

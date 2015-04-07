@@ -111,7 +111,7 @@ echo "openssl x509 -req -days 365 -in server.csr -signkey server.key -out server
 echo "openssl pkcs12 -export -in server.crt -inkey server.key -out server.p12 -name ozpdev -CAfile ca.crt -caname root"
 # convert the pkcs12 file into a Java keystore
 echo "keytool -importkeystore -deststorepass password -destkeypass password -destkeystore server.keystore -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass password -alias ozpdev"
-# copy keystore file to java place: 
+# copy keystore file to java place:
 echo "sudo cp server.keystore /usr/share/tomcat7"
 # copy other keys to nginx place
 echo "sudo cp server.crt /etc/nginx/ssl"

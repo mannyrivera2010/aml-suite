@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 HOMEDIR=/home/vagrant
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #			Install and configure build dependencies
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 sudo yum update -y
 # enable access to EPEL repo
 sudo yum install epel-release -y
 
 printf "\n******************\nfinished inital yum update\n******************\n"
-# this should have been installed in the basebox but wasn't. without it, the 
+# this should have been installed in the basebox but wasn't. without it, the
 # virtualbox guest additions will fail to build, and shared folders won't work
 sudo yum install kernel-headers kernel-devel -y
 printf "\n*************\n finished installing kernel headers \n*************\n"
@@ -17,7 +17,7 @@ sudo yum install java-1.7.0-openjdk java-1.7.0-openjdk-devel git unzip vim -y
 printf "\n**************\n finished installing java and such \n**************\n"
 sudo yum install nodejs npm -y
 printf "\n**************\nfinished installing nodejs and npm\n**************\n"
-# install gvm 
+# install gvm
 curl -s get.gvmtool.net | bash
 source ${HOMEDIR}/.gvm/bin/gvm-init.sh
 # modify .gvm/etc/config to set gvm_auto_answer=true
@@ -34,7 +34,7 @@ gvm install grails 2.3.7
 gvm use grails 2.3.7
 gvm default grails 2.3.7
 
-# if the above environment is not used for building (e.g. Jenkins), make sure 
+# if the above environment is not used for building (e.g. Jenkins), make sure
 # these env vars are set:
 # export GRAILS_HOME="${HOMEDIR}/.gvm/grails/2.3.7"
 # export PATH=$GRAILS_HOME/bin:$PATH
@@ -43,9 +43,9 @@ gvm default grails 2.3.7
 printf "\n*****************\nfinished grails installation\n*****************\n"
 
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #			Install and configure deployment dependencies
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Add other repos
 # Remi dependency on CentOS 6
@@ -96,7 +96,7 @@ sudo service elasticsearch start
 printf "\n*****************\nfinished elasticsearch config\n*****************\n"
 
 # - - - - - - - - - - - - - - -
-# configure MySQL 
+# configure MySQL
 # - - - - - - - - - - - - - - -
 # set the root password ('password')
 # remove Test database
@@ -116,7 +116,7 @@ mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"
 # start mysql on boot
 sudo chkconfig --level 345 mysqld on
 
-# create user ozp 
+# create user ozp
 mysql -u root -ppassword -Bse "create user 'ozp'@'localhost' identified by 'ozp';"
 # create ozp database
 mysql -u root -ppassword -Bse "create database ozp;"
@@ -125,7 +125,7 @@ mysql -u root -ppassword -Bse "grant all privileges on *.* to 'ozp'@'localhost';
 
 printf "\n********************\nfinished mysql config\n********************\n"
 # - - - - - - - - - - - - - - -
-# configure Tomcat 
+# configure Tomcat
 # - - - - - - - - - - - - - - -
 
 # TODO: start tomcat on boot
@@ -149,7 +149,7 @@ sudo sed -i '/<Service name="Catalina">/a <Connector port="8443" protocol="HTTP/
 
 printf "\n********************\nfinished tomcat config\n********************\n"
 # - - - - - - - - - - - - - - -
-# configure nginx 
+# configure nginx
 # - - - - - - - - - - - - - - -
 # set up SSL for nginx reverse proxy
 sudo mkdir /etc/nginx/ssl
@@ -179,7 +179,7 @@ sudo /etc/init.d/nginx start
 # convert the pkcs12 file into a Java keystore
 # keytool -importkeystore -deststorepass password -destkeypass password -destkeystore server.keystore -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass password -alias ozpdev
 
-# copy keystore file to java place: 
+# copy keystore file to java place:
 sudo cp /vagrant/configs/server.keystore /usr/share/tomcat
 sudo chown tomcat /usr/share/tomcat/server.keystore
 # copy other keys to nginx place
