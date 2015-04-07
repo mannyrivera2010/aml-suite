@@ -72,7 +72,7 @@ sudo yum remove mysql mysql-* -y
 sudo yum --enablerepo=remi,remi-test install mysql mysql-server tomcat elasticsearch nginx multitail -y
 
 # Install newman (for adding test data)
-sudo npm install -g newman
+sudo npm install -g newman bower
 
 printf "\n***************\nfinished deployment installation\n***************\n"
 
@@ -200,8 +200,6 @@ printf "\n******************\nfinished iptables config\n******************\n"
 
 # TODO: the next time i tried this, i had to just stop iptables altogether :(
 
-# copy and modify nginx conf file
-sudo cp /vagrant/configs/static_nginx.conf /etc/nginx/conf.d/
 
 printf "\n****************\ninitial_provisioning completed\n****************\n"
 

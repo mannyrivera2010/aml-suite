@@ -46,7 +46,7 @@ export CI=true
 printf "\n********************\n  Building Webtop \n********************\n"
 cd ${HOMEDIR}/ozp-webtop
 npm install
-npm run bower
+bower install
 npm run build
 npm run compile
 printf "\n******************\n  Finished Building Webtop \n******************\n"
@@ -59,7 +59,7 @@ cd ${HOMEDIR}/ozp-iwc
 # TODO: remove this when PR is merged to master!!!!!!!
 git checkout -b add-packaging origin/add-packaging
 npm install
-npm run bower
+bower install
 npm run build
 printf "\n*******************\n  Finished Building IWC \n*******************\n"
 
@@ -86,6 +86,6 @@ printf "\n*******************\n  Finished Building HUD \n*******************\n"
 # - - - - - - - - - - - - - - - - - - - 
 printf "\n********************\n  Building Demo Apps \n********************\n"
 cd ${HOMEDIR}/ozp-demo
-npm run postinstall
+bower install
 npm run prestart
 printf "\n****************\n  Finished Building Demo Apps \n****************\n"
