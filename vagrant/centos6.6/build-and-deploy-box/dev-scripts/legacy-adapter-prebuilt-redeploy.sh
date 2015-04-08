@@ -23,14 +23,10 @@ RSYNC_DIR=${HOMEDIR}/ozp
 
 # remove old build deployment
 sudo rm -rf ${STATIC_DEPLOY_DIR}/iwc-owf7-widget-adapter/*
-# copy pre-built center to the deployment directory
-sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/iwc-owf7-widget-adapter
 
-# modify OzoneConfig.js
-sudo sed -i "0,/\(\"API_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/marketplace\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i "0,/\(\"CENTER_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/center\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i "0,/\(\"HUD_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/hud\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
-sudo sed -i "0,/\(\"WEBTOP_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/webtop\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
+# copy pre-built adapter to the deployment directory
+sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/iwc/
+
 # fix ownership and restart nginx
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart

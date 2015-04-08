@@ -72,14 +72,13 @@ sudo mkdir ${STATIC_DEPLOY_DIR}/hud
 sudo mkdir ${STATIC_DEPLOY_DIR}/webtop
 sudo mkdir ${STATIC_DEPLOY_DIR}/demo_apps
 sudo mkdir ${STATIC_DEPLOY_DIR}/iwc
-sudo mkdir ${STATIC_DEPLOY_DIR}/iwc-owf7-widget-adapter
 
 cd ${HOMEDIR}
 sudo tar -C ${STATIC_DEPLOY_DIR}/center -xzf ${PACKAGE_DIR}/center.tar.gz --strip 2
 sudo tar -C ${STATIC_DEPLOY_DIR}/hud -xzf ${PACKAGE_DIR}/hud.tar.gz --strip 2
 sudo tar -C ${STATIC_DEPLOY_DIR}/webtop -xzf ${PACKAGE_DIR}/webtop.tar.gz --strip 2
 sudo tar -C ${STATIC_DEPLOY_DIR}/iwc -xzf ${PACKAGE_DIR}/iwc.tar.gz --strip 2
-sudo tar -C ${STATIC_DEPLOY_DIR}/iwc-owf7-widget-adapter -xzf ${PACKAGE_DIR}/iwc-owf7-widget-adapter.tar.gz --strip 2
+sudo tar -C ${STATIC_DEPLOY_DIR}/iwc -xzf ${PACKAGE_DIR}/iwc-owf7-widget-adapter.tar.gz --strip 2
 sudo tar -C ${STATIC_DEPLOY_DIR}/demo_apps -xzf ${PACKAGE_DIR}/demo_apps.tar.gz --strip 2
 
 # modify OzoneConfig.js files
@@ -89,8 +88,6 @@ sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marke
 sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/intentsChooser.html
 sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/debugger.html
 
-# Legacy Adapter
-sudo cp -r ${STATIC_DEPLOY_DIR}/iwc-owf7-widget-adapter/* ${STATIC_DEPLOY_DIR}/iwc/
 
 # Center
 sudo sed -i "0,/\(\"API_URL\":\).*/s//\1\"https:\/\/${HOST_IP}:7799\/marketplace\",/" ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js
