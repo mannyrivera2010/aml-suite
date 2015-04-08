@@ -30,6 +30,7 @@ printf "\n******************\n  cloning front-end repos \n******************\n"
 git clone https://github.com/ozone-development/ozp-hud.git
 git clone https://github.com/ozone-development/ozp-center.git
 git clone https://github.com/ozone-development/ozp-iwc.git
+git clone https://github.com/ozone-development/ozp-iwc-owf7-widget-adapter.git
 git clone https://github.com/ozone-development/ozp-webtop.git
 git clone https://github.com/ozone-development/ozp-demo.git
 printf "\n**************\n  finished cloning front-end repos \n*************\n"

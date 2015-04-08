@@ -49,7 +49,8 @@ Vagrant.configure(2) do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
 
   # TODO: CUSTOM FOR EACH USER
-  config.vm.synced_folder "~/ozp/", "/home/vagrant/ozp", type: "rsync"
+  config.vm.synced_folder "~/ozp/", "/home/vagrant/ozp", type: "rsync",
+    rsync__exclude: "**/*.git/"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
