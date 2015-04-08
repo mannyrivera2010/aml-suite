@@ -56,8 +56,6 @@ printf "\n******************\n  Finished Building Webtop \n******************\n"
 # - - - - - - - - - - - - - - - - - - -
 printf "\n********************\n  Building IWC \n********************\n"
 cd ${HOMEDIR}/ozp-iwc
-# TODO: remove this when PR is merged to master!!!!!!!
-git checkout -b add-packaging origin/add-packaging
 npm install
 bower install
 npm run build
