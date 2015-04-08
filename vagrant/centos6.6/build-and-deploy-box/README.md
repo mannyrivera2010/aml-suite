@@ -13,54 +13,65 @@ depending on your setup):
 * [HAL Browser](https://localhost:7799/iwc/debugger.html#hal-browser/https://localhost:5443/marketplace/api)
 * [Tomcat web UI](http://localhost:5808/manager/html/) (username: tomcat, password: password)
 
+Basic Authentication is used to access the OZP applications above. Use any of
+the following credentials to log in:
+
+* testUser1, password (role: USER)
+* testAdmin1, password (role: ADMIN)
+* testOrgSteward1, password (role: ORG_STEWARD)
+
 ## Usage
 First, install VirtualBox and Vagrant on your host, which are all available for
 Windows, OS X, and Linux. Make sure you have a current version of vagrant, at
 least v1.6 (check this with `vagrant -v`). If not, head over to the Vagrant
 homepage to download the latest version for your OS.
 
-You may also wish to install the `vagrant-vbguest` plugin which keeps your 
-Guest Additions up to date: `vagrant plugin install vagrant-vbguest` (this may 
+You may also wish to install the `vagrant-vbguest` plugin which keeps your
+Guest Additions up to date: `vagrant plugin install vagrant-vbguest` (this may
 not work on a Windows host)
 
 In most cases, you'll want to use your host's IP address to access the apps (
 instead of simply localhost, which would only work from your local machine).
 Enter your host's IP in `deploy.sh` (the HOST_IP variable at the top of the
-file).
+file). Note that if your host's IP changes in the future (after you've gone
+through the steps below), update the `HOST_IP` variable accordingly and just
+re-reun `/vagrant/deploy.sh` on the VM.
 
 Now, run `vagrant up` in this directory and, after provisioning
-is complete (**typically 35-55 minutes**), access the OZP applications from your 
+is complete (**typically 35-55 minutes**), access the OZP applications from your
 host at the URLs listed above. Alternateively, it may be helpful to catpure
 a log output to assist with any problems: `vagrant up 2>&1 | tee vagrant.log` (
 assuming you are running on Linux or OS X host)
 
-By default, the contents of `~/ozp` on your host are rsynced with the vagrant 
+By default, the contents of `~/ozp` on your host are rsynced with the vagrant
 box. This is useful for development purposes, where the code you're editing
 lives on your host and needs to get to the VM for execution. Run `vagrant rsync`
 to update the contents of `/home/vagrant/ozp` in the VM
 
-## Details 
-ozp-rest is run under Tomcat, using an actual MySQL database and Elasticsearch 
+## Details
+ozp-rest is run under Tomcat, using an actual MySQL database and Elasticsearch
 instance (as opposed to the in-memory versions often used in development). The
-front-end resources are hosted via nginx, and nginx is also used as a reverse 
-proxy, such that all resources (front and back end) are served from the same 
-domain. 
+front-end resources are hosted via nginx, and nginx is also used as a reverse
+proxy, such that all resources (front and back end) are served from the same
+domain.
 
-When this box is initially provisioned, `bootstrap.sh` is executed, which in 
+When this box is initially provisioned, `bootstrap.sh` is executed, which in
 turn runs four scripts:
 
-* `initial_provisioning.sh`: installs dependencies (Java, Grails, MySQL, etc), 
-configures dependencies, and copies **insecure** SSL keys for use by nginx and 
+* `initial_provisioning.sh`: installs dependencies (Java, Grails, MySQL, etc),
+configures dependencies, and copies **insecure** SSL keys for use by nginx and
 Tomcat. Unlike the other three scripts, this one should only be run once
 * `build.sh`: clones the ozp applications from GitHub and builds them
 * `package.sh`: tars and compresses the compiled output from the previous step
-* `deploy.sh`: move the previously created artifacts to the right places, and 
+* `deploy.sh`: move the previously created artifacts to the right places, and
 perform any configuration required for deployment
 
-## Potential Issues
+## Potential Issues/Troubleshooting
 1. Firewalls sometimes cause problems - if so, `sudo service iptables stop`
-2. `deploy.sh` will wait 2 minutes for ozp-rest to start up. On very slow 
+2. `deploy.sh` will wait 2 minutes for ozp-rest to start up. On very slow
 or resource-starved machines, that might not be long enough
+3. If you change the rsync directory in the Vagrantfile, do NOT rsync a
+directory that includes this one
 
 ## Helpful Hints:
     * nginx error log:  `/var/log/nginx/error.log`
