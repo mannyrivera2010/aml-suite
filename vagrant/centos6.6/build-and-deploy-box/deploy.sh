@@ -15,7 +15,9 @@ printf "\n******************\n  Begin deploying backend \n******************\n"
 sudo service tomcat stop
 sudo rm -rf /var/lib/tomcat/webapps/marketplace /var/lib/tomcat/webapps/marketplace.war
 # install new apps
-sudo cp ${PACKAGE_DIR}/marketplace.war /var/lib/tomcat/webapps/
+cd ${HOMEDIR}
+tar -xzf ${PACKAGE_DIR}/rest-backend.tar.gz --strip 1
+sudo mv marketplace.war /var/lib/tomcat/webapps/
 sudo chown tomcat /var/lib/tomcat/webapps/marketplace.war
 
 # copy MarketplaceConfig.groovy to tomcat
@@ -41,8 +43,9 @@ curl -XDELETE 'http://localhost:9200/marketplace'
 # delete the database
 mysql -u root -ppassword -Bse "DROP DATABASE ozp; CREATE DATABASE ozp;"
 # re-create the database
-mysql -u ozp -pozp ozp < ${PACKAGE_DIR}/mysqlCreate.sql
+mysql -u ozp -pozp ozp < ${HOMEDIR}/mysqlCreate.sql
 # restart the server
+rm ${HOMEDIR}/mysqlCreate.sql
 sudo service tomcat start
 
 cd ${HOMEDIR}/ozp-rest

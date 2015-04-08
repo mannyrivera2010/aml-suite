@@ -15,8 +15,11 @@ sudo rm -rf ${OUTPUTDIR}/*
 sudo chown -R vagrant ${OUTPUTDIR}
 
 cd ${HOMEDIR}
-cp ozp-rest/target/marketplace.war ${OUTPUTDIR}
-cp ozp-rest/mysqlCreate.sql ${OUTPUTDIR}
+rm -rf rest-package/
+mkdir rest-package; cp ozp-rest/target/marketplace.war rest-package/; cp ozp-rest/mysqlCreate.sql rest-package/
+tar -czf rest-backend.tar.gz rest-package
+rm -rf rest-package
+mv rest-backend.tar.gz ${OUTPUTDIR}
 
 tar -czf iwc.tar.gz ozp-iwc/dist
 mv iwc.tar.gz ${OUTPUTDIR}
