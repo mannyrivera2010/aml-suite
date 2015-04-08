@@ -1,12 +1,7 @@
 Develop scripts
 ==================
+The scripts in this directory serve as examples for what developers might want
+to do when using this VM in their workflow. It is expected that these scripts
+will need to be customized, based on the project and specific functionality
+the developer is working on
 
-## Examples
-
-copy pre-built front-end code to vm, re-deploy front-end
-
-copy front-end source to vm, rebuild, package, and re-deploy front-end
-
-copy backend source to vm, rebuild, package, redeploy backend (no DB change)
-
-copy backend source to vm, rebuild, package, redeploy backend and reload DB

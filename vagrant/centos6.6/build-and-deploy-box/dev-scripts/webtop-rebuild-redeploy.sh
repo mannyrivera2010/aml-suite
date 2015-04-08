@@ -21,10 +21,12 @@ HOST_IP="localhost"
 
 RSYNC_DIR=${HOMEDIR}/ozp
 
-
 # remove old deployment
 sudo rm -rf ${STATIC_DEPLOY_DIR}/webtop/*
 # build webtop
+# stop Bower from promting user about usage statistics
+# http://stackoverflow.com/questions/22387857/stop-bower-from-asking-for-statistics-when-installing
+export CI=true
 cd ${RSYNC_DIR}/ozp-webtop
 rm -rf node_modules
 rm -rf vendor
