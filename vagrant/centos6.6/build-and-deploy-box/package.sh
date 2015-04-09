@@ -24,6 +24,9 @@ mv rest-backend.tar.gz ${OUTPUTDIR}
 tar -czf iwc.tar.gz ozp-iwc/dist
 mv iwc.tar.gz ${OUTPUTDIR}
 
+tar -czf iwc-owf7-widget-adapter.tar.gz ozp-iwc-owf7-widget-adapter/dist
+mv iwc-owf7-widget-adapter.tar.gz ${OUTPUTDIR}
+
 tar -czf center.tar.gz ozp-center/dist
 mv center.tar.gz ${OUTPUTDIR}
 
