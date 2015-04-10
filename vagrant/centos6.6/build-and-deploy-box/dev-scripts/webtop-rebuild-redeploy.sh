@@ -39,7 +39,7 @@ sudo cp -r build/* ${STATIC_DEPLOY_DIR}/webtop/
 printf "\n******************\n  Finished Building Webtop \n******************\n"
 # modify OzoneConfig.js
 echo "window.OzoneConfig = {
-	\"API_URL\": \"https://${HOST_IP}:7799/marketplace/api\",
+	\"API_URL\": \"https://${HOST_IP}:7799/marketplace\",
     \"IWC_URL\": \"https://${HOST_IP}:7799/iwc\",
     \"CENTER_URL\": \"https://${HOST_IP}:7799/center\",
     \"HUD_URL\": \"https://${HOST_IP}:7799/hud\",

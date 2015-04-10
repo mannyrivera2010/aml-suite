@@ -101,7 +101,7 @@ sudo cp ${STATIC_DEPLOY_DIR}/center/OzoneConfig.js ${STATIC_DEPLOY_DIR}/hud/
 
 # Webtop
 echo "window.OzoneConfig = {
-	\"API_URL\": \"https://${HOST_IP}:7799/marketplace/api\",
+	\"API_URL\": \"https://${HOST_IP}:7799/marketplace\",
     \"IWC_URL\": \"https://${HOST_IP}:7799/iwc\",
     \"CENTER_URL\": \"https://${HOST_IP}:7799/center\",
     \"HUD_URL\": \"https://${HOST_IP}:7799/hud\",
