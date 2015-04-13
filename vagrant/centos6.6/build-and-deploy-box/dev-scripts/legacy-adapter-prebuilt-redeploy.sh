@@ -26,7 +26,7 @@ sudo rm -rf ${STATIC_DEPLOY_DIR}/iwc-owf7-widget-adapter/*
 
 # copy pre-built adapter to the deployment directory
 sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/iwc/
-
+sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/demo_apps/bower_components/ozp-iwc/dist
 # fix ownership and restart nginx
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart

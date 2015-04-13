@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Use case: developer working on ozp-iwc on host box, building on host box,
-# needs to redeploy pre-built IWC updates on VM.
+# Use case: developer working on demo-apps on host box, building on host box,
+# needs to redeploy app updates on VM.
 
 # Assumes code on host lives
 # in ~/ozp/ozp-iwc (modify the Vagrantfile if ~/ozp is not where you want
@@ -22,18 +22,15 @@ RSYNC_DIR=${HOMEDIR}/ozp
 
 
 # remove old build deployment
-sudo rm -rf ${STATIC_DEPLOY_DIR}/iwc/*
+sudo rm -rf ${STATIC_DEPLOY_DIR}/demo_apps/*
 # copy pre-built iwc to the deployment directory
-sudo cp -r ${RSYNC_DIR}/ozp-iwc/dist/* ${STATIC_DEPLOY_DIR}/iwc
-sudo cp -r ${RSYNC_DIR}/ozp-iwc/dist/* ${STATIC_DEPLOY_DIR}/demo_apps/bower_components/ozp-iwc/dist
+sudo cp -r ${RSYNC_DIR}/ozp-demo/app/* ${STATIC_DEPLOY_DIR}/demo_apps
 
-# IWC configurations
-sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/iframe_peer.html
-sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/intentsChooser.html
-sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${STATIC_DEPLOY_DIR}/iwc/debugger.html
-
+# App configurations
+sudo sed -i "0,/\(iwcUrl:\).*/s//\1\"https:\/\/${HOST_IP}:7799\/iwc\"/" ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js
 
 # fix ownership and restart nginx
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart
 printf "\n****************\n  Finished IWC re-deploy \n****************\n"
+

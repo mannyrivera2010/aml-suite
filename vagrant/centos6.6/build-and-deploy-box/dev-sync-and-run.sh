@@ -14,3 +14,11 @@ vagrant rsync
 
 # change the script invoked here based on your own needs
 vagrant ssh -c "/vagrant/dev-scripts/backend-rebuild-redeploy.sh"
+
+#Front end
+# Apps copied first
+vagrant ssh -c "/vagrant/dev-scripts/apps-prebuilt-redeploy.sh"
+# Then IWC is added both to static and bower dependencies
+vagrant ssh -c "/vagrant/dev-scripts/iwc-prebuilt-redeploy.sh"
+# Legacy adapter is added wherever IWC is added
+vagrant ssh -c "/vagrant/dev-scripts/legacy-adapter-prebuilt-redeploy.sh"
