@@ -48,6 +48,9 @@ box. This is useful for development purposes, where the code you're editing
 lives on your host and needs to get to the VM for execution. Run `vagrant rsync`
 to update the contents of `/home/vagrant/ozp` in the VM
 
+**Windows Users**: If things don't go well, try re-running (from the host):
+`vagrant ssh -c "/vagrant/build.sh; /vagrant/package.sh; /vagrant/deploy.sh;"`
+
 ## Details
 ozp-rest is run under Tomcat, using an actual MySQL database and Elasticsearch
 instance (as opposed to the in-memory versions often used in development). The
@@ -72,6 +75,20 @@ perform any configuration required for deployment
 or resource-starved machines, that might not be long enough
 3. If you change the rsync directory in the Vagrantfile, do NOT rsync a
 directory that includes this one
+
+## Developers
+This VM has also been designed to be ozp-developer friendly. The anticipated
+workflow goes like this:
+
+1. Clone this repo and run `vagrant up`, getting this VM up and running
+2. Edit OZP application code on the host box, somewhere inside the directory
+that is rsynced with the VM (by default, this is ~/ozp on the host - this can be
+changed in the Vagrantfile if desired)
+3. After making code changes on the host, the code needs to be
+redeployed on the VM for testing. At a high level, this means 1) running
+`vagrant rsync` to get the code to the VM, and 2) running some script on the
+VM to copy that code to the right place, build it (if not pre-built), restart
+servers, etc.
 
 ## Helpful Hints:
     * nginx error log:  `/var/log/nginx/error.log`
