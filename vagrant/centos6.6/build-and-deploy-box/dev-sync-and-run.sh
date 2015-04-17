@@ -13,4 +13,4 @@
 vagrant rsync
 
 # change the script invoked here based on your own needs
-vagrant ssh -c "/vagrant/dev-scripts/center-prebuilt-redeploy.sh"
+vagrant ssh -c "/vagrant/dev-scripts/webtop-prebuilt-redeploy.sh"

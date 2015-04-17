@@ -28,13 +28,16 @@ sudo cp -r ${RSYNC_DIR}/ozp-webtop/build/* ${STATIC_DEPLOY_DIR}/webtop
 # modify OzoneConfig.js
 echo "window.OzoneConfig = {
 	\"API_URL\": \"https://${HOST_IP}:7799/marketplace\",
-    \"IWC_URL\": \"https://${HOST_IP}:7799/iwc\",
     \"CENTER_URL\": \"https://${HOST_IP}:7799/center\",
+    \"DEVELOPER_RESOURCES_URL\": \"#\",
+    \"FEEDBACK_ADDRESS\": \"mailto:person@address.com\",
+    \"HELP_URL\": \"#\",
     \"HUD_URL\": \"https://${HOST_IP}:7799/hud\",
-    \"WEBTOP_URL\": \"https://${HOST_IP}:7799/webtop\",
-    \"METRICS_URL\": \"/path/to/metrics\"
+    \"IWC_URL\": \"https://${HOST_IP}:7799/iwc\",
+    \"METRICS_URL\": \"/path/to/metrics\",
+    \"WEBTOP_URL\": \"https://${HOST_IP}:7799/webtop\"
 };" | sudo tee ${STATIC_DEPLOY_DIR}/webtop/OzoneConfig.js
 # fix ownership and restart nginx
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart
-printf "\n****************\n  Finished webtop re-deploy \n****************\n"
+printf "\n***********\n  Finished webtop re-deploy \n***********\n"
