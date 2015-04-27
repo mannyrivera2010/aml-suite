@@ -24,7 +24,7 @@ printf "\n****************\n  finished compiling war file \n****************\n"
 #							Build frontend
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 cd ${HOMEDIR}
-rm -rf ozp-hud ozp-center ozp-iwc ozp-webtop ozp-demo
+rm -rf ozp-hud ozp-center ozp-iwc ozp-webtop ozp-demo ozp-iwc-owf7-widget-adapter
 
 printf "\n******************\n  cloning front-end repos \n******************\n"
 git clone https://github.com/ozone-development/ozp-hud.git
@@ -61,6 +61,16 @@ npm install
 bower install
 npm run build
 printf "\n*******************\n  Finished Building IWC \n*******************\n"
+
+# - - - - - - - - - - - - - - - - - - -
+# 				IWC Legacy Adapter
+# - - - - - - - - - - - - - - - - - - -
+printf "\n********************\n  Building IWC Legacy Adapter \n********************\n"
+cd ${HOMEDIR}/ozp-iwc-owf7-widget-adapter
+npm install
+bower install
+npm run build
+printf "\n*******************\n  Finished Building IWC Legacy Adapter \n*******************\n"
 
 # - - - - - - - - - - - - - - - - - - -
 # 				Center

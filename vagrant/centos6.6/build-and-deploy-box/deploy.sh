@@ -57,7 +57,7 @@ sed -i "s/http:\/\/ozone-development.github.io\/ozp-demo/https:\/\/${HOST_IP}:77
 printf "Sleeping for 2 minutes waiting for server to start"
 sleep 2m
 newman -k -c postman/createSampleMetaData.json -e postman/env/localDev.json
-newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 32 -d postman/data/modifiedListingData.json
+newman -k -c postman/createSampleListings.json -e postman/env/localDev.json -n 34 -d postman/data/modifiedListingData.json
 printf "\n*****************\n  Finished deploying backend \n*****************\n"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -115,6 +115,10 @@ echo "window.OzoneConfig = {
 
 # Demo Apps
 sudo sed -i "0,/\(iwcUrl:\).*/s//\1\"https:\/\/${HOST_IP}:7799\/iwc\"/" ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js
+
+
+# Legacy Adapter
+sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/demo_apps/bower_components/ozp-iwc/dist
 
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 
