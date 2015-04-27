@@ -114,11 +114,9 @@ echo "window.OzoneConfig = {
 
 
 # Demo Apps
+# copy over IWC+Legacy Adapter to bower ozp-iwc
+sudo cp -r ${STATIC_DEPLOY_DIR}/iwc ${STATIC_DEPLOY_DIR}/demo_apps/bower_components/ozp-iwc/dist
 sudo sed -i "0,/\(iwcUrl:\).*/s//\1\"https:\/\/${HOST_IP}:7799\/iwc\"/" ${STATIC_DEPLOY_DIR}/demo_apps/OzoneConfig.js
-
-
-# Legacy Adapter
-sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/demo_apps/bower_components/ozp-iwc/dist
 
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 
