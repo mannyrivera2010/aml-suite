@@ -31,7 +31,7 @@ echo "window.OzoneConfig = {
     \"CENTER_URL\": \"https://${HOST_IP}:7799/center\",
     \"DEVELOPER_RESOURCES_URL\": \"#\",
     \"FEEDBACK_ADDRESS\": \"mailto:person@address.com\",
-    \"HELP_URL\": \"#\",
+    \"HELP_URL\": \"http://ozone-development.github.io/ozp-hud/assets/PlaceholderUserGuide.pdf\",
     \"HUD_URL\": \"https://${HOST_IP}:7799/hud\",
     \"IWC_URL\": \"https://${HOST_IP}:7799/iwc\",
     \"METRICS_URL\": \"/path/to/metrics\",
