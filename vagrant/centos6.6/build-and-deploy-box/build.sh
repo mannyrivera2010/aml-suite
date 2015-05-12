@@ -57,6 +57,8 @@ printf "\n******************\n  Finished Building Webtop \n******************\n"
 # - - - - - - - - - - - - - - - - - - -
 printf "\n********************\n  Building IWC \n********************\n"
 cd ${HOMEDIR}/ozp-iwc
+# checkout latest tag
+git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 npm install
 bower install
 npm run build
@@ -67,6 +69,8 @@ printf "\n*******************\n  Finished Building IWC \n*******************\n"
 # - - - - - - - - - - - - - - - - - - -
 printf "\n********************\n  Building IWC Legacy Adapter \n********************\n"
 cd ${HOMEDIR}/ozp-iwc-owf7-widget-adapter
+# checkout latest tag
+git checkout $(git describe --tags `git rev-list --tags --max-count=1`)
 npm install
 bower install
 npm run build
