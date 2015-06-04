@@ -197,6 +197,14 @@ def get_jenkins_artifacts(tracker):
 			if cfg.config['COPY_DIR']:
 				for f in glob.glob('%s/archive/%s*' % (DOWNLOAD_DIR, i['artifact-prefix'])):
 					logger.info('copying file %s to %s' % (f, cfg.config['COPY_DIR']))
+					try:
+						# just get the filename, remove the 'archive/' part
+						f_remove = '%s/%s' % (cfg.config['COPY_DIR'], f.rsplit('/', 1)[1])
+						logger.debug('removing file %s' % f_remove)
+						os.remove(f_remove)
+					except Exception:
+						# it might not exist
+						logger.warning('failed to remove file %s' % f_remove)
 					shutil.copy(f, cfg.config['COPY_DIR'])
 
 		else:
@@ -249,6 +257,12 @@ def get_github_repos(tracker):
 			if cfg.config['COPY_DIR']:
 				for f in glob.glob('%s/%s.zip' % (DOWNLOAD_DIR, name)):
 					logger.info('copying file %s to %s' % (f, cfg.config['COPY_DIR']))
+					f_remove = '%s/%s' % (cfg.config['COPY_DIR'], f.rsplit('/', 1)[1])
+					try:
+						logger.debug('removing file %s' % f_remove)
+						os.remove(f_remove)
+					except Exception:
+						logger.warning('failed to remove file %s' % f_remove)
 					shutil.copy(f, cfg.config['COPY_DIR'])
 
 
