@@ -24,7 +24,6 @@ import download_config as cfg
 
 # file must live in same directory as this script
 TRACKER_FILE='download_tracker.json'
-DOWNLOAD_DIR='latest_download'
 TMP_DIR='tmp'
 
 GITHUB_URL_PREFIX='https://github.com/ozone-development'
@@ -132,8 +131,8 @@ def setup():
 
 
 	# check that download directory exists - if not, create it
-	if not os.path.exists(DOWNLOAD_DIR):
-		os.makedirs(DOWNLOAD_DIR)
+	if not os.path.exists(cfg.config['DOWNLOAD_DIR']):
+		os.makedirs(cfg.config['DOWNLOAD_DIR'])
 
 	# create local temp directory
 	if os.path.exists(TMP_DIR):
@@ -175,7 +174,7 @@ def get_jenkins_artifacts(tracker):
 			logger.info('Found new build for %s. Previous downloaded build: %s - current build: %s' % (
 				j_name, i['last_successful_build_number'], last_build_number))
 			# remove the current artifact(s)
-			for f in glob.glob('%s/%s*' % (DOWNLOAD_DIR, i['artifact-prefix'])):
+			for f in glob.glob('%s/%s*' % (cfg.config['DOWNLOAD_DIR'], i['artifact-prefix'])):
 				logger.debug('removing file %s' % f)
 				os.remove(f)
 			# download the latest artifact
@@ -189,37 +188,25 @@ def get_jenkins_artifacts(tracker):
 				# unzip the outer zip, revealing the tarball
 				with zipfile.ZipFile('%s/%s.zip' % (TMP_DIR, j_name)) as z:
 					# extract the zip to reveal the tarball within
-					z.extractall(DOWNLOAD_DIR)
+					z.extractall(cfg.config['DOWNLOAD_DIR'])
 			else:
 				logger.error('ERROR getting jenkins build artifact for %s' % j_name)
 
 			# update the tracker file
 			i['last_successful_build_number'] = last_build_number
 			write_tracker_file(tracker)
-
-			# optionally copy the file to a new location as well
-			if cfg.config['COPY_DIR']:
-				for f in glob.glob('%s/archive/%s*' % (DOWNLOAD_DIR, i['artifact-prefix'])):
-					logger.info('copying file %s to %s' % (f, cfg.config['COPY_DIR']))
-					try:
-						# just get the filename, remove the 'archive/' part
-						f_remove = '%s/%s' % (cfg.config['COPY_DIR'], f.rsplit('/', 1)[1])
-						logger.debug('removing file %s' % f_remove)
-						os.remove(f_remove)
-					except Exception:
-						# it might not exist
-						logger.warning('failed to remove file %s' % f_remove)
-					shutil.copy(f, cfg.config['COPY_DIR'])
-
 		else:
 			logger.debug('no new build for %s' % j_name)
 
 	# move all tarfiles from <download_dir>/artifact/* to <download_dir>/
-	if os.path.exists('%s/archive' % DOWNLOAD_DIR):
-		files = os.listdir('%s/archive/' % DOWNLOAD_DIR)
+	if os.path.exists('%s/archive' % cfg.config['DOWNLOAD_DIR']):
+		files = os.listdir('%s/archive/' % cfg.config['DOWNLOAD_DIR'])
 		for f in files:
-			shutil.move('%s/archive/%s' % (DOWNLOAD_DIR, f), DOWNLOAD_DIR)
-		shutil.rmtree('%s/archive' % DOWNLOAD_DIR)
+			f_check = '%s/%s' % (cfg.config['DOWNLOAD_DIR'], f)
+			if os.path.isfile(f_check):
+				os.remove(f_check)
+			shutil.move('%s/archive/%s' % (cfg.config['DOWNLOAD_DIR'], f), cfg.config['DOWNLOAD_DIR'])
+		shutil.rmtree('%s/archive' % cfg.config['DOWNLOAD_DIR'])
 
 
 def get_github_repos(tracker):
@@ -243,37 +230,26 @@ def get_github_repos(tracker):
 		if last_sha != i['last_sha']:
 			logger.info('Found new code for %s' % name)
 			# remove the current artifact(s) (no wildcards here)
-			for f in glob.glob('%s/%s.zip' % (DOWNLOAD_DIR, i['name'])):
+			for f in glob.glob('%s/%s.zip' % (cfg.config['DOWNLOAD_DIR'], i['name'])):
 				logger.debug('removing file %s' % f)
 				os.remove(f)
 			# download the latest artifact
-			url = '%s/%s/archive/master.zip' % (GITHUB_URL_PREFIX, name)
+			url = '%s/%s/archive/%s.zip' % (GITHUB_URL_PREFIX, name, i['branch'])
 			r = requests.get(url, stream=True)
 			if r.status_code == 200:
-				with open('%s/%s.zip' % (DOWNLOAD_DIR, name), 'wb') as outfile:
+				with open('%s/%s.zip' % (cfg.config['DOWNLOAD_DIR'], name), 'wb') as outfile:
 					shutil.copyfileobj(r.raw, outfile)
 			else:
 				logger.error('bad response: %s' % r.status_code)
 			# update the tracker file
 			i['last_sha'] = last_sha
 			write_tracker_file(tracker)
-			# optionally copy the file to a new location as well
-			if cfg.config['COPY_DIR']:
-				for f in glob.glob('%s/%s.zip' % (DOWNLOAD_DIR, name)):
-					logger.info('copying file %s to %s' % (f, cfg.config['COPY_DIR']))
-					f_remove = '%s/%s' % (cfg.config['COPY_DIR'], f.rsplit('/', 1)[1])
-					try:
-						logger.debug('removing file %s' % f_remove)
-						os.remove(f_remove)
-					except Exception:
-						logger.warning('failed to remove file %s' % f_remove)
-					shutil.copy(f, cfg.config['COPY_DIR'])
 
 
 def cleanup():
 	# clean up the tmp directory
 	shutil.rmtree(TMP_DIR)
-	# shutil.rmtree('%s/archive' % DOWNLOAD_DIR)
+	# shutil.rmtree('%s/archive' % cfg.config['DOWNLOAD_DIR'])
 
 
 def run():
