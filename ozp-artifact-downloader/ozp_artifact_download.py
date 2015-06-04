@@ -90,19 +90,23 @@ def create_tracker_file():
 		'github_repos': [
 			{
 				'name': 'piwik-theme-AppsMallTheme',
-				'last_sha': 'none'
+				'last_sha': 'none',
+				'branch': 'master'
 			},
 			{
 				'name': 'piwik-plugin-LoginPKI',
-				'last_sha': 'none'
+				'last_sha': 'none',
+				'branch': 'master'
 			},
 			{
 				'name': 'piwik',
-				'last_sha': 'none'
+				'last_sha': 'none',
+				'branch': 'ozone-enhancements'
 			},
 			{
 				'name': 'piwik-plugin-ClientCertificates',
-				'last_sha': 'none'
+				'last_sha': 'none',
+				'branch': 'master'
 			}
 		]
 	}
@@ -233,7 +237,7 @@ def get_github_repos(tracker):
 	for i in tracker['github_repos']:
 		name = i['name']
 		logger.info('checking github repo: %s' % i['name'])
-		url = '%s/%s/commits/master' % (GITHUB_API_URL_PREFIX, name)
+		url = '%s/%s/commits/%s' % (GITHUB_API_URL_PREFIX, name, i['branch'])
 		r = requests.get(url)
 		last_sha = r.json()['sha']
 		if last_sha != i['last_sha']:
