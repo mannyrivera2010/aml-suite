@@ -50,38 +50,38 @@ def create_tracker_file():
 	data = {
 		'jenkins_projects': [
 			{
-				'jenkins_name': 'build-ozp-center-master',
+				'jenkins_name': 'build-center-release',
 				'last_successful_build_number': '0',
 				'artifact-prefix': 'center-'
 			},
 			{
-				'jenkins_name': 'build-ozp-hud-master',
+				'jenkins_name': 'build-hud-release',
 				'last_successful_build_number': '0',
 				'artifact-prefix': 'hud-'
 
 			},
 			{
-				'jenkins_name': 'build-ozp-webtop-master',
+				'jenkins_name': 'build-webtop-release',
 				'last_successful_build_number': '0',
 				'artifact-prefix': 'webtop-'
 			},
 			{
-				'jenkins_name': 'build-ozp-iwc-master',
+				'jenkins_name': 'build-iwc-release',
 				'last_successful_build_number': '0',
 				'artifact-prefix': 'iwc-prod'
 			},
 			{
-				'jenkins_name': 'build-ozp-iwc-owf7-widget-adapter-master',
+				'jenkins_name': 'build-iwc-owf7-widget-adapter-release',
 				'last_successful_build_number': '0',
 				'artifact-prefix': 'iwc-owf7'
 			},
 			{
-				'jenkins_name': 'build-ozp-rest-master',
+				'jenkins_name': 'build-rest-release',
 				'last_successful_build_number': '0',
 				'artifact-prefix': 'rest-backend'
 			},
 			{
-				'jenkins_name': 'build-ozp-demo-master-deploy-master',
+				'jenkins_name': 'build-demo-release',
 				'last_successful_build_number': '0',
 				'artifact-prefix': 'demo-apps'
 			}
