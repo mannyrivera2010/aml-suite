@@ -165,6 +165,7 @@ def get_jenkins_artifacts(tracker):
 	"""
 	# for each Jenkins build artifact, check if there is a new build. If so,
 	# pull it down, and remove the previous build artifact for this project
+	global FOUND_CHANGES
 	for i in tracker['jenkins_projects']:
 		j_name = i['jenkins_name']
 		logger.info('checking jenkins project: %s' % j_name)
@@ -224,6 +225,7 @@ def get_github_repos(tracker):
 	"""
 	# for each GitHub repo, check if there is a new commit on master. If so,
 	# pull it down, and remove the previous download of this repository
+	global FOUND_CHANGES
 	for i in tracker['github_repos']:
 		name = i['name']
 		logger.info('checking github repo: %s' % i['name'])
@@ -257,6 +259,7 @@ def cleanup():
 
 
 def run():
+	global FOUND_CHANGES
 	tracker = setup()
 	get_jenkins_artifacts(tracker)
 	get_github_repos(tracker)
