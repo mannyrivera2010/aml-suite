@@ -42,6 +42,8 @@ formatter = logging.Formatter('%(levelname)s: %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+# Flag to detect changes
+FOUND_CHANGES = False
 
 def create_tracker_file():
 	"""
@@ -173,6 +175,7 @@ def get_jenkins_artifacts(tracker):
 		if last_build_number != i['last_successful_build_number']:
 			logger.info('Found new build for %s. Previous downloaded build: %s - current build: %s' % (
 				j_name, i['last_successful_build_number'], last_build_number))
+			FOUND_CHANGES = True
 			# remove the current artifact(s)
 			for f in glob.glob('%s/%s*' % (cfg.config['DOWNLOAD_DIR'], i['artifact-prefix'])):
 				logger.debug('removing file %s' % f)
@@ -229,6 +232,7 @@ def get_github_repos(tracker):
 		last_sha = r.json()['sha']
 		if last_sha != i['last_sha']:
 			logger.info('Found new code for %s' % name)
+			FOUND_CHANGES = True
 			# remove the current artifact(s) (no wildcards here)
 			for f in glob.glob('%s/%s.zip' % (cfg.config['DOWNLOAD_DIR'], i['name'])):
 				logger.debug('removing file %s' % f)
@@ -257,6 +261,12 @@ def run():
 	get_jenkins_artifacts(tracker)
 	get_github_repos(tracker)
 	cleanup()
+	# technically we shouldn't return a non-zero exit code unless something
+	# failed, but this makes downstream integration/automation easier
+	if FOUND_CHANGES:
+		sys.exit(0)
+	else:
+		sys.exit(1)
 
 
 if __name__ == '__main__':
