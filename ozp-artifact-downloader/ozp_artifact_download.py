@@ -1,7 +1,8 @@
 """
-This script reaches out to Jenkins and GitHub and checks to see if any of the
-resources have been updated since the last download. If so, they are
-downloaded.
+This script checks a 'release trigger' project on Jenkins - if that project
+has been run/built since the last time this script was executed, we'll check
+all related Jenkins (and GitHub) projects/repos for updates and downloads them
+as necessary
 
 This script is meant to be run in a polling manner (e.g. with cron)
 
@@ -15,6 +16,7 @@ import logging
 import os
 import shutil
 import sys
+import time
 import zipfile
 
 import requests
@@ -50,6 +52,10 @@ def create_tracker_file():
 	Writes a JSON file to keep track of the last downloaded builds
 	"""
 	data = {
+		'jenkins_trigger': {
+			'jenkins_name': 'trigger-release',
+			'last_successful_build_number': '0'
+		},
 		'jenkins_projects': [
 			{
 				'jenkins_name': 'build-center-release',
@@ -149,6 +155,30 @@ def setup():
 		tracker = json.load(data_file)
 	return tracker
 
+def check_trigger(tracker):
+	"""
+	Check the status of the trigger project
+
+	Return True if an update was made, indicating that artifacts should be
+	downloaded
+	"""
+	trigger = tracker['jenkins_trigger']
+	trigger_name = trigger['jenkins_name']
+	last_build_url='%s/view/OZP/job/%s/lastSuccessfulBuild/buildNumber' % (
+			cfg.config['JENKINS_URL_PREFIX'], trigger_name)
+	r = requests.get(last_build_url, auth=(cfg.config['JENKINS_USER'],
+		cfg.config['JENKINS_PW']))
+	last_build_number = r.text
+	if last_build_number != trigger['last_successful_build_number']:
+		logger.info('Found new build for %s. Previous downloaded build: %s - current build: %s' % (
+			trigger_name, trigger['last_successful_build_number'], last_build_number))
+		# update the tracker file
+		trigger['last_successful_build_number'] = last_build_number
+		write_tracker_file(tracker)
+		return True
+	logger.debug('Trigger project %s was not built since last execution' % trigger_name)
+	return False
+
 def get_jenkins_artifacts(tracker):
 	"""
 	Download the latest build artifacts from the jenkins jenkins projects
@@ -189,6 +219,8 @@ def get_jenkins_artifacts(tracker):
 			if r.status_code == 200:
 				with open('%s/%s.zip' % (TMP_DIR, j_name), 'wb') as outfile:
 					shutil.copyfileobj(r.raw, outfile)
+					# race condition here - just wait a few seconds
+					time.sleep(3)
 				# unzip the outer zip, revealing the tarball
 				with zipfile.ZipFile('%s/%s.zip' % (TMP_DIR, j_name)) as z:
 					# extract the zip to reveal the tarball within
@@ -261,9 +293,10 @@ def cleanup():
 def run():
 	global FOUND_CHANGES
 	tracker = setup()
-	get_jenkins_artifacts(tracker)
-	get_github_repos(tracker)
-	cleanup()
+	if check_trigger(tracker):
+		get_jenkins_artifacts(tracker)
+		get_github_repos(tracker)
+		cleanup()
 	# technically we shouldn't return a non-zero exit code unless something
 	# failed, but this makes downstream integration/automation easier
 	if FOUND_CHANGES:
