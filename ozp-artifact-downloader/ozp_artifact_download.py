@@ -168,6 +168,9 @@ def check_trigger(tracker):
             cfg.config['JENKINS_URL_PREFIX'], trigger_name)
     r = requests.get(last_build_url, auth=(cfg.config['JENKINS_USER'],
         cfg.config['JENKINS_PW']))
+    if r.status_code != 200:
+        logger.error('Got non 200 response checking jenkins trigger: %d' % r.status_code)
+        return False
     last_build_number = r.text
     if last_build_number != trigger['last_successful_build_number']:
         logger.info('Found new build for %s. Previous downloaded build: %s - current build: %s' % (
@@ -202,6 +205,10 @@ def get_jenkins_artifacts(tracker):
         last_build_url='%s/view/OZP/job/%s/lastSuccessfulBuild/buildNumber' % (
             cfg.config['JENKINS_URL_PREFIX'], j_name)
         r = requests.get(last_build_url, auth=(cfg.config['JENKINS_USER'], cfg.config['JENKINS_PW']))
+        if r.status_code != 200:
+            logger.error('Got non 200 response checking jenkins artifacts: %d' % r.status_code)
+            FOUND_CHANGES = False
+            return
         last_build_number = r.text
         if last_build_number != i['last_successful_build_number']:
             logger.info('Found new build for %s. Previous downloaded build: %s - current build: %s' % (
@@ -263,6 +270,10 @@ def get_github_repos(tracker):
         logger.info('checking github repo: %s' % i['name'])
         url = '%s/%s/commits/%s' % (GITHUB_API_URL_PREFIX, name, i['branch'])
         r = requests.get(url)
+        if r.status_code != 200:
+            logger.error('Got non 200 response checking GitHub artifacts: %d' % r.status_code)
+            FOUND_CHANGES = False
+            return
         last_sha = r.json()['sha']
         if last_sha != i['last_sha']:
             logger.info('Found new code for %s' % name)
