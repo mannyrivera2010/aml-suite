@@ -25,5 +25,5 @@ do
     git fetch --all --tags > /dev/null 2>&1
     git checkout master > /dev/null 2>&1
     git reset --hard origin/master > /dev/null 2>&1
-    git --no-pager log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short --since="$DAYS days ago"
+    git --no-pager log --pretty=format:'%C(yellow)%h %Cred%cd %Cblue%an%Cgreen%d %Creset%s' --date=short --since="$DAYS days ago"
 done
