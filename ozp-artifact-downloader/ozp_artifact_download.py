@@ -92,6 +92,21 @@ def create_tracker_file():
                 'jenkins_name': 'build-demo-release',
                 'last_successful_build_number': '0',
                 'artifact-prefix': 'demo-apps'
+            },
+            {
+                'jenkins_name': 'build-center-new-backend',
+                'last_successful_build_number': '0',
+                'artifact-prefix': 'new-backend-center-'
+            },
+            {
+                'jenkins_name': 'build-hud-new-backend',
+                'last_successful_build_number': '0',
+                'artifact-prefix': 'new-backend-hud-'
+            },
+            {
+                'jenkins_name': 'build-new-backend',
+                'last_successful_build_number': '0',
+                'artifact-prefix': 'new-backend-'
             }
         ],
         'github_repos': [
