@@ -129,6 +129,11 @@ def create_tracker_file():
                 'name': 'piwik-plugin-ClientCertificates',
                 'last_sha': 'none',
                 'branch': 'master'
+            },
+            {
+                'name': 'piwik-plugin-UserCreatedWebsite',
+                'last_sha': 'none',
+                'branch': 'master'
             }
         ]
     }
