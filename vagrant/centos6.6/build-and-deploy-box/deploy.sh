@@ -106,6 +106,7 @@ echo "window.OzoneConfig = {
     \"CENTER_URL\": \"https://${HOST_IP}:7799/center\",
     \"DEVELOPER_RESOURCES_URL\": \"#\",
     \"FEEDBACK_ADDRESS\": \"mailto:person@address.com\",
+    \"HELPDESK_ADDRESS\": \"mailto:person@address.com\",
     \"HELP_URL\": \"#\",
     \"HUD_URL\": \"https://${HOST_IP}:7799/hud\",
     \"IWC_URL\": \"https://${HOST_IP}:7799/iwc\",
