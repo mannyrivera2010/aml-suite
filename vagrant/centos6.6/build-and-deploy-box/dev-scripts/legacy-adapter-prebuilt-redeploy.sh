@@ -24,9 +24,12 @@ RSYNC_DIR=${HOMEDIR}/ozp
 # remove old build deployment
 sudo rm -rf ${STATIC_DEPLOY_DIR}/iwc-owf7-widget-adapter/*
 
+sudo sed -i "0,/\(ozpIwc\.apiRootUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api'/" ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/owf7adapter.html
+sudo sed -i "0,/\(ozpIwc\.owf7PrefsUrl=\).*/s//\1'https:\/\/${HOST_IP}:7799\/marketplace\/api\/prefs'/" ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/owf7adapter.html
 # copy pre-built adapter to the deployment directory
 sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/iwc/
 sudo cp -r ${RSYNC_DIR}/ozp-iwc-owf7-widget-adapter/dist/* ${STATIC_DEPLOY_DIR}/demo_apps/bower_components/ozp-iwc/dist
+
 # fix ownership and restart nginx
 sudo chown -R nginx ${STATIC_DEPLOY_DIR}
 sudo service nginx restart
