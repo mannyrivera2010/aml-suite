@@ -91,6 +91,8 @@ VM to copy that code to the right place, build it (if not pre-built), restart
 servers, etc.
 
 ## Helpful Hints:
+    * If prompted for a password after running "vagrant up" the password should be "vagrant"
+    * rsync will not work on windows.  the command will have to be comment out from the VagrantFile
     * nginx error log:  `/var/log/nginx/error.log`
     * nginx access log:  `/var/log/nginx/access.log`
     * restart nginx: `nginx -s reload` or `sudo service nginx restart`
