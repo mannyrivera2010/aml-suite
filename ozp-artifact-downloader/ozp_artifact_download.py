@@ -107,6 +107,11 @@ def create_tracker_file():
                 'jenkins_name': 'build-new-backend',
                 'last_successful_build_number': '0',
                 'artifact-prefix': 'new-backend-'
+            },
+            {
+                'jenkins_name': 'build-help-release',
+                'last_successful_build_number': '0',
+                'artifact-prefix': 'help-'
             }
         ],
         'github_repos': [
