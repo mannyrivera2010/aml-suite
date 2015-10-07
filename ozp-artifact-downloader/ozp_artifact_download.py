@@ -104,6 +104,11 @@ def create_tracker_file():
                 'artifact-prefix': 'new-backend-hud-'
             },
             {
+                'jenkins_name': 'build-webtop-new-backend',
+                'last_successful_build_number': '0',
+                'artifact-prefix': 'new-backend-webtop-'
+            },
+            {
                 'jenkins_name': 'build-new-backend',
                 'last_successful_build_number': '0',
                 'artifact-prefix': 'new-backend-'
