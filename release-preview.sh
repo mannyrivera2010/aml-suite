@@ -8,7 +8,7 @@ REPO_DIR=~/ozp-repos
 cd ${REPO_DIR}
 
 ## declare an array variable
-declare -a repos=("ozp-center" "ozp-hud" "ozp-webtop" "ozp-rest" "ozp-react-commons" "ozp-iwc" "ozp-iwc" "ozp-iwc-owf7-widget-adapter" "ozp-demo")
+declare -a repos=("ozp-center" "ozp-hud" "ozp-webtop" "ozp-rest" "ozp-react-commons" "ozp-iwc" "ozp-help" "ozp-iwc-owf7-widget-adapter" "ozp-demo")
 
 ## now loop through the above array
 for i in "${repos[@]}"
