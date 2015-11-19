@@ -58,7 +58,7 @@
 #   back-end dev running code on VM. Need mechanism to sync code from host
 #   to VM and to build/redeploy (back-end only)
 
-HOME=/home/vagrant
+HOME_DIR=/home/vagrant
 
 ################################################################################
 #                           Installation
@@ -69,8 +69,6 @@ sudo yum install epel-release -y
 
 sudo yum install git vim -y
 
-# install nginx
-sudo yum install nginx -y
 # install development tools
 sudo yum groupinstall "Development tools" -y
 # install other dependencies that might be useful
@@ -85,7 +83,7 @@ make
 sudo make altinstall
 
 # install custom node version manager
-cd $HOME
+cd $HOME_DIR
 wget https://raw.githubusercontent.com/ozone-development/dev-tools/master/node-version-manager/set_node_version.sh -O set_node_version.sh
 mkdir node_versions
 
@@ -95,13 +93,13 @@ mkdir 0.12.7; cd 0.12.7
 wget https://nodejs.org/download/release/v0.12.7/node-v0.12.7-linux-x64.tar.gz
 tar -xzvf node-v0.12.7-linux-x64.tar.gz --strip 1
 # use node version
-cd $HOME
+cd $HOME_DIR
 source ./set_node_versions.sh 0.12.7
 
 # install PostgreSQL 9.4.5 from source
 # install dependencies
 sudo yum install -y readline-devel libtermcap-devel
-cd $HOME
+cd $HOME_DIR
 wget https://ftp.postgresql.org/pub/source/v9.4.5/postgresql-9.4.5.tar.gz
 tar xfz postgresql-9.4.5.tar.gz
 cd postgresql-9.4.5
@@ -109,10 +107,23 @@ cd postgresql-9.4.5
 make
 sudo make install
 
+# install nginx 1.9.4 from source
+cd $HOME_DIR
+wget http://nginx.org/download/nginx-1.9.4.tar.gz
+tar xzf nginx-1.9.4.tar.gz
+cd nginx-1.9.4
+./configure --with-http_ssl_module
+make
+sudo make install
+
 
 ################################################################################
-#                           Configuration
+#                           Configuration and Deployment
 ################################################################################
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                               postgresql config
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # add user postgres and set password
 sudo adduser postgres
 echo "password" | sudo passwd "postgres" --stdin
@@ -123,7 +134,12 @@ sudo chown postgres:postgres /usr/local/pgsql/data
 sudo -H -u postgres bash -c '/usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data/'
 # Use the postgres postmaster command to start the postgreSQL server in the background
 # TODO: replace with init.d script
-/usr/local/pgsql/bin/postmaster -D /usr/local/pgsql/data >logfile 2>&1 &
+# /usr/local/pgsql/bin/postmaster -D /usr/local/pgsql/data >logfile 2>&1 &
+# install the init script
+sudo cp /vagrant/configs/init/postgres /etc/init.d/
+sudo chmod +x /etc/init.d/postgres
+# start postgres
+sudo service postgres restart
 # NOTE: do not install postgresql-libs. Doing so caused the problem described
 # here:  http://initd.org/psycopg/docs/faq.html#problems-compiling-and-deploying-psycopg2
 # Instead:
@@ -144,4 +160,74 @@ sudo -H -u postgres bash -c "cd /home/postgres;/usr/local/pgsql/bin/psql -c 'GRA
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                             SSL Certificates
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# SSL certs are all pre-made. Instructions provided here to reproduce if required
+#
+# First, create a Root Certificate Authority that will be used to sign all other
+# certificates. The Root CA's certificate will be self-signed:
+#
+# create the Root CA private key (no password, since this is just for testing):
+#   openssl genrsa -out rootCA.key 2048
+#
+# generate a self-signed certificate using this private key
+#   openssl req -x509 -new -nodes -key rootCA.key -days 3650 -out rootCA.pem
+#
+# NOTE: The above rootCA.pem must be installed into your host browser!
+#
+# Create a server certificate for nginx
+#
+#   create the key: openssl genrsa -out server.key 2048
+#   create a Certificate Signing Request (CSR) for the key:
+#       openssl req -new -key server.key -out server.csr
+#   sign the certificate using the Root CA:
+#       openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 3650
+#
+# These certs are in PEM format and ready to be used by nginx (it will need
+# rootCA.pem, server.key, and server.crt)
+#
+# Now we need to create additional SSL certs for the demo users of the site
+# using the exact same process that was used to create the server certs (
+#   these will also need to be installed in your host machine/browser):
+#
+# wsmith, julia, bigbrother, obrien, jones, charrington, tparsons, etc
+
+# copy the certs to the right places
+sudo mkdir -p /ozp/ca_certs
+sudo mkdir -p /ozp/ca_certs/private
+sudo cp /vagrant/configs/ssl_certs/rootCA.pem /ozp/ca_certs/
+sudo cp /vagrant/configs/ssl_certs/rootCA.key /ozp/ca_certs/private
+
+sudo mkdir -p /ozp/server_certs
+sudo mkdir -p /ozp/server_certs/private
+sudo cp /vagrant/configs/ssl_certs/server.crt /ozp/server_certs
+sudo cp /vagrant/configs/ssl_certs/server.key /ozp/server_certs/private
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                               nginx config
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# remove default conf files
+sudo rm -rf /usr/local/nginx/conf/*
+# copy our conf file
+sudo cp /vagrant/configs/ozp_nginx.conf /usr/local/nginx/conf/
+# install the init script
+sudo cp /vagrant/configs/init/nginx /etc/init.d/
+sudo chmod +x /etc/init.d/nginx
+# start nginx
+sudo service nginx restart
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   ozp-authorization service config and deploy
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   ozp-backend config and deploy
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   ozp front-end resources config and deploy
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   metrics config and deploy
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
