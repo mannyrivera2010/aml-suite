@@ -13,17 +13,17 @@
 #
 # Author:       mle <geobi@makina-corpus.net>
 #
-APPNAME=ozp
+APPNAME=demoauth
 USER=vagrant
 PYTHON_ENV=/home/vagrant/python_env
 ACTIVATE=$PYTHON_ENV/bin/activate
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:$PYTHON_ENV/bin
-APPDIR=/ozp/backend
-APPMODULE=ozp.wsgi:application
+APPDIR=/ozp/demoauth
+APPMODULE=demoauth.wsgi:application
 DAEMON=gunicorn
-BIND=127.0.0.1:8080
-PIDFILE=/var/run/gunicorn_ozp.pid
-LOGFILE=/var/log/gunicorn_ozp.log
+BIND=127.0.0.1:8081
+PIDFILE=/var/run/gunicorn_demoauth.pid
+LOGFILE=/var/log/gunicorn_demoauth.log
 WORKERS=2
 
 # Source function library
@@ -96,7 +96,8 @@ reinstall() {
  pyvenv-3.4 $PYTHON_ENV
  source $ACTIVATE
  # install dependencies
- pip install --no-index --find-links=wheelhouse -r requirements.txt
+ # pip install --no-index --find-links=wheelhouse -r requirements.txt
+ pip install -r requirements.txt
  return $?
 }
 

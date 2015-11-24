@@ -12,7 +12,8 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "bento/centos-6.7"
+  # config.vm.box = "bento/centos-6.7"
+  config.vm.box = "ozp-base"
 
   # provision
   config.vm.provision :shell, path: "bootstrap.sh", privileged: false
@@ -44,8 +45,8 @@ Vagrant.configure(2) do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
   #
   # TODO: CUSTOM FOR EACH USER
-  config.vm.synced_folder "~/ozp-v3/vagrant-sync", "/home/vagrant/ozp", type: "rsync",
-    rsync__exclude: "**/*.git/"
+  # config.vm.synced_folder "~/ozp-v3/vagrant-sync", "/home/vagrant/ozp", type: "rsync",
+  #  rsync__exclude: "**/*.git/"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -53,7 +54,7 @@ Vagrant.configure(2) do |config|
   #
   config.vm.provider "virtualbox" do |vb|
     # Name the box something useful.
-    vb.name = "ozp-centos6.7"
+    vb.name = "ozp-centos6.7-nb"
   #   # Display the VirtualBox GUI when booting the machine
   #   vb.gui = true
   #

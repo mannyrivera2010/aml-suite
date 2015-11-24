@@ -64,57 +64,64 @@ HOME_DIR=/home/vagrant
 #                           Installation
 ################################################################################
 
-# install CentOS 7 EPEL repo
-sudo yum install epel-release -y
+# # install CentOS 7 EPEL repo
+# sudo yum install epel-release -y
 
-sudo yum install git vim -y
+# sudo yum install git vim -y
 
-# install development tools
-sudo yum groupinstall "Development tools" -y
-# install other dependencies that might be useful
-sudo yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel -y
+# # for nginx (with ssl module)
+# sudo yum install -y pcre pcre-devel
 
-# install python 3.4.3 (build from source)
-wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tgz
-tar -xzf Python-3.4.3.tgz
-cd Python-3.4.3
-./configure --prefix=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
-make
-sudo make altinstall
+# # install development tools
+# sudo yum groupinstall "Development tools" -y
+# # install other dependencies that might be useful
+# sudo yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel -y
 
-# install custom node version manager
-cd $HOME_DIR
-wget https://raw.githubusercontent.com/ozone-development/dev-tools/master/node-version-manager/set_node_version.sh -O set_node_version.sh
-mkdir node_versions
+# # install python 3.4.3 (build from source)
+# wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tgz
+# tar -xzf Python-3.4.3.tgz
+# cd Python-3.4.3
+# ./configure --prefix=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+# make
+# sudo make altinstall
 
-# install node version 0.12.7
-cd node_versions
-mkdir 0.12.7; cd 0.12.7
-wget https://nodejs.org/download/release/v0.12.7/node-v0.12.7-linux-x64.tar.gz
-tar -xzvf node-v0.12.7-linux-x64.tar.gz --strip 1
-# use node version
-cd $HOME_DIR
-source ./set_node_versions.sh 0.12.7
+# # install custom node version manager
+# cd $HOME_DIR
+# wget https://raw.githubusercontent.com/ozone-development/dev-tools/master/node-version-manager/set_node_version.sh -O set_node_version.sh
+# mkdir node_versions
 
-# install PostgreSQL 9.4.5 from source
-# install dependencies
-sudo yum install -y readline-devel libtermcap-devel
-cd $HOME_DIR
-wget https://ftp.postgresql.org/pub/source/v9.4.5/postgresql-9.4.5.tar.gz
-tar xfz postgresql-9.4.5.tar.gz
-cd postgresql-9.4.5
-./configure
-make
-sudo make install
+# # install node version 0.12.7
+# cd node_versions
+# mkdir 0.12.7; cd 0.12.7
+# wget https://nodejs.org/download/release/v0.12.7/node-v0.12.7-linux-x64.tar.gz
+# tar -xzvf node-v0.12.7-linux-x64.tar.gz --strip 1
+# # use node version
+# cd $HOME_DIR
+# source ./set_node_versions.sh 0.12.7
 
-# install nginx 1.9.4 from source
-cd $HOME_DIR
-wget http://nginx.org/download/nginx-1.9.4.tar.gz
-tar xzf nginx-1.9.4.tar.gz
-cd nginx-1.9.4
-./configure --with-http_ssl_module
-make
-sudo make install
+# # install PostgreSQL 9.4.5 from source
+# # install dependencies
+# sudo yum install -y readline-devel libtermcap-devel
+# cd $HOME_DIR
+# wget https://ftp.postgresql.org/pub/source/v9.4.5/postgresql-9.4.5.tar.gz
+# tar xfz postgresql-9.4.5.tar.gz
+# cd postgresql-9.4.5
+# ./configure
+# make
+# sudo make install
+# # fix permissions
+# sudo find /usr/local/pgsql -type f -exec chmod 644 {} \;
+# sudo find /usr/local/pgsql -type d -exec chmod 755 {} \;
+# sudo find /usr/local/pgsql/bin -type f -exec chmod 755 {} \;
+
+# # install nginx 1.9.4 from source
+# cd $HOME_DIR
+# wget http://nginx.org/download/nginx-1.9.4.tar.gz
+# tar xzf nginx-1.9.4.tar.gz
+# cd nginx-1.9.4
+# ./configure --with-http_ssl_module
+# make
+# sudo make install
 
 
 ################################################################################
@@ -139,7 +146,8 @@ sudo -H -u postgres bash -c '/usr/local/pgsql/bin/initdb -D /usr/local/pgsql/dat
 sudo cp /vagrant/configs/init/postgres /etc/init.d/
 sudo chmod +x /etc/init.d/postgres
 # start postgres
-sudo service postgres restart
+sudo service postgres start
+sleep 1
 # NOTE: do not install postgresql-libs. Doing so caused the problem described
 # here:  http://initd.org/psycopg/docs/faq.html#problems-compiling-and-deploying-psycopg2
 # Instead:
@@ -205,29 +213,79 @@ sudo cp /vagrant/configs/ssl_certs/server.key /ozp/server_certs/private
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                               nginx config
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# remove default conf files
-sudo rm -rf /usr/local/nginx/conf/*
+# add user nginx and set password
+sudo adduser nginx
+echo "password" | sudo passwd "nginx" --stdin
+# replace default nginx.conf
+sudo cp /vagrant/configs/nginx.conf /usr/local/nginx/conf/
 # copy our conf file
-sudo cp /vagrant/configs/ozp_nginx.conf /usr/local/nginx/conf/
+sudo cp /vagrant/configs/ozp_nginx.conf /usr/local/nginx/conf/ozp.conf
 # install the init script
 sudo cp /vagrant/configs/init/nginx /etc/init.d/
 sudo chmod +x /etc/init.d/nginx
+# fix permissions
+# sudo find /ozp/static-deployment -type f -exec chmod 644 {} \;
+# sudo find /ozp/static-deployment -type d -exec chmod 755 {} \;
 # start nginx
 sudo service nginx restart
 
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# #                           create new python environment
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# pyvenv-3.4 /ozp/python_env
+# source /ozp/python_env/bin/activate
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#                   ozp-authorization service config and deploy
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# #                   ozp-authorization service config and deploy
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# # get the code
+# cd /ozp
+# git clone https://github.com/ozone-development/demo-auth-service.git
+# cd demo-auth-service
+# # use settings.py file
+# cp /vagrant/configs/settings_demoauth.py demoauth/settings.py
+# # install dependencies
+# pip intall -r requirements.txt
+# # install the init script
+# sudo cp /vagrant/configs/init/gunicorn_demoauth /etc/init.d/
+# sudo chmod +x /etc/init.d/gunicorn_demoauth
+# # start nginx
+# sudo service gunicorn_demoauth restart
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#                   ozp-backend config and deploy
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# #                   ozp-backend config and deploy
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# cd /ozp
+# git clone https://github.com/ozone-development/ozp-backend.git
+# cd ozp-backend
+# cp /vagrant/configs/settings.py ozp/settings.py
+# # this is super sketchy, but without it, psycopg2 will fail to install (won't be
+# # able to find lib2to3 stuff)
+# cp $HOME_DIR/Python-3.4.3/Lib/lib2to3 /ozp/python_env/lib/python3.4/site-packages/
+# # install dependencies
+# pip intall -r requirements.txt
+# # install the init script
+# sudo cp /vagrant/configs/init/gunicorn_ozp /etc/init.d/
+# sudo chmod +x /etc/init.d/gunicorn_ozp
+# # start nginx
+# sudo service gunicorn_ozp restart
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#                   ozp front-end resources config and deploy
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# #                   ozp front-end resources config and deploy
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# mkdir -p /ozp/static-deployment
+# cd /ozp/static-deployment
+# # Center
+# # get the code
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#                   metrics config and deploy
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# # HUD
+# # Webtop
+# # Help
+# # IWC
+# # Demo Apps
+
+
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# #                   metrics config and deploy
+# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
