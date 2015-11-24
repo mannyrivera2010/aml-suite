@@ -167,6 +167,14 @@ sudo -H -u postgres bash -c "cd /home/postgres;/usr/local/pgsql/bin/psql -c 'GRA
 # export PATH=/usr/local/pgsql/bin/:$PATH
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                             Create /ozp
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# open up permissions on /ozp
+sudo mkdir -p /ozp
+sudo find /ozp -type f -exec chmod 666 {} \;
+sudo find /ozp -type d -exec chmod 777 {} \;
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                             SSL Certificates
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # SSL certs are all pre-made. Instructions provided here to reproduce if required
@@ -198,17 +206,23 @@ sudo -H -u postgres bash -c "cd /home/postgres;/usr/local/pgsql/bin/psql -c 'GRA
 #   these will also need to be installed in your host machine/browser):
 #
 # wsmith, julia, bigbrother, obrien, jones, charrington, tparsons, etc
+#
+# Note that you will probably need to export the user certs in PKCS12 format
+# to import them into your browser. I've had problems creating password-less
+# certs, so all of the p12 certs have password: password
+#
+# openssl pkcs12 -export -out certificate.p12 -inkey privateKey.key -in certificate.crt -certfile rootCA.pem
 
 # copy the certs to the right places
-sudo mkdir -p /ozp/ca_certs
-sudo mkdir -p /ozp/ca_certs/private
-sudo cp /vagrant/configs/ssl_certs/rootCA.pem /ozp/ca_certs/
-sudo cp /vagrant/configs/ssl_certs/rootCA.key /ozp/ca_certs/private
+mkdir -p /ozp/ca_certs
+mkdir -p /ozp/ca_certs/private
+cp /vagrant/configs/ssl_certs/rootCA.pem /ozp/ca_certs/
+cp /vagrant/configs/ssl_certs/rootCA.key /ozp/ca_certs/private
 
-sudo mkdir -p /ozp/server_certs
-sudo mkdir -p /ozp/server_certs/private
-sudo cp /vagrant/configs/ssl_certs/server.crt /ozp/server_certs
-sudo cp /vagrant/configs/ssl_certs/server.key /ozp/server_certs/private
+mkdir -p /ozp/server_certs
+mkdir -p /ozp/server_certs/private
+cp /vagrant/configs/ssl_certs/server.crt /ozp/server_certs
+cp /vagrant/configs/ssl_certs/server.key /ozp/server_certs/private
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                               nginx config
@@ -227,48 +241,52 @@ sudo chmod +x /etc/init.d/nginx
 # sudo find /ozp/static-deployment -type f -exec chmod 644 {} \;
 # sudo find /ozp/static-deployment -type d -exec chmod 755 {} \;
 # start nginx
-sudo service nginx restart
+sudo service nginx start
 
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# #                           create new python environment
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# pyvenv-3.4 /ozp/python_env
-# source /ozp/python_env/bin/activate
+# make deployment dir
+sudo mkdir -p /ozp/static-deployment/django_static
+sudo chown -R nginx:nginx /ozp/static-deployment
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                           create new python user
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# add user ozp and set password (this user will run gunicorn processes)
+sudo adduser ozp
+echo "password" | sudo passwd "ozp" --stdin
 
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# #                   ozp-authorization service config and deploy
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# # get the code
-# cd /ozp
-# git clone https://github.com/ozone-development/demo-auth-service.git
-# cd demo-auth-service
-# # use settings.py file
-# cp /vagrant/configs/settings_demoauth.py demoauth/settings.py
-# # install dependencies
-# pip intall -r requirements.txt
-# # install the init script
-# sudo cp /vagrant/configs/init/gunicorn_demoauth /etc/init.d/
-# sudo chmod +x /etc/init.d/gunicorn_demoauth
-# # start nginx
-# sudo service gunicorn_demoauth restart
+mkdir -p /ozp/python_envs
 
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# #                   ozp-backend config and deploy
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# cd /ozp
-# git clone https://github.com/ozone-development/ozp-backend.git
-# cd ozp-backend
-# cp /vagrant/configs/settings.py ozp/settings.py
-# # this is super sketchy, but without it, psycopg2 will fail to install (won't be
-# # able to find lib2to3 stuff)
-# cp $HOME_DIR/Python-3.4.3/Lib/lib2to3 /ozp/python_env/lib/python3.4/site-packages/
-# # install dependencies
-# pip intall -r requirements.txt
-# # install the init script
-# sudo cp /vagrant/configs/init/gunicorn_ozp /etc/init.d/
-# sudo chmod +x /etc/init.d/gunicorn_ozp
-# # start nginx
-# sudo service gunicorn_ozp restart
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   ozp-authorization service config and deploy
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+cd /ozp
+# get the code
+# TODO: get a release instead of the source
+git clone https://github.com/ozone-development/demo-auth-service.git
+cd demo-auth-service
+# use settings.py file
+cp /vagrant/configs/settings_demoauth.py demoauth/settings.py
+# install the init script
+sudo cp /vagrant/configs/init/gunicorn_demoauth /etc/init.d/
+sudo chmod +x /etc/init.d/gunicorn_demoauth
+# deploy demoauth service
+sudo service gunicorn_demoauth redeploy
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   ozp-backend config and deploy
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+mkdir -p /ozp/backend
+cd /ozp/backend
+cp /ozp/artifacts/new-backend.tar.gz .
+tar -xzf new-backend.tar.gz --strip 1
+# use settings.py file
+cp /vagrant/configs/settings.py ozp/settings.py
+# install the init script
+sudo cp /vagrant/configs/init/gunicorn_ozp /etc/init.d/
+sudo chmod +x /etc/init.d/gunicorn_ozp
+# fix permissions
+sudo chown -R ozp:ozp /ozp/backend
+# start gunicorn
+sudo service gunicorn_ozp redeploy
 
 # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # #                   ozp front-end resources config and deploy

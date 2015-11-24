@@ -206,9 +206,9 @@ OZP = {
     'USE_AUTH_SERVER': True,
     'OZP_AUTHORIZATION': {
         # assumes the real URL is <root>/users/<DN>/
-        'USER_INFO_URL': r'http://localhost:8000/demo-auth/users/%s/',
+        'USER_INFO_URL': r'http://localhost:8081/demo-auth/users/%s/',
         # assumes the real URL is <root>/users/<DN>/groups/<PROJECT_NAME>/
-        'USER_GROUPS_URL': r'http://localhost:8000/demo-auth/users/dn/%s/groups/%s/',
+        'USER_GROUPS_URL': r'http://localhost:8081/demo-auth/users/dn/%s/groups/%s/',
         # name of the group in the auth service for apps mall stewards
         'APPS_MALL_STEWARD_GROUP_NAME': 'OZP_APPS_MALL_STEWARD',
         # name of the group in the auth service for org stewards

@@ -14,16 +14,16 @@
 # Author:       mle <geobi@makina-corpus.net>
 #
 APPNAME=ozp
-USER=vagrant
-PYTHON_ENV=/home/vagrant/python_env
+USER=ozp
+PYTHON_ENV=/ozp/python_envs/ozpbackend
 ACTIVATE=$PYTHON_ENV/bin/activate
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:$PYTHON_ENV/bin
 APPDIR=/ozp/backend
 APPMODULE=ozp.wsgi:application
 DAEMON=gunicorn
 BIND=127.0.0.1:8080
-PIDFILE=/var/run/gunicorn_ozp.pid
-LOGFILE=/var/log/gunicorn_ozp.log
+PIDFILE=/ozp/gunicorn_ozp.pid
+LOGFILE=/ozp/gunicorn_ozp.log
 WORKERS=2
 
 # Source function library
@@ -54,6 +54,7 @@ start() {
 	fi
         echo -n "Starting $APPNAME"
         source $ACTIVATE
+    cd $APPDIR
 	cmd="$DAEMON --daemon --bind=$BIND --pid=$PIDFILE --workers=$WORKERS --user=$USER --log-file=$LOGFILE $APPMODULE"
 	echo "Running gunicorn as: $cmd"
 	$cmd
@@ -77,7 +78,7 @@ stop() {
 }
 
 rh_status() {
-    status "$DAEMON"
+    status $(cat $PIDFILE)
 }
 
 reload() {
@@ -92,7 +93,7 @@ reinstall() {
  # remove old python env
  rm -rf $PYTHON_ENV
  # create new virtualenv
- mkdir $PYTHON_ENV
+ mkdir -p $PYTHON_ENV
  pyvenv-3.4 $PYTHON_ENV
  source $ACTIVATE
  # install dependencies

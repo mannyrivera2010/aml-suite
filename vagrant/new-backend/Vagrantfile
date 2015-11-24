@@ -27,6 +27,7 @@ Vagrant.configure(2) do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   config.vm.network "forwarded_port", guest: 443, host: 8443
+  config.vm.network "forwarded_port", guest: 4430, host: 9443
   config.vm.network "forwarded_port", guest: 5432, host: 15432
 
   # Create a private network, which allows host-only access to the machine
@@ -45,8 +46,8 @@ Vagrant.configure(2) do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
   #
   # TODO: CUSTOM FOR EACH USER
-  # config.vm.synced_folder "~/ozp-v3/vagrant-sync", "/home/vagrant/ozp", type: "rsync",
-  #  rsync__exclude: "**/*.git/"
+  config.vm.synced_folder "~/ozp/build_artifacts", "/ozp/artifacts", type: "rsync",
+    rsync__exclude: "**/*.git/"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
