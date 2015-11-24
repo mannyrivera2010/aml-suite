@@ -131,6 +131,9 @@ HOME_DIR=/home/vagrant
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                               postgresql config
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# add to ldconfig so we can find the shared library
+sudo cp /vagrant/configs/ld.conf /etc/ld.so.conf.d/ozp.conf
+sudo /sbin/ldconfig
 # add user postgres and set password
 sudo adduser postgres
 echo "password" | sudo passwd "postgres" --stdin
@@ -265,6 +268,8 @@ git clone https://github.com/ozone-development/demo-auth-service.git
 cd demo-auth-service
 # use settings.py file
 cp /vagrant/configs/settings_demoauth.py demoauth/settings.py
+# use configured auth data
+cp /vagrant/configs/auth_data.json main/
 # install the init script
 sudo cp /vagrant/configs/init/gunicorn_demoauth /etc/init.d/
 sudo chmod +x /etc/init.d/gunicorn_demoauth
@@ -286,7 +291,7 @@ sudo chmod +x /etc/init.d/gunicorn_ozp
 # fix permissions
 sudo chown -R ozp:ozp /ozp/backend
 # start gunicorn
-sudo service gunicorn_ozp redeploy
+sudo service gunicorn_ozp nuke
 
 # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # #                   ozp front-end resources config and deploy

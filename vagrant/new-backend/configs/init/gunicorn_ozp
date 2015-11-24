@@ -19,11 +19,13 @@ PYTHON_ENV=/ozp/python_envs/ozpbackend
 ACTIVATE=$PYTHON_ENV/bin/activate
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:$PYTHON_ENV/bin
 APPDIR=/ozp/backend
+NGINX_STATIC=/ozp/static-deployment/django_static
 APPMODULE=ozp.wsgi:application
 DAEMON=gunicorn
 BIND=127.0.0.1:8080
 PIDFILE=/ozp/gunicorn_ozp.pid
 LOGFILE=/ozp/gunicorn_ozp.log
+DJANGO_LOGFILE=/ozp/ozp.log
 WORKERS=2
 
 # Source function library
@@ -54,10 +56,12 @@ start() {
 	fi
         echo -n "Starting $APPNAME"
         source $ACTIVATE
+    sudo chown $USER $LOGFILE
+    sudo chown $USER $DJANGO_LOGFILE
     cd $APPDIR
 	cmd="$DAEMON --daemon --bind=$BIND --pid=$PIDFILE --workers=$WORKERS --user=$USER --log-file=$LOGFILE $APPMODULE"
 	echo "Running gunicorn as: $cmd"
-	$cmd
+    su - $USER -c "cd $APPDIR; source $ACTIVATE; $cmd"
 	if [ $? -eq 0 ]; then
 	   # TODO: this doesn't guarantee success
 	   success
@@ -98,7 +102,29 @@ reinstall() {
  source $ACTIVATE
  # install dependencies
  pip install --no-index --find-links=wheelhouse -r requirements.txt
+ # remove old static files
+ rm -rf static
+ mkdir static
+ # collect static files
+ python manage.py collectstatic --noinput
+ # copy static files to nginx directory
+ cp -r static/* $NGINX_STATIC
+ # make media directory if it doesn't exist
+ mkdir -p media
  return $?
+}
+
+flushdb() {
+    PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:$PYTHON_ENV/bin
+    source $ACTIVATE
+    cd $APPDIR
+    # create new database with a single new migration
+    python manage.py flush --noinput
+    python manage.py makemigrations ozpcenter
+    python manage.py makemigrations ozpiwc
+    python manage.py migrate
+    # load sample data
+    python manage.py runscript sample_data_generator
 }
 
 case "$1" in
@@ -119,12 +145,18 @@ case "$1" in
         reload
         ;;
     redeploy)
-	stop
-	reinstall
-	start
-	;;
+        stop
+	   reinstall
+	   start
+	   ;;
+    nuke)
+        stop
+        reinstall
+        flushdb
+        start
+    ;;
     *)
-        echo "Usage: $APPNAME {start|stop|status|reload|restart|redeploy"
+        echo "Usage: $APPNAME {start|stop|status|reload|restart|redeploy|nuke"
         exit 1
         ;;
 esac

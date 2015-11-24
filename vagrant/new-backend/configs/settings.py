@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'v%ue42rl)b*^6494!&1kd)dzfa--cs(#9#qwoe1p()hrjh#j9t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -86,8 +86,12 @@ WSGI_APPLICATION = 'ozp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'ozp',  # Or path to database file if using sqlite3.
+        'USER': 'ozp_user',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',  # Set to empty string for default.
     }
 }
 
@@ -98,22 +102,23 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/ozp/ozp.log'
+        }
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
         'ozp-center': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
         },
         'ozp-iwc': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-        'demo-auth': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
         }
     },
@@ -152,7 +157,8 @@ MEDIA_URL='media/'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication'
+        #'rest_framework.authentication.BasicAuthentication'
+        'ozpcenter.auth.pkiauth.PkiAuthentication'
         # 'rest_framework.authentication.SessionAuthentication',
     , ),
     # Use Django's standard `django.contrib.auth` permissions,
@@ -204,11 +210,12 @@ OZP = {
     # if set to False, never try and update authorization-related info from
     # an external source
     'USE_AUTH_SERVER': True,
+    # if we're using demo certs, we need to do some different things
+    'USING_DEMO_CERTS': True,
     'OZP_AUTHORIZATION': {
-        # assumes the real URL is <root>/users/<DN>/
-        'USER_INFO_URL': r'http://localhost:8081/demo-auth/users/%s/',
+        'USER_INFO_URL': r'http://localhost:8081/demo-auth/users/%s/info.json?issuerDN=%s',
         # assumes the real URL is <root>/users/<DN>/groups/<PROJECT_NAME>/
-        'USER_GROUPS_URL': r'http://localhost:8081/demo-auth/users/dn/%s/groups/%s/',
+        'USER_GROUPS_URL': r'http://localhost:8081/demo-auth/users/%s/groups/%s/',
         # name of the group in the auth service for apps mall stewards
         'APPS_MALL_STEWARD_GROUP_NAME': 'OZP_APPS_MALL_STEWARD',
         # name of the group in the auth service for org stewards
