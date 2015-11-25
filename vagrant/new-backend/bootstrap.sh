@@ -59,6 +59,7 @@
 #   to VM and to build/redeploy (back-end only)
 
 HOME_DIR=/home/vagrant
+STATIC_DEPLOY_DIR=/ozp/static-deployment
 
 ################################################################################
 #                           Installation
@@ -153,8 +154,6 @@ sudo service postgres start
 sleep 1
 # NOTE: do not install postgresql-libs. Doing so caused the problem described
 # here:  http://initd.org/psycopg/docs/faq.html#problems-compiling-and-deploying-psycopg2
-# Instead:
-export LD_LIBRARY_PATH=/usr/local/pgsql/lib:$LD_LIBRARY_PATH
 
 # create new database user
 # TODO: need a password?
@@ -241,14 +240,16 @@ sudo cp /vagrant/configs/ozp_nginx.conf /usr/local/nginx/conf/ozp.conf
 sudo cp /vagrant/configs/init/nginx /etc/init.d/
 sudo chmod +x /etc/init.d/nginx
 # fix permissions
+sudo mkdir -p $STATIC_DEPLOY_DIR
+sudo chmod 755 $STATIC_DEPLOY_DIR
 # sudo find /ozp/static-deployment -type f -exec chmod 644 {} \;
 # sudo find /ozp/static-deployment -type d -exec chmod 755 {} \;
 # start nginx
 sudo service nginx start
 
 # make deployment dir
-sudo mkdir -p /ozp/static-deployment/django_static
-sudo chown -R nginx:nginx /ozp/static-deployment
+mkdir -p /ozp/static-deployment/django_static
+# sudo chown -R nginx:nginx /ozp/static-deployment
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                           create new python user
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -293,21 +294,61 @@ sudo chown -R ozp:ozp /ozp/backend
 # start gunicorn
 sudo service gunicorn_ozp nuke
 
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# #                   ozp front-end resources config and deploy
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# mkdir -p /ozp/static-deployment
-# cd /ozp/static-deployment
-# # Center
-# # get the code
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   ozp front-end resources config and deploy
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+sudo chown -R vagrant:vagrant $STATIC_DEPLOY_DIR
 
+# center
+rm -rf $STATIC_DEPLOY_DIR/center
+mkdir $STATIC_DEPLOY_DIR/center
+cd $STATIC_DEPLOY_DIR/center
+cp /ozp/artifacts/center.tar.gz .
+tar xzf center.tar.gz --strip 1
+cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
 
-# # HUD
-# # Webtop
-# # Help
-# # IWC
-# # Demo Apps
+# HUD
+rm -rf $STATIC_DEPLOY_DIR/hud
+mkdir $STATIC_DEPLOY_DIR/hud
+cd $STATIC_DEPLOY_DIR/hud
+cp /ozp/artifacts/hud.tar.gz .
+tar xzf hud.tar.gz --strip 1
+cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
 
+# Webtop
+rm -rf $STATIC_DEPLOY_DIR/webtop
+mkdir $STATIC_DEPLOY_DIR/webtop
+cd $STATIC_DEPLOY_DIR/webtop
+cp /ozp/artifacts/webtop.tar.gz .
+tar xzf webtop.tar.gz --strip 1
+cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
+
+# Help
+rm -rf $STATIC_DEPLOY_DIR/help
+mkdir $STATIC_DEPLOY_DIR/help
+cd $STATIC_DEPLOY_DIR/help
+cp /ozp/artifacts/help.tar.gz .
+tar xzf help.tar.gz --strip 1
+cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
+
+# IWC
+rm -rf $STATIC_DEPLOY_DIR/iwc
+mkdir $STATIC_DEPLOY_DIR/iwc
+cd $STATIC_DEPLOY_DIR/iwc
+cp /ozp/artifacts/iwc.tar.gz .
+tar xzf iwc.tar.gz --strip 1
+cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
+
+# Demo Apps
+rm -rf $STATIC_DEPLOY_DIR/demo_apps
+mkdir $STATIC_DEPLOY_DIR/demo_apps
+cd $STATIC_DEPLOY_DIR/iwc
+cp /ozp/artifacts/demo_apps.tar.gz .
+tar xzf demo_apps.tar.gz --strip 1
+cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
+
+sudo chown -R nginx:nginx $STATIC_DEPLOY_DIR
+sudo service nginx restart
 
 # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # #                   metrics config and deploy
