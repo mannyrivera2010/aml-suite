@@ -239,16 +239,17 @@ sudo cp /vagrant/configs/ozp_nginx.conf /usr/local/nginx/conf/ozp.conf
 # install the init script
 sudo cp /vagrant/configs/init/nginx /etc/init.d/
 sudo chmod +x /etc/init.d/nginx
-# fix permissions
+
 sudo mkdir -p $STATIC_DEPLOY_DIR
-sudo chmod 755 $STATIC_DEPLOY_DIR
+# fix permissions
+#sudo chmod 755 $STATIC_DEPLOY_DIR
 # sudo find /ozp/static-deployment -type f -exec chmod 644 {} \;
 # sudo find /ozp/static-deployment -type d -exec chmod 755 {} \;
 # start nginx
 sudo service nginx start
 
 # make deployment dir
-mkdir -p /ozp/static-deployment/django_static
+sudo mkdir -p $STATIC_DEPLOY_DIR/django_static
 # sudo chown -R nginx:nginx /ozp/static-deployment
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                           create new python user
@@ -300,48 +301,48 @@ sudo service gunicorn_ozp nuke
 sudo chown -R vagrant:vagrant $STATIC_DEPLOY_DIR
 
 # center
-rm -rf $STATIC_DEPLOY_DIR/center
-mkdir $STATIC_DEPLOY_DIR/center
+mkdir -p $STATIC_DEPLOY_DIR/center
+rm -rf $STATIC_DEPLOY_DIR/center/*
 cd $STATIC_DEPLOY_DIR/center
 cp /ozp/artifacts/center.tar.gz .
 tar xzf center.tar.gz --strip 1
 cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
 
 # HUD
-rm -rf $STATIC_DEPLOY_DIR/hud
-mkdir $STATIC_DEPLOY_DIR/hud
+mkdir -p $STATIC_DEPLOY_DIR/hud
+rm -rf $STATIC_DEPLOY_DIR/hud/*
 cd $STATIC_DEPLOY_DIR/hud
 cp /ozp/artifacts/hud.tar.gz .
 tar xzf hud.tar.gz --strip 1
 cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
 
 # Webtop
-rm -rf $STATIC_DEPLOY_DIR/webtop
-mkdir $STATIC_DEPLOY_DIR/webtop
+mkdir -p $STATIC_DEPLOY_DIR/webtop
+rm -rf $STATIC_DEPLOY_DIR/webtop/*
 cd $STATIC_DEPLOY_DIR/webtop
 cp /ozp/artifacts/webtop.tar.gz .
 tar xzf webtop.tar.gz --strip 1
 cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
 
 # Help
-rm -rf $STATIC_DEPLOY_DIR/help
-mkdir $STATIC_DEPLOY_DIR/help
+mkdir -p $STATIC_DEPLOY_DIR/help
+rm -rf $STATIC_DEPLOY_DIR/help/*
 cd $STATIC_DEPLOY_DIR/help
 cp /ozp/artifacts/help.tar.gz .
 tar xzf help.tar.gz --strip 1
 cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
 
 # IWC
-rm -rf $STATIC_DEPLOY_DIR/iwc
-mkdir $STATIC_DEPLOY_DIR/iwc
+mkdir -p $STATIC_DEPLOY_DIR/iwc
+rm -rf $STATIC_DEPLOY_DIR/iwc/*
 cd $STATIC_DEPLOY_DIR/iwc
 cp /ozp/artifacts/iwc.tar.gz .
 tar xzf iwc.tar.gz --strip 1
 cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
 
 # Demo Apps
-rm -rf $STATIC_DEPLOY_DIR/demo_apps
-mkdir $STATIC_DEPLOY_DIR/demo_apps
+mkdir -p $STATIC_DEPLOY_DIR/demo_apps
+rm -rf $STATIC_DEPLOY_DIR/demo_apps/*
 cd $STATIC_DEPLOY_DIR/iwc
 cp /ozp/artifacts/demo_apps.tar.gz .
 tar xzf demo_apps.tar.gz --strip 1
