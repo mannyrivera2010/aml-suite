@@ -338,15 +338,15 @@ rm -rf $STATIC_DEPLOY_DIR/iwc/*
 cd $STATIC_DEPLOY_DIR/iwc
 cp /ozp/artifacts/iwc.tar.gz .
 tar xzf iwc.tar.gz --strip 1
-cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
+cp /vagrant/configs/ozpIwc.conf.js js/ozpIwc.conf.js
 
 # Demo Apps
 mkdir -p $STATIC_DEPLOY_DIR/demo_apps
 rm -rf $STATIC_DEPLOY_DIR/demo_apps/*
-cd $STATIC_DEPLOY_DIR/iwc
+cd $STATIC_DEPLOY_DIR/demo_apps
 cp /ozp/artifacts/demo_apps.tar.gz .
 tar xzf demo_apps.tar.gz --strip 1
-cp /vagrant/configs/OzoneConfigCenterHud.js OzoneConfig.js
+cp /vagrant/configs/OzoneConfigDemoApps.js OzoneConfig.js
 
 sudo chown -R nginx:nginx $STATIC_DEPLOY_DIR
 sudo service nginx restart

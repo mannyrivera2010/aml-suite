@@ -118,11 +118,18 @@ flushdb() {
     PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:$PYTHON_ENV/bin
     source $ACTIVATE
     cd $APPDIR
+    # reset indexes
+    python manage.py sqlsequencereset ozpcenter > /tmp/tmp.sql
+    /usr/local/pgsql/bin/psql -U postgres -d ozp -a -f /tmp/tmp.sql
+    python manage.py sqlsequencereset ozpiwc > /tmp/tmp.sql
+    /usr/local/pgsql/bin/psql -U postgres -d ozp -a -f /tmp/tmp.sql
+    rm /tmp/tmp.sql
     # create new database with a single new migration
     python manage.py flush --noinput
     python manage.py makemigrations ozpcenter
     python manage.py makemigrations ozpiwc
     python manage.py migrate
+
     # load sample data
     python manage.py runscript sample_data_generator
 }
