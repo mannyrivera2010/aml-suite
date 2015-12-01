@@ -72,6 +72,9 @@ STATIC_DEPLOY_DIR=/ozp/static-deployment
 
 # # for nginx (with ssl module)
 # sudo yum install -y pcre pcre-devel
+#
+# # for metrics
+# sudo yum install mysql-server php-fpm php-mysql -y
 
 # # install development tools
 # sudo yum groupinstall "Development tools" -y
@@ -348,9 +351,51 @@ cp /ozp/artifacts/demo_apps.tar.gz .
 tar xzf demo_apps.tar.gz --strip 1
 cp /vagrant/configs/OzoneConfigDemoApps.js OzoneConfig.js
 
+# Metrics
+rm -rf $STATIC_DEPLOY_DIR/metrics
+mkdir -p $STATIC_DEPLOY_DIR/metrics
+mkdir -p $STATIC_DEPLOY_DIR/metrics/plugins/ClientCertificates
+mkdir -p $STATIC_DEPLOY_DIR/metrics/plugins/LoginPKI
+mkdir -p $STATIC_DEPLOY_DIR/metrics/plugins/AppsMallTheme
+mkdir -p $STATIC_DEPLOY_DIR/metrics/plugins/UserCreatedWebsite
+cd $STATIC_DEPLOY_DIR/metrics
+cp /ozp/artifacts/metrics.tar.gz .
+tar xzf metrics.tar.gz
+cp /vagrant/configs/metrics.ini.php config/config.ini.php
+
+cd $STATIC_DEPLOY_DIR/metrics/LoginPKI
+cp /ozp/artifacts/metrics-pkilogin.tar.gz .
+tar xzf metrics-pkilogin.tar.gz
+
 sudo chown -R nginx:nginx $STATIC_DEPLOY_DIR
 sudo service nginx restart
 
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# #                   metrics config and deploy
-# # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                   metrics config and deploy
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# TODO: remove this once it makes it into the base box
+sudo yum install mysql-server php-fpm php-mysql php-mbstring -y
+sudo /etc/init.d/mysqld restart
+# configure mysql
+mysqladmin -u root password password
+
+# configure for piwik
+mysql --user=root --password=password --execute "CREATE DATABASE piwik;"
+mysql --user=root --password=password --execute "CREATE USER 'piwik'@'%' IDENTIFIED BY 'password';"
+mysql --user=root --password=password --execute "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON piwik.* TO 'piwik'@'%';"
+
+sudo touch /var/log/piwik.log
+sudo chown nginx:nginx /var/log/piwik.log
+
+sudo mkdir $STATIC_DEPLOY_DIR/metrics/tmp
+sudo chmod -R 777 $STATIC_DEPLOY_DIR/metrics/tmp
+
+sudo chmod -R a+w /ozp/static-deployment/metrics/config/
+
+# start php-fpm
+sudo service php-fpm start
+
+# make sure processes are started on boot
+sudo chkconfig nginx on
+sudo chkconfig php-fpm on
+
