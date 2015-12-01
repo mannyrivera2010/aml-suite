@@ -8,6 +8,7 @@ dbname = "piwik"
 tables_prefix = "piwik_"
 charset = "utf8"
 
+
 [log]
 log_writers[] = "file"
 log_level = "DEBUG"
