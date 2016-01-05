@@ -22,9 +22,9 @@ HOST_IP="localhost"
 RSYNC_DIR=${HOMEDIR}/ozp
 
 cd ${RSYNC_DIR}/ozp-rest
-source ${HOMEDIR}/.gvm/bin/gvm-init.sh
-gvm use grails 2.3.7
-gvm current grails
+source ${HOMEDIR}/.sdkman/bin/sdkman-init.sh
+sdk use grails 2.3.7
+sdk current grails
 grails war
 printf "\n****************\n  finished compiling war file \n****************\n"
 
