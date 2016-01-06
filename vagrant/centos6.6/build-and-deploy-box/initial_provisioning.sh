@@ -76,7 +76,7 @@ sudo yum remove mysql mysql-* -y
 sudo yum --enablerepo=remi,remi-test install mysql mysql-server tomcat elasticsearch nginx multitail -y
 
 # Install newman (for adding test data)
-sudo npm install -g newman bower
+npm install -g newman bower
 
 printf "\n***************\nfinished deployment installation\n***************\n"
 
