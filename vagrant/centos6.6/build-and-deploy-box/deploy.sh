@@ -4,8 +4,8 @@ HOMEDIR=/home/vagrant
 PACKAGE_DIR=/ozp-artifacts
 STATIC_DEPLOY_DIR=/ozp-static-deployment
 # CHANGE ME to your host's IP address
-HOST_IP="localhost"
-
+#HOST_IP="192.168.0.11"
+HOST_IP="172.16.96.96"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #						Configure and deploy backend
