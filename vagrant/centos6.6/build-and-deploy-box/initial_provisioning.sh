@@ -21,26 +21,24 @@ source ${HOMEDIR}/.nvm/nvm.sh
 nvm install 0.12
 nvm alias default node
 printf "\n**************\nfinished installing nodejs and npm\n**************\n"
-# install gvm
-curl -s get.gvmtool.net | bash
-source ${HOMEDIR}/.gvm/bin/gvm-init.sh
-# modify .gvm/etc/config to set gvm_auto_answer=true
-# (see options here: http://gvmtool.net/)
-printf "# make gvm non-interactive, great for CI environments
-gvm_auto_answer=true
-# prompt user to selfupdate on new shell
-gvm_suggestive_selfupdate=true
-# perform automatic selfupdates
-gvm_auto_selfupdate=false" > ${HOMEDIR}/.gvm/etc/config
+# install sdkman
+curl -s get.sdkman.io | bash
+source ${HOMEDIR}/.sdkman/bin/sdkman-init.sh
+# modify .sdkman/etc/config to set sdkman_auto_answer=true
+# (see options here: http://sdkman.iot/)
+printf "# make sdkman non-interactive, great for CI environments
+sdkman_auto_answer=true
+# do not perform automatic selfupdates
+sdkman_auto_selfupdate=false" > ${HOMEDIR}/.sdkman/etc/config
 
 # use grails 2.3.7
-gvm install grails 2.3.7
-gvm use grails 2.3.7
-gvm default grails 2.3.7
+sdk install grails 2.3.7
+sdk use grails 2.3.7
+sdk default grails 2.3.7
 
 # if the above environment is not used for building (e.g. Jenkins), make sure
 # these env vars are set:
-# export GRAILS_HOME="${HOMEDIR}/.gvm/grails/2.3.7"
+# export GRAILS_HOME="${HOMEDIR}/.sdkman/grails/2.3.7"
 # export PATH=$GRAILS_HOME/bin:$PATH
 # export JAVA_HOME="/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64"
 
