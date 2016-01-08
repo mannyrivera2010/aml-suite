@@ -104,4 +104,6 @@ servers, etc.
     * IE testing: Always enable Cache->Always Refresh From Server option in F12 dev tools
     * clear the elasticsearch data: curl -XDELETE 'http://localhost:9200/marketplace' (done on local box, not from host (would need port fwd))
     # elasticsearch data at /var/lib/elasticsearch
+    # To use this vagrant box as your backend API for a development environment set the OzoneConfig.js varible to point to your vagrant box
+    API_URL="https://VAGRANTBOXIP:7799/marketplace" npm start
 
