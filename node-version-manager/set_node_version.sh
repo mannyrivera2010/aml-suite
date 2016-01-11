@@ -14,7 +14,7 @@
 # wget https://nodejs.org/download/release/v0.10.36/node-v0.10.36-linux-x64.tar.gz
 # tar -xzvf node-v0.10.36-linux-x64.tar.gz --strip 1
 
-NODE_INSTALLS=$HOME/node_versions
+NODE_INSTALLS=/usr/local/node_versions
 NODE_VERSION=$1
 export NPM_CONFIG_PREFIX=$NODE_INSTALLS/$NODE_VERSION
 export PATH=$NODE_INSTALLS/$NODE_VERSION/bin:$PATH:$HOME/bin
