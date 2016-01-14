@@ -15,6 +15,9 @@ from subprocess import call
 import requests
 from requests.auth import HTTPBasicAuth
 
+# local directory where ansible playbooks are located
+ANSIBLE_DIR = '/home/jenkins/ozp-ansible'
+
 # setup logging
 logger = logging.getLogger('jenkins_ansible_deployer')
 logger.setLevel('DEBUG')
@@ -58,7 +61,7 @@ def run():
         ansible_playbook, args.job_name, args.build_number)
 
     logger.info("Running command: %s" % command)
-    call(command)
+    call(command, cwd=ANSIBLE_DIR)
 
 if __name__ == '__main__':
     run()
