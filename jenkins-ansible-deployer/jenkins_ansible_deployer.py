@@ -47,11 +47,11 @@ def run():
 
     # set the ansible playbook to use based on the Jenkins job name
     if args.job_name == "build-center-new-backend":
-        ansible_playbook = "ozp_center"
+        ansible_playbook = "ozp_deploy_center"
     if args.job_name == "build-hud-new-backend":
-        ansible_playbook = "ozp_hud"
+        ansible_playbook = "ozp_deploy_hud"
     if args.job_name == "build-webtop-new-backend":
-        ansible_playbook = "ozp_webtop"
+        ansible_playbook = "ozp_deploy_webtop"
 
     if not ansible_playbook:
         logger.error("No ansible playbook selected")
