@@ -17,6 +17,7 @@ from requests.auth import HTTPBasicAuth
 
 # local directory where ansible playbooks are located
 ANSIBLE_DIR = '/home/jenkins/ozp-ansible'
+ANSIBLE_INSTALL = '/home/jenkins/ansible'
 
 # setup logging
 logger = logging.getLogger('jenkins_ansible_deployer')
@@ -57,11 +58,12 @@ def run():
         sys.exit(1)
 
     logger.info("Running ansible playbook %s" % ansible_playbook)
-    command = 'ansible-playbook %s.yml -i hosts_local -u jenkins connection=local --extra-vars "jenkins_project=%s jenkins_build_number=%s"' % (
+    command = 'source %s/hacking/env-setup' % ANSIBLE_INSTALL
+    command += ';ansible-playbook %s.yml -i hosts_local -u jenkins connection=local --extra-vars "jenkins_project=%s jenkins_build_number=%s"' % (
         ansible_playbook, args.job_name, args.build_number)
 
     logger.info("Running command: %s" % command)
-    call(command, cwd=ANSIBLE_DIR)
+    call(command, cwd=ANSIBLE_DIR, shell=True)
 
 if __name__ == '__main__':
     run()
