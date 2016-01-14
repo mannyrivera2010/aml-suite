@@ -301,7 +301,8 @@ mkdir -p $STATIC_DEPLOY_DIR/metrics/plugins/UserCreatedWebsite
 cd $STATIC_DEPLOY_DIR/metrics
 cp /ozp/artifacts/metrics.tar.gz .
 tar xzf metrics.tar.gz
-cp /vagrant/configs/metrics.ini.php config/config.ini.php
+# TODO: causing issues?
+# cp /vagrant/configs/metrics.ini.php config/config.ini.php
 
 cd $STATIC_DEPLOY_DIR/metrics/LoginPKI
 cp /ozp/artifacts/metrics-pkilogin.tar.gz .
