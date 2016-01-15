@@ -21,7 +21,7 @@ ANSIBLE_INSTALL = '/home/jenkins/ansible'
 
 # setup logging
 logger = logging.getLogger('jenkins_ansible_deployer')
-logger.setLevel('DEBUG')
+logger.setLevel(logging.DEBUG)
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
