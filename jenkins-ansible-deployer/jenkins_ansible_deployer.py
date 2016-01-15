@@ -38,7 +38,9 @@ def run():
                         help="Jenkins project name", choices=[
                             "build-center-new-backend",
                             "build-hud-new-backend",
-                            "build-webtop-new-backend"],
+                            "build-webtop-new-backend",
+                            "build-iwc-new-backend",
+                            "build-new-backend"],
                         default="build-center-new-backend")
     parser.add_argument("build_number", metavar='build_number', type=int,
                         help="Jenkins build number to deploy")
