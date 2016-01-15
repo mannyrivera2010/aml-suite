@@ -52,6 +52,10 @@ def run():
         ansible_playbook = "ozp_deploy_hud"
     if args.job_name == "build-webtop-new-backend":
         ansible_playbook = "ozp_deploy_webtop"
+    if args.job_name == "build-iwc-new-backend":
+        ansible_playbook = "ozp_deploy_iwc"
+    if args.job_name == "build-new-backend":
+        ansible_playbook = "ozp_deploy_backend"
 
     if not ansible_playbook:
         logger.error("No ansible playbook selected")
