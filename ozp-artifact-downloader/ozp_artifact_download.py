@@ -144,6 +144,11 @@ def create_tracker_file():
                 'name': 'piwik-plugin-UserCreatedWebsite',
                 'last_sha': 'none',
                 'branch': 'master'
+            },
+            {
+                'name': 'ozp-ansible',
+                'last_sha': 'none',
+                'branch': 'master'
             }
         ]
     }
