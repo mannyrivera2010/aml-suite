@@ -36,28 +36,41 @@ def run():
     parser = argparse.ArgumentParser()
     parser.add_argument("job_name", metavar='job_name', type=str,
                         help="Jenkins project name", choices=[
-                            "build-center-new-backend",
-                            "build-hud-new-backend",
-                            "build-webtop-new-backend",
-                            "build-iwc-new-backend",
-                            "build-new-backend"],
-                        default="build-center-new-backend")
+                            "build-center-release",
+                            "build-hud-release",
+                            "build-webtop-release",
+                            "build-iwc-release",
+                            "build-backend-release",
+                            "build-demo-release",
+                            "build-help-release",
+                            "build-center-latest",
+                            "build-hud-latest",
+                            "build-webtop-latest",
+                            "build-iwc-latest",
+                            "build-demo-latest",
+                            "build-help-latest",
+                            "build-backend-latest"],
+                        default="build-center-release")
     parser.add_argument("build_number", metavar='build_number', type=int,
                         help="Jenkins build number to deploy")
 
     args = parser.parse_args()
 
     # set the ansible playbook to use based on the Jenkins job name
-    if args.job_name == "build-center-new-backend":
+    if "build-center" in args.job_name:
         ansible_playbook = "ozp_deploy_center"
-    if args.job_name == "build-hud-new-backend":
+    if "build-hud" in args.job_name:
         ansible_playbook = "ozp_deploy_hud"
-    if args.job_name == "build-webtop-new-backend":
+    if "build-webtop" in args.job_name:
         ansible_playbook = "ozp_deploy_webtop"
-    if args.job_name == "build-iwc-new-backend":
+    if "build-iwc" in args.job_name:
         ansible_playbook = "ozp_deploy_iwc"
-    if args.job_name == "build-new-backend":
+    if "build-backend" in args.job_name:
         ansible_playbook = "ozp_deploy_backend"
+    if "build-help" in args.job_name:
+        ansible_playbook = "ozp_deploy_help"
+    if "build-demo" in args.job_name:
+        ansible_playbook = "ozp_deploy_demo_apps"
 
     if not ansible_playbook:
         logger.error("No ansible playbook selected")

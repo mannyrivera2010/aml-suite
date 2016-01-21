@@ -79,39 +79,14 @@ def create_tracker_file():
                 'artifact-prefix': 'iwc-prod'
             },
             {
-                'jenkins_name': 'build-iwc-owf7-widget-adapter-release',
+                'jenkins_name': 'build-backend-release',
                 'last_successful_build_number': '0',
-                'artifact-prefix': 'iwc-owf7'
-            },
-            {
-                'jenkins_name': 'build-rest-release',
-                'last_successful_build_number': '0',
-                'artifact-prefix': 'rest-backend'
+                'artifact-prefix': 'backend-'
             },
             {
                 'jenkins_name': 'build-demo-release',
                 'last_successful_build_number': '0',
                 'artifact-prefix': 'demo-apps'
-            },
-            {
-                'jenkins_name': 'build-center-new-backend',
-                'last_successful_build_number': '0',
-                'artifact-prefix': 'new-backend-center-'
-            },
-            {
-                'jenkins_name': 'build-hud-new-backend',
-                'last_successful_build_number': '0',
-                'artifact-prefix': 'new-backend-hud-'
-            },
-            {
-                'jenkins_name': 'build-webtop-new-backend',
-                'last_successful_build_number': '0',
-                'artifact-prefix': 'new-backend-webtop-'
-            },
-            {
-                'jenkins_name': 'build-new-backend',
-                'last_successful_build_number': '0',
-                'artifact-prefix': 'new-backend-'
             },
             {
                 'jenkins_name': 'build-help-release',
