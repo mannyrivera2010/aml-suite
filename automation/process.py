@@ -159,6 +159,10 @@ class UpdateRepoTask(TaskBase):
             #logger.info('%s'%git_obj.config('-l'))
             # Set Username  - git config --global user.name "Billy Everyteen"
             # Set email - git config --global user.email "Billy Everyteen"
+            logger.info('%s - %s' % (repo_name, git_obj.config('--global', 'user.name','"Manny Rivera"')))
+            logger.info('%s - %s' % (repo_name, git_obj.config('--global', 'user.email','mannyrivera2010@gmail.com')))
+
+
 
             # Delete all local tags
             for tag in repo.tags:
