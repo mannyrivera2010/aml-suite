@@ -29,5 +29,6 @@ DEFAULT_LOGGING = {
     }
 }
 
+
 def configure_logging():
     logging.config.dictConfig(DEFAULT_LOGGING)

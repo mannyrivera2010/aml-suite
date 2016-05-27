@@ -2,11 +2,13 @@
 File for Versions
 """
 
+
 class Version(object):
     """
     An object that represents a three-part version number.
     """
-    def __init__(self, major, minor, micro, error=None, error_msg=None):
+
+    def __init__(self, major, minor, micro, error=None, error_msg=None, is_head=False):
         """
         @param major: The major version number.
         @type major: {int}
@@ -20,6 +22,7 @@ class Version(object):
         self.micro = micro
         self.error = error
         self.error_msg = error_msg
+        self.is_head = is_head
 
     def __str__(self):
         if self.error:
@@ -40,16 +43,16 @@ class Version(object):
             return Version(int(self.major + major), int(self.minor + minor), int(self.micro + micro))
 
 
-def parse_version_string(input_string):
+def parse_version_string(input_string, is_head=False):
     """
     @param input_string: string with version infomation
     @type input_string: {string}
     """
     versions = input_string.split('.')
     try:
-        major = int(versions[0].replace('v',''))
+        major = int(versions[0].replace('v', ''))
         minor = int(versions[1])
-        micro = int(versions[2].replace('-rc',''))
-        return Version(major, minor, micro)
+        micro = int(versions[2].replace('-rc', ''))
+        return Version(major, minor, micro, is_head=is_head)
     except Exception as err:
-        return Version(-2, -2, -2, err, input_string)
+        return Version(-2, -2, -2, err, input_string, is_head)

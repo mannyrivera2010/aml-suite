@@ -1,24 +1,22 @@
 
-GIT_USER = ''
-GIT_EMAIL = ''
-
 GIT_BASE_DIR = 'git-working'
-DAYS=14
+DAYS = 14
 
 # Default Organization
-ORG = 'ozone-development'
+DEFAULT_ORGANIZATION = 'ozone-development'
 
 # Default Repos to manage - Used for releases
+# Order Matters
 REPOS = [
+    'ozp-help',
+    'ozp-react-commons',
     'ozp-center',
     'ozp-hud',
     'ozp-webtop',
-    #'ozp-rest',
-    'ozp-react-commons',
-    #'ozp-iwc',
-    #'ozp-iwc-owf7-widget-adapter',
-    #'ozp-iwc-angular',
+    # 'ozp-rest',
+    # 'ozp-iwc',
+    # 'ozp-iwc-owf7-widget-adapter',
+    # 'ozp-iwc-angular',
     'ozp-demo',
-    'ozp-backend',
-    'ozp-help'
+    'ozp-backend'
 ]

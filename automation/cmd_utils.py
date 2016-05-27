@@ -7,6 +7,7 @@ class CommandResults(object):
     """
     Wrapper Class
     """
+
     def __init__(self, command, pipe, return_code):
         self.command = command
         self.pipe = pipe
@@ -14,7 +15,7 @@ class CommandResults(object):
 
     def check(self):
         if self.return_code >= 2:
-            raise Exception('Command:[%s] - Code:[%s] - Error:[%s]' % (self.command, self.return_code,self.pipe))
+            raise Exception('Command:[%s] - Code:[%s] - Error:[%s]' % (self.command, self.return_code, self.pipe))
 
     def __repr__(self):
         return '[%s, %s]' % (self.command, self.return_code)
@@ -22,7 +23,7 @@ class CommandResults(object):
 
 def call_command(command):
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #print(p.communicate())
+    # print(p.communicate())
     # print(p.returncode)
     return CommandResults(command, p.communicate(), p.returncode)
 
