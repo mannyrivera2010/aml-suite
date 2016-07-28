@@ -191,6 +191,7 @@ class RepoHelper(object):
         self.git_directory = None
         self.valid = False
         self.release_flag = False
+        self.force_flag = False
         self.detector_list = None
         self.releases = []
         self.push_flag = True
@@ -203,7 +204,7 @@ class RepoHelper(object):
         return self.push_flag
 
     def force_release(self):
-        self.release_flag = True
+        self.force_flag = True
 
     def init_detectors(self):
         if not self.detector_list:
@@ -218,13 +219,21 @@ class RepoHelper(object):
             return False
         return self.releases[0].is_head
 
+    def release(self):
+        """
+        If the head commit is not a release commit make a release
+        """
+        return not self.is_head_release_commit()
+
     def prep_release(self):
         """
         Prep release
         """
         self.init_detectors()
 
-        if not self.is_head_release_commit() or self.release_flag:
+        # If the head commit is not a release then need to make a release
+        # If force_flag is true then need to make a release
+        if not self.is_head_release_commit() or self.force_flag:
             logger.info('%s - Detected need to Release(%s) to (%s) - Forced: %s' % (self.repo_name,
                                                                                     self.get_current_version_number(),
                                                                                     self.get_next_version_number(),
@@ -270,8 +279,6 @@ class RepoHelper(object):
                     import sys
                     exc_info = sys.exc_info()
                     traceback.print_exception(*exc_info)
-
-
 
             if safe_commit:
                 self.push_flag = True
@@ -469,11 +476,15 @@ class RepoWorkingDirectory(object):
 
         """
         for name in settings_instance.repos():
-            release_flag = self.repos[name].is_head_release_commit()
+            release_flag = self.repos[name].release()
+            force_flag = self.repos[name].force_flag
 
             if release_flag:
-                if name == 'ozp-hud' or name == 'ozp-center':
-                    self.repos['ozp-react-commons'].force_release()
+                if name == 'ozp-react-commons':
+                    self.repos['ozp-hud'].force_release()
+                    self.repos['ozp-center'].force_release()
+                    
+            logger.info('{} - release_flag: {} - force_flag: {}'.format(name, release_flag, force_flag))
 
         for name in settings_instance.repos():
             release_flag = self.repos[name].prep_release()

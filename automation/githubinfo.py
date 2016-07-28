@@ -4,6 +4,7 @@ import constants
 import logging
 import log
 
+import socket
 
 log.configure_logging()
 logger = logging.getLogger('default')
