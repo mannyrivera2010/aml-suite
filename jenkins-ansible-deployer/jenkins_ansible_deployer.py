@@ -53,7 +53,7 @@ def run():
                         default="build-center-release")
     parser.add_argument("build_number", metavar='build_number', type=int,
                         help="Jenkins build number to deploy")
-    parser.add_argument("es_enabled", metavar='es_enabled', type=str,
+    parser.add_argument("--es_enabled", metavar='es_enabled', type=str,
                     help="Enable Elasticsearch", choices=[
                         "False",
                         "True"],
