@@ -53,6 +53,11 @@ def run():
                         default="build-center-release")
     parser.add_argument("build_number", metavar='build_number', type=int,
                         help="Jenkins build number to deploy")
+    parser.add_argument("es_enabled", metavar='es_enabled', type=str,
+                    help="Enable Elasticsearch", choices=[
+                        "False",
+                        "True"],
+                    default="False")
 
     args = parser.parse_args()
 
@@ -77,8 +82,8 @@ def run():
         sys.exit(1)
 
     logger.info("Running ansible playbook %s" % ansible_playbook)
-    command = 'ansible-playbook %s.yml -i hosts_local -u jenkins --connection=local --extra-vars "download_from=jenkins jenkins_project=%s jenkins_build_number=%s"' % (
-        ansible_playbook, args.job_name, args.build_number)
+    command = 'ansible-playbook %s.yml -i hosts_local -u jenkins --connection=local --extra-vars "download_from=jenkins jenkins_project=%s jenkins_build_number=%s es_enabled=%s"' % (
+        ansible_playbook, args.job_name, args.build_number, args.es_enabled)
 
     logger.info("Running command: %s" % command)
     call(command, cwd=ANSIBLE_DIR, shell=True)
