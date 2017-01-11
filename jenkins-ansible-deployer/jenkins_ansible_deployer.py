@@ -60,7 +60,7 @@ def run():
                     default="False")
 
     args = parser.parse_args()
-
+    logger.info("Parsed Arguments %s" % args)
     # set the ansible playbook to use based on the Jenkins job name
     if "build-center" in args.job_name:
         ansible_playbook = "ozp_deploy_center"
