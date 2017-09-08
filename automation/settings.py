@@ -1,43 +1,33 @@
-import constants
+GIT_BASE_DIR = 'git-working'
+DAYS = 14
 
+# Default Organization
+DEFAULT_ORGANIZATION = 'aml-development'
 
-class Settings(object):
+# Default Repos to manage - Used for releases
+# Order Matters
+REPOS = [
+    'ozp-help',
+    'ozp-react-commons',
+    'ozp-center',
+    'ozp-hud',
+    'ozp-webtop',
+    # 'ozp-rest',
+    # 'ozp-iwc',
+    # 'ozp-iwc-owf7-widget-adapter',
+    # 'ozp-iwc-angular',
+    'ozp-demo',
+    'ozp-backend'
+]
 
-    def __init__(self):
-        self.settings_dictionary = {}
-        self._load_constants_file()
+REPO_CLONE_MODE = 'git'  # git/https
 
-    def _load_constants_file(self):
-        constants_variable = dir(constants)
+GIT_USERNAME = 'Manny Rivera'
+GIT_EMAIL = 'mannyrivera2010@gmail.com'
 
-        for variable in constants_variable:
-            if '__' not in variable:
-                self.settings_dictionary[variable.upper()] = getattr(constants, variable)
-
-    def __getattr__(self, name):
-        value = self.settings_dictionary.get(name.upper())
-        if value:
-            return lambda: value
-        raise AttributeError('{0} does not exist'.format(name))
-
-    def set(self, key, value):
-        self.settings_dictionary[key.upper()] = value
-        return value
-
-    def get(self, key, default=None):
-        return self.settings_dictionary.get(key.upper(), default)
-
-    def __repr__(self):
-        return self.settings_dictionary
-
-    def __str__(self):
-        return str(self.settings_dictionary)
-
-
-settings_instance = Settings()
-
-
-if __name__ == '__main__':
-    print(settings_instance)
-    print(settings_instance.repos())
-    print(settings_instance.get('repos'))
+DETECTORS = [
+    'PythonFileDetector',
+    'PackageFileDetector',
+    'NpmShrinkwrapDetector',
+    'ChangeLogDetector'
+]

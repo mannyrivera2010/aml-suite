@@ -5,20 +5,20 @@ DEFAULT_LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'format1': {
+        'default_format': {
             'format': '%(asctime)s - %(levelname)-5.5s - %(message)s',
         }
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'format1',
+            'formatter': 'default_format',
         },
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'main.log',
-            'formatter': 'format1',
+            'filename': 'automation.log',
+            'formatter': 'default_format',
         }
     },
     'loggers': {

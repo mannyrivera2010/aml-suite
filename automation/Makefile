@@ -1,8 +1,14 @@
 test:
 	nosetests -v
 
-pep8:
-	pep8 *.py --ignore=E501,E123,E128,E121,E124,E711,E402 --show-source
+clean:
+	rm git-working -rf
 
-autopep8:
-	autopep8 *.py --ignore=E501,E123,E128,E121,E124,E711,E402 --in-place
+codecheck:
+	flake8 *.py tests --ignore=E501,E123,E128,E121,E124,E711,E402 --show-source
+
+autopep:
+	autopep8 *.py tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
+
+autopepdiff:
+	autopep8 *.py tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff

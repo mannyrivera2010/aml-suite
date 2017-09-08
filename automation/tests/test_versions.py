@@ -1,5 +1,6 @@
 import unittest
 
+
 class VersionsTest(unittest.TestCase):
 
     def test(self):
@@ -7,6 +8,7 @@ class VersionsTest(unittest.TestCase):
 
     def test2(self):
         self.failUnless(True)
-        
+
+
 if __name__ == '__main__':
     unittest.main()

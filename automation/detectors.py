@@ -22,7 +22,7 @@ class Detector(object):
         return self.repo_helper.get_next_version_number()
 
     def repo_directory_next_version(self, repo_name):
-        return self.repo_helper.repo_directory_next_version(repo_name)
+        return self.repo_helper.repo_working_directory_obj.data_store['repo'][repo_name]['next_version']
 
     def detect(self):
         raise NotImplementedError()
@@ -128,7 +128,7 @@ class NpmShrinkwrapDetector(Detector):
 
         if input_file_dir:
             ozp_react_commons_next_version = self.repo_directory_next_version('ozp-react-commons')
-            #print(ozp_react_commons_next_version)
+            # print(ozp_react_commons_next_version)
             lines = []
             with open(input_file_dir, 'r') as f:
                 lines = f.readlines()
@@ -173,31 +173,15 @@ class ChangeLogDetector(Detector):
 
     def execute(self):
         """
-        Generate the changelog.
+        Execute Changelog for repo
 
-        For center and hud: gulp changelog
-        For webtop: grunt changelog
+        For center, hud, webtop: gulp changelog
         None of the other repos have changelogs
         """
-        # os.remove(self.detect_changelog())
-        #
-        if self.get_repo_name() in ['ozp-center', 'ozp-hud']:
-            # print('(cd %s && npm install gulp)' % self.get_repo_directory_name())
-            # print('(cd %s && rm node_modules/ -rf)' % self.get_repo_directory_name())
-            # print('(cd %s && npm install)' % self.get_repo_directory_name())
-            command = '(cd %s && gulp changelog)' % self.get_repo_directory_name()
-            # print(command)
+        if self.get_repo_name() in ['ozp-center', 'ozp-hud', 'ozp-webtop']:
+            command = '(cd {} && grunt changelog)'.format(self.get_repo_directory_name())
             command_results = cmd_utils.call_command(command)
 
-            if command_results.return_code != 0:
-                raise Exception(command_results.pipe)
-            return True
-
-        elif self.get_repo_name() == 'ozp-webtop':
-            command = '(cd %s && grunt changelog)' % self.get_repo_directory_name()
-            # print(command)
-
-            command_results = cmd_utils.call_command(command)
             if command_results.return_code != 0:
                 raise Exception(command_results.pipe)
             return True

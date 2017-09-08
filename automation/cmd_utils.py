@@ -1,6 +1,4 @@
-import os
 import subprocess
-from subprocess import call
 
 
 class CommandResults(object):

@@ -1,0 +1,8 @@
+Subject: Release Build - {{ tomorrow_date }}
+Body:
+The release build will run tomorrow afternoon at 3:30 PM.
+Please have all Pull Requests completed by 3:15 PM.
+If there are any questions or concerns, please let me know.
+
+Thank you,
+{{ name }}

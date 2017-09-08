@@ -8,38 +8,45 @@ Automated Release Process
   * If open or approve PRs get instruction form PR owner
 *
 
-
 Reference:
 https://github.com/ozone-development/ozp-documentation/wiki/CI-and-Release-Process
 """
+import argparse
+import binascii
+import io
+import logging
 import os
 import sys
-import logging
-import io
-import socket
-import argparse
-import re
 import time
-import binascii
+import traceback
+import json
 
 from git import Repo
 from git.exc import GitCommandError
 from git.remote import RemoteProgress
+import jinja2
 
-from versions import Version
+from githubinfo import GithubRequests
 from versions import parse_version_string
-import cmd_utils
-import log
-from githubinfo import GitHubInfo
 import detectors
-from settings import settings_instance
+import log
+import settings
+
 
 log.configure_logging()
 logger = logging.getLogger('default')
 
 
+def render_template(tpl_path, context):
+    path, filename = os.path.split(tpl_path)
+    return jinja2.Environment(
+        loader=jinja2.FileSystemLoader(path or './')
+    ).get_template(filename).render(context)
+
+
 class ProgressListener(RemoteProgress):
     """
+    Git Progress Listener
     https://gitpython.readthedocs.io/en/0.3.4/reference.html?highlight=remoteprogress#git.remote.RemoteProgress
     """
 
@@ -61,69 +68,17 @@ class ProgressListener(RemoteProgress):
 
 def generate_github_repo_url(repo_name):
     """
-    https://github.com/ozone-development/ozp-backend.git
-    https://github.com/ozone-development/ozp-hud.git
-
+    Generate Github Repo URL used for cloning
     """
-    return 'https://github.com/ozone-development/%s.git' % repo_name
+    format_data = {'REPO_NAME': repo_name}
+    format_data['DEFAULT_ORGANIZATION'] = settings.DEFAULT_ORGANIZATION
 
+    if settings.REPO_CLONE_MODE == 'git':
+        REPO_CLONE_URL = 'git@github.com:{DEFAULT_ORGANIZATION}/{REPO_NAME}.git'
+    else:
+        REPO_CLONE_URL = 'https://github.com/{DEFAULT_ORGANIZATION}/{REPO_NAME}.git'
 
-def get_release_from_log(repo_commits_log_list):
-    releases = []
-
-    for commit_entry in repo_commits_log_list:
-        version1 = None
-        version2 = None
-
-        line = commit_entry.summary
-        is_head = commit_entry.is_head
-
-        release_detected = 'release-' in line or 'chore(release):' in line
-
-        if release_detected:
-            if 'release-' in line:
-                version1 = line[line.find('release-') + 8::]
-            elif 'chore(release):' in line:  # IWC
-                version1 = line[line.find('chore(release):') + 15::]
-
-            if '(tag: v' in line:
-                version2 = line[line.find('(tag: v') + 5: line.find(',')]
-
-            if not version1 and not version2 and release_detected:
-                logger.debug('Could not find version : %s' % line)
-            elif not version1 and version2 and release_detected:
-                version1 = version2
-                logger.debug(
-                    'Replaced Commit Version with Tag Version : %s' % line)
-
-            if version1:
-                version_obj = parse_version_string(version1, is_head)
-
-                if version_obj.error:
-                    logger.debug('%s - %s' % (version_obj.error, line))
-                else:
-                    releases.append(version_obj)
-
-    return releases
-
-
-class CommitEntry(object):
-
-    def __init__(self, commit_sha, authored_date, committer, summary, is_head, tags):
-        self.commit_sha = commit_sha
-        self.authored_date = authored_date
-        self.committer = committer
-        self.summary = summary
-        self.is_head = is_head
-        self.tags = tags
-
-    def __str__(self):
-        return('%s - %s - %s - %s - HEAD(%s) - Tags: %s' % (self.commit_sha,
-                                    self.authored_date,
-                                    self.committer,
-                                    self.summary,
-                                    self.is_head,
-                                    self.tags))
+    return REPO_CLONE_URL.format_map(format_data)
 
 
 def repo_commits_log(repo):
@@ -149,36 +104,78 @@ def repo_commits_log(repo):
     heads_hexsha = [head.commit.hexsha for head in repo.heads]
 
     for commit_obj in repo.iter_commits():
-
         commit_sha = binascii.hexlify(commit_obj.binsha).decode('utf8')
-        authored_date = time.strftime(
-            "%Y-%m-%d  %H:%M:%S", time.gmtime(commit_obj.authored_date))
+        is_head = (commit_sha in heads_hexsha)
+
+        authored_date = time.strftime("%Y-%m-%d  %H:%M:%S", time.gmtime(commit_obj.authored_date))
+        summary = commit_obj.summary
+
         commit_obj_tags = repo_tag_mapping.get(commit_sha, [])
 
-        current_entry = CommitEntry(commit_sha, authored_date, commit_obj.committer,
-                                    commit_obj.summary, (commit_sha in heads_hexsha),
-                                    commit_obj_tags)
+        version1 = None
+        version2 = None
 
-        output.append(current_entry)
+        version_object = None
+        release_flag = None
+
+        release_detected = 'release-' in summary or 'chore(release):' in summary
+        if release_detected:
+            if 'release-' in summary:
+                version1 = summary[summary.find('release-') + 8::]
+            elif 'chore(release):' in summary:  # IWC
+                version1 = summary[summary.find('chore(release):') + 15::]
+
+            if '(tag: v' in summary:
+                version2 = summary[summary.find('(tag: v') + 5: summary.find(',')]
+
+            if not version1 and not version2 and release_detected:
+                logger.debug('Could not find version : %s' % summary)
+            elif not version1 and version2 and release_detected:
+                version1 = version2
+                logger.debug('Replaced Commit Version with Tag Version : %s' % summary)
+
+            if version1:
+                version_obj = parse_version_string(version1, is_head)
+
+                if version_obj.error:
+                    logger.debug('%s - %s' % (version_obj.error, summary))
+                else:
+                    version_object = version_obj
+                    release_flag = True
+
+        current_data = {}
+        current_data['commit_sha'] = commit_sha
+        current_data['authored_date'] = authored_date
+        current_data['author'] = commit_obj.author
+        current_data['summary'] = commit_obj.summary
+        current_data['is_head'] = is_head
+        current_data['tags'] = commit_obj_tags
+        current_data['version_object'] = version_object
+        current_data['release_flag'] = release_flag
+
+        output.append(current_data)
 
     return output
 
 
-def valid_git_dir_helper(repo_name):
+class DirectoryState(object):
+    NOT_EXIST = 'NOT_EXIST'
+    EXIST = 'EXIST'
+    GIT_CORRUPT = 'GIT_CORRUPT'
+    CLONED = 'CLONED'
+
+
+def get_directory_state(directory_path):
     """
     Return directory of repo
     """
-    git_base_dir = settings_instance.git_base_dir()
-
-    if os.path.isdir(os.path.join(git_base_dir, repo_name)):
-        if os.path.isdir(os.path.join(git_base_dir, repo_name, '.git')):
-            return os.path.join(git_base_dir, repo_name)
+    if os.path.isdir(directory_path):
+        if os.path.isdir(os.path.join(directory_path, '.git')):
+            return DirectoryState.EXIST
         else:
-            logger.warning(
-                'Repo directory [%s] seems to be corrupt' % repo_name)
+            return DirectoryState.GIT_CORRUPT
     else:
-        logger.warning('Repo directory [%s] seems does not exist' % repo_name)
-    return None
+        return DirectoryState.NOT_EXIST
 
 
 class RepoHelper(object):
@@ -193,18 +190,20 @@ class RepoHelper(object):
         self.release_flag = False
         self.force_flag = False
         self.detector_list = None
+        self.commit_log = []
         self.releases = []
         self.push_flag = True
         self.repo_working_directory_obj = repo_working_directory_obj
-
-    def repo_directory_next_version(self, name):
-        return self.repo_working_directory_obj.get_repo_next_version(name)
 
     def get_push_flag(self):
         return self.push_flag
 
     def force_release(self):
+        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['force_flag'] = True
         self.force_flag = True
+
+    def get_directory_name(self):
+        return self.repo_working_directory_obj.data_store['repo'][self.repo_name]['working_directory']
 
     def init_detectors(self):
         if not self.detector_list:
@@ -225,6 +224,73 @@ class RepoHelper(object):
         """
         return not self.is_head_release_commit()
 
+    def get_current_version_number(self):
+        return self.releases[0]
+
+    def get_next_version_number(self):
+        return self.releases[0].increment()
+
+    def check_release(self):
+        return self.release_flag
+
+    def _log_git_output(self, desc, git_output):
+        string_io = io.StringIO(git_output.decode('utf-8'))
+        log_output_lines = string_io.readlines()
+
+        if log_output_lines:
+            for line in log_output_lines:
+                line = line.strip().rstrip('\n')
+                if line:
+                    logger.info('{} - {} - {}'.format(self.repo_name, desc, line))
+        string_io.close()
+
+    def initize_repo(self, create_if_not_exist=False):
+        """
+        Return if git directory is valid
+        """
+        repo_working_directory = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['working_directory']
+        repo_directory_state = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['directory_state']
+        repo_github_url = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['github_repo_url']
+
+        if repo_directory_state == 'NOT_EXIST':
+            logger.info('%s - %s' % (self.repo_name, 'Cloning Repo'))
+            Repo.clone_from(repo_github_url, repo_working_directory, ProgressListener(self.repo_name))
+            self.repo_working_directory_obj.data_store['repo'][self.repo_name]['directory_state'] = DirectoryState.CLONED
+
+        self.repo = Repo(repo_working_directory)
+        self.git = self.repo.git
+        self.git_directory = repo_working_directory
+        self._commit_log()
+        self.valid = True
+
+        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['current_version'] = str(self.releases[0])
+        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['next_version'] = str(self.releases[0].increment())
+        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['is_head_release_commit'] = self.releases[0].is_head
+
+        logger.info('%s - %s' % (self.repo_name, 'Repo directory is valid'))
+
+        return True
+
+    def reset_update_repo(self):
+        """
+        Reset Repo
+        """
+        if not self.valid:
+            raise Exception('Need to run initize_repo method first')
+
+        self._log_git_output('config', self.git.config('--global', 'user.name', '"{0}"'.format(settings.GIT_USERNAME), stdout_as_string=False))
+        self._log_git_output('config', self.git.config('--global', 'user.email', settings.GIT_EMAIL, stdout_as_string=False))
+
+        # Delete all local tags
+        for tag in self.repo.tags:
+            self.repo.delete_tag(tag)
+
+        self._log_git_output('fetch', self.git.fetch('--all', '--tags', stdout_as_string=False))
+        self._log_git_output('checkout', self.git.checkout('master', stdout_as_string=False))
+        self._log_git_output('reset', self.git.reset('--hard', 'origin/master', stdout_as_string=False))
+
+        self._commit_log()
+
     def prep_release(self):
         """
         Prep release
@@ -243,22 +309,14 @@ class RepoHelper(object):
                     logger.info('%s - %s - Detected File(%s)' %
                                 (self.repo_name, type(detector_obj).__name__, detector_obj.detect()))
             self.release_flag = True
+            self.repo_working_directory_obj.data_store['repo'][self.repo_name]['release_flag'] = True
+
         else:
-            logger.info('%s - Does not need to  Release(%s)' %
-                        (self.repo_name, self.get_current_version_number()))
+            logger.info('{} - Does not need to release({})'.format(self.repo_name, self.get_current_version_number()))
 
         return self.release_flag
 
-    def get_current_version_number(self):
-        return self.releases[0]
-
-    def get_next_version_number(self):
-        return self.releases[0].increment()
-
-    def check_release(self):
-        return self.release_flag
-
-    def make_release(self):
+    def release_modifications_commit(self):
         if not self.detector_list:
             self.prep_release()
 
@@ -275,14 +333,13 @@ class RepoHelper(object):
                     logger.info('%s - %s - Failed Execution File(%s) - %s' %
                                 (self.repo_name, type(detector_obj).__name__, detector_obj.detect(), error))
 
-                    import traceback
-                    import sys
+                    self.repo_working_directory_obj.data_store['repo'][self.repo_name]['errors'].append(str(error))
                     exc_info = sys.exc_info()
                     traceback.print_exception(*exc_info)
 
             if safe_commit:
                 self.push_flag = True
-                self.commit(self.get_next_version_number())
+                self.commit()
             else:
                 self.push_flag = False
                 logger.info('%s - Not Committing due to failure' % self.repo_name)
@@ -290,144 +347,46 @@ class RepoHelper(object):
         else:
             logger.info('%s - No Need for Modifications' % (self.repo_name))
 
-    def directory_exist(self):
-        git_base_dir = settings_instance.git_base_dir()
-
-        if os.path.isdir(os.path.join(git_base_dir, self.repo_name)):
-            if os.path.isdir(os.path.join(git_base_dir, self.repo_name, '.git')):
-                return True
-        return False
-
-    def get_directory_name(self):
-        git_base_dir = settings_instance.git_base_dir()
-        return os.path.join(git_base_dir, self.repo_name)
+    def log_commits(self):
+        for entry in self.commit_log[0:15]:
+            logger.info('{} - {} - {} - {}'.format(self.repo_name,
+                                                   entry['authored_date'],
+                                                   entry['author'],
+                                                   entry['summary']))
 
     def _commit_log(self):
         self.commit_log = repo_commits_log(self.repo)
-        self.releases = get_release_from_log(self.commit_log)
 
-    def validate(self, create_if_not_exist=False):
-        """
-        Return if git directory is valid
-        """
-        directory_exist = self.directory_exist()
-        git_repo_directory = self.get_directory_name()
+        self.releases = []
 
-        if not directory_exist and create_if_not_exist:
-                url = generate_github_repo_url(self.repo_name)
-                Repo.clone_from(url, git_repo_directory,
-                                ProgressListener(self.repo_name))
+        for commit in self.commit_log:
+            if commit['release_flag'] is True:
+                self.releases.append(commit['version_object'])
 
-        if git_repo_directory:
-            self.repo = Repo(git_repo_directory)
-            self.git = self.repo.git
-            self.git_directory = git_repo_directory
-            self._commit_log()
-            self.valid = True
-            logger.info('%s - %s' % (self.repo_name, 'Repo directory is valid'))
-            # print(self.releases)
-            return True
-
-        logger.info('%s - %s' % (self.repo_name, 'Repo directory is not valid'))
-        return False
-
-    def change_git_user_email(self, user, email):
-        """
-        Used to change user name and email in git config
-        """
-        logger.info('%s - %s' % (self.repo_name,
-                                 self.git.config('--global', 'user.name', '"{0}"'.format(user))))
-        logger.info('%s - %s' % (self.repo_name, self.git.config('--global',
-                                                                 'user.email', email)))
-
-    def reset_update_repo(self):
-        """
-        Reset Repo
-        """
-        if not self.valid:
-            raise Exception('Need to run validate method first')
-
-        self.change_git_user_email('Manny Rivera', 'mannyrivera2010@gmail.com')
-        # Delete all local tags
-        for tag in self.repo.tags:
-            self.repo.delete_tag(tag)
-
+    def commit(self):
+        lastest_version_number = self.get_next_version_number()
         git_obj = self.repo.git
-        logger.info('%s - %s' %
-                    (self.repo_name, self.git.fetch('--all', '--tags')))
-        logger.info('%s - %s' % (self.repo_name, self.git.checkout('master')))
-        current_head_str = self.git.reset('--hard', 'origin/master')
-
-        self._commit_log()
-
-    def commit(self, lastest_version_number):
-        git_obj = self.repo.git
-        # Commit - git commit -am "release-$1"
         commit_release_string = ("release-%s" % str(lastest_version_number))
         tag_release_string = ("release/%s" % str(lastest_version_number))
         tag_v_release_string_ow = ('v%s' % str(lastest_version_number))
         tag_v_release_string = ('"v%s"' % str(lastest_version_number))
 
-        git_output = git_obj.commit(
-            '-am', commit_release_string, stdout_as_string=False)
-        string_io = io.StringIO(git_output.decode('utf-8'))
-        log_output_lines = string_io.readlines()
-
-        if log_output_lines:
-            for line in log_output_lines:
-                if line.strip():
-                    logger.info('%s - commit - %s' %
-                                (self.repo_name, line.rstrip('\n')))
-
-        # git commit -am "release-$1"
-        # git tag -a release/$1 -m "v$1"
         try:
-            git_output = git_obj.tag(
-                '-a', tag_release_string, '-m', tag_v_release_string, stdout_as_string=False)
-            string_io = io.StringIO(git_output.decode('utf-8'))
-            log_output_lines = string_io.readlines()
+            git_output = git_obj.commit('-am', commit_release_string, stdout_as_string=False)
+            self._log_git_output('commit', git_output)
 
-            if log_output_lines:
-                for line in log_output_lines:
-                    if line.strip():
-                        logger.info('%s - tag 1 - %s' %
-                                    (self.repo_name, line.rstrip('\n')))
+            git_output = git_obj.tag('-a', tag_release_string, '-m', tag_v_release_string, stdout_as_string=False)
+            self._log_git_output('tag', git_output)
+
+            git_output = git_obj.tag('-a', tag_v_release_string_ow, '-m', tag_v_release_string, stdout_as_string=False)
+            self._log_git_output('tag', git_output)
+
+            log_output = git_obj.status(stdout_as_string=False)
+            self._log_git_output('status', log_output)
+
         except GitCommandError as error:
             logger.warn(error)
             raise
-
-        # git tag -a v$1 -m "v$1"
-        try:
-            git_output = git_obj.tag(
-                '-a', tag_v_release_string_ow, '-m', tag_v_release_string, stdout_as_string=False)
-            string_io = io.StringIO(git_output.decode('utf-8'))
-            log_output_lines = string_io.readlines()
-
-            if log_output_lines:
-                for line in log_output_lines:
-                    if line.strip():
-                        logger.info('%s - tag 1 - %s' %
-                                    (self.repo_name, line.rstrip('\n')))
-        except GitCommandError as error:
-            logger.warn(error)
-            raise
-
-        self.status()
-
-    def status(self):
-        git_obj = self.repo.git
-        log_output = git_obj.status(stdout_as_string=False)
-
-        string_io = io.StringIO(log_output.decode('utf-8'))
-        log_output_lines = string_io.readlines()
-
-        if log_output_lines:
-            for line in log_output_lines:
-                if line.strip():
-                    logger.info('%s - status - %s' %
-                                (self.repo_name, line.rstrip('\n')))
-
-        string_io.close()
 
     def __repr__(self):
         return '(%s, %s, %s)' % (self.repo_name, self.git_directory, self.valid)
@@ -440,32 +399,43 @@ class RepoWorkingDirectory(object):
     """
     Class to manage working git directory
     """
-
     def __init__(self, github_info=None):
+        self.data_store = {}
+        self.data_store['meta'] = {}
+        self.data_store['meta']['repos'] = settings.REPOS
+        self.data_store['meta']['release_directory'] = settings.GIT_BASE_DIR
+
+        self.data_store['repo'] = {}
+        for repo_name in self.data_store['meta']['repos']:
+            self.data_store['repo'][repo_name] = {}
+            self.data_store['repo'][repo_name]['working_directory'] = os.path.join(self.data_store['meta']['release_directory'], repo_name)
+            self.data_store['repo'][repo_name]['github_repo_url'] = generate_github_repo_url(repo_name)
+            self.data_store['repo'][repo_name]['directory_state'] = get_directory_state(self.data_store['repo'][repo_name]['working_directory'])
+            self.data_store['repo'][repo_name]['next_version'] = None
+            self.data_store['repo'][repo_name]['current_version'] = None
+            self.data_store['repo'][repo_name]['release_flag'] = False
+            self.data_store['repo'][repo_name]['force_flag'] = False
+            self.data_store['repo'][repo_name]['errors'] = []
+
+        self.data_store['meta']['safe_push_flag'] = False
+
         if github_info:
             self.github_info = github_info
         else:
-            self.github_info = GitHubInfo()
+            self.github_info = GithubRequests()
 
         self.repos = {}
-        for name in settings_instance.repos():
+        for name in self.data_store['meta']['repos']:
             self.repos[name] = RepoHelper(name, self)
 
-        self.safe_push_flag = False
-
-    def get_repo_next_version(self, repo_name):
-        if self.repos.get(repo_name):
-            return self.repos.get(repo_name).get_next_version_number()
-        else:
-            raise Exception('get_repo_next_version({0}) - repo not found'.format(repo_name))
-
-    def check_repos(self, create_if_not_exist=False):
-        for name in settings_instance.repos():
-            self.repos[name].validate(create_if_not_exist=create_if_not_exist)
+    def initize_repos(self):
+        for name in self.data_store['meta']['repos']:
+            self.repos[name].initize_repo()
 
     def reset_update_repos(self):
-        for name in settings_instance.repos():
+        for name in self.data_store['meta']['repos']:
             self.repos[name].reset_update_repo()
+            self.repos[name].log_commits()
 
     def prep_for_releases(self):
         """
@@ -473,9 +443,8 @@ class RepoWorkingDirectory(object):
 
         if ozp-hud or ozp-center needs a releases
             force ozp-react-commons to make a release
-
         """
-        for name in settings_instance.repos():
+        for name in self.data_store['meta']['repos']:
             release_flag = self.repos[name].release()
             force_flag = self.repos[name].force_flag
 
@@ -483,39 +452,36 @@ class RepoWorkingDirectory(object):
                 if name == 'ozp-react-commons':
                     self.repos['ozp-hud'].force_release()
                     self.repos['ozp-center'].force_release()
-                    
+
             logger.info('{} - release_flag: {} - force_flag: {}'.format(name, release_flag, force_flag))
 
-        for name in settings_instance.repos():
+        for name in self.data_store['meta']['repos']:
             release_flag = self.repos[name].prep_release()
 
-    def modifications_for_releases(self):
+    def repos_release_modifications_commit(self):
         """
         Make Release Modifications and commit
         """
-        self.safe_push_flag = True
+        self.data_store['meta']['safe_push_flag'] = True
 
-        for name in settings_instance.repos():
-            release_flag = self.repos[name].make_release()
+        for name in self.data_store['meta']['repos']:
+            self.repos[name].release_modifications_commit()
 
             if not self.repos[name].get_push_flag():
-                self.safe_push_flag = False
+                self.data_store['meta']['safe_push_flag'] = False
 
-        if not self.safe_push_flag:
-            logger.info('********* modifications for releases error ************')
-            logger.info(
-                'Detected a repo modification failure - Will not push any repos')
-            for name in settings_instance.repos():
-                push_flag = self.repos[name].get_push_flag()
-                logger.info('%s - Safe to push: %s' % (name, push_flag))
-
-    def push_releases(self):
-        if self.safe_push_flag:
-            for name in settings_instance.repos():
-                # push_flag = self.repos[name].get_push_flag()
-                logger.info('%s - Push' % (name))
+    def repos_release_push(self):
+        if self.data_store['meta']['safe_push_flag']:
+            for name in self.data_store['meta']['repos']:
+                push_flag = self.repos[name].check_release()
+                if push_flag:
+                    # logger.info('%s - Push : ' % (name))
+                    print('(cd git-working/{}/ && git push --follow-tags)'.format(name))
         else:
             logger.info('Detected a repo modification failure - Will not push any repos')
+
+    def show_state(self):
+        return self.data_store
 
     def __repr__(self):
         return '%s' % (self.repos)
@@ -527,10 +493,12 @@ class RepoWorkingDirectory(object):
 def main():
     parser = argparse.ArgumentParser(description='Release')
     parser.add_argument('--github-token', type=str)
+    parser.add_argument('--check_open_pull_request', action="store_true")
+    parser.add_argument('--skip_repo_release', action="store_false")
 
     args = parser.parse_args()
 
-    print(args)
+    print('args: {}'.format(args))
 
     login_or_token = None
     if args.github_token:
@@ -538,42 +506,40 @@ def main():
 
     # if args.github-username and github-password:
     #     print()
-    githubinfo = GitHubInfo(login_or_token=login_or_token)
+    githubinfo = GithubRequests()
 
-    logger.info("******** Checking Open Pull Requests for all repos *********")
-    githubinfo.check_open_pull_requests()
+    if args.check_open_pull_request:
+        logger.info("******** Checking Open Pull Requests for all repos *********")
+        githubinfo.check_open_pull_requests()
 
-    option1 = input("Do you want to continue with release process? (Enter [Yes] or [no]) ")
+    if args.skip_repo_release:
+        repos_obj = RepoWorkingDirectory(githubinfo)
 
-    if option1.lower() == 'no':
-        return
+        # Check if repos exist, if not clone repo from github
+        logger.info('******** Check Repos **********')
+        repos_obj.initize_repos()
 
-    repos_obj = RepoWorkingDirectory(githubinfo)
+        # Reset and Update Repos
+        logger.info('******** Reset Update Repos **********')
+        repos_obj.reset_update_repos()
 
-    # Check if repos exist, if not clone repo from github
-    logger.info('******** Check Repos **********')
-    repos_obj.check_repos(True)
+        # Check to see what repos need to be release and file modifications
+        logger.info('******** Prep Repos **********')
+        repos_obj.prep_for_releases()
 
-    # Reset and Update Repos
-    logger.info('******** Reset Update Repos **********')
-    repos_obj.reset_update_repos()
+        # Make Release Modifications and commit
+        logger.info('******** Release Modifications **********')
+        repos_obj.repos_release_modifications_commit()
 
-    # Check to see what repos need to be release and file modifications
-    logger.info('******** Prep Repos **********')
-    repos_obj.prep_for_releases()
+        # Push Repos
+        logger.info('******** Start Shell Push Commands **********')
+        repos_obj.repos_release_push()
+        logger.info('******** End Shell Push Commands **********')
 
-    # Make Release Modifications and commit
-    logger.info('******** Release Modifications **********')
-    repos_obj.modifications_for_releases()
+        print('*-*-')
+        print(json.dumps(repos_obj.show_state(), indent=2))
+        print('*-*-')
 
-    option1 = input("Do you want to continue with release process, next phase is pushing? (Enter [Yes] or [no]) ")
-
-    if option1.lower() == 'no':
-        return
-
-    # Push Repos
-    logger.info('******** Push **********')
-    repos_obj.push_releases()
 
 if __name__ == '__main__':
     main()
