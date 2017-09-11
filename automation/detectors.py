@@ -10,16 +10,16 @@ class Detector(object):
         self.repo_helper = repo_helper
 
     def get_repo_directory_name(self):
-        return self.repo_helper.get_directory_name()
+        return self.repo_helper.repo_working_directory_obj.data_store['repo'][self.repo_helper.repo_name]['working_directory']
 
     def get_repo_name(self):
         return self.repo_helper.repo_name
 
     def get_current_version_number(self):
-        return self.repo_helper.get_current_version_number()
+        return self.repo_helper.repo_working_directory_obj.data_store['repo'][self.repo_helper.repo_name]['current_version']
 
     def get_next_version_number(self):
-        return self.repo_helper.get_next_version_number()
+        return self.repo_helper.repo_working_directory_obj.data_store['repo'][self.repo_helper.repo_name]['next_version']
 
     def repo_directory_next_version(self, repo_name):
         return self.repo_helper.repo_working_directory_obj.data_store['repo'][repo_name]['next_version']
@@ -77,7 +77,6 @@ class PackageFileDetector(Detector):
     def detect(self):
         """
         This is used to detect if the repo has a package.json file
-        If it does run 'glup changelog'
         """
         if os.path.isfile(os.path.join(self.get_repo_directory_name(), 'package.json')):
             return os.path.join(self.get_repo_directory_name(), 'package.json')

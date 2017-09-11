@@ -1,0 +1,11 @@
+{%- for release in releases %}
+### {{release.version}} ({{release.authored_date}})
+  {% for section in section_order -%}
+    {%- if section in release.commits and release.commits[section] -%}
+#### {{ section }}
+    {% for change_commit in release.commits[section] -%}
+* {{change_commit}}
+    {% endfor %}
+    {% endif %} {# change_commit in release.commits['changes' #}
+  {%- endfor -%} {# section in section_order  #}
+{% endfor %} {# release in releases #}
