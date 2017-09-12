@@ -41,6 +41,19 @@ def generate_github_repo_url(repo_name):
     return REPO_CLONE_URL.format_map(format_data)
 
 
+def generate_github_repo_commit_url(repo_name, commit_sha):
+    """
+    Generate Github Repo URL used for cloning
+    """
+    format_data = {'REPO_NAME': repo_name}
+    format_data['DEFAULT_ORGANIZATION'] = settings.DEFAULT_ORGANIZATION
+    format_data['commit_sha'] = commit_sha
+
+    REPO_CLONE_URL = 'https://github.com/{DEFAULT_ORGANIZATION}/{REPO_NAME}/commit/{commit_sha}'
+
+    return REPO_CLONE_URL.format_map(format_data)
+
+
 def repo_commits_log(repo):
     """
     # http://gitpython.readthedocs.io/en/stable/reference.html#module-git.objects.commit

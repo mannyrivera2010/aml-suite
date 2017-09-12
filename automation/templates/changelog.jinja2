@@ -1,11 +1,30 @@
 {%- for release in releases %}
 ### {{release.version}} ({{release.authored_date}})
-  {% for section in section_order -%}
-    {%- if section in release.commits and release.commits[section] -%}
-#### {{ section }}
-    {% for change_commit in release.commits[section] -%}
-* {{change_commit}}
-    {% endfor %}
-    {% endif %} {# change_commit in release.commits['changes' #}
-  {%- endfor -%} {# section in section_order  #}
+  {%- for section_dict in sections %}
+  {%- set current_section = section_dict.get('section') -%}
+  {%- set current_scope_commits = release.commits.get(current_section) -%}
+    {%- if current_scope_commits %}
+
+#### {{ current_section }}
+    {%- for current_scope in current_scope_commits %}
+      {%- set scope_commits_dict = current_scope_commits.get(current_scope) %}
+      {%- set scope_commits = scope_commits_dict.get('commits') %}
+      {%- set scope_commits_length = scope_commits_dict.get('commits') | length %}
+    {%- if current_scope == '*' %}  {# if section is *  #}
+    {%- for  current_commit in scope_commits %}
+* {{ current_commit.summary }} ([{{ current_commit.commit_sha[:8] }}]({{ current_commit.commit_url }}))
+    {%- endfor %} {# current_commit in scope_commits  #}
+    {%- else %} {# if section is *  #}
+      {%- if scope_commits_length > 1 %}
+* **{{ current_scope }}**
+        {%- for  current_commit in scope_commits %}
+  * {{ current_commit.summary }} ([{{ current_commit.commit_sha[:8] }}]({{ current_commit.commit_url }}))
+        {%- endfor %} {# current_commit in scope_commits  #}
+      {%- else %} {# if scope_commits_length > 1  #}
+* **{{ current_scope }}**: {{ scope_commits[0].summary }} ([{{ scope_commits[0].commit_sha[:8] }}]({{ scope_commits[0].commit_url}}))
+      {%- endif %} {# if scope_commits_length > 1 #}
+    {%- endif %} {# if current_scope == '*' #}
+    {%- endfor %} {# section in section_order  #}
+    {%- endif %} {# change_commit in release.commits['changes' #}
+  {%- endfor %} {# section in section_order  #}
 {% endfor %} {# release in releases #}

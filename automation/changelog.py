@@ -2,6 +2,8 @@
 Used to Generate changelog file
 """
 import os
+import re
+from collections import OrderedDict
 
 from git import Repo
 import utils
@@ -9,32 +11,46 @@ import pprint
 
 INCLUDE_UNRELEASED = False
 UNRELEASED_STRING = 'Unreleased'
-SECTION_ORDER = ['Feature', 'Fixes', 'Refactor', 'Merge Pull Requests', 'Changes']
 
-SECTION_KEYWORDS = {
-    'Feature': ['feat'],
-    'Fixes': ['fix', '(fix)', 'Fix'],
-    'Refactor': ['refactor'],
-    'Merge Pull Requests': ['Merge pull request', 'Merge branch']
-}
+SECTIONS = [
+    {'section':'Feature',
+     'type_keywords':['feat']},
+    {'section':'Fixes',
+        'type_keywords':['fix', '(fix)']},
+    {'section':'Refactor',
+        'type_keywords':['refactor']},
+    {'section':'Merge Pull Requests',
+        'type_keywords':['merge pull request', 'merge branch']},
+    {'section':'Documentation',
+        'type_keywords':['docs', 'doc']},
+    {'section':'Style',
+        'type_keywords':['style']},
+    {'section':'Performance',
+        'type_keywords':['perf','performance']},
+    {'section':'Test',
+        'type_keywords':['test', 'unittest']},
+    {'section':'Chore',
+        'type_keywords':['chore']},
+    {'section':'Changes',
+        'type_keywords':[]}
+]
 
 
 if __name__ == '__main__':
-    cwd = os.path.join(os.getcwd(), 'git-working', 'ozp-backend')
+    repo_name = 'ozp-center'
+    cwd = os.path.join(os.getcwd(), 'git-working', repo_name)
     repo = Repo(cwd)
     commit_log = utils.repo_commits_log(repo)
 
-    # print(pprint.pprint(commit_log))
     releases = []
 
     previous_version = UNRELEASED_STRING
     first_commit = True
-
     current_version = None
 
     commits_dict = {}
-    for section in SECTION_ORDER:
-        commits_dict[section] = []
+    for section_dict in SECTIONS:
+        commits_dict[section_dict['section']] = OrderedDict()
 
     commit_count = 0
     release_authored_date = None
@@ -52,24 +68,42 @@ if __name__ == '__main__':
                 release_authored_date = commit_authored_date
         else:
             default_section = 'Changes'
+            default_scope = '*'
+            org_string = summary
 
-            for section, section_keywords in SECTION_KEYWORDS.items():
+            for section_dict in SECTIONS:
+                break_flag = False
+                current_section = section_dict['section']
+                section_keywords = section_dict['type_keywords']
                 for current_keyword in section_keywords:
-                    if summary.startswith(current_keyword):
-                        default_section = section
+                    if org_string.lower().startswith(current_keyword):
+                        default_section = current_section
+                        break_flag = True
                         break
+                if break_flag:
+                    break
 
+            current_commit_dict = OrderedDict()
+            current_commit_dict['summary'] = summary
+            current_commit_dict['commit_sha'] = commit['commit_sha']
+            current_commit_dict['commit_url'] = utils.generate_github_repo_commit_url(repo_name, commit['commit_sha'])
 
-            commits_dict[default_section].append(summary)
+            regex_result = re.match(r"([a-zA-Z0-9_ ]+)\(([a-zA-Z0-9_ -\./]+)\)[:]?([a-zA-Z0-9_,;:'\" \.\(\)#-]+)", current_commit_dict['summary'])
+            if regex_result:
+                default_scope = regex_result.group(2).lower()
+                current_commit_dict['summary'] = regex_result.group(3)
+
+            if default_scope not in commits_dict[default_section]:
+                commits_dict[default_section][default_scope] = OrderedDict({'commits':[]})
+
+            commits_dict[default_section][default_scope]['commits'].append(current_commit_dict)
             commit_count = commit_count + 1
 
         if is_release:
             if current_version != previous_version:
                 filter_release = False
-
-                print('Changed {} to {}, {}'.format(previous_version, current_version, commit_count))
-
-                current_release = {}
+                # print('Changed {} to {}, {}'.format(previous_version, current_version, commit_count))
+                current_release = OrderedDict()
                 current_release['version'] = previous_version
                 current_release['commits'] = commits_dict
                 current_release['commit_count'] = commit_count
@@ -83,12 +117,16 @@ if __name__ == '__main__':
                 previous_version = version
                 release_authored_date = commit_authored_date
                 commits_dict = {}
-                for section in SECTION_ORDER:
-                    commits_dict[section] = []
+                for section_dict in SECTIONS:
+                    commits_dict[section_dict['section']] = OrderedDict()
                 commit_count = 0
 
         first_commit =  False
 
-    print(pprint.pprint(releases))
-    template_context = {'releases':releases,'section_order': SECTION_ORDER}
-    print(utils.render_template('templates/changelog.jinja2', template_context))
+    # print(pprint.pprint(releases))
+    template_context = {'releases':releases,'sections': SECTIONS}
+    rendered_template = utils.render_template('templates/changelog.jinja2', template_context)
+
+    with open('CHANGELOG.md', 'w') as f:
+        for current_line in rendered_template:
+            f.write(current_line)
