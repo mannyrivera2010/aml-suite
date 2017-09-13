@@ -1,7 +1,7 @@
 import os
 import re
 
-import cmd_utils
+from changelog import create_changelog
 
 
 class Detector(object):
@@ -173,15 +173,10 @@ class ChangeLogDetector(Detector):
     def execute(self):
         """
         Execute Changelog for repo
-
-        For center, hud, webtop: gulp changelog
+        For center, hud, webtop
         None of the other repos have changelogs
         """
-        if self.get_repo_name() in ['ozp-center', 'ozp-hud', 'ozp-webtop']:
-            command = '(cd {} && grunt changelog)'.format(self.get_repo_directory_name())
-            command_results = cmd_utils.call_command(command)
-
-            if command_results.return_code != 0:
-                raise Exception(command_results.pipe)
+        if self.get_repo_name() in ['ozp-center', 'ozp-hud', 'ozp-webtop', 'ozp-backend']:
+            create_changelog(self.get_repo_directory_name())
             return True
         return False

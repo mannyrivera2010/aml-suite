@@ -12,17 +12,18 @@ import log
 import settings
 
 
+TEMPLATE_DIRECTORY = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates')
+
+
 log.configure_logging()
 logger = logging.getLogger('default')
 
 
-def render_template(tpl_path, context):
-    path, filename = os.path.split(tpl_path)
-
+def render_template(template_name, context):
     template_loader = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(path or './')
+        loader=jinja2.FileSystemLoader(TEMPLATE_DIRECTORY)
     )
-    template = template_loader.get_template(filename)
+    template = template_loader.get_template(template_name)
     return template.render(context)
 
 

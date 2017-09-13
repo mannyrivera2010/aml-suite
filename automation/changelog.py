@@ -1,5 +1,8 @@
 """
 Used to Generate changelog file
+
+TODO: Figure out how not include commits that are in the release but not really in the release
+due to git authored_date
 """
 import os
 import re
@@ -7,39 +10,43 @@ from collections import OrderedDict
 
 from git import Repo
 import utils
-import pprint
+
 
 INCLUDE_UNRELEASED = False
 UNRELEASED_STRING = 'Unreleased'
 
+
 SECTIONS = [
-    {'section':'Feature',
-     'type_keywords':['feat']},
-    {'section':'Fixes',
-        'type_keywords':['fix', '(fix)']},
-    {'section':'Refactor',
-        'type_keywords':['refactor']},
-    {'section':'Merge Pull Requests',
-        'type_keywords':['merge pull request', 'merge branch']},
-    {'section':'Documentation',
-        'type_keywords':['docs', 'doc']},
-    {'section':'Style',
-        'type_keywords':['style']},
-    {'section':'Performance',
-        'type_keywords':['perf','performance']},
-    {'section':'Test',
-        'type_keywords':['test', 'unittest']},
-    {'section':'Chore',
-        'type_keywords':['chore']},
-    {'section':'Changes',
-        'type_keywords':[]}
+    {'section': 'Feature',
+     'type_keywords': ['feat']},
+    {'section': 'Fixes',
+        'type_keywords': ['fix', '(fix)']},
+    {'section': 'Refactor',
+        'type_keywords': ['refactor']},
+    {'section': 'Merge Pull Requests',
+        'type_keywords': ['merge pull request', 'merge branch']},
+    {'section': 'Documentation',
+        'type_keywords': ['docs', 'doc']},
+    {'section': 'Style',
+        'type_keywords': ['style']},
+    {'section': 'Performance',
+        'type_keywords': ['perf', 'performance']},
+    {'section': 'Test',
+        'type_keywords': ['test', 'unittest']},
+    {'section': 'Chore',
+        'type_keywords': ['chore']},
+    {'section': 'Changes',
+        'type_keywords': []}
 ]
 
 
-if __name__ == '__main__':
-    repo_name = 'ozp-center'
-    cwd = os.path.join(os.getcwd(), 'git-working', repo_name)
-    repo = Repo(cwd)
+def create_changelog(repo_path):
+    repo = Repo(repo_path)
+    repo_directory = repo.working_tree_dir
+    changelog_path = os.path.join(repo_directory, 'CHANGELOG.md')
+
+    repo_name = os.path.split(repo_directory)[1]
+
     commit_log = utils.repo_commits_log(repo)
 
     releases = []
@@ -94,7 +101,7 @@ if __name__ == '__main__':
                 current_commit_dict['summary'] = regex_result.group(3)
 
             if default_scope not in commits_dict[default_section]:
-                commits_dict[default_section][default_scope] = OrderedDict({'commits':[]})
+                commits_dict[default_section][default_scope] = OrderedDict({'commits': []})
 
             commits_dict[default_section][default_scope]['commits'].append(current_commit_dict)
             commit_count = commit_count + 1
@@ -109,7 +116,7 @@ if __name__ == '__main__':
                 current_release['commit_count'] = commit_count
                 current_release['authored_date'] = release_authored_date
 
-                if INCLUDE_UNRELEASED == False and current_release['version'] == UNRELEASED_STRING:
+                if not INCLUDE_UNRELEASED and current_release['version'] == UNRELEASED_STRING:
                     filter_release = True
 
                 if not filter_release:
@@ -121,12 +128,16 @@ if __name__ == '__main__':
                     commits_dict[section_dict['section']] = OrderedDict()
                 commit_count = 0
 
-        first_commit =  False
+        first_commit = False
 
     # print(pprint.pprint(releases))
-    template_context = {'releases':releases,'sections': SECTIONS}
-    rendered_template = utils.render_template('templates/changelog.jinja2', template_context)
+    template_context = {'releases': releases, 'sections': SECTIONS}
+    rendered_template = utils.render_template('changelog.jinja2', template_context)
 
-    with open('CHANGELOG.md', 'w') as f:
+    with open(changelog_path, 'w') as f:
         for current_line in rendered_template:
             f.write(current_line)
+
+
+if __name__ == '__main__':
+    create_changelog('git-working/ozp-center')
