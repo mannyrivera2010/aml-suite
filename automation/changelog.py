@@ -7,13 +7,10 @@ due to git authored_date
 import os
 import re
 from collections import OrderedDict
+import time
 
 from git import Repo
 import utils
-
-
-INCLUDE_UNRELEASED = False
-UNRELEASED_STRING = 'Unreleased'
 
 
 SECTIONS = [
@@ -40,18 +37,23 @@ SECTIONS = [
 ]
 
 
-def create_changelog(repo_path):
+def create_changelog(repo_path, override_release=None):
+    unreleased_string ='Unreleased'
+    include_unreleased = False
+
+    if override_release:
+        include_unreleased = True
+        unreleased_string = override_release
+
     repo = Repo(repo_path)
     repo_directory = repo.working_tree_dir
     changelog_path = os.path.join(repo_directory, 'CHANGELOG.md')
-
     repo_name = os.path.split(repo_directory)[1]
-
     commit_log = utils.repo_commits_log(repo)
 
     releases = []
 
-    previous_version = UNRELEASED_STRING
+    previous_version = unreleased_string
     first_commit = True
     current_version = None
 
@@ -116,22 +118,35 @@ def create_changelog(repo_path):
                 current_release['commit_count'] = commit_count
                 current_release['authored_date'] = release_authored_date
 
-                if not INCLUDE_UNRELEASED and current_release['version'] == UNRELEASED_STRING:
+                if include_unreleased is False and current_release['version'] == unreleased_string:
                     filter_release = True
 
                 if not filter_release:
                     releases.append(current_release)
                 previous_version = version
                 release_authored_date = commit_authored_date
-                commits_dict = {}
+                commits_dict = OrderedDict()
                 for section_dict in SECTIONS:
                     commits_dict[section_dict['section']] = OrderedDict()
                 commit_count = 0
 
         first_commit = False
 
-    # print(pprint.pprint(releases))
+    if override_release:
+        first_version = releases[0]['version']
+        if unreleased_string != first_version:
+            current_release = OrderedDict()
+            current_release['version'] = unreleased_string
+            current_release['commits'] = {}
+            current_release['commit_count'] = 0
+            current_release['authored_date'] = time.strftime("%Y-%m-%d", time.gmtime())
+            releases.insert(0, current_release)
+            # releases = [current_release] + releases
+
     template_context = {'releases': releases, 'sections': SECTIONS}
+
+    # print([release['version'] for release in template_context['releases']])
+
     rendered_template = utils.render_template('changelog.jinja2', template_context)
 
     with open(changelog_path, 'w') as f:

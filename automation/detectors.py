@@ -173,10 +173,8 @@ class ChangeLogDetector(Detector):
     def execute(self):
         """
         Execute Changelog for repo
-        For center, hud, webtop
-        None of the other repos have changelogs
         """
-        if self.get_repo_name() in ['ozp-center', 'ozp-hud', 'ozp-webtop', 'ozp-backend']:
-            create_changelog(self.get_repo_directory_name())
-            return True
-        return False
+        input_file_dir = self.detect()
+        if input_file_dir:
+            create_changelog(self.get_repo_directory_name(), self.get_next_version_number())
+        return True
