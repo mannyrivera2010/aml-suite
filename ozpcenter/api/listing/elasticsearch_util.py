@@ -285,10 +285,6 @@ def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
             "launch_url": {
               "type": "string"
             },
-            "avg_rate": {
-              "type": "double"
-            },
-
             "is_featured": {
               "type": "boolean"
             },
@@ -362,8 +358,14 @@ def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
             "total_reviews": {
               "type": "long"
             },
+            "total_review_responses": {
+              "type": "long"
+            },
             "total_votes": {
               "type": "long"
+            },
+            "avg_rate": {
+              "type": "double"
             }
           }
         }
@@ -684,6 +686,14 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
             }
         })
 
+        # Search the title first to give it the score it needs and weight to order
+        # the list by title preferance.
+        temp_should.append({
+           "match": {
+              "title": user_string
+           }
+        })
+
         # The reason fuzziness is needed using the sample_data is because if
         # searching for 'ir', the results should bring up 'air mail' listings
         # without it will not bring 'air mail' listings
@@ -810,7 +820,8 @@ def prepare_clean_listing_record(listing_serializer_record):
                       'iframe_compatible',
                       'edited_date',
                       'version_name',
-                      'requirements',
+                      'usage_requirements',
+                      'system_requirements',
                       'intents']
 
     # Clean Record
