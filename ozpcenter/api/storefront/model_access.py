@@ -511,15 +511,15 @@ def get_storefront_recommended(username, pre_fetch=True):
     listing_ids_list_temp = []
 
     for current_listing_id in listing_ids_list:
-        exclude_flag = False
+        include_flag = True
 
         if current_listing_id in bookmarked_apps_list:
-            exclude_flag = True
+            include_flag = False
 
         if current_listing_id in negative_feedback_listing_ids:
-            exclude_flag = True
+            include_flag = False
 
-        if exclude_flag:
+        if include_flag:
             listing_ids_list_temp.append(current_listing_id)
 
     listing_ids_list = listing_ids_list_temp

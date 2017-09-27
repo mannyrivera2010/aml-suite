@@ -600,8 +600,10 @@ def create_recommendation_feedback(target_profile, target_listing, feedback):
     Get recommendation feedback entry for listing
     """
     recommendation_feedback, created = models.RecommendationFeedback.objects.for_user(target_profile.user.username).get_or_create(target_profile=target_profile, target_listing=target_listing)
-    recommendation_feedback.feedback = feedback
-    recommendation_feedback.save()
+
+    if recommendation_feedback.feedback != feedback:
+        recommendation_feedback.feedback = feedback
+        recommendation_feedback.save()
 
     return recommendation_feedback
 
