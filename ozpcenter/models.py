@@ -838,6 +838,8 @@ class Profile(models.Model):
     # subscription_notification_flag  will disable/enable:
     #    TagSubscriptionNotification, CategorySubscriptionNotification
     subscription_notification_flag = models.BooleanField(default=True)
+    # leaving_ozp_warning_flag: True = Show warning modal when launching an app
+    leaving_ozp_warning_flag = models.BooleanField(default=True)
 
     # TODO: on create, update, or delete, do the same for the related django_user
     objects = ProfileManager()
@@ -1129,7 +1131,8 @@ class Listing(models.Model):
 
     what_is_new = models.CharField(max_length=255, null=True, blank=True)
     description_short = models.CharField(max_length=150, null=True, blank=True)
-    requirements = models.CharField(max_length=1000, null=True, blank=True)
+    usage_requirements = models.CharField(max_length=1000, null=True, blank=True)
+    system_requirements = models.CharField(max_length=1000, null=True, blank=True)
     approval_status = models.CharField(max_length=255, choices=APPROVAL_STATUS_CHOICES, default=IN_PROGRESS)
     is_enabled = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
