@@ -106,7 +106,6 @@ def get_screenshots_for_listing(listing):
     return models.Screenshot.objects.filter(listing=listing)
 
 
-# TODO: reraise=False
 def get_listing_type_by_title(title, reraise=True):
     """
     Get listing type by title
@@ -148,7 +147,6 @@ def get_listing_by_id(username, id, reraise=False):
             return None
 
 
-# TODO: reraise=False
 def get_listing_by_title(username, title, reraise=True):
     """
     Get listing by title
@@ -392,7 +390,6 @@ def _add_listing_activity(author, listing, action, change_details=None,
 
     Raises:
         None
-
     """
     listing_activity = models.ListingActivity(action=action,
         author=author, listing=listing, description=description)
@@ -588,6 +585,25 @@ def disable_listing(steward, listing):
     listing.edited_date = utils.get_now_utc()
     listing.save()
     return listing
+
+
+def get_recommendation_feedback(username, listing):
+    """
+    Get recommendation feedback entry for listing
+    """
+    target_profile = generic_model_access.get_profile(username)
+    return models.RecommendationFeedback.objects.for_user(username).filter(target_profile=target_profile, target_listing=listing).first()
+
+
+def create_recommendation_feedback(target_profile, target_listing, feedback):
+    """
+    Get recommendation feedback entry for listing
+    """
+    recommendation_feedback, created = models.RecommendationFeedback.objects.for_user(target_profile.user.username).get_or_create(target_profile=target_profile, target_listing=target_listing)
+    recommendation_feedback.feedback = feedback
+    recommendation_feedback.save()
+
+    return recommendation_feedback
 
 
 def create_listing_review(username, listing, rating, text=None, review_parent=None):

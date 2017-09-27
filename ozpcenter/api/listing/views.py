@@ -244,9 +244,58 @@ class SimilarViewSet(viewsets.ModelViewSet):
         similar_listings = pipeline.Pipeline(recommend_utils.ListIterator(serializer.data),
                                           [pipes.ListingDictPostSecurityMarkingCheckPipe(self.request.user.username),
                                            pipes.LimitPipe(10)]).to_list()
+        return Response(similar_listings)
 
-        r = Response(similar_listings)
-        return r
+
+class RecommendationFeedbackViewSet(viewsets.ModelViewSet):
+    """
+    Recommendation Feedback for a given listing
+
+
+    Access Control
+    ===============
+    - All users can view
+
+    URIs
+    ======
+    GET /api/listing/{pk}/feedback
+    Summary:
+        Find a feedback Entry by ID
+    Response:
+        200 - Successful operation - ListingSerializer
+    """
+    permission_classes = (permissions.IsUser,)
+    serializer_class = serializers.RecommendationFeedbackSerializer
+    # pagination_class = pagination.StandardPagination
+
+    def get_queryset(self, listing):
+        recommendation_feedback_query = model_access.get_recommendation_feedback(self.request.user.username, listing)
+        return recommendation_feedback_query
+
+    def list(self, request, listing_pk=None):
+        listing = model_access.get_listing_by_id(request.user.username, listing_pk, True)
+
+        queryset = self.get_queryset(listing)
+
+        if not queryset:
+            return Response({'feedback': 0}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = serializers.RecommendationFeedbackSerializer(queryset, context={'request': request, 'listing': listing})
+        data = serializer.data
+        return Response(data)
+
+    def create(self, request, listing_pk=None):
+        listing = model_access.get_listing_by_id(request.user.username, listing_pk, True)
+
+        serializer = serializers.RecommendationFeedbackSerializer(data=request.data, context={'request': request, 'listing': listing})
+
+        if not serializer.is_valid():
+            logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ListingTypeViewSet(viewsets.ModelViewSet):
