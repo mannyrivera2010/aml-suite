@@ -1195,6 +1195,9 @@ class Listing(models.Model):
     def is_bookmarked(self):
         return ApplicationLibraryEntry.objects.filter(listing=self).count() >= 1
 
+    def gave_feedback(self):
+        return RecommendationFeedback.objects.filter(target_listing=self, feedback=1).count() >= 1 or RecommendationFeedback.objects.filter(target_listing=self, feedback=-1).count() >= 1
+
     def __repr__(self):
         listing_name = None
 

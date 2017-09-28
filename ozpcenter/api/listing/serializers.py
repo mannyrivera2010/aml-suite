@@ -199,6 +199,7 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'total_reviews',
                   'is_private',
                   'is_bookmarked',
+                  'gave_feedback',
                   'description_short',
                   'security_marking',
                   'launch_url',
@@ -307,6 +308,15 @@ class CreateListingProfileSerializer(serializers.ModelSerializer):
 class ListingIsBookmarked(serializers.ReadOnlyField):
     """
     Read Only Field to see if a listing is bookmarked
+    """
+
+    def to_native(self, obj):
+        return obj
+
+
+class ListingHasFeedback(serializers.ReadOnlyField):
+    """
+    Read Only Field to see if a listing has feedback
     """
 
     def to_native(self, obj):
@@ -924,6 +934,7 @@ def update_listing(serializer_instance, instance, validated_data):
 
 class ListingSerializer(serializers.ModelSerializer):
     is_bookmarked = ListingIsBookmarked()
+    gave_feedback = ListingHasFeedback()
     screenshots = ScreenshotSerializer(many=True, required=False)
     doc_urls = DocUrlSerializer(many=True, required=False)
     owners = CreateListingProfileSerializer(required=False, many=True)
