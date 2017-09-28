@@ -112,6 +112,7 @@ class ContactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Contact
+        fields = '__all__'
 
     def to_representation(self, data):
         access_control_instance = plugin_manager.get_system_access_control_plugin()
@@ -176,6 +177,7 @@ class ChangeDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ChangeDetail
+        fields = '__all__'
 
 
 class ShortListingSerializer(serializers.HyperlinkedModelSerializer):
@@ -314,6 +316,15 @@ class ListingIsBookmarked(serializers.ReadOnlyField):
         return obj
 
 
+class CertIssuesField(serializers.ReadOnlyField):
+    """
+    Read Only Field
+    """
+
+    def from_native(self, obj):
+        return obj
+
+
 class ListingSerializer(serializers.ModelSerializer):
     is_bookmarked = ListingIsBookmarked()
     screenshots = ScreenshotSerializer(many=True, required=False)
@@ -329,13 +340,14 @@ class ListingSerializer(serializers.ModelSerializer):
     large_banner_icon = ImageSerializer(required=False, allow_null=True)
     agency = AgencySerializer(required=False)
     last_activity = ListingActivitySerializer(required=False, read_only=True)
-    current_rejection = RejectionListingActivitySerializer(required=False,
-        read_only=True)
+    current_rejection = RejectionListingActivitySerializer(required=False, read_only=True)
     listing_type = ListingTypeSerializer(required=False, allow_null=True)
+    cert_issues = CertIssuesField(required=False)
 
     class Meta:
         model = models.Listing
         depth = 2
+        fields = '__all__'
 
     def to_representation(self, data):
         ret = super(ListingSerializer, self).to_representation(data)
@@ -991,12 +1003,22 @@ class ReviewResponsesSerializer(serializers.ModelSerializer):
         validators = []  # Remove a default "unique together" constraint.
 
 
+class ReviewResponsesField(serializers.ReadOnlyField):
+    """
+    Read Only Field
+    """
+
+    def from_native(self, obj):
+        return obj
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     author = profile_serializers.ShortProfileSerializer()
+    review_responses = ReviewResponsesField()
 
     class Meta:
         model = models.Review
-        fields = ('id', 'author', 'listing', 'rate', 'text', 'edited_date', 'created_date', 'review_parent')
+        fields = ('id', 'author', 'listing', 'rate', 'text', 'edited_date', 'created_date', 'review_parent', 'review_responses')
         validators = []  # Remove a default "unique together" constraint.
 
     def to_representation(self, data):

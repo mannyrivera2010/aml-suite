@@ -15,3 +15,4 @@ class ContactTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ContactType
+        fields = '__all__'

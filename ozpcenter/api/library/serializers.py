@@ -18,6 +18,7 @@ class LibrarySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = models.ApplicationLibraryEntry
+        fields = '__all__'
 
 
 class LibraryListingSerializer(serializers.HyperlinkedModelSerializer):

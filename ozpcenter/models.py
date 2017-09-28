@@ -1266,6 +1266,7 @@ class ReadOnlyListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
         depth = 2
+        fields = '__all__'
 
 
 @receiver(post_save, sender=Listing)

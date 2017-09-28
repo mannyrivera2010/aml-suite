@@ -555,5 +555,6 @@ def run():
 
     print('Sample Data Generator took: {} ms'.format(total_end_time - total_start_time))
 
+
 if __name__ == "__main__":
     run()

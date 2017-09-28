@@ -19,6 +19,7 @@ class IntentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Intent
         depth = 1
+        fields = '__all__'
 
     def validate(self, data):
         icon = data.get('icon')

@@ -649,11 +649,11 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             "_source": ["id", "title"],
             "query": {
                 "bool": {
-                    "must_not": {
+                    "must_not": [
                         # id is the id of the listing when it searches the listings:
-                        "terms": {"id": each_profile_source['bookmark_ids']},
-                        "terms": {"id": rated_apps_list}
-                    },
+                        {"terms": {"id": each_profile_source['bookmark_ids']}},
+                        {"terms": {"id": rated_apps_list}}
+                    ],
                     "should": [
                         query_object
                     ]
