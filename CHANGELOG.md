@@ -1,5 +1,13 @@
 
-### 1.0.78 (None)   
+### 1.0.79 (None) 
+
+#### Fixes  
+* **preferences**:  set default to true instead of false ([33a693c6](https://github.com/aml-development/ozp-backend/commit/33a693c65fecdc02418dae0094af11d8854a43ef))     
+
+#### Merge Pull Requests  
+* Merge pull request #350 from aml-development/leave_ozp ([0986a1a7](https://github.com/aml-development/ozp-backend/commit/0986a1a7894bf17731b13d23f2c4ed658ff1933e))           
+
+### 1.0.78 (2017-09-20)   
 
 #### Merge Pull Requests  
 * Merge pull request #354 from aml-development/performance ([a60775fa](https://github.com/aml-development/ozp-backend/commit/a60775faaed5868abc3bf320c826564de09fa604))           
@@ -7,7 +15,14 @@
 ### 1.0.77 (2017-09-20)
 
 #### Feature  
-* **doc**:  Wiki created and links added to code base ([8d7d2d9f](https://github.com/aml-development/ozp-backend/commit/8d7d2d9fd0f2da141cb5871e54f06b349b90c0bf))     
+* **requirements**:  break out requirements into usage and system requirements ([b845a509](https://github.com/aml-development/ozp-backend/commit/b845a5098eb7a08f4503ac925106a38748b08e4f))    
+* **doc**:  Wiki created and links added to code base ([8d7d2d9f](https://github.com/aml-development/ozp-backend/commit/8d7d2d9fd0f2da141cb5871e54f06b349b90c0bf))    
+* **preferences**:  Create preference for opting in ([a5c91e5a](https://github.com/aml-development/ozp-backend/commit/a5c91e5a0fa9b6cf5eea5a83d4cd91145f97b10b))    
+
+#### Fixes 
+* **preferences**
+  *  fix comment to match logic ([e0e8b3f2](https://github.com/aml-development/ozp-backend/commit/e0e8b3f21f98dcd8cfe8db79e61c70247b6b1701))
+  *  changing migration number ([472e2914](https://github.com/aml-development/ozp-backend/commit/472e2914c5671ec2ffdcc3a94610451a991acbe9))     
 
 #### Refactor 
 * **performance**
@@ -15,6 +30,7 @@
   *  database ([58ba3393](https://github.com/aml-development/ozp-backend/commit/58ba339321c0cf2486a08bca055598410e38b819))     
 
 #### Merge Pull Requests  
+* Merge branch 'requirements' of github.com:aml-development/ozp-backend into leave_ozp ([61b15914](https://github.com/aml-development/ozp-backend/commit/61b15914ce8ec85e7770c2524d7570c9d7c2f756))
 * Merge pull request #343 from aml-development/review_response ([83432379](https://github.com/aml-development/ozp-backend/commit/83432379507f7f6b4b5560100c32a36aa2807488))
 * Merge pull request #351 from aml-development/codedoc ([b4e41e91](https://github.com/aml-development/ozp-backend/commit/b4e41e91bc6d97e1baf6bd8cb859b1260a037347))           
 
