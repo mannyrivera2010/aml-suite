@@ -55,7 +55,7 @@ runp_psql_es:
 	MAIN_DATABASE=psql ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
 codecheck:
-	flake8 ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402 --show-source
+	pycodestyle ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
 
 autopep:
 	autopep8 ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
@@ -130,3 +130,9 @@ shell_psql:
 
 shell:
 	python manage.py shell_plus
+
+upgrade_requirements:
+	pip freeze | cut -d = -f 1 | xargs -n 1 pip install --upgrade
+
+freeze_requirements:
+	pip freeze > requirements.txt
