@@ -70,10 +70,19 @@ class NotificationMailBoxSerializer(serializers.HyperlinkedModelSerializer):
             'read_status', 'acknowledged_status', )
 
 
+class NotificationTypeField(serializers.ReadOnlyField):
+    """
+    Custom NotificationTypeField
+    """
+    def to_native(self, obj):
+        return obj
+
+
 class NotificationSerializer(serializers.HyperlinkedModelSerializer):
     author = profile_serializers.ShortProfileSerializer(required=False)
     listing = NotificationListingSerializer(required=False)
     agency = NotificationAgencySerializer(required=False)
+    notification_type = NotificationTypeField(required=False)
 
     class Meta:
         model = models.Notification
@@ -109,6 +118,8 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['error'] = None
         initial_data = self.initial_data
         username = self.context['request'].user.username
+
+        validated_data['notification_type'] = initial_data.get('notification_type')
 
         # Check for notification types
         key_type_list = []
@@ -211,7 +222,8 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
                                                         listing=validated_data['listing'],
                                                         agency=validated_data['agency'],
                                                         peer=validated_data['peer'],
-                                                        peer_profile=validated_data.get('entity_target'))
+                                                        peer_profile=validated_data.get('entity_target'),
+                                                        notification_type=validated_data['notification_type'])
         return notification
 
     def update(self, instance, validated_data):
