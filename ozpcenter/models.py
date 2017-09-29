@@ -172,12 +172,17 @@ class Image(models.Model):
             # TODO: raise exception?
             return
 
-        image_type = kwargs.get('image_type')
-        if not image_type:
-            logger.error('No image_type provided')
-            # TODO raise exception?
-            return
-        image_type = ImageType.objects.get(name=image_type)
+        image_type_obj = kwargs.get('image_type_obj')
+
+        if image_type_obj:
+            image_type = image_type_obj
+        else:
+            image_type = kwargs.get('image_type')
+            if not image_type:
+                logger.error('No image_type provided')
+                # TODO raise exception?
+                raise Exception('Missing Image Type')
+            image_type = ImageType.objects.get(name=image_type)
 
         # create database entry
         img = Image(uuid=random_uuid,
@@ -207,6 +212,7 @@ class Image(models.Model):
         #     print(img.image_type.name)
 
         # logger.debug('saving image %s' % file_name)
+        # TODO Figure out how to increase Performance on pil_img.save(***)
         image_binary = BytesIO()
         pil_img.save(image_binary, format=current_format)
 
@@ -568,7 +574,7 @@ class ContactType(models.Model):
     required = models.BooleanField(default=False)
 
     def __repr__(self):
-        return self.title
+        return self.name
 
 
 @receiver(post_save, sender=ContactType)

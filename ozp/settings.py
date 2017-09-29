@@ -143,13 +143,17 @@ LOGGING = {
             'handlers': ['console', 'file'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
         },
+        'PIL': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('PILLOW_LOG_LEVEL', 'WARNING'),
+        },
         'ozp-center': {
             'handlers': ['console', 'file'],
-            'level': os.getenv('OZP_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('OZP_LOG_LEVEL', 'INFO'),
         },
         'ozp-iwc': {
             'handlers': ['console', 'file'],
-            'level': os.getenv('OZP_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('OZP_LOG_LEVEL', 'INFO'),
         }
     },
 }
