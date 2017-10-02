@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import uuid
-from io import BytesIO
+import io
 import PIL
 from PIL import Image as PilImage
 
@@ -157,20 +157,27 @@ class Image(models.Model):
     @staticmethod
     def create_image(pil_img, **kwargs):
         """
-        Given an image (PIL format) and some metadata, write to file sys and
-        create DB entry
+        Given an image (PIL format) and some metadata, then
+        - Create database entry
+        - Write to media_storage
 
-        pil_img: PIL.Image (see https://pillow.readthedocs.org/en/latest/reference/Image.html)
+        TODO: raise exception and remove file and database entry
+        TODO: check width and height
+
+        Args:
+            pil_img: PIL.Image (see https://pillow.readthedocs.org/en/latest/reference/Image.html)
         """
-        # get DB info for image
+        exception = None
+        saved_to_db = False
+
         random_uuid = str(uuid.uuid4())
         security_marking = kwargs.get('security_marking', 'UNCLASSIFIED')
         file_extension = kwargs.get('file_extension', 'png')
-        valid_extensions = constants.VALID_IMAGE_TYPES
-        if file_extension not in valid_extensions:
+        valid_image_types = constants.VALID_IMAGE_TYPES
+
+        if file_extension not in valid_image_types:
             logger.error('Invalid image type: {0!s}'.format(file_extension))
-            # TODO: raise exception?
-            return
+            exception = Exception('Invalid Image Type, Valid Image type: {}'.format(valid_image_types))
 
         image_type_obj = kwargs.get('image_type_obj')
 
@@ -180,43 +187,41 @@ class Image(models.Model):
             image_type = kwargs.get('image_type')
             if not image_type:
                 logger.error('No image_type provided')
-                # TODO raise exception?
-                raise Exception('Missing Image Type')
+                exception = Exception('Missing Image Type')
             image_type = ImageType.objects.get(name=image_type)
 
         # create database entry
-        img = Image(uuid=random_uuid,
+        image_object = Image(uuid=random_uuid,
                     security_marking=security_marking,
                     file_extension=file_extension,
                     image_type=image_type)
-        img.save()
-
+        image_object.save()
+        saved_to_db = True
         # write the image to the file system
         # prefix_file_name = pil_img.fp.name.split('/')[-1].split('.')[0].replace('16','').replace('32','').replace('Featured','')  # Used for export script
-        prefix_file_name = str(img.id)
-        file_name = prefix_file_name + '_' + img.image_type.name + '.' + file_extension
+        prefix_file_name = str(image_object.id)
+        file_name = prefix_file_name + '_' + image_type.name + '.' + file_extension
         ext = os.path.splitext(file_name)[1].lower()
         try:
             current_format = PIL.Image.EXTENSION[ext]
         except KeyError:
-            raise ValueError('unknown file extension: {}'.format(ext))
+            exception = ValueError('unknown file extension: {}'.format(ext))
 
-        # logger.debug('saving image %s' % file_name)
-        if img.image_type.name == 'small_icon':
+        if image_object.image_type.name == 'small_icon':
             pil_img = pil_img.resize((16, 16), PilImage.ANTIALIAS)
-        elif img.image_type.name == 'large_icon':
+        elif image_object.image_type.name == 'large_icon':
             pil_img = pil_img.resize((32, 32), PilImage.ANTIALIAS)
-        elif img.image_type.name == 'banner_icon':
+        elif image_object.image_type.name == 'banner_icon':
             pil_img = pil_img.resize((220, 137), PilImage.ANTIALIAS)
-        # elif img.image_type.name == 'large_banner_icon':
-        #     print(img.image_type.name)
 
-        # logger.debug('saving image %s' % file_name)
         # TODO Figure out how to increase Performance on pil_img.save(***)
-        image_binary = BytesIO()
+        # With io.BytesIO(): Sample Data Generator took: 16109.5576171875 ms
+        # Commenting out io.BytesIO() - Sample Data Generator took: 34608.710693359375 ms
+
+        image_binary = io.BytesIO()
         pil_img.save(image_binary, format=current_format)
 
-        # check size requirements
+        # image_binary.seek(0)
         size_bytes = image_binary.tell()
 
         # TODO: PIL saved images can be larger than submitted images.
@@ -225,14 +230,15 @@ class Image(models.Model):
         if size_bytes > (image_type.max_size_bytes * 2):
             logger.error('Image size is {0:d} bytes, which is larger than the max \
                 allowed {1:d} bytes'.format(size_bytes, 2 * image_type.max_size_bytes))
-            # raise
-            # TODO raise exception and remove file
-            return
-        # TODO: check width and height
-        # image_binary.seek(0)
-        # if not media_storage.exists(file_name):  # If
+            exception = Exception('Image Size too big')
+
+        if exception:
+            if saved_to_db:
+                image_object.delete()
+            raise exception
+
         media_storage.save(file_name, image_binary)
-        return img
+        return image_object
 
 
 @receiver(post_save, sender=Image)
