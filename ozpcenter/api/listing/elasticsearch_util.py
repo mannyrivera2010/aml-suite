@@ -75,7 +75,7 @@ class ElasticsearchFactory(object):
     def recreate_index_mapping(self, index_name, index_mapping):
         self.get_client()
 
-        if settings.ES_ENABLED:
+        if settings.ES_ENABLED is True:
             self.check_elasticsearch()
             logger.info('Checking to see if Index [{}] exist'.format(index_name))
 
@@ -93,7 +93,7 @@ class ElasticsearchFactory(object):
             logger.debug('Elasticsearch is not enabled')
 
     def get_client(self):
-        if settings.ES_ENABLED:
+        if settings.ES_ENABLED is True:
             if self.es_client is None:
                 kwords = {}
                 kwords['hosts'] = settings.ES_HOST
