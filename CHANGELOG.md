@@ -1,5 +1,23 @@
 
-### 1.0.79 (None) 
+### 1.0.80 (None)
+
+#### Feature 
+* **upgrade**
+  *  refactor sample_data_generator ([71195f4a](https://github.com/aml-development/ozp-backend/commit/71195f4aefb7ee8297c52094b59fbab4ee78b163))
+  *  Improve Image Create Error handling ([e14799eb](https://github.com/aml-development/ozp-backend/commit/e14799eb14c8162299a5f0fe916d8dc1f0279ba1))
+  *  Fix unittest and Refactor sample data ([f06c6558](https://github.com/aml-development/ozp-backend/commit/f06c65587a9b878d625e87b6df434bf8f5c3c8db))
+  *  Updated makefile ([ab6be72d](https://github.com/aml-development/ozp-backend/commit/ab6be72d573dbbeec539bf2975c4c056a2dfdd66))
+  *  Upgrade Requirements and refactored code ([89e0fd42](https://github.com/aml-development/ozp-backend/commit/89e0fd4267a2b87261ee70fecf4a6a27339cdf88))     
+* **notifications**:  create new contact the POCs from a listing ([006f7ed1](https://github.com/aml-development/ozp-backend/commit/006f7ed125502f1575189dff2132b87aec940f8b))      
+
+#### Merge Pull Requests  
+* Merge pull request #357 from aml-development/upgrade_deps ([e8d41c6b](https://github.com/aml-development/ozp-backend/commit/e8d41c6b04434533b295252835e77c489d99ebd5))
+* Merge pull request #358 from aml-development/user_to_owner_notification ([870741fb](https://github.com/aml-development/ozp-backend/commit/870741fbe7b858cfa90883a6133b39aedaa11b9f))    
+
+#### Documentation  
+* **readme**:  Add readthedocs Style Docs ([309f2934](https://github.com/aml-development/ozp-backend/commit/309f29342828c88f68a308d58f2b1447400e1d80))          
+
+### 1.0.79 (2017-09-28) 
 
 #### Fixes  
 * **preferences**:  set default to true instead of false ([33a693c6](https://github.com/aml-development/ozp-backend/commit/33a693c65fecdc02418dae0094af11d8854a43ef))     
