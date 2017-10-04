@@ -1,3 +1,21 @@
+## Tracing REST Call
+This section describes the life of a REST call.    
+Developer should have knownledge of
+
+* [Django's URL Dispatcher](https://docs.djangoproject.com/es/1.9/topics/http/urls/)
+* [Django Rest Framework's Viewsets](http://www.django-rest-framework.org/api-guide/viewsets/)
+* [Django Rest Framework's Serializer](http://www.django-rest-framework.org/api-guide/serializers/)
+
+Example trace for a GET Request for getting a user's profile for an authenticated user     
+`GET /api/self/profile`
+
+* Entry Point for all REST Calls - ozp/urls.py. All /api/* calls get re-routed to ozpcenter/urls.py file    
+* ozpcenter/urls.py add REST access points for all the views for the resources (agency, category, etc...)    
+    * This line of code `url(r'', include('ozpcenter.api.profile.urls'))` adds endpoints related to profile REST Calls
+* ozpcenter/api/profile/user.py - 'self/profile/' route points to current user's profile (Using CurrentUserViewSet in ozpcenter/api/profile/views.py)
+* ozpcenter/api/profile/views.py - For GET Request for this route it will call the 'retrieve' method
+    * Before allowing user to access the endpoint it will make sure user is authenticated and has the correct role using 'permission_classes = (permissions.IsUser,)'
+
 ## Performance Debugging
 We check the performance of a Database model using shell_plus command for manage.py.
 ````shell
