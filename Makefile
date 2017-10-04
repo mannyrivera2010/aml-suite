@@ -45,17 +45,17 @@ run_psql:
 run_psql_es:
 	MAIN_DATABASE=psql ES_ENABLED=True python manage.py runserver localhost:8001
 
-runp:
+rung:
 	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
-runp_es:
+rung_es:
 	ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
-runp_psql_es:
+rung_psql_es:
 	MAIN_DATABASE=psql ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
 codecheck:
-	flake8 ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402 --show-source
+	pycodestyle ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
 
 autopep:
 	autopep8 ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
@@ -92,14 +92,15 @@ dev: clean pre create_static
 	MAIN_DATABASE=sqlite python manage.py runserver localhost:8001
 
 dev_es: clean pre create_static
-	MAIN_DATABASE=sqlite ES_ENABLED=TRUE python manage.py makemigrations ozpcenter
-	MAIN_DATABASE=sqlite ES_ENABLED=TRUE python manage.py makemigrations ozpiwc
-	MAIN_DATABASE=sqlite ES_ENABLED=TRUE DEV_MODE=True python manage.py migrate
+	MAIN_DATABASE=sqlite ES_ENABLED=FALSE python manage.py makemigrations ozpcenter
+	MAIN_DATABASE=sqlite ES_ENABLED=FALSE python manage.py makemigrations ozpiwc
+	MAIN_DATABASE=sqlite ES_ENABLED=FALSE DEV_MODE=True python manage.py migrate
 
 	echo 'Loading sample data...'
-	MAIN_DATABASE=sqlite ES_ENABLED=TRUE python manage.py runscript sample_data_generator
-
+	MAIN_DATABASE=sqlite ES_ENABLED=FALSE python manage.py runscript sample_data_generator
+	ES_ENABLED=TRUE python manage.py runscript reindex_es
 	MAIN_DATABASE=sqlite ES_ENABLED=TRUE python manage.py runserver localhost:8001
+
 
 # sudo apt-get install postgresql postgresql-contrib
 # sudo -i -u postgres
@@ -130,3 +131,12 @@ shell_psql:
 
 shell:
 	python manage.py shell_plus
+
+pyenv:
+	(virtualenv env && source env/bin/activate &&  pip install -r requirements.txt)
+
+upgrade_requirements:
+	pip freeze | cut -d = -f 1 | xargs -n 1 pip install --upgrade
+
+freeze_requirements:
+	pip freeze > requirements.txt

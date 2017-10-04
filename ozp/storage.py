@@ -56,8 +56,9 @@ class MediaFileStorage(FileSystemStorage):
             self.base_location = None
             self.location = None
 
-    def get_available_name(self, name):
-        """Returns a filename that's free on the target storage system, and
+    def get_available_name(self, name, max_length=None):
+        """
+        Returns a filename that's free on the target storage system, and
         available for new content to be written to.
 
         Found at http://djangosnippets.org/snippets/976/

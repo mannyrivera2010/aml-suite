@@ -8,12 +8,12 @@ fixtures with easy-to-use factories for creating complex objects"
 https://factoryboy.readthedocs.org/en/latest/index.html
 """
 from django.contrib import auth
-from faker import Factory
+from faker import Faker
 from ozpcenter import models
 import factory
 
 
-fake = Factory.create()
+fake = Faker()
 
 
 class GroupFactory(factory.django.DjangoModelFactory):

@@ -8,7 +8,6 @@ recommendation_engines = ['ElasticsearchUserBaseRecommender', 'ElasticsearchCont
 
 os.getenv('RECOMMENDATION_ENGINE')
 
-
 ************************************WARNING************************************
 Running this script will delete existing Recommendations in database
 ************************************WARNING************************************
@@ -25,7 +24,7 @@ from django.conf import settings
 
 # TODO: Uncomment lines and indent current RECOMMENDATION_ENGINE line when Elasticsearch is ready to be added
 #       to the recommendation engine list.
-if (settings.ES_ENABLED):
+if settings.ES_ENABLED is True:
     RECOMMENDATION_ENGINE = os.getenv('RECOMMENDATION_ENGINE', 'baseline,graph_cf,elasticsearch_user_base,elasticsearch_content_base')
 else:
     RECOMMENDATION_ENGINE = os.getenv('RECOMMENDATION_ENGINE', 'baseline,graph_cf')

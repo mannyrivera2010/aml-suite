@@ -18,14 +18,20 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 
+from ozp import views
+
+apipatterns = [
+    url(r'^api/', include('ozpcenter.urls')),
+    url(r'^iwc-api/', include('ozpiwc.urls')),
+]
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/', include('ozpcenter.urls')),
-    url(r'^iwc-api/', include('ozpiwc.urls')),
-    url(r'^docs/', include('rest_framework_swagger.urls'))
+    url(r'^docs/', views.schema_view),
+    url(r'^version/', views.version_view),
 ]
+urlpatterns = urlpatterns + apipatterns
 
 # in debug, serve the media and static resources with the django web server
 # https://docs.djangoproject.com/en/1.8/howto/static-files/#serving-static-files-during-development

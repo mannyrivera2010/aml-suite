@@ -13,6 +13,17 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+
+def str_to_bool(user_input):
+    if isinstance(user_input, bool):
+        return user_input
+    else:
+        if user_input.lower() in ['1', 'true']:
+            return True
+        else:
+            return False
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -51,11 +62,12 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
     'django_extensions',
     'rest_framework_swagger',
     'ozpcenter',
     'ozpiwc',
-    'corsheaders'
+    'corsheaders',
 )
 
 # Note that CorsMiddleware needs to come before Django's CommonMiddleware if
@@ -140,15 +152,19 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
+        },
+        'PIL': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('PILLOW_LOG_LEVEL', 'WARNING'),
         },
         'ozp-center': {
             'handlers': ['console', 'file'],
-            'level': os.getenv('OZP_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('OZP_LOG_LEVEL', 'INFO'),
         },
         'ozp-iwc': {
             'handlers': ['console', 'file'],
-            'level': os.getenv('OZP_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('OZP_LOG_LEVEL', 'INFO'),
         }
     },
 }
@@ -176,7 +192,8 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        'ozpcenter.permissions.IsUser',
     ),
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
@@ -266,7 +283,7 @@ DEFAULT_AGENCY = ''
 GLOBAL_SECONDS_TO_CACHE_DATA = 60 * 60 * 24  # 24 Hours
 
 # Boolean to enable/disable the use Elasticsearch use
-ES_ENABLED = bool(os.getenv('ES_ENABLED', False))  # This needs to be false for unit test to pass
+ES_ENABLED = str_to_bool(os.getenv('ES_ENABLED', False))  # This needs to be false for unit test to pass
 ES_INDEX_NAME = 'appsmall'
 ES_TYPE_NAME = 'listings'
 ES_ID_FIELD = 'id'
@@ -282,7 +299,7 @@ ES_HOST = [{
     "port": 9200
 }]
 
-ES_BASIC_AUTH = bool(os.getenv('ES_BASIC_AUTH', False))
+ES_BASIC_AUTH = str_to_bool(os.getenv('ES_BASIC_AUTH', False))
 ES_AUTH_USERNAME = os.getenv('ES_AUTH_USERNAME', 'user')
 ES_AUTH_PASSWORD = os.getenv('ES_AUTH_PASSWORD', 'password')
 

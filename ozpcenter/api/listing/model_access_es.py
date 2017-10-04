@@ -119,6 +119,7 @@ class ReadOnlyListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Listing
         depth = 2
+        fields = '__all__'
 
 
 def bulk_reindex():

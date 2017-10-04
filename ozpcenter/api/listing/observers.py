@@ -1,6 +1,7 @@
 """
 Observers
 """
+import logging
 import datetime
 import pytz
 
@@ -8,6 +9,9 @@ from ozpcenter import models
 from ozpcenter.pubsub import Observer
 from ozpcenter.models import Notification
 import ozpcenter.api.notification.model_access as notification_model_access
+
+# Get an instance of a logger
+logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
 class ListingObserver(Observer):
@@ -24,7 +28,7 @@ class ListingObserver(Observer):
                 'listing_changed']
 
     def execute(self, event_type, **kwargs):
-        print('message: event_type:{}, kwards:{}'.format(event_type, kwargs))
+        logger.debug('message: event_type:{}, kwards:{}'.format(event_type, kwargs))
 
     def listing_approval_status_changed(self, listing=None, profile=None, old_approval_status=None, new_approval_status=None):
         """
