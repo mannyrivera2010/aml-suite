@@ -1192,11 +1192,14 @@ class Listing(models.Model):
 
     objects = AccessControlListingManager()
 
-    def is_bookmarked(self):
-        return ApplicationLibraryEntry.objects.filter(listing=self).count() >= 1
+    def _is_bookmarked(self):
+        return False
 
-    def gave_feedback(self):
-        return RecommendationFeedback.objects.filter(target_listing=self, feedback=1).count() >= 1 or RecommendationFeedback.objects.filter(target_listing=self, feedback=-1).count() >= 1
+    def _gave_feedback(self):
+        return False
+
+    is_bookmarked = property(_is_bookmarked)
+    gave_feedback = property(_gave_feedback)
 
     def __repr__(self):
         listing_name = None

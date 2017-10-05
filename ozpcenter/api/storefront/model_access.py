@@ -294,16 +294,6 @@ def get_user_listings(username, request, exclude_orgs=None):
 
             }
 
-            if row['bookmark_count']:
-                mapping_dict[row['id']]['is_bookmarked'] = True
-            else:
-                mapping_dict[row['id']]['is_bookmarked'] = False
-
-            if row['gave_feedback']:
-                mapping_dict[row['id']]['gave_feedback'] = True
-            else:
-                mapping_dict[row['id']]['gave_feedback'] = False
-
         # Many to Many
         # Categorys
 

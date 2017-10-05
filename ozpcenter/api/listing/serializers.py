@@ -305,24 +305,6 @@ class CreateListingProfileSerializer(serializers.ModelSerializer):
         return ret
 
 
-class ListingIsBookmarked(serializers.ReadOnlyField):
-    """
-    Read Only Field to see if a listing is bookmarked
-    """
-
-    def to_native(self, obj):
-        return obj
-
-
-class ListingHasFeedback(serializers.ReadOnlyField):
-    """
-    Read Only Field to see if a listing has feedback
-    """
-
-    def to_native(self, obj):
-        return obj
-
-
 def validate_listing(serializer_instance, data):
     access_control_instance = plugin_manager.get_system_access_control_plugin()
     profile = generic_model_access.get_profile(serializer_instance.context['request'].user.username)
@@ -933,8 +915,8 @@ def update_listing(serializer_instance, instance, validated_data):
 
 
 class ListingSerializer(serializers.ModelSerializer):
-    is_bookmarked = ListingIsBookmarked()
-    gave_feedback = ListingHasFeedback()
+    is_bookmarked = serializers.ReadOnlyField()
+    gave_feedback = serializers.ReadOnlyField()
     screenshots = ScreenshotSerializer(many=True, required=False)
     doc_urls = DocUrlSerializer(many=True, required=False)
     owners = CreateListingProfileSerializer(required=False, many=True)
@@ -955,10 +937,19 @@ class ListingSerializer(serializers.ModelSerializer):
         model = models.Listing
         depth = 2
 
+    def _is_bookmarked(self, request_user, request_listing):
+        bookmarks = models.ApplicationLibraryEntry.objects.filter(listing=request_listing, owner=request_user)
+        return len(bookmarks) >= 1
+
+    def _gave_feedback(self, request_user, request_listing):
+        recommendations = models.RecommendationFeedback.objects.filter(target_listing=request_listing, target_profile=request_user)
+        return len(recommendations) >= 1
+
     def to_representation(self, data):
         ret = super(ListingSerializer, self).to_representation(data)
 
         anonymize_identifiable_data = system_anonymize_identifiable_data(self.context['request'].user.username)
+        request_user = generic_model_access.get_profile(self.context['request'].user)
 
         if anonymize_identifiable_data:
             ret['contacts'] = []
@@ -986,6 +977,8 @@ class ListingSerializer(serializers.ModelSerializer):
                     check_failed.append(owner_profile.user.username)
 
         ret['cert_issues'] = check_failed
+        ret['gave_feedback'] = self._gave_feedback(request_user, data)
+        ret['is_bookmarked'] = self._is_bookmarked(request_user, data)
         return ret
 
     def validate(self, data):

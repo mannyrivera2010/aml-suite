@@ -285,7 +285,7 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['large_icon']['id'], 2)
         self.assertEqual(response.data['banner_icon']['id'], 3)
         self.assertEqual(response.data['large_banner_icon']['id'], 4)
-        self.assertEqual(response.data['is_bookmarked'], True)
+        self.assertEqual(response.data['is_bookmarked'], False)
         self.assertEquals(validate_listing_map_keys(response.data), [])
 
     def test_update_listing_full(self):
