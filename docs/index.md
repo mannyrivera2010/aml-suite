@@ -15,7 +15,6 @@ Travis-CI
 [![Build Status](https://travis-ci.org/aml-development/ozp-backend.svg?branch=master)](https://travis-ci.org/ozone-development/ozp-backend)
 
 ## Getting Started
-
 ### Development environment preparation
 ```
 cd ~
@@ -34,6 +33,39 @@ If `virtualenv env` does not work it might be `python3 -m venv env` if the envir
 cd ~/git/ozp-backend
 source env/bin/activate
 make dev
+```
+
+### MakeFile
+There is a MakeFile in the project to run repetitive commands    
+
+Commands:    
+`make dev run` - Setup up the Development environment and run server on a SQLite Database (without Elasticsearch)  
+`make pyenv` - Create Python environment and install requirements    
+`make dev` - Setup up the development environment running on a SQLite Database (without Elasticsearch)    
+`make dev_psql` - Setup up the development environment running on a Postgres Database (without Elasticsearch)    
+`make dev_es` - Setup up the development environment running on a SQLite Database with Elasticsearch)    
+`make reindex_es` - Reindex the data into Elasticsearch    
+`make run` - Run the server    
+`make run_es` - Run the server with Elasticsearch    
+`make rung` - Run Server with gunicorn with a worker per core    
+`make test` - Run all test    
+`make codecheck` - Run pycodestyle python linter on the code    
+`make upgrade_requirements` - Update project python dependencies    
+
+### Postgres Setup
+Command to install postgresql (on Debian-based OS)
+```
+sudo apt-get install postgresql postgresql-contrib
+```
+
+Commands to setup postgresql for ozp-backend
+```
+sudo -i -u postgres
+createuser ozp_user
+psql -c 'ALTER USER ozp_user CREATEDB;'
+psql -c "ALTER USER "ozp_user" WITH PASSWORD 'password';"
+createdb ozp
+psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;'
 ```
 
 ### Local development method (minimal)
@@ -82,22 +114,6 @@ of this README, which will create a production-esque deployment of OZP:
 * Use of external authorization service
 * Enable HTTPS (via nginx reverse proxy)
 * Served via Gunicorn (vs. Django development server)
-
-## MakeFile
-There is a MakeFile in the project to run repetitive commands    
-
-Commands:    
-`make pyenv` - Create Python environment and install requirements    
-`make dev` - Setup up the development environment running on a SQLite Database (without Elasticsearch)    
-`make dev_psql` - Setup up the development environment running on a Postgres Database (without Elasticsearch)    
-`make dev_es` - Setup up the development environment running on a SQLite Database with Elasticsearch)    
-`make reindex_es` - Reindex the data into Elasticsearch    
-`make run` - Run the server    
-`make run_es` - Run the server with Elasticsearch    
-`make rung` - Run Server with gunicorn with a worker per core    
-`make test` - Run all test    
-`make codecheck` - Run pycodestyle python linter on the code    
-`make upgrade_requirements` - Update project python dependencies    
 
 ### Runing Elasticsearch for Search
 ozp/Settings.py file variable needs to be updated to `ES_ENABLED = True`    
