@@ -1,5 +1,16 @@
 
-### 1.0.81 (None) 
+### 1.0.82 (None)
+
+#### Feature  
+* **githooks**:  Enforce GitHooks for make dev ([c65d766d](https://github.com/aml-development/ozp-backend/commit/c65d766d4859245c8900e51a33d88ab4d15860fb))    
+
+#### Fixes  
+* **deps**:  Fix Deployment Deps ([5350c927](https://github.com/aml-development/ozp-backend/commit/5350c92793143a42b271fe083a25923bb07e6430))      
+
+#### Documentation  
+* **docs**:  Add Jenkins.md docs ([92595963](https://github.com/aml-development/ozp-backend/commit/9259596381f5161635f1fd1331fc3c746205fc12))          
+
+### 1.0.81 (2017-10-05) 
 
 #### Fixes  
 * **release**:  Fix Setup and Release.py ([a8711b60](https://github.com/aml-development/ozp-backend/commit/a8711b609f12086d6c19e5f5a7085179c77a4485))      
