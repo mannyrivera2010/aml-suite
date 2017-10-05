@@ -23,8 +23,8 @@ package_data = {'': ['README.md', 'static']}
 
 setup(name=PKG,
       version=verstr,
-      packages=packages,
-      package_data=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
+      packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
+      package_data=package_data,
       include_package_data=True,
       install_requires=install_requires
 )

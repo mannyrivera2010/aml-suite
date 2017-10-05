@@ -122,10 +122,12 @@ def run():
     # wheelhouse/)
     call("pip wheel -r requirements.txt --wheel-dir wheelhouse", shell=True)
 
-    call("cp wheelhouse/msgpack_python-0.4.7-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/msgpack_python-0.4.7-cp34-cp34m-linux_x86_64.whl", shell=True)
+
     # add our wheel to the wheelhouse
     for file in glob.glob(r'dist/*.whl'):
         shutil.copy(file, "wheelhouse")
+
+    #call("cp wheelhouse/msgpack_python-0.4.7-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/msgpack_python-0.4.7-cp34-cp34m-linux_x86_64.whl", shell=True)
 
     # create release directory including the wheelhouse (dependencies) and the
     # relevant source for ozp_backend
