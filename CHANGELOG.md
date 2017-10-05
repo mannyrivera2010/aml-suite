@@ -1,5 +1,18 @@
 
-### 1.0.80 (None)
+### 1.0.81 (None) 
+
+#### Fixes  
+* **release**:  Fix Setup and Release.py ([a8711b60](https://github.com/aml-development/ozp-backend/commit/a8711b609f12086d6c19e5f5a7085179c77a4485))      
+
+#### Documentation 
+* **readme**
+  *  Update MakeFile and Docs ([adf55121](https://github.com/aml-development/ozp-backend/commit/adf55121cacce1ea50fe590ca4d76c1b5cf77e6b))
+  *  Organized Docs ([e0c7cb04](https://github.com/aml-development/ozp-backend/commit/e0c7cb04963b7b21d464c8661a8ddbe23dab7c65))         
+
+#### Changes  
+* Enhancements for ES Recommender - Adding Tags and Agency (#349) ([e1416a89](https://github.com/aml-development/ozp-backend/commit/e1416a895fb95820ce25c1a2366b6d06f769b39d))     
+
+### 1.0.80 (2017-10-04)
 
 #### Feature 
 * **upgrade**
