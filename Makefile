@@ -120,6 +120,9 @@ create_virtualenv:
 pyenv: create_virtualenv
 	(source env/bin/activate &&  pip install -r requirements.txt)
 
+pyenv_wheel: create_virtualenv
+	(source env/bin/activate &&  pip install --no-index --find-links=wheelhouse -r requirements.txt)
+
 upgrade_requirements:
 	pip freeze | cut -d = -f 1 | xargs -n 1 pip install --upgrade
 

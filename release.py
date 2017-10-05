@@ -127,8 +127,10 @@ def run():
     for file in glob.glob(r'dist/*.whl'):
         shutil.copy(file, "wheelhouse")
 
-    #call("cp wheelhouse/msgpack_python-0.4.7-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/msgpack_python-0.4.7-cp34-cp34m-linux_x86_64.whl", shell=True)
-
+    # hack for it to work on deployment machine
+    call("cp wheelhouse/coverage-4.4.1-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/coverage-4.4.1-py2.py3-none-any.whl", shell=True)
+    call("cp wheelhouse/Pillow-4.2.1-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/Pillow-4.2.1-cp34-cp34m-linux_x86_64.whl", shell=True)
+    call("cp wheelhouse/psycopg2-2.7.3.1-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/psycopg2-2.7.3.1-cp34-cp34m-linux_x86_64.whl", shell=True)
     # create release directory including the wheelhouse (dependencies) and the
     # relevant source for ozp_backend
     create_release_dir()
