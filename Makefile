@@ -88,14 +88,14 @@ sqlite_migrate:
 	MAIN_DATABASE=sqlite python manage.py makemigrations ozpiwc
 	MAIN_DATABASE=sqlite DEV_MODE=True python manage.py migrate
 
-dev: clean pre create_static sqlite_migrate
+dev: clean pre create_static install_git_hooks sqlite_migrate
 	MAIN_DATABASE=sqlite python manage.py runscript sample_data_generator
 
-dev_es: clean pre create_static sqlite_migrate
+dev_es: clean pre create_static install_git_hooks sqlite_migrate
 	MAIN_DATABASE=sqlite ES_ENABLED=FALSE python manage.py runscript sample_data_generator
 	ES_ENABLED=TRUE python manage.py runscript reindex_es
 
-dev_psql: clean pre create_static
+dev_psql: clean pre create_static install_git_hooks
 	MAIN_DATABASE=psql python manage.py makemigrations ozpcenter
 	MAIN_DATABASE=psql python manage.py makemigrations ozpiwc
 	MAIN_DATABASE=psql DEV_MODE=True python manage.py migrate
