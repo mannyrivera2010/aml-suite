@@ -106,10 +106,8 @@ class Recommender(object):
         start_ms = time.time() * 1000.0
         self.recommendation_logic()
         recommendation_ms = time.time() * 1000.0
-        print('--------')  # Print statement for debugging output
-        logger.info(self.recommender_result_set)
-        print('--------')  # Print statement for debugging output
-        logger.info('Recommendation Logic took: {} ms'.format(recommendation_ms - start_ms))
+        logger.debug(self.recommender_result_set)
+        logger.debug('Recommendation Logic took: {} ms'.format(recommendation_ms - start_ms))
         return self.recommender_result_set
 
 
@@ -180,7 +178,7 @@ class BaselineRecommender(Recommender):
         current_profile_count = 0
         for profile in all_profiles:
             current_profile_count = current_profile_count + 1
-            logger.info('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
+            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
 
             profile_id = profile.id
             profile_username = profile.user.username
@@ -315,7 +313,7 @@ class ElasticsearchRecommender(Recommender):
             )
         else:
             # There is no index created and need to create one, return True to do so:
-            logger.info("== ES Table Does not exist, create a new one ==")
+            logger.debug("== ES Table Does not exist, create a new one ==")
             return True
 
         if result_es['hits']['total'] == 0:
@@ -323,7 +321,7 @@ class ElasticsearchRecommender(Recommender):
         else:
             lastupdate = result_es['hits']['hits'][0]['_source']['lastupdated']
         currenttime = time.time()
-        logger.info("== ES Table Last Update: {}, Current Time: {}, Recreate Index: {} ==".format(currenttime, lastupdate, ((currenttime - lastupdate) > trigger_recreate)))
+        logger.debug("== ES Table Last Update: {}, Current Time: {}, Recreate Index: {} ==".format(currenttime, lastupdate, ((currenttime - lastupdate) > trigger_recreate)))
         if (currenttime - lastupdate) > trigger_recreate:
             return True
         else:
@@ -382,13 +380,11 @@ class ElasticsearchRecommender(Recommender):
                             "type": "string",
                             "analyzer": "english"
                         },
-                        "agency_short_name": {
-                            "type": "string",
-                            "analyzer": "english"
+                        "agency_name_list": {
+                            "type": "string"
                         },
-                        "tags": {
-                            "type": "string",
-                            "analyzer": "english"
+                        "tags_list": {
+                            "type": "string"
                         },
                         "categories_text": {
                             "type": "string",
@@ -461,6 +457,11 @@ class ElasticsearchRecommender(Recommender):
             categories_text_list = set()
             category_id_list = set()
             tags_text_list = set()
+            organizations_text_list = [agency.short_name for agency in profile.organizations.all()]
+            # orgs_text_list = str(organizations_text_list).strip('[').strip(']')
+            #
+            # print("orig: ", organizations_text_list)
+            # print("modi: ", orgs_text_list)
 
             profile_listings_review = []
             for review_object in models.Review.objects.filter(author=profile.user_id):
@@ -504,10 +505,11 @@ class ElasticsearchRecommender(Recommender):
 
             data_to_bulk_index.append({"author_id": profile.user_id,
                 "author": profile_username,
+                "agency_name_list": organizations_text_list,
                 "titles": list(title_text_list),
                 "descriptions": list(description_text_list),
                 "description_shorts": list(description_short_text_list),
-                "tags": list(tags_text_list),
+                "tags_list": list(tags_text_list),
                 "categories_text": list(categories_text_list),
                 "bookmark_ids": list(bookmarked_id_list),
                 "categories_id": list(category_id_list),
@@ -528,14 +530,14 @@ class ElasticsearchRecommender(Recommender):
             bulk_data.append(record)
 
         # Bulk index the data
-        logger.info('Bulk indexing Users...')
+        logger.debug('Bulk indexing Users...')
         res = es_client.bulk(index=settings.ES_RECOMMEND_USER, body=bulk_data, refresh=True)
         if res.get('errors', True):
             logger.error('Error Bulk Recommendation Indexing')
         else:
-            logger.info('Bulk Recommendation Indexing Successful')
+            logger.debug('Bulk Recommendation Indexing Successful')
 
-        logger.info("Done Indexing")
+        logger.debug("Done Indexing")
 
         ElasticsearchRecommender.set_timestamp_record()
 
@@ -592,6 +594,18 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
 
         query_object = []
 
+        agency_text_query = str(each_profile_source['agency_name_list']).strip('[').strip(']')
+        agency_to_query = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"match": {"agency_short_name": agency_text_query}}
+                    ]
+                }
+            }
+        }
+        query_object.append(agency_to_query)
+
         categories_to_query = {
             "nested": {
                 "path": "categories",
@@ -605,6 +619,20 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             }
         }
         query_object.append(categories_to_query)
+
+        tags_to_query = {
+            "nested": {
+                "path": "tags",
+                "query": {
+                    "bool": {
+                        "should": [
+                            {"terms": {"tags.name_string": each_profile_source['tags_list']}}
+                        ]
+                    }
+                }
+            }
+        }
+        query_object.append(tags_to_query)
 
         title_list = {}
         for items in each_profile_source['titles']:
@@ -649,11 +677,11 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             "_source": ["id", "title"],
             "query": {
                 "bool": {
-                    "must_not": {
+                    "must_not": [
                         # id is the id of the listing when it searches the listings:
-                        "terms": {"id": each_profile_source['bookmark_ids']},
-                        "terms": {"id": rated_apps_list}
-                    },
+                        {"terms": {"id": each_profile_source['bookmark_ids']}},
+                        {"terms": {"id": rated_apps_list}}
+                    ],
                     "should": [
                         query_object
                     ]
@@ -730,7 +758,7 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
         recommendations.
         The list is then normalized and added to the recommendations database.
         """
-        logger.info('= Elasticsearch Content Base Recommendation Engine= ')
+        logger.debug('= Elasticsearch Content Base Recommendation Engine= ')
         all_profiles = models.Profile.objects.all()
         all_profiles_count = all_profiles.count()
 
@@ -759,9 +787,9 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
                 score = recommend_utils.map_numbers(indexitem['_score'], 0, max_score_es_content, self.min_new_score, self.max_new_score)
                 itemtoadd = indexitem['_source']['id']
                 self.add_listing_to_user_profile(profile_id, itemtoadd, score, False)
-            logger.info("= ES CONTENT RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
+            logger.debug("= ES CONTENT RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
 
-        logger.info("= ES CONTENT RECOMMENDATION Results Completed =")
+        logger.debug("= ES CONTENT RECOMMENDATION Results Completed =")
 
 
 class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
@@ -812,9 +840,11 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
 
         agg_query_term = {}
         categories_to_match = es_search_result['hits']['hits'][0]['_source']['categories_id']
+        tags_to_match = es_search_result['hits']['hits'][0]['_source']['tags_list']
         bookmarks_to_match = es_search_result['hits']['hits'][0]['_source']['bookmark_ids']
         rated_apps_list = list([rate['listing_id'] for rate in es_search_result['hits']['hits'][0]['_source']['ratings']])
         rated_apps_list_match = list([rate['listing_id'] for rate in es_search_result['hits']['hits'][0]['_source']['ratings'] if rate['rate'] > ElasticsearchRecommender.MIN_ES_RATING])
+        agency_to_match = str(es_search_result['hits']['hits'][0]['_source']['agency_name_list'])
 
         agg_query_term = {
             "constant_score": {
@@ -823,6 +853,8 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
                         "should": [
                             {"terms": {"bookmark_ids": bookmarks_to_match}},
                             {"terms": {"categories": categories_to_match}},
+                            {"terms": {"tags_list": tags_to_match}},
+                            {"term": {"agency_name_list": agency_to_match}},
                             {
                                 "nested": {
                                     "path": "ratings",
@@ -894,7 +926,7 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
             - Take max score from results for profile and rebase all results while adding them to the recommendation list
             - For each recommendation add it to the list while rescalling the score based on the max score returned
         """
-        logger.info('= Elasticsearch User Base Recommendation Engine =')
+        logger.debug('= Elasticsearch User Base Recommendation Engine =')
 
         # Retreive all of the profiles from database:
         all_profiles = models.Profile.objects.all()
@@ -916,8 +948,8 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
                 score = recommend_utils.map_numbers(indexitem['score'], 0, max_score_es_user, self.min_new_score, self.max_new_score)
                 self.add_listing_to_user_profile(profile_id, indexitem['key'], score, False)
 
-            logger.info("= ES USER RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
-        logger.info("= ES USER RECOMMENDATION Results Completed =")
+            logger.debug("= ES USER RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
+        logger.debug("= ES USER RECOMMENDATION Results Completed =")
 
 
 class GraphCollaborativeFilteringBaseRecommender(Recommender):
@@ -945,7 +977,7 @@ class GraphCollaborativeFilteringBaseRecommender(Recommender):
         current_profile_count = 0
         for profile in all_profiles:
             current_profile_count = current_profile_count + 1
-            logger.info('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
+            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
 
             profile_id = profile.id
 
@@ -1100,7 +1132,7 @@ class RecommenderDirectory(object):
         start_ms = time.time() * 1000.0
 
         for current_recommender_obj in recommender_list:
-            logger.info('=={}=='.format(current_recommender_obj.__class__.__name__))
+            logger.debug('=={}=='.format(current_recommender_obj.__class__.__name__))
 
             friendly_name = current_recommender_obj.__class__.__name__
             if hasattr(current_recommender_obj.__class__, 'friendly_name'):
@@ -1117,14 +1149,14 @@ class RecommenderDirectory(object):
             recommendations_end_ms = time.time() * 1000.0
             recommendations_time = recommendations_end_ms - recommendations_start_ms
 
-            logger.info('Merging {} into results'.format(friendly_name))
+            logger.debug('Merging {} into results'.format(friendly_name))
             self.merge(friendly_name, recommendation_weight, recommendations_results, recommendations_time)
 
         start_db_ms = time.time() * 1000.0
         self.save_to_db()
         end_db_ms = time.time() * 1000.0
-        logger.info('Save to database took: {} ms'.format(end_db_ms - start_db_ms))
-        logger.info('Whole Process: {} ms'.format(end_db_ms - start_ms))
+        logger.debug('Save to database took: {} ms'.format(end_db_ms - start_db_ms))
+        logger.debug('Whole Process: {} ms'.format(end_db_ms - start_ms))
 
     def save_to_db(self):
         """

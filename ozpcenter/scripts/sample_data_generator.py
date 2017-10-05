@@ -1,11 +1,60 @@
 """
-Creates test data
-
 ************************************WARNING************************************
 Many of the unit tests depend on data set in this script. Always
 run the unit tests (python manage.py test) after making any changes to this
 data!!
 ************************************WARNING************************************
+
+Creates test data
+
+Performance as 9/29/2017
+--Loading Files
+-----Took: 2819.659423828125 ms
+--Recreate Index Mapping
+-----Took: 0.201171875 ms
+--Creating Groups
+-----Took: 39.802490234375 ms
+---Database Calls: 10
+--Creating Categories
+-----Took: 38.673583984375 ms
+---Database Calls: 17
+--Creating Contact Types and Contacts
+-----Took: 63.4443359375 ms
+---Database Calls: 103
+--Creating Listing Types
+-----Took: 11.817138671875 ms
+---Database Calls: 6
+--Creating Image Types
+-----Took: 12.355224609375 ms
+---Database Calls: 9
+--Creating Intents
+-----Took: 22.01318359375 ms
+---Database Calls: 5
+--Creating Organizations
+-----Took: 133.14892578125 ms
+---Database Calls: 28
+--Creating Tags
+-----Took: 10.674560546875 ms
+---Database Calls: 3
+--Creating Profiles
+-----Took: 810.586181640625 ms
+---Database Calls: 259
+--Creating System Notifications
+-----Took: 75.64794921875 ms
+---Database Calls: 113
+--Creating Listings
+-----Took: 24917.27197265625 ms
+---Database Calls: 11842
+--Creating Reviews
+-----Took: 3434.453369140625 ms
+---Database Calls: 4236
+--Creating Library
+-----Took: 1062.648681640625 ms
+---Database Calls: 731
+--Creating Recommendations
+-----Took: 3525.688720703125 ms
+---Database Calls: 1322
+Sample Data Generator took: 36984.35693359375 ms
 """
 from PIL import Image
 import datetime
@@ -14,12 +63,12 @@ import os
 import time
 import pytz
 import sys
+from collections import deque
 
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '../../')))
 from django.conf import settings
 from django.db import transaction
 import yaml
-
 
 from ozpcenter import models
 from ozpcenter.api.notification import model_access as notification_model_access
@@ -38,7 +87,7 @@ def time_ms():
     return time.time() * 1000.0
 
 
-def create_listing_review_batch(listing, review_list):
+def create_listing_review_batch(listing, review_list, object_cache):
     """
     Create Listing
 
@@ -56,34 +105,32 @@ def create_listing_review_batch(listing, review_list):
     current_listing = listing
 
     for review_entry in review_list:
-        profile_obj = models.Profile.objects.get(user__username=review_entry['author'])
+        profile_obj = object_cache['Profile.{}'.format(review_entry['author'])]
         current_rating = review_entry['rate']
         current_text = review_entry['text']
         listing_model_access.create_listing_review(profile_obj.user.username, current_listing, current_rating, text=current_text)
 
 
-def create_library_entries(library_entries):
+def create_library_entries(library_entries, object_cache):
     """
     Create Bookmarks for users
 
     # library_entries = [{'folder': None, 'listing_id': 8, 'owner': 'wsmith', 'position': 0},
     #    {'folder': None, 'listing_id': 5, 'owner': 'hodor', 'position': 0},...]
     """
-    print('Creating Library Entries...')
     for current_entry in library_entries:
-        current_profile = models.Profile.objects.filter(user__username=current_entry['owner']).first()
-        current_listing = models.Listing.objects.get(id=current_entry['listing_id'])
+        current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
+        current_listing = current_entry['listing_obj']
         library_entry = models.ApplicationLibraryEntry(
             owner=current_profile,
             listing=current_listing,
             folder=current_entry['folder'],
             position=current_entry['position'])
         library_entry.save()
-        print('--[{}] creating bookmark for listing [{}]'.format(current_profile.user.username, current_listing.title))
-    print('Finished Library Entries...')
+        # print('--[{}] creating bookmark for listing [{}]'.format(current_profile.user.username, current_listing.title))
 
 
-def create_listing(listing_builder_dict):
+def create_listing_icons(listing_builder_dict, object_cache):
     """
     Create Listing Helper Function
     """
@@ -95,41 +142,58 @@ def create_listing(listing_builder_dict):
         Image.open(TEST_IMG_PATH + listing_data['small_icon']['filename']),
         file_extension=listing_data['small_icon']['filename'].split('.')[-1],
         security_marking=listing_data['small_icon']['security_marking'],
-        image_type=models.ImageType.objects.get(name='small_icon').name)
+        image_type_obj=object_cache['ImageType.small_icon'])
+
+    object_cache['Listing[{}].small_icon'.format(listing_data['title'])] = small_icon
 
     large_icon = models.Image.create_image(
         Image.open(TEST_IMG_PATH + listing_data['large_icon']['filename']),
         file_extension=listing_data['large_icon']['filename'].split('.')[-1],
         security_marking=listing_data['large_icon']['security_marking'],
-        image_type=models.ImageType.objects.get(name='large_icon').name)
+        image_type_obj=object_cache['ImageType.large_icon'])
+
+    object_cache['Listing[{}].large_icon'.format(listing_data['title'])] = large_icon
 
     banner_icon = models.Image.create_image(
         Image.open(TEST_IMG_PATH + listing_data['banner_icon']['filename']),
         file_extension=listing_data['banner_icon']['filename'].split('.')[-1],
         security_marking=listing_data['banner_icon']['security_marking'],
-        image_type=models.ImageType.objects.get(name='banner_icon').name)
+        image_type_obj=object_cache['ImageType.banner_icon'])
+
+    object_cache['Listing[{}].banner_icon'.format(listing_data['title'])] = banner_icon
 
     large_banner_icon = models.Image.create_image(
         Image.open(TEST_IMG_PATH + listing_data['large_banner_icon']['filename']),
         file_extension=listing_data['large_banner_icon']['filename'].split('.')[-1],
         security_marking=listing_data['large_banner_icon']['security_marking'],
-        image_type=models.ImageType.objects.get(name='large_banner_icon').name)
+        image_type_obj=object_cache['ImageType.large_banner_icon'])
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    #                           Listing
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    object_cache['Listing[{}].large_banner_icon'.format(listing_data['title'])] = large_banner_icon
+
+
+def create_listing(listing_builder_dict, object_cache):
+    """
+    Create Listing Helper Function
+
+    10-01-2017 - Total Database Calls: 11842
+    10-02-2017 - Total Database Calls: 7737
+
+
+    """
+    listing_data = listing_builder_dict['listing']
+
     listing = models.Listing(
         title=listing_data['title'],
-        agency=models.Agency.objects.get(short_name=listing_data['agency']),
-        listing_type=models.ListingType.objects.get(title=listing_data['listing_type']),
+        agency=object_cache['Agency.{}'.format(listing_data['agency'])],
+        listing_type=object_cache['ListingType.{}'.format(listing_data['listing_type'])],
         description=listing_data['description'],
         launch_url=listing_data['launch_url'].format_map({'DEMO_APP_ROOT': DEMO_APP_ROOT}),
         version_name=listing_data['version_name'],
         unique_name=listing_data['unique_name'],
-        small_icon=small_icon,
-        large_icon=large_icon,
-        banner_icon=banner_icon,
-        large_banner_icon=large_banner_icon,
+        small_icon=object_cache['Listing[{}].small_icon'.format(listing_data['title'])],
+        large_icon=object_cache['Listing[{}].large_icon'.format(listing_data['title'])],
+        banner_icon=object_cache['Listing[{}].banner_icon'.format(listing_data['title'])],
+        large_banner_icon=object_cache['Listing[{}].large_banner_icon'.format(listing_data['title'])],
         what_is_new=listing_data['what_is_new'],
         description_short=listing_data['description_short'],
         usage_requirements=listing_data['usage_requirements'],
@@ -146,13 +210,13 @@ def create_listing(listing_builder_dict):
     #                           Contacts
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     for current_contact in listing_data['contacts']:
-        listing.contacts.add(models.Contact.objects.get(email=current_contact))
+        listing.contacts.add(object_cache['Contact.{}'.format(current_contact)])
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #                           Owners
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     for current_owner in listing_data['owners']:
-        listing.owners.add(models.Profile.objects.get(user__username=current_owner))
+        listing.owners.add(object_cache['Profile.{}'.format(current_owner)])
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #                           Categories
@@ -163,7 +227,10 @@ def create_listing(listing_builder_dict):
     #                           Tags
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     for current_tag in listing_data['tags']:
-        current_tag_obj, created = models.Tag.objects.get_or_create(name=current_tag)
+        if object_cache.get('Tag.{}'.format(current_tag)):
+            current_tag_obj = object_cache['Tag.{}'.format(current_tag)]
+        else:
+            current_tag_obj, created = models.Tag.objects.get_or_create(name=current_tag)
         listing.tags.add(current_tag_obj)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #                           Screenshots
@@ -173,13 +240,13 @@ def create_listing(listing_builder_dict):
             Image.open(TEST_IMG_PATH + current_screenshot_entry['small_image']['filename']),
             file_extension=current_screenshot_entry['small_image']['filename'].split('.')[-1],
             security_marking=current_screenshot_entry['small_image']['security_marking'],
-            image_type=models.ImageType.objects.get(name='small_screenshot').name)
+            image_type=object_cache['ImageType.small_screenshot'].name)
 
         large_image = models.Image.create_image(
             Image.open(TEST_IMG_PATH + current_screenshot_entry['large_image']['filename']),
             file_extension=current_screenshot_entry['large_image']['filename'].split('.')[-1],
             security_marking=current_screenshot_entry['large_image']['security_marking'],
-            image_type=models.ImageType.objects.get(name='large_screenshot').name)
+            image_type=object_cache['ImageType.large_screenshot'].name)
 
         screenshot = models.Screenshot(small_image=small_image,
                                        large_image=large_image,
@@ -192,14 +259,13 @@ def create_listing(listing_builder_dict):
     #                           Document URLs
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     for current_doc_url_entry in listing_data['doc_urls']:
-        current_doc_url_obj = models.DocUrl(name=current_doc_url_entry['name'], url=current_doc_url_entry['url'],
-            listing=listing)
+        current_doc_url_obj = models.DocUrl(name=current_doc_url_entry['name'], url=current_doc_url_entry['url'], listing=listing)
         current_doc_url_obj.save()
 
     # listing_activity
     for listing_activity_entry in listing_builder_dict['listing_activity']:
         listing_activity_action = listing_activity_entry['action']
-        listing_activity_author = models.Profile.objects.get(user__username=listing_activity_entry['author'])
+        listing_activity_author = object_cache['Profile.{}'.format(listing_activity_entry['author'])]
 
         if listing_activity_action == 'CREATED':
             listing_model_access.create_listing(listing_activity_author, listing)
@@ -210,12 +276,25 @@ def create_listing(listing_builder_dict):
         elif listing_activity_action == 'APPROVED':
             listing_model_access.approve_listing(listing_activity_author, listing)
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    #                           Reviews
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # listing_review_batch
-    create_listing_review_batch(listing, listing_builder_dict['listing_review_batch'])
     return listing
+
+
+def show_db_calls(db_connection, print_queries=False):
+    number_of_calls = len(db_connection.queries)
+    if print_queries:
+        [print(query) for query in db_connection.queries]
+
+    db_connection.queries_log.clear()
+    return number_of_calls
+
+
+def load_yaml_file(filename):
+    with open(os.path.join(TEST_DATA_PATH, filename), 'r') as stream:
+        try:
+            # TODO: Use Stream API ?
+            return yaml.load(stream)
+        except yaml.YAMLError as exc:
+            raise exc
 
 
 def run():
@@ -224,11 +303,9 @@ def run():
     """
     total_start_time = time_ms()
 
-    # Recreate Index Mapping
-    model_access_es.recreate_index_mapping()
-
-    # Create Groups
-    models.Profile.create_groups()
+    db_connection = transaction.get_connection()
+    db_connection.queries_limit = 100000
+    db_connection.queries_log = deque(maxlen=db_connection.queries_limit)
 
     ############################################################################
     #                           Security Markings
@@ -247,103 +324,151 @@ def run():
     ts_stghn = 'TOP SECRET//SIERRA//TANGO//GOLF//HOTEL//NOVEMBER'    # noqa: F841
 
     ############################################################################
+    #                           Loading Data Files
+    ############################################################################
+    object_cache = {}
+
+    print('--Loading Files')
+    section_file_start_time = time_ms()
+
+    categories_data = load_yaml_file('categories.yaml')
+    contact_data = load_yaml_file('contacts.yaml')
+    profile_data = load_yaml_file('profile.yaml')
+    listings_data = load_yaml_file('listings.yaml')
+    listing_types = load_yaml_file('listing_types.yaml')
+    image_types = load_yaml_file('image_types.yaml')
+
+    agency_data = [
+        {'short_name': 'Minitrue',
+         'title': 'Ministry of Truth',
+         'icon.filename': 'ministry_of_truth.jpg'},
+        {'short_name': 'Minipax',
+        'title': 'Ministry of Peace',
+        'icon.filename': 'ministry_of_peace.png'},
+        {'short_name': 'Miniluv',
+        'title': 'Ministry of Love',
+        'icon.filename': 'ministry_of_love.jpeg'},
+        {'short_name': 'Miniplen',
+        'title': 'Ministry of Plenty',
+        'icon.filename': 'ministry_of_plenty.png'},
+        {'short_name': 'Test',
+        'title': 'Test',
+        'icon.filename': 'ministry_of_plenty.png'},
+        {'short_name': 'Test 1',
+        'title': 'Test 1',
+        'icon.filename': 'ministry_of_plenty.png'},
+        {'short_name': 'Test2',
+        'title': 'Test 2',
+        'icon.filename': 'ministry_of_plenty.png'},
+        {'short_name': 'Test 3',
+        'title': 'Test 3',
+        'icon.filename': 'ministry_of_plenty.png'},
+        {'short_name': 'Test 4',
+        'title': 'Test 4',
+        'icon.filename': 'ministry_of_plenty.png'}
+    ]
+
+    print('-----Took: {} ms'.format(time_ms() - section_file_start_time))
+
+    ############################################################################
+    #                           Recreate Index Mapping
+    ############################################################################
+    print('--Recreate Index Mapping')
+    section_file_start_time = time_ms()
+
+    model_access_es.recreate_index_mapping()
+    print('-----Took: {} ms'.format(time_ms() - section_file_start_time))
+
+    ############################################################################
+    #                           Groups
+    ############################################################################
+    print('--Creating Groups')
+    section_file_start_time = time_ms()
+    models.Profile.create_groups()
+
+    print('-----Took: {} ms'.format(time_ms() - section_file_start_time))
+    show_db_calls(db_connection)
+
+    ############################################################################
     #                           Categories
     ############################################################################
-    with transaction.atomic():
-        categories_data = None
-        with open(os.path.join(TEST_DATA_PATH, 'categories.yaml'), 'r') as stream:
-            try:
-                categories_data = yaml.load(stream)  # TODO: Use Stream API
-            except yaml.YAMLError as exc:
-                print(exc)
+    print('--Creating Categories')
+    section_start_time = time_ms()
 
+    with transaction.atomic():
         for current_category in categories_data['categories']:
             current_category_obj = models.Category(title=current_category['title'], description=current_category['description'])
             current_category_obj.save()
 
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
     ############################################################################
     #                           Contact Types and Contacts
     ############################################################################
+    print('--Creating Contact Types and Contacts')
+    section_start_time = time_ms()
     with transaction.atomic():
-        contact_data = None
-        with open(os.path.join(TEST_DATA_PATH, 'contacts.yaml'), 'r') as stream:
-            try:
-                contact_data = yaml.load(stream)  # TODO: Use Stream API
-            except yaml.YAMLError as exc:
-                print(exc)
-
         for contact_type in contact_data['contact_types']:
             current_contact_type_obj = models.ContactType(name=contact_type)
             current_contact_type_obj.save()
+
+            object_cache['ContactType.{}'.format(contact_type)] = current_contact_type_obj
 
         for current_contact in contact_data['contacts']:
             if not models.Contact.objects.filter(email=current_contact['email']).exists():
                 current_contact_obj = models.Contact(name=current_contact['name'],
                                                      organization=current_contact['organization'],
-                                                     contact_type=models.ContactType.objects.get(
-                    name=current_contact['contact_type']),
+                                                     contact_type=object_cache['ContactType.{}'.format(current_contact['contact_type'])],
                     email=current_contact['email'],
                     unsecure_phone=current_contact['unsecure_phone'],
                     secure_phone=current_contact['secure_phone'])
                 current_contact_obj.save()
 
+                object_cache['Contact.{}'.format(current_contact['email'])] = current_contact_obj
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
     ############################################################################
     #                           Listing Types
     ############################################################################
+    print('--Creating Listing Types')
+    section_start_time = time_ms()
     with transaction.atomic():
-        web_app = models.ListingType(title='Web Application', description='web applications')
-        web_app.save()
+        for listing_type in listing_types['listing_types']:
+            listing_type_object = models.ListingType(title=listing_type['title'], description=listing_type['description'])
+            listing_type_object.save()
+            object_cache['ListingType.{}'.format(listing_type['title'])] = listing_type_object
 
-        widget = models.ListingType(title='Widget', description='widget things')
-        widget.save()
-
-        desktop_app = models.ListingType(title='Desktop App', description='desktop app')
-        desktop_app.save()
-
-        web_services = models.ListingType(title='Web Services', description='web services')
-        web_services.save()
-
-        code_library = models.ListingType(title='Code Library', description='code library')
-        code_library.save()
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
     #                           Image Types
     ############################################################################
-    # Note: these image sizes do not represent those that should be used in
-    # production
+    # Note: these image sizes do not represent those that should be used in production
+    print('--Creating Image Types')
+    section_start_time = time_ms()
     with transaction.atomic():
-        small_icon_type = models.ImageType(name='small_icon', max_size_bytes='4096')
-        small_icon_type.save()
+        for image_type in image_types['image_types']:
+            image_type_obj = models.ImageType(name=image_type['name'], max_size_bytes=image_type['max_size_bytes'])
+            image_type_obj.save()
+            object_cache['ImageType.{}'.format(image_type['name'])] = image_type_obj
 
-        large_icon_type = models.ImageType(name='large_icon', max_size_bytes='8192')
-        large_icon_type.save()
-
-        banner_icon_type = models.ImageType(name='banner_icon', max_size_bytes='2097152')
-        banner_icon_type.save()
-
-        large_banner_icon_type = models.ImageType(name='large_banner_icon', max_size_bytes='2097152')
-        large_banner_icon_type.save()
-
-        small_screenshot_type = models.ImageType(name='small_screenshot', max_size_bytes='1048576')
-        small_screenshot_type.save()
-
-        large_screenshot_type = models.ImageType(name='large_screenshot', max_size_bytes='1048576')
-        large_screenshot_type.save()
-
-        intent_icon_type = models.ImageType(name='intent_icon', max_size_bytes='2097152')
-        intent_icon_type.save()
-
-        agency_icon_type = models.ImageType(name='agency_icon', max_size_bytes='2097152')
-        agency_icon_type.save()
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
     #                           Intents
     ############################################################################
     # TODO: more realistic data
+    print('--Creating Intents')
+    section_start_time = time_ms()
     with transaction.atomic():
         img = Image.open(TEST_IMG_PATH + 'android.png')
         icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type=intent_icon_type.name)
+            security_marking='UNCLASSIFIED', image_type=object_cache['ImageType.intent_icon'].name)
         i = models.Intent(action='/application/json/view',
             media_type='vnd.ozp-intent-v1+json.json',
             label='view',
@@ -356,94 +481,53 @@ def run():
             icon=icon)
         i.save()
 
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
     ############################################################################
     #                           Organizations
     ############################################################################
+    print('--Creating Organizations')
+    section_start_time = time_ms()
     with transaction.atomic():
-        # Minitrue - Ministry of Truth
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_truth.jpg')
-        icon = models.Image.create_image(img, file_extension='jpg',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        minitrue = models.Agency(title='Ministry of Truth', short_name='Minitrue', icon=icon)
-        minitrue.save()
+        for agency_record in agency_data:
+            img = Image.open(TEST_IMG_PATH + agency_record['icon.filename'])
+            icon = models.Image.create_image(img,
+                file_extension=agency_record['icon.filename'].split(".")[-1],
+                security_marking=agency_record.get('icon.security_marking', 'UNCLASSIFIED'),
+                image_type=object_cache['ImageType.agency_icon'])
+            agency_object = models.Agency(title=agency_record['title'], short_name=agency_record['short_name'], icon=icon)
+            agency_object.save()
+            object_cache['Agency.{}'.format(agency_record['short_name'])] = agency_object
 
-        # Minipax - Ministry of Peace
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_peace.png')
-        icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        minipax = models.Agency(title='Ministry of Peace', short_name='Minipax',
-            icon=icon)
-        minipax.save()
-
-        # Miniluv - Ministry of Love
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_love.jpeg')
-        icon = models.Image.create_image(img, file_extension='jpeg',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        miniluv = models.Agency(title='Ministry of Love', short_name='Miniluv', icon=icon)
-        miniluv.save()
-
-        # Miniplen - Ministry of Plenty
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_plenty.png')
-        icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        miniplenty = models.Agency(title='Ministry of Plenty', short_name='Miniplen', icon=icon)
-        miniplenty.save()
-
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_plenty.png')
-        icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        test = models.Agency(title='Test', short_name='Test', icon=icon)
-        test.save()
-
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_plenty.png')
-        icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        test1 = models.Agency(title='Test 1', short_name='Test 1', icon=icon)
-        test1.save()
-
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_plenty.png')
-        icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        test2 = models.Agency(title='Test 2', short_name='Test2', icon=icon)
-        test2.save()
-
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_plenty.png')
-        icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        test3 = models.Agency(title='Test 3', short_name='Test 3', icon=icon)
-        test3.save()
-
-        img = Image.open(TEST_IMG_PATH + 'ministry_of_plenty.png')
-        icon = models.Image.create_image(img, file_extension='png',
-            security_marking='UNCLASSIFIED', image_type='agency_icon')
-        test4 = models.Agency(title='Test 4', short_name='Test 4', icon=icon)
-        test4.save()
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
     #                               Tags
     ############################################################################
+    print('--Creating Tags')
+    section_start_time = time_ms()
     with transaction.atomic():
-        demo = models.Tag(name='demo')
-        demo.save()
+        tag_names = ['demo', 'example']
 
-        example = models.Tag(name='example')
-        example.save()
+        for tag_name in tag_names:
+            tag_object = models.Tag(name=tag_name)
+            tag_object.save()
+            object_cache['Tag.{}'.format(tag_name)] = tag_object
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
     #                               Profiles
     ############################################################################
+    print('--Creating Profiles')
+    section_start_time = time_ms()
     with transaction.atomic():
-        profile_ref = {}
-        profile_data = None
-        with open(os.path.join(TEST_DATA_PATH, 'profile.yaml'), 'r') as stream:
-            try:
-                profile_data = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-
         for current_profile_data in profile_data:
             access_control = json.dumps(current_profile_data['access_control'])
-            profile_ref[current_profile_data['username']] = models.Profile.create_user(current_profile_data['username'],  # noqa: F841
+            profile_obj = models.Profile.create_user(current_profile_data['username'],  # noqa: F841
                 email=current_profile_data['email'],
                 display_name=current_profile_data['display_name'],
                 bio=current_profile_data['bio'],
@@ -453,21 +537,27 @@ def run():
                 groups=current_profile_data['groups'],
                 dn=current_profile_data['dn']
             )
+            object_cache['Profile.{}'.format(current_profile_data['username'])] = profile_obj
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
     ############################################################################
     #                           System Notifications
     ############################################################################
+    print('--Creating System Notifications')
+    section_start_time = time_ms()
     with transaction.atomic():
         # create some notifications that expire next week
         next_week = datetime.datetime.now() + datetime.timedelta(days=7)
         eastern = pytz.timezone('US/Eastern')
         next_week = eastern.localize(next_week)
-        n1 = notification_model_access.create_notification(profile_ref['wsmith'],  # noqa: F841
+        n1 = notification_model_access.create_notification(object_cache['Profile.{}'.format('wsmith')],  # noqa: F841
                                                            next_week,
                                                            'System will be going down for approximately 30 minutes on X/Y at 1100Z')
 
-        n2 = notification_model_access.create_notification(profile_ref['julia'],  # noqa: F841
+        n2 = notification_model_access.create_notification(object_cache['Profile.{}'.format('julia')],  # noqa: F841
                                                            next_week,
                                                            'System will be functioning in a degredaded state between 1800Z-0400Z on A/B')
 
@@ -475,57 +565,101 @@ def run():
         last_week = datetime.datetime.now() - datetime.timedelta(days=7)
         last_week = eastern.localize(last_week)
 
-        n1 = notification_model_access.create_notification(profile_ref['wsmith'],  # noqa: F841
+        n1 = notification_model_access.create_notification(object_cache['Profile.{}'.format('wsmith')],  # noqa: F841
                                                            last_week,
                                                            'System will be going down for approximately 30 minutes on C/D at 1700Z')
 
-        n2 = notification_model_access.create_notification(profile_ref['julia'],  # noqa: F841
+        n2 = notification_model_access.create_notification(object_cache['Profile.{}'.format('julia')],  # noqa: F841
                                                            last_week,
                                                            'System will be functioning in a degredaded state between 2100Z-0430Z on F/G')
 
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
     # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
     # ===========================================================================
-    #                           Listings
-    #                           Listings from File
+    #                           Listings Icons
     # ===========================================================================
-    with transaction.atomic():  # Maybe too large of a transaction
-        listings_data = None
-        with open(os.path.join(TEST_DATA_PATH, 'listings.yaml'), 'r') as stream:
-            try:
-                listings_data = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
+    library_entries = []
+    review_entries = []
 
-        library_entries = []
+    print('--Creating Listings Icons')
+    listing_db_call_total = 0
+
+    section_start_time = time_ms()
+    with transaction.atomic():  # Maybe too large of a transaction
         for current_listing_data in listings_data:
-            listing_obj = create_listing(current_listing_data)
+            listing_obj = create_listing_icons(current_listing_data, object_cache)
+            db_calls = show_db_calls(db_connection, False)
+            listing_db_call_total = listing_db_call_total + db_calls
+
+    print('---Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Total Database Calls: {}'.format(listing_db_call_total))
+
+    # ===========================================================================
+    #                           Listings
+    # ===========================================================================
+    print('--Creating Listings')
+    listing_db_call_total = 0
+    temp_counter = 0
+
+    section_start_time = time_ms()
+    with transaction.atomic():  # Maybe too large of a transaction
+        for current_listing_data in listings_data:
+            temp_counter = temp_counter + 1
+            listing_obj = create_listing(current_listing_data, object_cache)
+
+            if current_listing_data['listing_review_batch']:
+                review_entry = {}
+                review_entry['listing_obj'] = listing_obj
+                review_entry['listing_review_batch'] = current_listing_data['listing_review_batch']
+                review_entries.append(review_entry)
 
             listing_id = listing_obj.id
             listing_library_entries = current_listing_data['library_entries']
 
             if listing_library_entries:
-
                 for listing_library_entry in listing_library_entries:
-                    listing_library_entry['listing_id'] = listing_id
+                    listing_library_entry['listing_obj'] = listing_obj
                     library_entries.append(listing_library_entry)
+
+            db_calls = show_db_calls(db_connection, False)
+            listing_db_call_total = listing_db_call_total + db_calls
+            print('----{} \t DB Calls: {}'.format(current_listing_data['listing']['title'], db_calls))
+
+    print('--Creating {} Listings took: {} ms'.format(temp_counter, time_ms() - section_start_time))
+    print('---Total Database Calls: {}'.format(listing_db_call_total))
+
+    ############################################################################
+    #                           Reviews
+    ############################################################################
+    print('--Creating Reviews')
+    section_start_time = time_ms()
+    with transaction.atomic():
+        for review_entry in review_entries:
+            create_listing_review_batch(review_entry['listing_obj'], review_entry['listing_review_batch'], object_cache)
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
     #                           Library (bookmark listings)
     ############################################################################
+    print('--Creating Library')
+    section_start_time = time_ms()
     with transaction.atomic():
-        create_library_entries(library_entries)
+        create_library_entries(library_entries, object_cache)
 
-        for current_id in [entry['listing_id'] for entry in library_entries]:
-            current_listing = models.Listing.objects.get(id=current_id)
+        for library_entry in library_entries:
+            current_listing = library_entry['listing_obj']
             current_listing_owner = current_listing.owners.first()
 
-            print('={} Creating Notification for {}='.format(current_listing_owner.user.username, current_listing.title))
-
+            #  print('={} Creating Notification for {}='.format(current_listing_owner.user.username, current_listing.title))
             listing_notification = notification_model_access.create_notification(current_listing_owner,  # noqa: F841
                                                                           next_week,
                                                                           '{} update next week'.format(current_listing.title),
                                                                           listing=current_listing)
-
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
     ############################################################################
     #                           Subscription
     ############################################################################
@@ -548,12 +682,19 @@ def run():
     ############################################################################
     #                           Recommendations
     ############################################################################
+    print('--Creating Recommendations')
+    section_start_time = time_ms()
     sample_data_recommender = RecommenderDirectory()
     sample_data_recommender.recommend('baseline,graph_cf')
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
+    ############################################################################
+    #                           End of script
+    ############################################################################
     total_end_time = time_ms()
-
     print('Sample Data Generator took: {} ms'.format(total_end_time - total_start_time))
+
 
 if __name__ == "__main__":
     run()

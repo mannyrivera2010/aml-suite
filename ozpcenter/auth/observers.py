@@ -1,8 +1,12 @@
 """
 Observers
 """
+import logging
 from ozpcenter.pubsub import Observer
+
 # import ozpcenter.api.notification.model_access as notification_model_access
+# Get an instance of a logger
+logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
 class AuthObserver(Observer):
@@ -11,7 +15,7 @@ class AuthObserver(Observer):
         return ['profile_created']
 
     def execute(self, event_type, **kwargs):
-        print('AuthObserver message: event_type:{}, kwards:{}'.format(event_type, kwargs))
+        logger.debug('AuthObserver message: event_type:{}, kwards:{}'.format(event_type, kwargs))
 
     def profile_created(self, profile=None):
         """
