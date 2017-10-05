@@ -187,30 +187,6 @@ class ShortListingSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('unique_name', 'title', 'id', 'agency', 'small_icon', 'is_deleted')
 
 
-class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
-    agency = AgencySerializer(required=False)
-    large_banner_icon = ImageSerializer(required=False, allow_null=True)
-    banner_icon = ImageSerializer(required=False, allow_null=True)
-
-    class Meta:
-        model = models.Listing
-        fields = ('id',
-                  'title',
-                  'agency',
-                  'avg_rate',
-                  'total_reviews',
-                  'is_private',
-                  'is_bookmarked',
-                  'gave_feedback',
-                  'description_short',
-                  'security_marking',
-                  'launch_url',
-                  'large_banner_icon',
-                  'banner_icon',
-                  'unique_name',
-                  'is_enabled')
-
-
 class ListingActivitySerializer(serializers.ModelSerializer):
     author = profile_serializers.ShortProfileSerializer()
     listing = ShortListingSerializer()
@@ -308,6 +284,7 @@ class CreateListingProfileSerializer(serializers.ModelSerializer):
 
 
 def validate_listing(serializer_instance, data):
+    # TODO Put in listing model_access.py
     access_control_instance = plugin_manager.get_system_access_control_plugin()
     profile = generic_model_access.get_profile(serializer_instance.context['request'].user.username)
 
@@ -512,6 +489,7 @@ def validate_listing(serializer_instance, data):
 
 
 def create_listing(serializer_instance, validated_data):
+    # TODO Put in listing model_access.py
     title = validated_data['title']
     user = generic_model_access.get_profile(serializer_instance.context['request'].user.username)
 
@@ -612,6 +590,7 @@ def create_listing(serializer_instance, validated_data):
 
 
 def update_listing(serializer_instance, instance, validated_data):
+    # TODO Put in listing model_access.py
     user = generic_model_access.get_profile(serializer_instance.context['request'].user.username)
 
     if user.highest_role() not in ['APPS_MALL_STEWARD', 'ORG_STEWARD']:
@@ -916,6 +895,48 @@ def update_listing(serializer_instance, instance, validated_data):
     return instance
 
 
+class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
+    agency = AgencySerializer(required=False)
+    large_banner_icon = ImageSerializer(required=False, allow_null=True)
+    banner_icon = ImageSerializer(required=False, allow_null=True)
+
+    class Meta:
+        model = models.Listing
+        fields = ('id',
+                  'title',
+                  'agency',
+                  'avg_rate',
+                  'total_reviews',
+                  'is_private',
+                  'is_bookmarked',
+                  'gave_feedback',
+                  'description_short',
+                  'security_marking',
+                  'launch_url',
+                  'large_banner_icon',
+                  'banner_icon',
+                  'unique_name',
+                  'is_enabled')
+
+    def _is_bookmarked(self, request_user, request_listing):
+        # TODO: put in listing model_access.py call from there > creative name for method
+        bookmarks = models.ApplicationLibraryEntry.objects.filter(listing=request_listing, owner=request_user)
+        return len(bookmarks) >= 1
+
+    def _gave_feedback(self, request_user, request_listing):
+        # TODO: put in listing model_access.py call from there > creative name for method
+        recommendations = models.RecommendationFeedback.objects.filter(target_listing=request_listing, target_profile=request_user)
+        return len(recommendations) >= 1
+
+    def to_representation(self, data):
+        ret = super(StorefrontListingSerializer, self).to_representation(data)
+        request_user = generic_model_access.get_profile(self.context['request'].user)  # TODO: Get the profile from view request instead of getting it from db again
+
+        ret['gave_feedback'] = self._gave_feedback(request_user, data)
+        ret['is_bookmarked'] = self._is_bookmarked(request_user, data)
+        return ret
+
+
 class CertIssuesField(serializers.ReadOnlyField):
     """
     Read Only Field
@@ -951,10 +972,12 @@ class ListingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def _is_bookmarked(self, request_user, request_listing):
+        # TODO: put in listing model_access.py call from there > creative name for method
         bookmarks = models.ApplicationLibraryEntry.objects.filter(listing=request_listing, owner=request_user)
         return len(bookmarks) >= 1
 
     def _gave_feedback(self, request_user, request_listing):
+        # TODO: put in listing model_access.py call from there > creative name for method
         recommendations = models.RecommendationFeedback.objects.filter(target_listing=request_listing, target_profile=request_user)
         return len(recommendations) >= 1
 
@@ -962,7 +985,7 @@ class ListingSerializer(serializers.ModelSerializer):
         ret = super(ListingSerializer, self).to_representation(data)
 
         anonymize_identifiable_data = system_anonymize_identifiable_data(self.context['request'].user.username)
-        request_user = generic_model_access.get_profile(self.context['request'].user)
+        request_user = generic_model_access.get_profile(self.context['request'].user)  # TODO: Get the profile from view request instead of getting it from db again
 
         if anonymize_identifiable_data:
             ret['contacts'] = []
