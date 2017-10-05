@@ -878,3 +878,71 @@ class ListingApiTest(APITestCase):
         self.assertEqual(current_rejection['author']['user']['username'], 'wsmith')
         self.assertTrue(current_rejection['description'])
         self.assertTrue(current_rejection['author']['display_name'])
+
+    def test_gave_single_user_feedback_listing(self):
+        """
+        betafish user
+        """
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Create a negative feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": 1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertTrue(response.data['gave_feedback'])
+
+        # Login as betaraybill (no feedback given to listing #1)
+        user = generic_model_access.get_profile('betaraybill').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertFalse(response.data['gave_feedback'])
+
+    def test_gave_double_user_feedback_listing(self):
+        """
+        betafish user
+        """
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Create a negative feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": 1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertTrue(response.data['gave_feedback'])
+
+        # Login as betaraybill
+        user = generic_model_access.get_profile('betaraybill').user
+        self.client.force_authenticate(user=user)
+
+        # Create a negative feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": -1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertTrue(response.data['gave_feedback'])
