@@ -1,5 +1,22 @@
 
-### 1.0.82 (None)
+### 1.0.83 (None)
+
+#### Feature  
+* **feedback**:  add new test cases for feedback ([e607c900](https://github.com/aml-development/ozp-backend/commit/e607c900dc5986b62563358a7631177a07b67596))    
+
+#### Fixes  
+* **profile**:  Fix Unit Test ([718a103c](https://github.com/aml-development/ozp-backend/commit/718a103cecc34e266477e786b4ecd82af27eb02e))    
+* **feedback**:  fix storefront returning false for gave_feedback ([f494a48c](https://github.com/aml-development/ozp-backend/commit/f494a48c8e45f9f7d55d441ac7cd3125755d40f9))     
+
+#### Merge Pull Requests  
+* Merge pull request #356 from aml-development/er_feedback ([9748055a](https://github.com/aml-development/ozp-backend/commit/9748055a6c74353f7f591c4f1827390f88820a81))
+* Merge pull request #329 from aml-development/profile_listing ([2540ba98](https://github.com/aml-development/ozp-backend/commit/2540ba9808e1d80bdaf0d264b1b8f2ece086afdf))
+* Merge branch 'master' into profile_listing ([0f52fe4d](https://github.com/aml-development/ozp-backend/commit/0f52fe4d6bbb581beddc05586fd50c8a6dbc97f6))    
+
+#### Documentation  
+* **jenkins**:  Added Jenkins Docs ([8a8259d7](https://github.com/aml-development/ozp-backend/commit/8a8259d7e423ad4801d97928e16b8808c35e76bb))          
+
+### 1.0.82 (2017-10-05)
 
 #### Feature  
 * **githooks**:  Enforce GitHooks for make dev ([c65d766d](https://github.com/aml-development/ozp-backend/commit/c65d766d4859245c8900e51a33d88ab4d15860fb))    
@@ -13,7 +30,10 @@
 ### 1.0.81 (2017-10-05) 
 
 #### Fixes  
-* **release**:  Fix Setup and Release.py ([a8711b60](https://github.com/aml-development/ozp-backend/commit/a8711b609f12086d6c19e5f5a7085179c77a4485))      
+* **release**:  Fix Setup and Release.py ([a8711b60](https://github.com/aml-development/ozp-backend/commit/a8711b609f12086d6c19e5f5a7085179c77a4485))   
+* **feedback**
+  *  fix merge conflicts ([1d02116e](https://github.com/aml-development/ozp-backend/commit/1d02116ebb73dbd65804cfdfc7bc066083131183))
+  *  allow is_bookmarked and gave_feedback field to be unique to user ([1c15175c](https://github.com/aml-development/ozp-backend/commit/1c15175cd1549329dfcdeda83fc2f2745bb4f3d3))       
 
 #### Documentation 
 * **readme**
@@ -32,7 +52,8 @@
   *  Fix unittest and Refactor sample data ([f06c6558](https://github.com/aml-development/ozp-backend/commit/f06c65587a9b878d625e87b6df434bf8f5c3c8db))
   *  Updated makefile ([ab6be72d](https://github.com/aml-development/ozp-backend/commit/ab6be72d573dbbeec539bf2975c4c056a2dfdd66))
   *  Upgrade Requirements and refactored code ([89e0fd42](https://github.com/aml-development/ozp-backend/commit/89e0fd4267a2b87261ee70fecf4a6a27339cdf88))     
-* **notifications**:  create new contact the POCs from a listing ([006f7ed1](https://github.com/aml-development/ozp-backend/commit/006f7ed125502f1575189dff2132b87aec940f8b))      
+* **notifications**:  create new contact the POCs from a listing ([006f7ed1](https://github.com/aml-development/ozp-backend/commit/006f7ed125502f1575189dff2132b87aec940f8b))    
+* **feedback**:  track if listing has been given feedback ([bc58cf1b](https://github.com/aml-development/ozp-backend/commit/bc58cf1b342058c150891d556531fd1aae19f806))      
 
 #### Merge Pull Requests  
 * Merge pull request #357 from aml-development/upgrade_deps ([e8d41c6b](https://github.com/aml-development/ozp-backend/commit/e8d41c6b04434533b295252835e77c489d99ebd5))
@@ -41,12 +62,17 @@
 #### Documentation  
 * **readme**:  Add readthedocs Style Docs ([309f2934](https://github.com/aml-development/ozp-backend/commit/309f29342828c88f68a308d58f2b1447400e1d80))          
 
-### 1.0.79 (2017-09-28) 
+### 1.0.79 (2017-09-28)
+
+#### Feature  
+* **recommend_feedback**:  fixed storefront logic and migration conflict ([fd7d83b1](https://github.com/aml-development/ozp-backend/commit/fd7d83b11f03f1270cf02f51de3b6c926a578f5b))    
+* **feedback**:  Add Recommendation Feedback ([aa4cfd67](https://github.com/aml-development/ozp-backend/commit/aa4cfd67349ce90c278936ed3237769ed975c103))    
 
 #### Fixes  
 * **preferences**:  set default to true instead of false ([33a693c6](https://github.com/aml-development/ozp-backend/commit/33a693c65fecdc02418dae0094af11d8854a43ef))     
 
 #### Merge Pull Requests  
+* Merge branch 'master' into er_feedback ([ebdeeedd](https://github.com/aml-development/ozp-backend/commit/ebdeeeddcc1877ea8d78634ba3d92e8ca6a5b62a))
 * Merge pull request #350 from aml-development/leave_ozp ([0986a1a7](https://github.com/aml-development/ozp-backend/commit/0986a1a7894bf17731b13d23f2c4ed658ff1933e))           
 
 ### 1.0.78 (2017-09-20)   
@@ -242,6 +268,7 @@
 
 #### Fixes  
 * **category**:  Change error message ([f25f439a](https://github.com/aml-development/ozp-backend/commit/f25f439a0f491a14c3e2e9725c2fc68c9fff388c))    
+* **profile**:  Corrected Profiles Listing Endpoint ([a9f808a0](https://github.com/aml-development/ozp-backend/commit/a9f808a053b63c410fa867928c42c01029499fea))    
 
 #### Refactor  
 * **search**:  Added Documentation, Corrected Mapping ([c4307c1f](https://github.com/aml-development/ozp-backend/commit/c4307c1fe02aa5503c4a1ecf8f5f663ec36d93e8))    
