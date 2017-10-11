@@ -74,6 +74,7 @@ class NotificationTypeField(serializers.ReadOnlyField):
     """
     Custom NotificationTypeField
     """
+
     def to_native(self, obj):
         return obj
 

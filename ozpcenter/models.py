@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 Model Definitions for ozpcenter
+
+* Many Models use a custom Manager class to limit returned instances of Model
+
+TODO: Find more effective way to do exclude security_marking
+
 """
 import json
 import logging
@@ -32,6 +37,24 @@ from ozp.storage import media_storage
 
 # Get an instance of a logger
 logger = logging.getLogger('ozp-center.' + str(__name__))
+
+
+def get_user_excluded_orgs(username):
+    """
+    Get user exclude orgs
+    """
+    user = Profile.objects.get(user__username=username)
+    if user.highest_role() == 'APPS_MALL_STEWARD':
+        exclude_orgs = []
+    elif user.highest_role() == 'ORG_STEWARD':
+        user_orgs = user.stewarded_organizations.all()
+        user_orgs = [i.title for i in user_orgs]
+        exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+    else:
+        user_orgs = user.organizations.all()
+        user_orgs = [i.title for i in user_orgs]
+        exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+    return exclude_orgs
 
 
 class ImageType(models.Model):
@@ -98,7 +121,6 @@ class AccessControlImageManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
         queryset = queryset.select_related('image_type')
         return queryset
 
@@ -108,11 +130,6 @@ class AccessControlImageManager(models.Manager):
         return queryset
 
     def for_user(self, username):
-        """
-        Find more effective way to do exclude
-        SELECT * FROM "ozpcenter_image"
-        """
-        # get all images
         objects = super(AccessControlImageManager, self).get_queryset()
 
         # filter out listings by user's access level
@@ -145,7 +162,6 @@ class Image(models.Model):
     file_extension = models.CharField(max_length=16, default='png')
     image_type = models.ForeignKey(ImageType, related_name='images')
 
-    # use a custom Manager class to limit returned Images
     objects = AccessControlImageManager()
 
     def __repr__(self):
@@ -167,6 +183,7 @@ class Image(models.Model):
         Args:
             pil_img: PIL.Image (see https://pillow.readthedocs.org/en/latest/reference/Image.html)
         """
+
         exception = None
         saved_to_db = False
 
@@ -341,20 +358,9 @@ class AccessControlApplicationLibraryEntryManager(models.Manager):
         return self.apply_select_related(queryset)
 
     def for_user(self, username):
-        # get all listings
         objects = super(AccessControlApplicationLibraryEntryManager, self).get_queryset()
         # filter out private listings
-        user = Profile.objects.get(user__username=username)
-        if user.highest_role() == 'APPS_MALL_STEWARD':
-            exclude_orgs = []
-        elif user.highest_role() == 'ORG_STEWARD':
-            user_orgs = user.stewarded_organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
-        else:
-            user_orgs = user.organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+        exclude_orgs = get_user_excluded_orgs(username)
 
         objects = objects.filter(owner__user__username=username)
         objects = objects.filter(listing__is_enabled=True)
@@ -372,23 +378,10 @@ class AccessControlApplicationLibraryEntryManager(models.Manager):
         return objects
 
     def for_user_organization_minus_security_markings(self, username, filter_for_user=False):
-        """
-        This method is used for recommendations
-        """
-        # get all listings
         objects = super(AccessControlApplicationLibraryEntryManager, self).get_queryset()
+
         # filter out private listings
-        user = Profile.objects.get(user__username=username)
-        if user.highest_role() == 'APPS_MALL_STEWARD':
-            exclude_orgs = []
-        elif user.highest_role() == 'ORG_STEWARD':
-            user_orgs = user.stewarded_organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
-        else:
-            user_orgs = user.organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+        exclude_orgs = get_user_excluded_orgs(username)
 
         objects = objects.exclude(listing__is_private=True,
                                   listing__agency__in=exclude_orgs)
@@ -417,7 +410,6 @@ class ApplicationLibraryEntry(models.Model):
     listing = models.ForeignKey('Listing', related_name='application_library_entries')
     position = models.PositiveIntegerField(default=0)
 
-    # use a custom Manager class to limit returned Listings
     objects = AccessControlApplicationLibraryEntryManager()
 
     def __str__(self):
@@ -496,7 +488,6 @@ class ContactManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
         queryset = queryset.select_related('contact_type')
         return queryset
 
@@ -710,6 +701,7 @@ class AccessControlReviewManager(models.Manager):
         queryset = queryset.select_related('listing__required_listings')
         queryset = queryset.select_related('listing__last_activity')
         queryset = queryset.select_related('listing__current_rejection')
+
         queryset = queryset.select_related('author')
         queryset = queryset.select_related('author__user')
 
@@ -737,25 +729,23 @@ class Review(models.Model):
     """
     A Review made on a Listing
     """
-    # Self Referencing
     review_parent = models.ForeignKey('Review', null=True, blank=True)
 
     text = models.CharField(max_length=constants.MAX_VALUE_LENGTH, blank=True, null=True)
-    rate = models.IntegerField(validators=[
-        MinValueValidator(1),
-        MaxValueValidator(5)
-    ]
+    rate = models.IntegerField(
+        validators=[MinValueValidator(1),
+                    MaxValueValidator(5)]
     )
     listing = models.ForeignKey('Listing', related_name='reviews')
     author = models.ForeignKey('Profile', related_name='reviews')
 
+    # TODO: change this back after the database migration
     # edited_date = models.DateTimeField(auto_now=True)
     edited_date = models.DateTimeField(default=utils.get_now_utc)
     created_date = models.DateTimeField(default=utils.get_now_utc)
 
     # use a custom Manager class to limit returned Reviews
     objects = AccessControlReviewManager()
-    # TODO: change this back after the database migration
 
     def validate_unique(self, exclude=None):
         queryset = Review.objects.filter(author=self.author, listing=self.listing)
@@ -1015,7 +1005,6 @@ class AccessControlListingManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
         queryset = queryset.select_related('agency')
         queryset = queryset.select_related('agency__icon')
         queryset = queryset.select_related('listing_type')
@@ -1072,20 +1061,10 @@ class AccessControlListingManager(models.Manager):
         return self.apply_select_related(queryset)
 
     def for_user(self, username):
-        # get all listings
         objects = super(AccessControlListingManager, self).get_queryset()
+
         # filter out private listings
-        user = Profile.objects.get(user__username=username)
-        if user.highest_role() == 'APPS_MALL_STEWARD':
-            exclude_orgs = []
-        elif user.highest_role() == 'ORG_STEWARD':
-            user_orgs = user.stewarded_organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
-        else:
-            user_orgs = user.organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+        exclude_orgs = get_user_excluded_orgs(username)
 
         objects = objects.exclude(is_private=True, agency__in=exclude_orgs)
         objects = self.apply_select_related(objects)
@@ -1102,20 +1081,9 @@ class AccessControlListingManager(models.Manager):
         return objects
 
     def for_user_organization_minus_security_markings(self, username):
-        # get all listings
         objects = super(AccessControlListingManager, self).get_queryset()
         # filter out private listings
-        user = Profile.objects.get(user__username=username)
-        if user.highest_role() == 'APPS_MALL_STEWARD':
-            exclude_orgs = []
-        elif user.highest_role() == 'ORG_STEWARD':
-            user_orgs = user.stewarded_organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
-        else:
-            user_orgs = user.organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+        exclude_orgs = get_user_excluded_orgs(username)
 
         objects = objects.exclude(is_private=True, agency__in=exclude_orgs)
         return objects
@@ -1236,11 +1204,16 @@ class Listing(models.Model):
     # private listings can only be viewed by members of the same agency
     is_private = models.BooleanField(default=False)
 
-    # use a custom Manager class to limit returned Listings
     objects = AccessControlListingManager()
 
-    def is_bookmarked(self):
-        return ApplicationLibraryEntry.objects.filter(listing=self).count() >= 1
+    def _is_bookmarked(self):
+        return False
+
+    def _gave_feedback(self):
+        return False
+
+    is_bookmarked = property(_is_bookmarked)
+    gave_feedback = property(_gave_feedback)
 
     def __repr__(self):
         listing_name = None
@@ -1306,7 +1279,6 @@ class AccessControlRecommendationsEntryManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
         queryset = queryset.select_related('target_profile')
         return queryset
 
@@ -1315,21 +1287,11 @@ class AccessControlRecommendationsEntryManager(models.Manager):
         return self.apply_select_related(queryset)
 
     def for_user(self, username):
-        # get all entries
         objects = super(AccessControlRecommendationsEntryManager, self).get_queryset()
 
-        # filter out private listings
         user = Profile.objects.get(user__username=username)
-        if user.highest_role() == 'APPS_MALL_STEWARD':
-            exclude_orgs = []
-        elif user.highest_role() == 'ORG_STEWARD':
-            user_orgs = user.stewarded_organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
-        else:
-            user_orgs = user.organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+        # filter out private listings
+        exclude_orgs = get_user_excluded_orgs(username)
 
         objects = objects.filter(target_profile=user,
                     listing__is_enabled=True,
@@ -1350,21 +1312,11 @@ class AccessControlRecommendationsEntryManager(models.Manager):
         return objects
 
     def for_user_organization_minus_security_markings(self, username):
-        # get all listings
         objects = super(AccessControlRecommendationsEntryManager, self).get_queryset()
-        # filter out private listings
-        user = Profile.objects.get(user__username=username)
 
-        if user.highest_role() == 'APPS_MALL_STEWARD':
-            exclude_orgs = []
-        elif user.highest_role() == 'ORG_STEWARD':
-            user_orgs = user.stewarded_organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
-        else:
-            user_orgs = user.organizations.all()
-            user_orgs = [i.title for i in user_orgs]
-            exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+        user = Profile.objects.get(user__username=username)
+        # filter out private listings
+        exclude_orgs = get_user_excluded_orgs(username)
 
         objects = objects.filter(target_profile=user,
                     listing__is_enabled=True,
@@ -1382,7 +1334,6 @@ class RecommendationsEntry(models.Model):
     target_profile = models.ForeignKey('Profile', related_name='recommendations_profile')
     recommendation_data = models.BinaryField(default=None)
 
-    # use a custom Manager class to limit returned Listings
     objects = AccessControlRecommendationsEntryManager()
 
     def __str__(self):
@@ -1393,6 +1344,88 @@ class RecommendationsEntry(models.Model):
 
     class Meta:
         verbose_name_plural = "recommendations entries"
+
+
+class AccessControlRecommendationFeedbackManager(models.Manager):
+    """
+    Use a custom manager to control access to RecommendationsEntry
+
+    Instead of using models.Listing.objects.all() or .filter(...) etc, use:
+    models.Listing.objects.for_user(user).all() or .filter(...) etc
+
+    This way there is a single place to implement this 'tailored view' logic
+    for listing queries
+    """
+
+    def apply_select_related(self, queryset):
+        queryset = queryset.select_related('target_profile')
+        queryset = queryset.select_related('target_listing')
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(AccessControlRecommendationFeedbackManager, self).get_queryset()
+        return self.apply_select_related(queryset)
+
+    def for_user(self, username):
+        objects = super(AccessControlRecommendationFeedbackManager, self).get_queryset()
+
+        user = Profile.objects.get(user__username=username)
+        # filter out private listings
+        exclude_orgs = get_user_excluded_orgs(username)
+
+        objects = objects.filter(target_profile=user,
+                    target_listing__is_enabled=True,
+                    target_listing__approval_status=Listing.APPROVED,
+                    target_listing__is_deleted=False)
+
+        objects = objects.exclude(target_listing__is_private=True,
+                                  target_listing__agency__in=exclude_orgs)
+
+        # Filter out listings by user's access level
+        ids_to_exclude = []
+        for recommend_feedback_obj in objects:
+            if not recommend_feedback_obj.target_listing.security_marking:
+                logger.debug('Listing {0!s} has no security_marking'.format(recommend_feedback_obj.target_listing.title))
+            if not system_has_access_control(username, recommend_feedback_obj.target_listing.security_marking):
+                ids_to_exclude.append(recommend_feedback_obj.target_listing.id)
+        objects = objects.exclude(target_listing__pk__in=ids_to_exclude)
+        return objects
+
+    def for_user_organization_minus_security_markings(self, username):
+        objects = super(AccessControlRecommendationFeedbackManager, self).get_queryset()
+
+        user = Profile.objects.get(user__username=username)
+        # filter out private listings
+        exclude_orgs = get_user_excluded_orgs(username)
+
+        objects = objects.filter(target_profile=user,
+                    target_listing__is_enabled=True,
+                    target_listing__approval_status=Listing.APPROVED,
+                    target_listing__is_deleted=False)
+
+        objects = objects.exclude(target_listing_is_private=True,
+                                  target_listing__agency__in=exclude_orgs)
+        return objects
+
+
+class RecommendationFeedback(models.Model):
+    """
+    Recommendations Feedback
+    """
+    target_profile = models.ForeignKey('Profile', related_name='recommendation_feedback_profile')
+    target_listing = models.ForeignKey('Listing', related_name='recommendation_feedback_listing')
+    feedback = models.IntegerField(default=0)
+
+    objects = AccessControlRecommendationFeedbackManager()
+
+    def __str__(self):
+        return '{0!s}:RecommendationFeedback({1!s},, {2!s})'.format(self.target_profile, self.feedback, self.target_listing)
+
+    def __repr__(self):
+        return '{0!s}:RecommendationFeedback({1!s}, {2!s})'.format(self.target_profile, self.feedback, self.target_listing)
+
+    class Meta:
+        verbose_name_plural = "recommendation feedback"
 
 
 class AccessControlListingActivityManager(models.Manager):
@@ -1407,7 +1440,6 @@ class AccessControlListingActivityManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
         queryset = queryset.select_related('author')
         queryset = queryset.select_related('listing')
         return queryset
@@ -1417,9 +1449,7 @@ class AccessControlListingActivityManager(models.Manager):
         return self.apply_select_related(queryset)
 
     def for_user(self, username):
-        # get all activities
         all_activities = super(AccessControlListingActivityManager, self).get_queryset()
-        # get all listings for this user
         listings = Listing.objects.for_user(username).all()
         # filter out listing_activities for listings this user cannot see
         filtered_listing_activities = all_activities.filter(listing__in=listings)
@@ -1506,8 +1536,6 @@ class ScreenshotManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
-        # Adding select_related cut db calls from 3167 to 2683
         queryset = queryset.select_related('small_image')
         queryset = queryset.select_related('large_image')
         queryset = queryset.select_related('listing')
@@ -1544,9 +1572,7 @@ class Screenshot(models.Model):
 class ListingType(models.Model):
     """
     The type of a Listing
-
     In NextGen OZP, only two listing types are supported: web apps and widgets
-
     TODO: Auditing for create, update, delete
     """
     title = models.CharField(max_length=50, unique=True)
@@ -1575,8 +1601,6 @@ class NotificationManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
-        # select_related cut down db calls from 717 to 8
         # TODO; Enable after 0013_notification_fill_migrate has been refactored
         # queryset = queryset.select_related('author')
         # queryset = queryset.select_related('author__user')
@@ -1721,8 +1745,6 @@ class NotificationMailBoxManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
-        # select_related cut down db calls from  to
         # queryset = queryset.select_related('target_profile')
         # queryset = queryset.select_related('notification')
         return queryset

@@ -294,11 +294,6 @@ def get_user_listings(username, request, exclude_orgs=None):
 
             }
 
-            if row['bookmark_count']:
-                mapping_dict[row['id']]['is_bookmarked'] = True
-            else:
-                mapping_dict[row['id']]['is_bookmarked'] = False
-
         # Many to Many
         # Categorys
 
@@ -505,11 +500,21 @@ def get_storefront_recommended(username, pre_fetch=True):
 
     # Retrieve Profile Bookmarks and remove bookmarked from recommendation list
     bookmarked_apps_list = set([application_library_entry.listing.id for application_library_entry in models.ApplicationLibraryEntry.objects.for_user(username)])
+    # Retrieve negative feedback and remove from recommendation list
+    negative_feedback_listing_ids = set([recommendation_feedback.target_listing.id for recommendation_feedback in models.RecommendationFeedback.objects.filter(target_profile=profile, feedback=-1)])
 
     listing_ids_list_temp = []
 
     for current_listing_id in listing_ids_list:
-        if current_listing_id not in bookmarked_apps_list:
+        include_flag = True
+
+        if current_listing_id in bookmarked_apps_list:
+            include_flag = False
+
+        if current_listing_id in negative_feedback_listing_ids:
+            include_flag = False
+
+        if include_flag:
             listing_ids_list_temp.append(current_listing_id)
 
     listing_ids_list = listing_ids_list_temp
