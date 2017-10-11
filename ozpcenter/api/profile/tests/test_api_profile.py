@@ -175,10 +175,9 @@ class ProfileApiTest(APITestCase):
         response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
 
         titles = sorted([i['title'] for i in response.data])
-        expected_listing = ['Chatter Box']
+        expected_listing = ['Bread Basket', 'Chatter Box']
         # BreadBasket(Minitrue, private, julia)
         # ChatterBox(Miniluv, public, julia)
-        # TODO: Figure out why BreadBasket is not in the list
         self.assertEquals(expected_listing, titles)
 
     @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
