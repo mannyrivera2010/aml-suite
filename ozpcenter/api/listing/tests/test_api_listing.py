@@ -1,6 +1,7 @@
 """
 Tests for listing endpoints
 """
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -8,14 +9,18 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
 import ozpcenter.api.listing.model_access as model_access
+from ozpcenter.tests.helper import validate_listing_map_keys
+from ozpcenter.tests.helper import unittest_request_helper
 
 
+@override_settings(ES_ENABLED=False)
 class ListingApiTest(APITestCase):
 
     def setUp(self):
         """
         setUp is invoked before each test method
         """
+        self.maxDiff = None
         pass
 
     @classmethod
@@ -24,67 +29,6 @@ class ListingApiTest(APITestCase):
         Set up test data for the whole TestCase (only run once for the TestCase)
         """
         data_gen.run()
-
-    def _validate_listing_map_keys(self, listing_map):
-        """
-        Used to validate the keys of a listing
-        """
-        if not isinstance(listing_map, dict):
-            raise Exception('listing_map is not type dict, it is {0!s}'.format(type(listing_map)))
-
-        listing_map_default_keys = ['id', 'is_bookmarked', 'screenshots',
-                                    'doc_urls', 'owners', 'categories', 'tags', 'contacts', 'intents',
-                                    'small_icon', 'large_icon', 'banner_icon', 'large_banner_icon',
-                                    'agency', 'last_activity', 'current_rejection', 'listing_type',
-                                    'title', 'approved_date', 'edited_date', 'description', 'launch_url',
-                                    'version_name', 'unique_name', 'what_is_new', 'description_short',
-                                    'requirements', 'approval_status', 'is_enabled', 'is_featured',
-                                    'is_deleted', 'avg_rate', 'total_votes', 'total_rate5', 'total_rate4',
-                                    'total_rate3', 'total_rate2', 'total_rate1', 'total_reviews',
-                                    'iframe_compatible', 'security_marking', 'is_private',
-                                    'required_listings', 'cert_issues']
-
-        listing_keys = [k for k, v in listing_map.items()]
-
-        invalid_key_list = []
-
-        for current_key in listing_map_default_keys:
-            if current_key not in listing_keys:
-                invalid_key_list.append(current_key)
-
-        return invalid_key_list
-
-    def _request_helper(self, url, method, data=None, username='bigbrother', status_code=200):
-        """
-        Request Helper
-        """
-        user = generic_model_access.get_profile(username).user
-        self.client.force_authenticate(user=user)
-
-        response = None
-
-        if method.upper() == 'GET':
-            response = self.client.get(url, format='json')
-        elif method.upper() == 'POST':
-            response = self.client.post(url, data, format='json')
-        elif method.upper() == 'PUT':
-            response = self.client.put(url, data, format='json')
-        elif method.upper() == 'DELETE':
-            response = self.client.delete(url, format='json')
-        else:
-            raise Exception('method is not supported')
-
-        if response:
-            if status_code == 200:
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
-            elif status_code == 201:
-                self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            elif status_code == 204:
-                self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-            else:
-                raise Exception('status code is not supported')
-
-        return response
 
     def test_create_listing_minimal(self):
         # create a new listing with minimal data (title)
@@ -96,7 +40,7 @@ class ListingApiTest(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], title)
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
         self.assertEquals(response.data['is_bookmarked'], False)
 
     def test_create_listing_no_title(self):
@@ -126,7 +70,8 @@ class ListingApiTest(APITestCase):
             "unique_name": "org.apps.julia-one",
             "what_is_new": "nothing is new",
             "description_short": "a shorter description",
-            "requirements": "None",
+            "usage_requirements": "None",
+            "system_requirements": "None",
             "is_private": "true",
             "contacts": [
                 {"email": "a@a.com", "secure_phone": "111-222-3434",
@@ -188,8 +133,10 @@ class ListingApiTest(APITestCase):
         # description_short
         self.assertEqual(response.data['description_short'],
             'a shorter description')
-        # requirements
-        self.assertEqual(response.data['requirements'], 'None')
+        # usage_requirements
+        self.assertEqual(response.data['usage_requirements'], 'None')
+        # system_requirements
+        self.assertEqual(response.data['system_requirements'], 'None')
         # is_private
         self.assertEqual(response.data['is_private'], True)
         # contacts
@@ -200,11 +147,9 @@ class ListingApiTest(APITestCase):
         self.assertTrue('me' in names)
         self.assertTrue('you' in names)
         # security_marking
-        self.assertEqual(response.data['security_marking'],
-            'UNCLASSIFIED')
+        self.assertEqual(response.data['security_marking'], 'UNCLASSIFIED')
         # listing_type
-        self.assertEqual(response.data['listing_type']['title'],
-            'Web Application')
+        self.assertEqual(response.data['listing_type']['title'], 'Web Application')
         # icons
         self.assertEqual(response.data['small_icon']['id'], 1)
         self.assertEqual(response.data['large_icon']['id'], 2)
@@ -270,22 +215,22 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['iframe_compatible'], True)
         self.assertEqual(response.data['required_listings'], None)
         self.assertTrue(response.data['edited_date'])
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
         self.assertEquals(response.data['is_bookmarked'], False)
 
     def test_delete_listing(self):
         url = '/api/listing/1/'
-        response = self._request_helper(url, 'GET', username='wsmith', status_code=200)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
         self.assertFalse(response.data.get('is_deleted'))
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
 
         url = '/api/listing/1/'
-        response = self._request_helper(url, 'DELETE', username='wsmith', status_code=204)
+        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=204)
 
         url = '/api/listing/1/'
-        response = self._request_helper(url, 'GET', username='wsmith', status_code=200)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
         self.assertTrue(response.data.get('is_deleted'))
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
 
     def test_delete_listing_permission_denied(self):
         user = generic_model_access.get_profile('jones').user
@@ -341,7 +286,7 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['banner_icon']['id'], 3)
         self.assertEqual(response.data['large_banner_icon']['id'], 4)
         self.assertEqual(response.data['is_bookmarked'], True)
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
 
     def test_update_listing_full(self):
         user = generic_model_access.get_profile('julia').user
@@ -356,7 +301,8 @@ class ListingApiTest(APITestCase):
             "unique_name": "org.apps.julia-one",
             "what_is_new": "nothing is new",
             "description_short": "a shorter description",
-            "requirements": "Many new things",
+            "usage_requirements": "Many new things",
+            "system_requirements": "Good System",
             "is_private": "true",
             "is_enabled": "false",
             "is_featured": "false",
@@ -421,8 +367,10 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['what_is_new'], data['what_is_new'])
         # description_short
         self.assertEqual(response.data['description_short'], data['description_short'])
-        # requirements
-        self.assertEqual(response.data['requirements'], data['requirements'])
+        # usage_requirements
+        self.assertEqual(response.data['usage_requirements'], data['usage_requirements'])
+        # system_requirements
+        self.assertEqual(response.data['system_requirements'], data['system_requirements'])
         # is_private
         self.assertEqual(response.data['is_private'], True)
         # contacts
@@ -493,8 +441,7 @@ class ListingApiTest(APITestCase):
         self.assertTrue(4 in screenshots_large)
 
         self.assertTrue(response.data['approved_date'])
-        self.assertEqual(response.data['approval_status'],
-            models.Listing.APPROVED)
+        self.assertEqual(response.data['approval_status'], models.Listing.APPROVED)
         self.assertEqual(response.data['is_enabled'], False)
         self.assertEqual(response.data['is_featured'], False)
         self.assertEqual(response.data['avg_rate'], 3.0)
@@ -508,7 +455,7 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['iframe_compatible'], False)
         self.assertEqual(response.data['required_listings'], None)
         self.assertTrue(response.data['edited_date'])
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         #                   verify change_details
@@ -518,124 +465,56 @@ class ListingApiTest(APITestCase):
         activity_data = activity_response.data
 
         fields = ['title', 'description', 'description_short', 'version_name',
-            'requirements', 'unique_name', 'what_is_new', 'launch_url',
+            'usage_requirements', 'system_requirements', 'unique_name', 'what_is_new', 'launch_url',
             'is_enabled', 'is_featured', 'is_private', 'doc_urls', 'contacts',
             'screenshots', 'categories', 'owners', 'tags', 'small_icon',
             'large_icon', 'banner_icon', 'large_banner_icon', 'security_marking',
             'listing_type', 'approval_status', 'intents']
 
-        total_found = 0
+        changed_found_fields = []
+
         for activity in activity_data:
             if activity['action'] == 'MODIFIED':
                 for change in activity['change_details']:
-                    if change['field_name'] == 'title':
-                        self.assertEqual(change['new_value'], data['title'])
-                        self.assertEqual(change['old_value'], old_listing_data['title'])
-                        total_found += 1
-                    if change['field_name'] == 'description':
-                        self.assertEqual(change['new_value'], data['description'])
-                        self.assertEqual(change['old_value'], old_listing_data['description'])
-                        total_found += 1
-                    if change['field_name'] == 'description_short':
-                        self.assertEqual(change['new_value'], data['description_short'])
-                        self.assertEqual(change['old_value'], old_listing_data['description_short'])
-                        total_found += 1
-                    if change['field_name'] == 'version_name':
-                        self.assertEqual(change['new_value'], data['version_name'])
-                        self.assertEqual(change['old_value'], old_listing_data['version_name'])
-                        total_found += 1
-                    if change['field_name'] == 'requirements':
-                        self.assertEqual(change['new_value'], data['requirements'])
-                        self.assertEqual(change['old_value'], old_listing_data['requirements'])
-                        total_found += 1
-                    if change['field_name'] == 'what_is_new':
-                        self.assertEqual(change['new_value'], data['what_is_new'])
-                        self.assertEqual(change['old_value'], old_listing_data['what_is_new'])
-                        total_found += 1
-                    if change['field_name'] == 'unique_name':
-                        self.assertEqual(change['new_value'], data['unique_name'])
-                        self.assertEqual(change['old_value'], old_listing_data['unique_name'])
-                        total_found += 1
-                    if change['field_name'] == 'launch_url':
-                        self.assertEqual(change['new_value'], data['launch_url'])
-                        self.assertEqual(change['old_value'], old_listing_data['launch_url'])
-                        total_found += 1
-                    if change['field_name'] == 'is_private':
-                        self.assertEqual(change['new_value'], data['is_private'])
-                        self.assertEqual(change['old_value'], model_access.bool_to_string(old_listing_data['is_private']))
-                        total_found += 1
-                    if change['field_name'] == 'is_featured':
-                        self.assertEqual(change['new_value'], data['is_featured'])
-                        self.assertEqual(change['old_value'], model_access.bool_to_string(old_listing_data['is_featured']))
-                        total_found += 1
-                    if change['field_name'] == 'listing_type':
-                        self.assertEqual(change['new_value'], data['listing_type']['title'])
-                        self.assertEqual(change['old_value'], old_listing_data['listing_type']['title'])
-                        total_found += 1
-                    if change['field_name'] == 'security_marking':
-                        self.assertEqual(change['new_value'], data['security_marking'])
-                        self.assertEqual(change['old_value'], old_listing_data['security_marking'])
-                        total_found += 1
-                    if change['field_name'] == 'small_icon':
-                        self.assertEqual(change['new_value'], str(data['small_icon']['id']) + '.UNCLASSIFIED')
-                        self.assertEqual(change['old_value'], str(old_listing_data['small_icon']['id']) + '.UNCLASSIFIED')
-                        total_found += 1
-                    if change['field_name'] == 'large_icon':
-                        self.assertEqual(change['new_value'], str(data['large_icon']['id']) + '.UNCLASSIFIED')
-                        self.assertEqual(change['old_value'], str(old_listing_data['large_icon']['id']) + '.UNCLASSIFIED')
-                        total_found += 1
-                    if change['field_name'] == 'banner_icon':
-                        self.assertEqual(change['new_value'], str(data['banner_icon']['id']) + '.UNCLASSIFIED')
-                        self.assertEqual(change['old_value'], str(old_listing_data['banner_icon']['id']) + '.UNCLASSIFIED')
-                        total_found += 1
-                    if change['field_name'] == 'large_banner_icon':
-                        self.assertEqual(change['new_value'], str(data['large_banner_icon']['id']) + '.UNCLASSIFIED')
-                        self.assertEqual(change['old_value'], str(old_listing_data['large_banner_icon']['id']) + '.UNCLASSIFIED')
-                        total_found += 1
-                    if change['field_name'] == 'doc_urls':
-                        self.assertEqual(change['new_value'],
-                            model_access.doc_urls_to_string(data['doc_urls']))
-                        self.assertEqual(change['old_value'],
-                            model_access.doc_urls_to_string(old_listing_data['doc_urls']))
-                        total_found += 1
-                    if change['field_name'] == 'screenshots':
-                        self.assertEqual(change['new_value'],
-                            model_access.screenshots_to_string(data['screenshots']))
-                        self.assertEqual(change['old_value'],
-                            model_access.screenshots_to_string(old_listing_data['screenshots']))
-                        total_found += 1
-                    if change['field_name'] == 'contacts':
-                        self.assertEqual(change['new_value'],
-                            model_access.contacts_to_string(data['contacts']))
-                        self.assertEqual(change['old_value'],
-                            model_access.contacts_to_string(old_listing_data['contacts']))
-                        total_found += 1
-                    if change['field_name'] == 'intents':
-                        self.assertEqual(change['new_value'],
-                            model_access.intents_to_string(data['intents']))
-                        self.assertEqual(change['old_value'],
-                            model_access.intents_to_string(old_listing_data['intents']))
-                        total_found += 1
-                    if change['field_name'] == 'categories':
-                        self.assertEqual(change['new_value'],
-                            model_access.categories_to_string(data['categories']))
-                        self.assertEqual(change['old_value'],
-                            model_access.categories_to_string(old_listing_data['categories']))
-                        total_found += 1
-                    if change['field_name'] == 'tags':
-                        self.assertEqual(change['new_value'],
-                            model_access.tags_to_string(data['tags']))
-                        self.assertEqual(change['old_value'],
-                            model_access.tags_to_string(old_listing_data['tags']))
-                        total_found += 1
-                    if change['field_name'] == 'owners':
-                        self.assertEqual(change['new_value'],
-                            model_access.owners_to_string(data['owners']))
-                        self.assertEqual(change['old_value'],
-                            model_access.owners_to_string(old_listing_data['owners']))
-                        total_found += 1
+                    # Field Set 1
+                    temp_change_fields = ['title', 'description', 'description_short',
+                        'version_name', 'usage_requirements', 'system_requirements', 'what_is_new', 'unique_name', 'launch_url',
+                        'is_private', 'is_featured', 'listing_type', 'security_marking']
 
-        self.assertEqual(total_found, len(fields) - 2)    # (-1 for approved_status) + (-1 for is_enabled)
+                    for temp_field in temp_change_fields:
+                        if change['field_name'] == temp_field:
+                            if temp_field == 'listing_type':
+                                self.assertEqual(change['new_value'], data[temp_field]['title'], 'new_value assertion for {}'.format(temp_field))
+                            else:
+                                self.assertEqual(change['new_value'], data[temp_field], 'new_value assertion for {}'.format(temp_field))
+
+                            if temp_field.startswith('is_'):
+                                self.assertEqual(change['old_value'], model_access.bool_to_string(old_listing_data[temp_field]), 'old_value assertion for {}'.format(temp_field))
+                            elif temp_field == 'listing_type':
+                                self.assertEqual(change['old_value'], old_listing_data[temp_field]['title'], 'old_value assertion for {}'.format(temp_field))
+                            else:
+                                self.assertEqual(change['old_value'], old_listing_data[temp_field], 'old_value assertion for {}'.format(temp_field))
+                            changed_found_fields.append(temp_field)
+
+                    # Field Set 2
+                    temp_change_fields = ['small_icon', 'large_icon', 'banner_icon', 'large_banner_icon']
+                    for temp_field in temp_change_fields:
+                        if change['field_name'] == temp_field:
+                            self.assertEqual(change['new_value'], str(data[temp_field]['id']) + '.UNCLASSIFIED', 'new_value assertion for {}'.format(temp_field))
+                            self.assertEqual(change['old_value'], str(old_listing_data[temp_field]['id']) + '.UNCLASSIFIED', 'old_value assertion for {}'.format(temp_field))
+                            changed_found_fields.append(temp_field)
+
+                    # Field Set 3
+                    temp_change_fields = ['doc_urls', 'screenshots', 'contacts', 'intents', 'categories', 'tags', 'owners']
+                    for temp_field in temp_change_fields:
+                        if change['field_name'] == temp_field:
+                            temp_field_function = getattr(model_access, '{}_to_string'.format(temp_field))
+                            self.assertEqual(change['new_value'], temp_field_function(data[temp_field]))
+                            self.assertEqual(change['old_value'], temp_field_function(old_listing_data[temp_field]))
+                            changed_found_fields.append(temp_field)
+
+        difference_in_fields = sorted(list(set(fields) - set(changed_found_fields)))  # TODO: Better way to do this
+        self.assertEqual(difference_in_fields, ['approval_status', 'is_enabled', 'is_featured'])
 
     # TODO: def test_update_listing_full_access_control(self):
 
@@ -670,7 +549,8 @@ class ListingApiTest(APITestCase):
             "unique_name": "org.apps.julia-one",
             "what_is_new": "nothing is new",
             "description_short": "a shorter description",
-            "requirements": "Many new things",
+            "usage_requirements": "Many new things",
+            "system_requirements": "Good System",
             "is_private": "true",
             "is_enabled": "false",
             "is_featured": "false",
@@ -783,7 +663,7 @@ class ListingApiTest(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['approval_status'], 'IN_PROGRESS')
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
         listing_id = response.data['id']
 
         data = {
@@ -819,7 +699,8 @@ class ListingApiTest(APITestCase):
           "avg_rate": 0,
           "total_votes": 0,
           "tags": [],
-          "requirements": None,
+          "usage_requirements": None,
+          "system_requirements": None,
           "version_name": None,
           "launch_url": None,
           "what_is_new": None,
@@ -864,7 +745,7 @@ class ListingApiTest(APITestCase):
         contacts = response.data['contacts']
         contact_types = [i['contact_type']['name'] for i in contacts]
         self.assertEqual(str(contact_types), str(['Civilian', 'Government']))
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
 
     def test_update_listing_approval_status_deny_user(self):
         # a standard user cannot update the approval_status
@@ -880,7 +761,7 @@ class ListingApiTest(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['approval_status'], 'IN_PROGRESS')
-        self.assertEquals(self._validate_listing_map_keys(response.data), [])
+        self.assertEquals(validate_listing_map_keys(response.data), [])
 
         data = response.data
         data['approval_status'] = models.Listing.APPROVED
@@ -898,6 +779,7 @@ class ListingApiTest(APITestCase):
 
     def test_get_listings_with_query_params(self):
         """
+        test_get_listings_with_query_params
         Supported query params: org (agency title), approval_status, enabled
         """
         user = generic_model_access.get_profile('julia').user
@@ -910,6 +792,7 @@ class ListingApiTest(APITestCase):
 
     def test_counts_in_listings(self):
         """
+        test_counts_in_listings
         Supported query params: org (agency title), approval_status, enabled
         """
         user = generic_model_access.get_profile('julia').user
@@ -921,30 +804,29 @@ class ListingApiTest(APITestCase):
         last_item = data[-1]
 
         expected_item = {"counts": {
-            "organizations": {
-                "4": 0,
-                "2": 0,
-                "1": 100,
-                "3": 20,
-                "5": 0,
-                "6": 0,
-                "7": 0,
-                "8": 0,
-                "9": 0
-                },
-            "REJECTED": 0,
-            "enabled": 120,
-            "APPROVED_ORG": 0,
-            "total": 120,
-            "APPROVED": 120,
-            "PENDING": 0,
-            "PENDING_DELETION": 0,
+            "APPROVED": 176,
+            "APPROVED_ORG": 1,
+            "DELETED": 0,
             "IN_PROGRESS": 0,
-            "DELETED": 0
-            }
-            }
+            "PENDING": 10,
+            "PENDING_DELETION": 0,
+            "enabled": 183,
+            "REJECTED": 0,
+            "organizations": {
+              "1": 44,
+              "2": 42,
+              "3": 49,
+              "4": 37,
+              "5": 5,
+              "6": 3,
+              "7": 2,
+              "8": 3,
+              "9": 2
+            },
+            "total": 187
+          }
+        }
         self.assertEquals(last_item, expected_item)
-
     # TODO: test_counts_in_listings - 2ndparty
 
     def test_create_listing_with_different_agency(self):

@@ -1,8 +1,10 @@
 """
 Tests for data.api endpoints
+https://github.com/aml-development/ozp-iwc/wiki/PacketFormat
 """
 import json
 
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -10,6 +12,7 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 
 
+@override_settings(ES_ENABLED=False)
 class DataApiTest(APITestCase):
 
     def setUp(self):
@@ -25,7 +28,7 @@ class DataApiTest(APITestCase):
         """
         data_gen.run()
 
-    def test_data_api(self):
+    def test_data_api_non_existent(self):
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
         key = '/transportation/car'
@@ -34,6 +37,12 @@ class DataApiTest(APITestCase):
         # Trying to get a non-existent key should produce a 404
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_data_api(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+        key = '/transportation/car'
+        url = '/iwc-api/self/data' + key
 
         # Create a new entry
         entity = {"details": {"color": "black", "year": 2000}}
@@ -46,8 +55,9 @@ class DataApiTest(APITestCase):
             "content_type": content_type,
             "version": version,
             "pattern": pattern,
-            "permissions": permissions
+            "permissions": str(permissions)
         }
+
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['username'], 'wsmith')
@@ -56,9 +66,8 @@ class DataApiTest(APITestCase):
         self.assertEqual(response.data['pattern'], pattern)
         self.assertEqual(response.data['permissions'], str(permissions))
 
-        entity_resp = json.loads(response.data['entity'])
-        self.assertEqual(
-            entity_resp['details']['color'], entity['details']['color'])
+        entity_resp = response.data['entity']
+        self.assertEqual(entity_resp['details']['color'], entity['details']['color'])
 
         # now retrieve that entry
         response = self.client.get(url, format='json')
@@ -70,11 +79,14 @@ class DataApiTest(APITestCase):
         self.assertEqual(response.data['pattern'], pattern)
         self.assertEqual(response.data['permissions'], str(permissions))
 
-        entity_resp = json.loads(response.data['entity'])
-        self.assertEqual(
-            entity_resp['details']['color'], entity['details']['color'])
+        # new
+        entity_resp = response.data['entity']
+        self.assertEqual(entity_resp['details']['color'], entity['details']['color'])
 
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
         # test the list endpoint
+        key = '/transportation/car'
         url = '/iwc-api/self/data/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

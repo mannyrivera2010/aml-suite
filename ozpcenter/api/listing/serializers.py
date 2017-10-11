@@ -6,6 +6,7 @@ import logging
 import pytz
 
 from django.contrib import auth
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from ozpcenter import constants
@@ -111,6 +112,7 @@ class ContactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Contact
+        fields = '__all__'
 
     def to_representation(self, data):
         access_control_instance = plugin_manager.get_system_access_control_plugin()
@@ -175,6 +177,7 @@ class ChangeDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ChangeDetail
+        fields = '__all__'
 
 
 class ShortListingSerializer(serializers.HyperlinkedModelSerializer):
@@ -183,6 +186,29 @@ class ShortListingSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.Listing
         fields = ('unique_name', 'title', 'id', 'agency', 'small_icon', 'is_deleted')
+
+
+class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
+    agency = AgencySerializer(required=False)
+    large_banner_icon = ImageSerializer(required=False, allow_null=True)
+    banner_icon = ImageSerializer(required=False, allow_null=True)
+
+    class Meta:
+        model = models.Listing
+        fields = ('id',
+                  'title',
+                  'agency',
+                  'avg_rate',
+                  'total_reviews',
+                  'is_private',
+                  'is_bookmarked',
+                  'description_short',
+                  'security_marking',
+                  'launch_url',
+                  'large_banner_icon',
+                  'banner_icon',
+                  'unique_name',
+                  'is_enabled')
 
 
 class ListingActivitySerializer(serializers.ModelSerializer):
@@ -290,6 +316,15 @@ class ListingIsBookmarked(serializers.ReadOnlyField):
         return obj
 
 
+class CertIssuesField(serializers.ReadOnlyField):
+    """
+    Read Only Field
+    """
+
+    def from_native(self, obj):
+        return obj
+
+
 class ListingSerializer(serializers.ModelSerializer):
     is_bookmarked = ListingIsBookmarked()
     screenshots = ScreenshotSerializer(many=True, required=False)
@@ -305,13 +340,14 @@ class ListingSerializer(serializers.ModelSerializer):
     large_banner_icon = ImageSerializer(required=False, allow_null=True)
     agency = AgencySerializer(required=False)
     last_activity = ListingActivitySerializer(required=False, read_only=True)
-    current_rejection = RejectionListingActivitySerializer(required=False,
-        read_only=True)
+    current_rejection = RejectionListingActivitySerializer(required=False, read_only=True)
     listing_type = ListingTypeSerializer(required=False, allow_null=True)
+    cert_issues = CertIssuesField(required=False)
 
     class Meta:
         model = models.Listing
         depth = 2
+        fields = '__all__'
 
     def to_representation(self, data):
         ret = super(ListingSerializer, self).to_representation(data)
@@ -347,53 +383,10 @@ class ListingSerializer(serializers.ModelSerializer):
         ret['cert_issues'] = check_failed
         return ret
 
-    @staticmethod
-    def setup_eager_loading(queryset):
-        # select_related foreign keys
-        queryset = queryset.select_related('agency')
-        queryset = queryset.select_related('small_icon')
-        queryset = queryset.select_related('large_icon')
-        queryset = queryset.select_related('banner_icon')
-        queryset = queryset.select_related('large_banner_icon')
-        queryset = queryset.select_related('required_listings')
-
-        # prefetch_related many-to-many relationships
-        queryset = queryset.prefetch_related('agency__icon')
-        queryset = queryset.prefetch_related('screenshots')
-        queryset = queryset.prefetch_related('screenshots__small_image')
-        queryset = queryset.prefetch_related('screenshots__large_image')
-        queryset = queryset.prefetch_related('doc_urls')
-        queryset = queryset.prefetch_related('owners')
-        queryset = queryset.prefetch_related('owners__user')
-        queryset = queryset.prefetch_related('owners__organizations')
-        queryset = queryset.prefetch_related('owners__stewarded_organizations')
-        queryset = queryset.prefetch_related('categories')
-        queryset = queryset.prefetch_related('tags')
-        queryset = queryset.prefetch_related('contacts')
-        queryset = queryset.prefetch_related('contacts__contact_type')
-        queryset = queryset.prefetch_related('listing_type')
-        queryset = queryset.prefetch_related('last_activity')
-        queryset = queryset.prefetch_related('last_activity__change_details')
-        queryset = queryset.prefetch_related('last_activity__author')
-        queryset = queryset.prefetch_related('last_activity__author__organizations')
-        queryset = queryset.prefetch_related('last_activity__author__stewarded_organizations')
-        queryset = queryset.prefetch_related('last_activity__listing')
-        queryset = queryset.prefetch_related('last_activity__listing__contacts')
-        queryset = queryset.prefetch_related('last_activity__listing__owners')
-        queryset = queryset.prefetch_related('last_activity__listing__owners__user')
-        queryset = queryset.prefetch_related('last_activity__listing__categories')
-        queryset = queryset.prefetch_related('last_activity__listing__tags')
-        queryset = queryset.prefetch_related('last_activity__listing__intents')
-        queryset = queryset.prefetch_related('current_rejection')
-        queryset = queryset.prefetch_related('intents')
-        queryset = queryset.prefetch_related('intents__icon')
-        return queryset
-
     def validate(self, data):
         access_control_instance = plugin_manager.get_system_access_control_plugin()
         # logger.debug('inside ListingSerializer.validate', extra={'request':self.context.get('request')})
-        profile = generic_model_access.get_profile(
-            self.context['request'].user.username)
+        profile = generic_model_access.get_profile(self.context['request'].user.username)
 
         # This checks to see if value exist as a key and value is not None
         if not data.get('title'):
@@ -426,7 +419,8 @@ class ListingSerializer(serializers.ModelSerializer):
         data['unique_name'] = data.get('unique_name')
         data['what_is_new'] = data.get('what_is_new')
         data['description_short'] = data.get('description_short')
-        data['requirements'] = data.get('requirements')
+        data['usage_requirements'] = data.get('usage_requirements')
+        data['system_requirements'] = data.get('system_requirements')
         data['is_private'] = data.get('is_private', False)
         data['security_marking'] = data.get('security_marking')
 
@@ -611,7 +605,8 @@ class ListingSerializer(serializers.ModelSerializer):
             unique_name=validated_data['unique_name'],
             what_is_new=validated_data['what_is_new'],
             description_short=validated_data['description_short'],
-            requirements=validated_data['requirements'],
+            usage_requirements=validated_data['usage_requirements'],
+            system_requirements=validated_data['system_requirements'],
             security_marking=validated_data['security_marking'],
             listing_type=validated_data['listing_type'],
             is_private=validated_data['is_private'])
@@ -708,7 +703,7 @@ class ListingSerializer(serializers.ModelSerializer):
         change_details = []
 
         simple_fields = ['title', 'description', 'description_short',
-            'launch_url', 'version_name', 'requirements', 'unique_name',
+            'launch_url', 'version_name', 'usage_requirements', 'system_requirements', 'unique_name',
             'what_is_new', 'security_marking']
 
         for i in simple_fields:
@@ -999,9 +994,83 @@ class ListingSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ReviewSerializer(serializers.ModelSerializer):
+class ReviewResponsesSerializer(serializers.ModelSerializer):
     author = profile_serializers.ShortProfileSerializer()
 
     class Meta:
         model = models.Review
-        fields = ('author', 'listing', 'rate', 'text', 'edited_date', 'id')
+        fields = ('id', 'author', 'listing', 'rate', 'text', 'edited_date', 'created_date')
+        validators = []  # Remove a default "unique together" constraint.
+
+
+class ReviewResponsesField(serializers.ReadOnlyField):
+    """
+    Read Only Field
+    """
+
+    def from_native(self, obj):
+        return obj
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = profile_serializers.ShortProfileSerializer()
+    review_responses = ReviewResponsesField()
+
+    class Meta:
+        model = models.Review
+        fields = ('id', 'author', 'listing', 'rate', 'text', 'edited_date', 'created_date', 'review_parent', 'review_responses')
+        validators = []  # Remove a default "unique together" constraint.
+
+    def to_representation(self, data):
+        data = super(ReviewSerializer, self).to_representation(data)
+
+        responses_queryset = models.Review.objects.for_user(self.context['request'].user.username).filter(review_parent=data['id']).order_by('created_date')
+        review_responses_serializer = ReviewResponsesSerializer(responses_queryset, context={'request': self.context['request']}, many=True)
+        data['review_responses'] = review_responses_serializer.data
+
+        return data
+
+    def validate(self, data):
+        """
+        validate review
+        """
+        data['listing'] = self.context['listing']
+
+        if 'rate' not in data:
+            raise serializers.ValidationError('Missing required rate field')
+
+        if 'text' not in data:
+            data['text'] = None
+            # raise serializers.ValidationError('Missing required text field')
+
+        if 'review_parent' not in data:
+            data['review_parent'] = None
+        else:
+            review_parent = data['review_parent']
+
+            if review_parent.review_parent is not None:
+                raise serializers.ValidationError('More than one level review responses not allowed')
+
+        return data
+
+    def create(self, validated_data):
+        profile = generic_model_access.get_profile(self.context['request'].user.username)
+        try:
+            resp = model_access.create_listing_review(profile,
+                        validated_data['listing'],
+                validated_data['rate'],
+                validated_data['text'],
+                validated_data['review_parent'])
+        except ValidationError as err:
+            raise serializers.ValidationError('{}'.format(err))
+        return resp
+
+    def update(self, review_instance, validated_data):
+        try:
+            review = model_access.edit_listing_review(self.context['request'].user.username,
+                                                      review_instance,
+                                                      validated_data['rate'],
+                                                      validated_data['text'])
+        except ValidationError as err:
+            raise serializers.ValidationError('{}'.format(err))
+        return review

@@ -81,6 +81,7 @@ class Router(object):
                                  'host': host,
                                  'URL': url}, 404)
 
+
 router = Router()
 
 # Detect if test is in the arguement, ex) manage.py

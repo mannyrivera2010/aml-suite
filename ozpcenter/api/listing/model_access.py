@@ -1,5 +1,51 @@
 """
 Listing Model Access
+
+Approval Status Stages
+- There are approved transitions for each action the user preforms
+
+APPROVAL_STATUS_CHOICES = (
+    (IN_PROGRESS, 'IN_PROGRESS'),
+    (PENDING, 'PENDING'),
+    (APPROVED_ORG, 'APPROVED_ORG'),
+    (APPROVED, 'APPROVED'),
+    (REJECTED, 'REJECTED'),
+    (DELETED, 'DELETED'),
+    (PENDING_DELETION, 'PENDING_DELETION')
+)
+
+
+                           Submitted
+ +--------+                Listing     +---------------------+
+ |  USER  +------------------------->  |  ORG STEWARD/ADMIN  |
+ +---+----+                            +---+----+------------+
+     ^           Rejected Listing          |    |
+     +---------------------+---------------+    |
+                           ^                    |
+                           |          Approved  |
+                Approved   |          Listing   |
++-----------+   Listing   ++-------+            |
+|Published  | <-----------+  ADMIN | <----------+
++-----------+             +--------+
+
+
+
+def validate_approval_status_transistion(current_approval_status, next_approval_status):
+    pass
+
+TODO: Add Validation to below method
+    listing_model_access.create_listing(listing_activity_author, listing)
+    listing_model_access.submit_listing(listing_activity_author, listing)
+    listing_model_access.approve_listing_by_org_steward(listing_activity_author, listing)
+    listing_model_access.approve_listing(listing_activity_author, listing)
+
+Check for the listings that has been approved more than once
+    {action: CREATED, author: khaleesi, description: null}
+   - {action: SUBMITTED, author: khaleesi, description: null}
+   - {action: APPROVED_ORG, author: khaleesi, description: null}
+   - {action: APPROVED_ORG, author: khaleesi, description: null}
+   - {action: APPROVED, author: khaleesi, description: null}
+
 """
 import logging
 
@@ -210,7 +256,7 @@ def get_reviews(username):
         username (str): username
     """
     try:
-        return models.Review.objects.for_user(username).all()
+        return models.Review.objects.for_user(username)
     except ObjectDoesNotExist:
         return None
 
@@ -275,7 +321,8 @@ def _update_rating(username, listing):
     """
     Invoked each time a review is created, deleted, or updated
     """
-    reviews = models.Review.objects.filter(listing=listing)
+    reviews = models.Review.objects.filter(listing=listing, review_parent__isnull=True)
+    review_responses = models.Review.objects.filter(listing=listing, review_parent__isnull=False)
     rate1 = reviews.filter(rate=1).count()
     rate2 = reviews.filter(rate=2).count()
     rate3 = reviews.filter(rate=3).count()
@@ -283,6 +330,7 @@ def _update_rating(username, listing):
     rate5 = reviews.filter(rate=5).count()
     total_votes = reviews.count()
     total_reviews = total_votes - reviews.filter(text=None).count()
+    total_review_responses = review_responses.count()
 
     # calculate weighted average
     if total_votes == 0:
@@ -299,6 +347,7 @@ def _update_rating(username, listing):
     listing.total_rate5 = rate5
     listing.total_votes = total_votes
     listing.total_reviews = total_reviews
+    listing.total_review_responses = total_review_responses
     listing.avg_rate = avg_rate
     listing.edited_date = utils.get_now_utc()
     listing.save()
@@ -368,6 +417,8 @@ def create_listing(author, listing):
     """
     Create a listing
 
+    TODO: Validation - If a listing is already [IN_PROGRESS] does it make sense to _add_listing_activity [ListingActivity.CREATED] again
+
     Args:
         author
         listing
@@ -398,6 +449,8 @@ def log_listing_modification(author, listing, change_details):
 def submit_listing(author, listing):
     """
     Submit a listing for approval
+
+    TODO: Validation - If a listing is already [PENDING] does it make sense to _add_listing_activity [ListingActivity.SUBMITTED] again
 
     Args:
         author
@@ -437,6 +490,8 @@ def approve_listing_by_org_steward(org_steward, listing):
     """
     Give Org Steward approval to a listing
 
+    TODO: Validation - If a listing is already [APPROVED_ORG] does it make sense to _add_listing_activity [ListingActivity.APPROVED_ORG] again
+
     Args:
         org_steward
         listing
@@ -444,8 +499,7 @@ def approve_listing_by_org_steward(org_steward, listing):
     Return:
         listing
     """
-    listing = _add_listing_activity(org_steward, listing,
-        models.ListingActivity.APPROVED_ORG)
+    listing = _add_listing_activity(org_steward, listing, models.ListingActivity.APPROVED_ORG)
     listing.approval_status = models.Listing.APPROVED_ORG
     listing.edited_date = utils.get_now_utc()
     listing.save()
@@ -456,6 +510,8 @@ def approve_listing(steward, listing):
     """
     Give final approval to a listing
 
+    TODO: Validation - If a listing is already [APPROVED] does it make sense to _add_listing_activity [ListingActivity.APPROVED] again
+
     Args:
         org_steward
         listing
@@ -463,8 +519,7 @@ def approve_listing(steward, listing):
     Return:
         listing
     """
-    listing = _add_listing_activity(steward, listing,
-        models.ListingActivity.APPROVED)
+    listing = _add_listing_activity(steward, listing, models.ListingActivity.APPROVED)
     listing.approval_status = models.Listing.APPROVED
     listing.approved_date = utils.get_now_utc()
     listing.edited_date = utils.get_now_utc()
@@ -485,8 +540,7 @@ def reject_listing(steward, listing, rejection_description):
         Listing
     """
     old_approval_status = listing.approval_status
-    listing = _add_listing_activity(steward, listing,
-        models.ListingActivity.REJECTED, description=rejection_description)
+    listing = _add_listing_activity(steward, listing, models.ListingActivity.REJECTED, description=rejection_description)
     listing.approval_status = models.Listing.REJECTED
     listing.edited_date = utils.get_now_utc()
     listing.save()
@@ -536,7 +590,7 @@ def disable_listing(steward, listing):
     return listing
 
 
-def create_listing_review(username, listing, rating, text=None):
+def create_listing_review(username, listing, rating, text=None, review_parent=None):
     """
     Create a new review for a listing
 
@@ -555,24 +609,15 @@ def create_listing_review(username, listing, rating, text=None):
         }
     """
     author = generic_model_access.get_profile(username)
-    review = models.Review(listing=listing, author=author,
-                rate=rating, text=text)
+
+    review = models.Review(listing=listing, author=author, rate=rating, text=text, review_parent=review_parent)
     review.save()
 
     # update this listing's rating
     _update_rating(username, listing)
 
-    resp = {
-        "rate": rating,
-        "text": text,
-        "author": author.id,
-        "listing": listing.id,
-        "id": review.id
-    }
-
     dispatcher.publish('listing_review_created', listing=listing, profile=author, rating=rating, text=text)
-
-    return resp
+    return review
 
 
 def edit_listing_review(username, review, rate, text=None):

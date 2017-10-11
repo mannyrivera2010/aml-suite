@@ -29,7 +29,8 @@ class IntentApiTest(APITestCase):
         # get intent url from root endpoint
         url = '/iwc-api/'
         root_api_resp = self.client.get(url, format='json')
-        url = root_api_resp.data['ozp:intent']['href']
+
+        url = root_api_resp.data['_links']['ozp:intent']['href']
         # test the list endpoint
         intent_list_resp = self.client.get(url, format='json')
         # now get the first intent in the list

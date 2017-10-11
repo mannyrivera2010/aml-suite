@@ -47,8 +47,7 @@ def ListDataApiView(request):
         # add data items to _embedded
         key = '/' + k
         try:
-            instance = model_access.get_data_resource(request.user.username,
-                key)
+            instance = model_access.get_data_resource(request.user.username, key)
             if not instance:
                 return Response(status=status.HTTP_404_NOT_FOUND)
             serializer = serializers.DataResourceSerializer(instance,
@@ -102,8 +101,10 @@ def DataApiView(request, key=None):
     if request.method == 'PUT':
         try:
             logger.debug('request.data: {0!s}'.format(request.data))
-            instance = model_access.get_data_resource(request.user.username,
-                key)
+            instance = model_access.get_data_resource(request.user.username, key)
+
+            print('-----------------')
+            print(instance)
             if instance:
                 serializer = serializers.DataResourceSerializer(instance,
                     data=request.data, context={'request': request, 'key': key},
@@ -124,8 +125,7 @@ def DataApiView(request, key=None):
                     partial=True)
                 if not serializer.is_valid():
                     logger.error('ERROR: {0!s}'.format(serializer.errors))
-                    return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 serializer.save()
                 resp = serializer.data
                 resp = hal.add_hal_structure(resp, request,

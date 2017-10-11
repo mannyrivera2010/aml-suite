@@ -349,7 +349,6 @@ class ListingNotification(NotificationBase):
         """
         owner_id_list = ApplicationLibraryEntry.objects.filter(listing__in=[self.entity],
                                                                listing__isnull=False,
-                                                               listing__is_enabled=True,
                                                                listing__approval_status=Listing.APPROVED,
                                                                listing__is_deleted=False).values_list('owner', flat=True).distinct()
         return Profile.objects.filter(id__in=owner_id_list, listing_notification_flag=True).all()
@@ -425,6 +424,36 @@ class ListingReviewNotification(NotificationBase):  # Not Verified
         EXPECTED RESULTS - At least two notifications should display for wsmith.
         Log on as aaronson
         EXPECTED RESULTS - At least two notifications should display for aaronson.
+    """
+
+    def get_notification_db_type(self):
+        return Notification.LISTING
+
+    def get_group_target(self):
+        return Notification.USER
+
+    def get_target_list(self):
+        current_listing = self.entity
+
+        target_set = set()
+
+        for owner in current_listing.owners.filter(listing_notification_flag=True).all():
+            target_set.add(owner)
+
+        current_listing_agency_id = current_listing.agency.id
+
+        for steward in Profile.objects.filter(stewarded_organizations__in=[current_listing_agency_id], listing_notification_flag=True).all():
+            target_set.add(steward)
+
+        return list(target_set)
+
+
+class ListingOwnerNotification(NotificationBase):  # Not Verified
+    """
+    AMLNG-??? - ListingOwner
+        As an user, I want to send a notification to the owners and org_steward for that listing's agency
+    Targets: owners and org_steward for that listing's agency
+    Invoked: Directly
     """
 
     def get_notification_db_type(self):
@@ -794,6 +823,10 @@ def create_notification(author_username=None,
 
     elif notification_type == 'ListingReviewNotification':
         notification_instance = ListingReviewNotification()
+        notification_instance.set_sender_and_entity(author_username, listing)
+
+    elif notification_type == 'ListingOwnerNotification':
+        notification_instance = ListingOwnerNotification()
         notification_instance.set_sender_and_entity(author_username, listing)
 
     elif notification_type == 'PendingDeletionRequestNotification':

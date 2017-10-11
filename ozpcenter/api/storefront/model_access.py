@@ -31,11 +31,13 @@ ORDER BY profile_username, role_priority
 import logging
 
 from django.core.urlresolvers import reverse
-from django.db.models.functions import Lower
 from django.db import connection
+from django.db.models import Count
+from django.db.models.functions import Lower
+
 import msgpack
 
-import ozpcenter.api.listing.serializers as listing_serializers
+# import ozpcenter.api.listing.serializers as listing_serializers
 from ozpcenter import models
 from ozpcenter.pipe import pipes
 from ozpcenter.pipe import pipeline
@@ -79,7 +81,8 @@ SELECT DISTINCT
   ozpcenter_listing.version_name,
   ozpcenter_listing.unique_name,
   ozpcenter_listing.what_is_new,
-  ozpcenter_listing.requirements,
+  ozpcenter_listing.usage_requirements,
+  ozpcenter_listing.system_requirements,
   ozpcenter_listing.description_short,
   ozpcenter_listing.approval_status,
   ozpcenter_listing.is_enabled,
@@ -126,7 +129,7 @@ SELECT DISTINCT
   /* Category */
   category_listing.category_id,
   ozpcenter_category.title category_title,
-  ozpcenter_category.description category_description,
+  ozpcenter_category.description categorequiredry_description,
 
   /* Contact */
   contact_listing.contact_id contact_id,
@@ -245,7 +248,8 @@ def get_user_listings(username, request, exclude_orgs=None):
 
                 "approved_date": row['approved_date'],
 
-                "requirements": row['requirements'],
+                "usage_requirements": row['usage_requirements'],
+                "system_requirements": row['system_requirements'],
                 "iframe_compatible": row['iframe_compatible'],
 
                 "what_is_new": row['what_is_new'],
@@ -516,9 +520,6 @@ def get_storefront_recommended(username, pre_fetch=True):
                                                                                                                           is_enabled=True,
                                                                                                                           is_deleted=False).all()
 
-    if pre_fetch:
-        recommended_listings_queryset = listing_serializers.ListingSerializer.setup_eager_loading(recommended_listings_queryset)
-
     # Fix Order of Recommendations
     id_recommended_object_mapper = {}
     for recommendation_entry in recommended_listings_queryset:
@@ -553,9 +554,6 @@ def get_storefront_featured(username, pre_fetch=True):
             is_enabled=True,
             is_deleted=False)
 
-    if pre_fetch:
-        featured_listings_raw = listing_serializers.ListingSerializer.setup_eager_loading(featured_listings_raw)
-
     featured_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in featured_listings_raw]),
                                       [pipes.ListingPostSecurityMarkingCheckPipe(username)]).to_list()
     return featured_listings
@@ -571,9 +569,6 @@ def get_storefront_recent(username, pre_fetch=True):
         approval_status=models.Listing.APPROVED,
         is_enabled=True,
         is_deleted=False)
-
-    if pre_fetch:
-        recent_listings_raw = listing_serializers.ListingSerializer.setup_eager_loading(recent_listings_raw)
 
     recent_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in recent_listings_raw]),
                                       [pipes.ListingPostSecurityMarkingCheckPipe(username),
@@ -592,16 +587,13 @@ def get_storefront_most_popular(username, pre_fetch=True):
             is_enabled=True,
             is_deleted=False).order_by('-avg_rate', '-total_reviews')
 
-    if pre_fetch:
-        most_popular_listings_raw = listing_serializers.ListingSerializer.setup_eager_loading(most_popular_listings_raw)
-
     most_popular_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in most_popular_listings_raw]),
                                       [pipes.ListingPostSecurityMarkingCheckPipe(username),
                                        pipes.LimitPipe(36)]).to_list()
     return most_popular_listings
 
 
-def get_storefront(username, pre_fetch=False):
+def get_storefront(username, pre_fetch=False, section=None):
     """
     Returns data for /storefront api invocation including:
         * recommended listings (max=10)
@@ -613,6 +605,8 @@ def get_storefront(username, pre_fetch=False):
 
     Args:
         username
+        pre_fetch
+        section(str): recommended, featured, recent, most_popular, all
 
     Returns:
         {
@@ -623,14 +617,32 @@ def get_storefront(username, pre_fetch=False):
         }
     """
     try:
-        recommended_listings, extra_data = get_storefront_recommended(username, pre_fetch)
+        section = section or 'all'
 
-        data = {
-            'recommended': recommended_listings,
-            'featured': get_storefront_featured(username, pre_fetch),
-            'recent': get_storefront_recent(username, pre_fetch),
-            'most_popular': get_storefront_most_popular(username, pre_fetch)
-        }
+        data = {}
+        extra_data = {}
+
+        if section == 'all' or section == 'recommended':
+            recommended_listings, extra_data = get_storefront_recommended(username, pre_fetch)
+            data['recommended'] = recommended_listings
+        else:
+            data['recommended'] = []
+
+        if section == 'all' or section == 'featured':
+            data['featured'] = get_storefront_featured(username, pre_fetch)
+        else:
+            data['featured'] = []
+
+        if section == 'all' or section == 'recent':
+            data['recent'] = get_storefront_recent(username, pre_fetch)
+        else:
+            data['recent'] = []
+
+        if section == 'all' or section == 'most_popular':
+            data['most_popular'] = get_storefront_most_popular(username, pre_fetch)
+        else:
+            data['most_popular'] = []
+
     except Exception:
         # raise Exception({'error': True, 'msg': 'Error getting storefront: {0!s}'.format(str(e))})
         raise  # Should be catch in the django framwork
@@ -660,21 +672,23 @@ def get_metadata(username):
         data['listing_types'] = values_query_set_to_dict(models.ListingType.objects.all().values(
             'title', 'description'))
 
-        data['agencies'] = values_query_set_to_dict(models.Agency.objects.all().values(
-            'title', 'short_name', 'icon', 'id'))
-
         data['contact_types'] = values_query_set_to_dict(models.ContactType.objects.all().values(
             'name', 'required'))
 
         data['intents'] = values_query_set_to_dict(models.Intent.objects.all().values(
             'action', 'media_type', 'label', 'icon', 'id'))
 
-        # return icon/image urls instead of the id and get listing counts
-        for i in data['agencies']:
-            # i['icon'] = models.Image.objects.get(id=i['icon']).image_url()
-            # i['icon'] = '/TODO'
-            i['listing_count'] = models.Listing.objects.for_user(
-                username).filter(agency__title=i['title'], approval_status=models.Listing.APPROVED, is_enabled=True).count()
+        agency_listing_count_queryset = models.Listing.objects.for_user(username).filter(approval_status=models.Listing.APPROVED, is_enabled=True)
+        agency_listing_count_queryset = agency_listing_count_queryset.values('agency__id',
+                                                                        'agency__title',
+                                                                        'agency__short_name',
+                                                                        'agency__icon').annotate(listing_count=Count('agency__id')).order_by('agency__short_name')
+
+        data['agencies'] = [{'id': record['agency__id'],
+                            'title': record['agency__title'],
+                            'short_name': record['agency__short_name'],
+                            'icon': record['agency__icon'],
+                            'listing_count': record['listing_count']} for record in agency_listing_count_queryset]
 
         for i in data['intents']:
             # i['icon'] = models.Image.objects.get(id=i['icon']).image_url()

@@ -2,6 +2,15 @@
 root:
 	# '==Commands=='
 	# 'dev - make new development environment'
+	# --Running--
+	# 'run - run development environment'
+	# 'run_es - run development environment with Elasticsearch'
+	# 'runp - run development environment in multithreaded mode'
+	# 'runp_es - run development environment with Elasticsearch  in multithreaded mode'
+	# 'install_git_hooks - Install Git Hooks to run code checker'
+	# 'shell - Enter into interactive shell'
+
+# tail -f /var/log/postgresql/postgresql-9.3-main.log
 
 clean:
 	rm -f db.sqlite3
@@ -38,11 +47,17 @@ run_psql:
 run_psql_es:
 	MAIN_DATABASE=psql ES_ENABLED=True python manage.py runserver localhost:8001
 
-runp:
-	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8000 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
+rung:
+	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
+
+rung_es:
+	ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
+
+rung_psql_es:
+	MAIN_DATABASE=psql ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
 codecheck:
-	flake8 ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402 --show-source
+	pycodestyle ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
 
 autopep:
 	autopep8 ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
@@ -68,25 +83,19 @@ recommend_es_user:
 recommend_es_content:
 	ES_ENABLED=TRUE RECOMMENDATION_ENGINE='elasticsearch_content_base' python manage.py runscript recommend
 
-dev: clean pre create_static
+sqlite_migrate:
 	MAIN_DATABASE=sqlite python manage.py makemigrations ozpcenter
 	MAIN_DATABASE=sqlite python manage.py makemigrations ozpiwc
 	MAIN_DATABASE=sqlite DEV_MODE=True python manage.py migrate
 
-	echo 'Loading sample data...'
+dev: clean pre create_static install_git_hooks sqlite_migrate
 	MAIN_DATABASE=sqlite python manage.py runscript sample_data_generator
 
-	MAIN_DATABASE=sqlite python manage.py runserver localhost:8001
-# sudo apt-get install postgresql postgresql-contrib
-# sudo -i -u postgres
-# createuser ozp_user
-# psql -c 'ALTER USER ozp_user CREATEDB;'
-# psql -c "ALTER USER "ozp_user" WITH PASSWORD 'password';"
-# createdb ozp
-# psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;'
+dev_es: clean pre create_static install_git_hooks sqlite_migrate
+	MAIN_DATABASE=sqlite ES_ENABLED=FALSE python manage.py runscript sample_data_generator
+	ES_ENABLED=TRUE python manage.py runscript reindex_es
 
-# tail -f /var/log/postgresql/postgresql-9.3-main.log
-dev_psql: clean pre create_static
+dev_psql: clean pre create_static install_git_hooks
 	MAIN_DATABASE=psql python manage.py makemigrations ozpcenter
 	MAIN_DATABASE=psql python manage.py makemigrations ozpiwc
 	MAIN_DATABASE=psql DEV_MODE=True python manage.py migrate
@@ -96,13 +105,26 @@ dev_psql: clean pre create_static
 	echo 'Loading sample data...'
 	MAIN_DATABASE=psql python manage.py runscript sample_data_generator
 
-	MAIN_DATABASE=psql python manage.py runserver localhost:8001
-
 email:
 	python manage.py runscript notification_email
+
+shell:
+	python manage.py shell_plus
 
 shell_psql:
 	MAIN_DATABASE='psql' python manage.py shell_plus
 
-shell:
-	python manage.py shell_plus
+create_virtualenv:
+	virtualenv env
+
+pyenv: create_virtualenv
+	(source env/bin/activate &&  pip install -r requirements.txt)
+
+pyenv_wheel: create_virtualenv
+	(source env/bin/activate &&  pip install --no-index --find-links=wheelhouse -r requirements.txt)
+
+upgrade_requirements:
+	pip freeze | cut -d = -f 1 | xargs -n 1 pip install --upgrade
+
+freeze_requirements:
+	pip freeze > requirements.txt

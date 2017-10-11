@@ -37,18 +37,12 @@ from django.db import transaction
 from django.conf import settings
 
 from ozpcenter import models
-from ozpcenter.api.listing import model_access_es
-from ozpcenter.api.listing.model_access_es import check_elasticsearch
 from ozpcenter.recommend import recommend_utils
 from ozpcenter.recommend.graph_factory import GraphFactory
-# from ozpcenter.recommend.graph_factory import GraphFactory
-
+from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 
 # Get an instance of a logger
 logger = logging.getLogger('ozp-center.' + str(__name__))
-
-# Create ES client
-es_client = model_access_es.es_client
 
 
 class Recommender(object):
@@ -112,10 +106,8 @@ class Recommender(object):
         start_ms = time.time() * 1000.0
         self.recommendation_logic()
         recommendation_ms = time.time() * 1000.0
-        print('--------')  # Print statement for debugging output
-        logger.info(self.recommender_result_set)
-        print('--------')  # Print statement for debugging output
-        logger.info('Recommendation Logic took: {} ms'.format(recommendation_ms - start_ms))
+        logger.debug(self.recommender_result_set)
+        logger.debug('Recommendation Logic took: {} ms'.format(recommendation_ms - start_ms))
         return self.recommender_result_set
 
 
@@ -186,7 +178,7 @@ class BaselineRecommender(Recommender):
         current_profile_count = 0
         for profile in all_profiles:
             current_profile_count = current_profile_count + 1
-            logger.info('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
+            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
 
             profile_id = profile.id
             profile_username = profile.user.username
@@ -233,6 +225,9 @@ class BaselineRecommender(Recommender):
             library_entries_group_by_count = library_entries.values('listing_id').annotate(count=Count('listing_id')).order_by('-count')
             # [{'listing_id': 1, 'count': 1}, {'listing_id': 2, 'count': 1}]
 
+            # Calculation of Min and Max new scores dynamically.  This will increase the values that are lower
+            # to a range within 2 and 5, but will not cause values higher than new_min and new_max to become even
+            # larger.
             old_min = 1
             old_max = 1
             new_min = 2
@@ -255,154 +250,145 @@ class BaselineRecommender(Recommender):
                 self.add_listing_to_user_profile(profile_id, listing_id, calculation, True)
 
 
-class ElasticsearchContentBaseRecommender(Recommender):
+class ElasticsearchRecommender(Recommender):
     """
-    Elasticsearch Content based recommendation engine
+    Elasticsearch methods to create mappings, populate data, and run core recommendation queries for both Content and
+    Collaborative based recommendations.  This is meant to be in a fashion so that it will also allow for execution
+    from outside in other classes.  Thus will then facilitate a realtime execution when needed.
+
+    See link for information on methods that have content:
+    https://github.com/aml-development/ozp-backend/wiki/Elasticsearch-Recommendation-Engine
     """
-    friendly_name = 'Elasticsearch Filtering'
-    recommendation_weight = 1.0
+    # Static Contstant to get ratings greater than this value entered into ES User Profile Table:
+    MIN_ES_RATING = 3.5
+    WAIT_TIME = 30  # Wait time in Minutes before running recreation of index
+    TIMESTAMP_INDEX_TYPE = 'custom_meta'
 
-    def initiate(self):
+    @staticmethod
+    def set_timestamp_record():
         """
-        Initiate any variables needed for recommendation_logic function
-        Make sure the Elasticsearch is up and running
+        Method to set timestamp for creation and last update of ES Recommendation Table data
         """
-        check_elasticsearch()
-        # TODO: Make sure the elasticsearch index is created here with the mappings
+        es_client = elasticsearch_factory.get_client()
 
-    def recommendation_logic(self):
+        index_name = settings.ES_RECOMMEND_USER
+        timestamp = time.time()
+        result_es = None
+
+        if es_client.indices.exists(index_name):
+            result_es = es_client.create(
+                index=settings.ES_RECOMMEND_USER,
+                doc_type=ElasticsearchRecommender.TIMESTAMP_INDEX_TYPE,
+                id=0,
+                refresh=True,
+                body={
+                    "lastupdated": timestamp
+                }
+            )
+
+        return result_es
+
+    @staticmethod
+    def is_data_old():
         """
-        Recommendation logic
-
-        Template Code to make sure that Elasticsearch client is working
-        This code should be replace by real algorthim
+        Method to determine if the ES Recommendation Table data is out of date and needs to be recreated
         """
-        logger.debug('Elasticsearch Content Base Recommendation Engine')
-        logger.debug('Elasticsearch Health : {}'.format(es_client.cluster.health()))
+        # time.time() returns time in seconds since epoch.  To convert wait time to seconds need to multiply
+        # by 60.  REF: https://docs.python.org/3/library/time.html
+        trigger_recreate = ElasticsearchRecommender.WAIT_TIME * 60
+        es_client = elasticsearch_factory.get_client()
 
+        query_es_date = {
+            "query": {
+                "term": {
+                    "_type": "custom_meta"
+                }
+            }
+        }
 
-class ElasticsearchUserBaseRecommender(Recommender):
-    """
-    Elasticsearch User based recommendation engine
-    Steps:
-       - Initialize Mappings for Reviews Table to import
-       - Import Ratings Table
-       - Perform aggregations on data to obtain recommendation list
-         - Need to ensure that user apps and bookmarked apps are not in list
-       - Output with query and put into recommendation table:
-       Format should be:
-                 profile_id#1: {
-                     recommender_friendly_name#1:{
-                         recommendations:[
-                             [listing_id#1, score#1],
-                             [listing_id#2, score#2]
-                         ]
-                         weight: 1.0
-                         ms_took: 5050
-                     },
-    """
-    '''
-    # Algorithm detailed information
-    # Structure to setup for storing Elasticsearch data:
-        Mapping of data:
-            MAPPING:
-                recommend - document property to store the contents under
-                    fields used:
-                        author_id - Stores the id of the user the data is about
-                        bookmark_ids - Stores a list of bookmarks ids that the user has bookmarked
-                        categories - Stores a list of the categories for associating with the user
-                        ratings - Nested object
-                            - listing_id - Listing Id for rated app
-                            - rate - Rating given to app by user
-                            - listing_categories - Category(ies) that the app is listed under
-                (All of the fields are of type long so as to store numeric values)
-                TODO: Need to check if storing as a String might be better
+        if es_client.indices.exists(settings.ES_RECOMMEND_USER):
+            result_es = es_client.search(
+                index=settings.ES_RECOMMEND_USER,
+                body=query_es_date
+            )
+        else:
+            # There is no index created and need to create one, return True to do so:
+            logger.debug("== ES Table Does not exist, create a new one ==")
+            return True
 
-    # Theory Information for Elasticsearch:
-    # Information on Significant Term Aggregations that is used in this algorithm can be found here:
-    #        https://www.elastic.co/guide/en/elasticsearch/reference/2.4/search-aggregations-bucket-significantterms-aggregation.html
-    # The Elasticsearch process is based on significant terms aggregations of data.
-    # The process will derive scores based on frequencies in the foreground and background sets.
-    #   The terms are then considered significant if there is a noticeable difference in
-    #   frequency in how it appears in the subset and also in the background data set.
-    # The frequency is based on bookmarked, reviewed items and categories that the listings are based
-    #   on per user to create the background and foreground items for calculating the term frequency.
-    # There is no clear way to explain how this works, but based on implementation if you were to have people
-    #   review similar listings in the same category and then a person that has those categories bookmarked but
-    #   not all of tha apps should see the other apps from the category that are reviewed and bookmarked by other users.
-    # The apps will be then ranked based on the number of occurrences that they have compared to the total number in the set.
-    # Once the score is created one will show the ranking based on the number of matching documents including occurrences
-    #   versus the total number of documents in the set that is being compared.
-    #
-    # To explain simply, the more of a category items that are bookmarked and reviewed the chances are the items
-    #   will be recommended.  Items that have no reviews or bookmarks will not be included in the recommended items.
-    #   Recommendation depends on having items that have been reviewed and/or bookmarked to even appear in the list.
-    '''
+        if result_es['hits']['total'] == 0:
+            lastupdate = 0
+        else:
+            lastupdate = result_es['hits']['hits'][0]['_source']['lastupdated']
+        currenttime = time.time()
+        logger.debug("== ES Table Last Update: {}, Current Time: {}, Recreate Index: {} ==".format(currenttime, lastupdate, ((currenttime - lastupdate) > trigger_recreate)))
+        if (currenttime - lastupdate) > trigger_recreate:
+            return True
+        else:
+            return False
 
-    friendly_name = 'Elasticsearch User Based Filtering'
-    # The weights that are returned by Elasticsearch will be 0.X and hence the reason that we need to multiply
-    # by factors of 10 to get reasonable values for ranking.
-    # Making weight of 25 so that results will correlate well with other recommendation engines when combined.
-    # Reasoning: Results of scores are between 0 and 1 with results mainly around 0.0X, thus the recommendation weight
-    #            will mix well with other recommendations and not become too large at the same time.
-    recommendation_weight = 25.0
-    MIN_ES_RATING = 3.5  # Minimum rating to have results meet before being recommended for ES Recommender Systems
-
-    def initiate(self):
+    @staticmethod
+    def get_index_mapping():
         """
-        Initiate any variables needed for recommendation_logic function
-        Make sure the Elasticsearch is up and running
-        Steps:
-        - Make sure that Elasticsearch is running
-        - Ensure that variables are setup and working properly.
-        - Import data into Elasticsearch
+        Mapping to be used for Elasticsearch Table for both Content and Collaborative Recommendation Engines
+        See: https://github.com/aml-development/ozp-backend/wiki/Elasticsearch-Recommendation-Engine
         """
-        '''
-        # Process Creating Documents (Importing) for searching:
-        - Initially create a mapping for Elasticsearch using the above mapping data
-        - Check to see if Elasticsearch table already exists
-            - if so then remove the table
-        - Create a new table to store data
-        - Loop through all reviews:
-            - Search for user (aka author_id) to get all reviewed listings by user
-            - Add only items that are rated above the MIN_ES_RATING to the categories to be added to
-                the user profile.  This makes items that are not ranked high to not play a role in which categories
-                the user is associated with.
-            - If new record, then create the contents just retrieved into a document
-            - Else, append the information to the existing document
-        '''
-
-        check_elasticsearch()
-        # TODO: Make sure the elasticsearch index is created here with the mappings
-
-        '''
-        Load data from Reviews Table into memory
-        '''
-        ###########
-        # Loading Review Data:
-        logger.debug('Elasticsearch User Base Recommendation Engine: Loading data from Review model')
-        reviews_listings = models.Review.objects.all()
-        reviews_listing_uname = reviews_listings.values_list('id', 'listing_id', 'rate', 'author')
-        # End loading of Reviews Table data
-        ###########
-
         number_of_shards = settings.ES_NUMBER_OF_SHARDS
         number_of_replicas = settings.ES_NUMBER_OF_REPLICAS
 
-        '''
-        Use Ratings table for data
-        '''
-        # Initialize ratings table for Elasticsearch to perform User Based Recommendations:
-        rate_request_body = {
+        index_mapping = {
             "settings": {
                 "number_of_shards": number_of_shards,
-                "number_of_replicas": number_of_replicas  # ,
+                "number_of_replicas": number_of_replicas,
+                "analysis": {
+                    "analyzer": {
+                       "keyword_lowercase_analyzer": {
+                         "tokenizer": "keyword",
+                         "filter": ["lowercase"]
+                       }
+                     }
+                }
             },
             "mappings": {
+                "custom_meta": {
+                    "dynamic": "strict",
+                    "properties": {
+                        "lastupdated": {
+                            "type": "long"
+                        }
+                    }
+                },
                 "recommend": {
+                    "dynamic": "strict",
                     "properties": {
                         "author_id": {
                             "type": "long"
+                        },
+                        "author": {
+                            "type": "string",
+                            "analyzer": "english"
+                        },
+                        "titles": {
+                            "type": "string",
+                            "analyzer": "english"
+                        },
+                        "descriptions": {
+                            "type": "string",
+                            "analyzer": "english"
+                        },
+                        "description_shorts": {
+                            "type": "string",
+                            "analyzer": "english"
+                        },
+                        "agency_name_list": {
+                            "type": "string"
+                        },
+                        "tags_list": {
+                            "type": "string"
+                        },
+                        "categories_text": {
+                            "type": "string",
+                            "analyzer": "keyword_lowercase_analyzer"
                         },
                         "ratings": {
                             "type": "nested",
@@ -412,9 +398,13 @@ class ElasticsearchUserBaseRecommender(Recommender):
                                 },
                                 "rate": {
                                     "type": "long",
-                                    "boost": 10
+                                    "boost": 1
                                 },
                                 "listing_categories": {
+                                    "type": "string",
+                                    "analyzer": "keyword_lowercase_analyzer"
+                                },
+                                "category_ids": {
                                     "type": "long"
                                 }
                             }
@@ -422,366 +412,544 @@ class ElasticsearchUserBaseRecommender(Recommender):
                         "bookmark_ids": {
                             "type": "long"
                         },
-                        "categories": {
+                        "categories_id": {
                             "type": "long"
                         }
                     }
                 }
             }
         }
+        return index_mapping
 
-        # Initialize Tables:
-        # Initializing Recommended by Ratings ES Table by removing old Elasticsearch Table:
-        if es_client.indices.exists(settings.ES_RECOMMEND_USER):
-            resdel = es_client.indices.delete(index=settings.ES_RECOMMEND_USER)
-            logger.info("Deleting Existing ES Index Result: '{}'".format(resdel))
+    def initiate(self):
+        """
+        Make sure the Elasticsearch is up and running
+        Making profiles for Elasticsearch Recommendations
+        """
+        elasticsearch_factory.check_elasticsearch()
 
-        # Create ES Index since it has not been created or is deleted above:
-        connect_es_record_exist = es_client.indices.create(index=settings.ES_RECOMMEND_USER, body=rate_request_body)
-        logger.info("Creating ES Index after Deletion Result: '{}'".format(connect_es_record_exist))
+        if ElasticsearchRecommender.is_data_old():
+            elasticsearch_factory.recreate_index_mapping(settings.ES_RECOMMEND_USER, ElasticsearchRecommender.get_index_mapping())
+            ElasticsearchRecommender.load_data_into_es_table()
 
-        # Recommendation Listings loaded at start:
-        # reviews_listings = models.Review.objects.all()
-        # reviews_listing_uname = reviews_listings.values_list('id', 'listing_id', 'rate', 'author_id')
+    @staticmethod
+    def load_data_into_es_table():
+        """
+        - Get Mapping for Elasticsearch Table
+        - Cycle through all profiles:
+            - For each profile:
+                Get Reviewed Listings with Categories, Title, Description, and Description Short Text
+                Get Bookmarked Listings with Categories, Title, Description, and Description Short Text
+                Add information to Elasticsearch Table for profile
+        - Set timestamp for data creation
+        """
+        es_client = elasticsearch_factory.get_client()
 
-        for record in reviews_listing_uname:
-            result_es = {}
+        all_profiles = models.Profile.objects.all()
 
-            query_term = {
-                "query": {
-                    "term": {
-                        "author_id": record[3]
-                    }
+        data_to_bulk_index = []
+        for profile in all_profiles:
+            profile_username = profile.user.username
+
+            title_text_list = set()
+            description_text_list = set()
+            description_short_text_list = set()
+            categories_text_list = set()
+            category_id_list = set()
+            tags_text_list = set()
+            organizations_text_list = [agency.short_name for agency in profile.organizations.all()]
+            # orgs_text_list = str(organizations_text_list).strip('[').strip(']')
+            #
+            # print("orig: ", organizations_text_list)
+            # print("modi: ", orgs_text_list)
+
+            profile_listings_review = []
+            for review_object in models.Review.objects.filter(author=profile.user_id):
+                listing_obj = review_object.listing
+
+                if review_object.rate > ElasticsearchRecommender.MIN_ES_RATING:
+                    title_text_list.add(listing_obj.title)
+                    description_text_list.add(listing_obj.description)
+                    description_short_text_list.add(listing_obj.description_short)
+
+                for tagitem in listing_obj.tags.all():
+                    tags_text_list.add(tagitem.name)
+
+                listing_categories = set()
+                listing_category_id_list = set()
+                for cat_item in review_object.listing.categories.all():
+                    listing_categories.add(cat_item.title)
+                    listing_category_id_list.add(cat_item.id)
+                    categories_text_list.add(cat_item.title)
+                    category_id_list.add(cat_item.id)
+
+                update_item = {"listing_id": review_object.listing_id,
+                               "rate": review_object.rate,
+                               "listing_categories": list(categories_text_list),
+                               "category_ids": list(listing_category_id_list)}
+                profile_listings_review.append(update_item)
+
+            bookmarked_id_list = []
+            for bookmark_item in models.ApplicationLibraryEntry.objects.for_user(profile.user.username):
+                bookmarked_listing_obj = bookmark_item.listing
+                bookmarked_id_list.append(bookmarked_listing_obj.id)
+                title_text_list.add(bookmarked_listing_obj.title)
+                description_text_list.add(bookmarked_listing_obj.description)
+                description_short_text_list.add(bookmarked_listing_obj.description_short)
+
+                for cat_item in bookmarked_listing_obj.categories.all():
+                    categories_text_list.add(cat_item.title)
+
+                for tagitem in bookmarked_listing_obj.tags.all():
+                    tags_text_list.add(tagitem.name)
+
+            data_to_bulk_index.append({"author_id": profile.user_id,
+                "author": profile_username,
+                "agency_name_list": organizations_text_list,
+                "titles": list(title_text_list),
+                "descriptions": list(description_text_list),
+                "description_shorts": list(description_short_text_list),
+                "tags_list": list(tags_text_list),
+                "categories_text": list(categories_text_list),
+                "bookmark_ids": list(bookmarked_id_list),
+                "categories_id": list(category_id_list),
+                "ratings": profile_listings_review})
+
+        # TODO data_to_bulk_index = [1..19500] > [[1..5000],[5001..10000], .., [15001..19500]]
+        bulk_data = []
+        for record in data_to_bulk_index:
+            op_dict = {
+                "index": {
+                    "_index": settings.ES_RECOMMEND_USER,
+                    "_type": settings.ES_RECOMMEND_TYPE,
+                    "_id": record['author_id']
                 }
             }
 
-            # Get current reviewed items for Person (author_id):
-            es_search_result = es_client.search(
-                index=settings.ES_RECOMMEND_USER,
-                body=query_term
-            )
+            bulk_data.append(op_dict)
+            bulk_data.append(record)
 
-            # For each reviewed listing_id in ratings_items get the categories associated with the listing:
-            es_cat_query_term = {
-                "_source": ["id", "categories"],
+        # Bulk index the data
+        logger.debug('Bulk indexing Users...')
+        res = es_client.bulk(index=settings.ES_RECOMMEND_USER, body=bulk_data, refresh=True)
+        if res.get('errors', True):
+            logger.error('Error Bulk Recommendation Indexing')
+        else:
+            logger.debug('Bulk Recommendation Indexing Successful')
+
+        logger.debug("Done Indexing")
+
+        ElasticsearchRecommender.set_timestamp_record()
+
+
+class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
+    """
+    Elasticsearch Content based recommendation engine
+    Steps:
+    - Initialize Mappings by calling common Utils command to create table if it has not already been created recently
+    - Import listings into main Elasticsearch table (if not already created recently)
+        - Cycle through all reviews and add information to table (including text)
+            - Add rating that the user given
+        - Add all users that have bookmarked the app to the table
+        - Go through User tables and add text to each record of a User Table
+    - Perform calculations via query on data
+    See: https://github.com/aml-development/ozp-backend/wiki/Elasticsearch-Recommendation-Engine
+    """
+    friendly_name = 'Elasticsearch Content Filtering'
+    recommendation_weight = 0.9  # Weighting is based on rebasing the results
+    result_size = 20  # Get only the top 50 results
+    min_new_score = 4  # Min value to set for rebasing of results
+    max_new_score = 9  # Max value to rebase results to so that values
+    content_norm_factor = 0.05  # Amount to increase the max value found so that saturation does not occur.
+
+    def es_content_based_recommendation(self, profile_id, result_size):
+        """
+        Recommendation Logic for Content Based Recommendations:
+
+        Recommendation logic
+        - Take profile passed in and SIZE of result set requested
+        - Get information from profile to match against listings
+        - Exclude apps that are already in the profile
+        - Perform search based on queries and return results
+        - Return list of recommended items back to calling method for the profile
+        """
+        es_client = elasticsearch_factory.get_client()
+
+        query = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"author_id": profile_id}}
+                    ]
+                }
+            }
+        }
+
+        es_profile_result = es_client.search(
+            index=settings.ES_RECOMMEND_USER,
+            body=query
+        )
+
+        each_profile_source = es_profile_result['hits']['hits'][0]['_source']
+
+        query_object = []
+
+        agency_text_query = str(each_profile_source['agency_name_list']).strip('[').strip(']')
+        agency_to_query = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"match": {"agency_short_name": agency_text_query}}
+                    ]
+                }
+            }
+        }
+        query_object.append(agency_to_query)
+
+        categories_to_query = {
+            "nested": {
+                "path": "categories",
                 "query": {
                     "bool": {
-                        "must": [
-                            {"term": {"id": record[1]}}
+                        "should": [
+                            {"terms": {"categories.id": each_profile_source['categories_id']}}
                         ]
                     }
                 }
             }
+        }
+        query_object.append(categories_to_query)
 
-            category_items = []
+        tags_to_query = {
+            "nested": {
+                "path": "tags",
+                "query": {
+                    "bool": {
+                        "should": [
+                            {"terms": {"tags.name_string": each_profile_source['tags_list']}}
+                        ]
+                    }
+                }
+            }
+        }
+        query_object.append(tags_to_query)
 
-            # Only take categories when the rating is above a 3, do not look at categories when the rating is 3 and below:
-            if record[2] > self.MIN_ES_RATING:
-                es_cat_search = es_client.search(
-                    index=settings.ES_INDEX_NAME,
-                    body=es_cat_query_term
-                )
+        title_list = {}
+        for items in each_profile_source['titles']:
+            title_list = {
+                "multi_match": {
+                    "query": items,
+                    "type": "cross_fields",
+                    "fields": ["title", "description", "description_short"],
+                    "minimum_should_match": "20%"
+                }
+            }
+            query_object.append(title_list)
 
-                # Set category_items array with category id's:
-                if es_cat_search['hits']['total'] <= 1:
-                    category_items = [cat['id'] for cat in es_cat_search['hits']['hits'][0]['_source']['categories']]
-                else:
-                    logger.debug("== MORE THAN ONE ID WAS FOUND ({}) ==".format(es_cat_search['hits']['total']))
+        description_list = {}
+        for items in each_profile_source['descriptions']:
+            description_list = {
+                "multi_match": {
+                    "query": items,
+                    "type": "cross_fields",
+                    "fields": ["title", "description", "description_short"],
+                    "minimum_should_match": "20%"
+                }
+            }
+            query_object.append(description_list)
 
-            ratings_items = []
-            ratings_items.append({"listing_id": record[1], "rate": record[2], "listing_categories": category_items})
+        description_short_list = {}
+        for items in each_profile_source['description_shorts']:
+            description_short_list = {
+                "multi_match": {
+                    "query": items,
+                    "type": "cross_fields",
+                    "fields": ["title", "description", "description_short"],
+                    "minimum_should_match": "20%"
+                }
+            }
+            query_object.append(description_short_list)
 
-            if es_search_result['hits']['total'] == 0:
-                # If record does not exist in Recommendation List, then create it:
-                result_es = es_client.create(
-                    index=settings.ES_RECOMMEND_USER,
-                    doc_type=settings.ES_RECOMMEND_TYPE,
-                    id=record[0],
-                    refresh=True,
-                    body={
-                        "author_id": record[3],
-                        "ratings": ratings_items,
-                        "categories": category_items
-                    })
-            else:
-                # Update existing record:
-                record_to_update = es_search_result['hits']['hits'][0]['_id']
-                current_ratings = es_search_result['hits']['hits'][0]['_source']['ratings']
-                new_ratings = current_ratings + ratings_items
-                current_categories = es_search_result['hits']['hits'][0]['_source']['categories']
+        rated_apps_list = list([rate['listing_id'] for rate in each_profile_source['ratings']])
 
-                # Since exisiting recommendation lists have been deleted, no need to worry about
-                # adding duplicate data.
+        query_compare = {
+            "size": result_size,
+            "_source": ["id", "title"],
+            "query": {
+                "bool": {
+                    "must_not": [
+                        # id is the id of the listing when it searches the listings:
+                        {"terms": {"id": each_profile_source['bookmark_ids']}},
+                        {"terms": {"id": rated_apps_list}}
+                    ],
+                    "should": [
+                        query_object
+                    ]
+                }
+            }
+        }
 
-                result_es = es_client.update(
-                   index=settings.ES_RECOMMEND_USER,
-                   doc_type=settings.ES_RECOMMEND_TYPE,
-                   id=record_to_update,
-                   refresh=True,
-                   body={"doc": {
-                       "ratings": new_ratings,
-                       "categories": list(set(current_categories + category_items))
-                       }
-                   })
+        es_query_result = es_client.search(
+            index=settings.ES_INDEX_NAME,
+            body=query_compare
+        )
 
-            logger.info("Creating/Updating Record Result: '{}'".format(result_es))
+        return es_query_result
+
+    def new_user_return_list(self, result_size):
+        """
+        This procedure is a uses all profile contents to create recommendations for a new user.
+        RETURN: The procedure will return a query results of applications matching query of result_size to be used for
+                populating new user recommendations.
+        See: https://github.com/aml-development/ozp-backend/wiki/Elasticsearch-Recommendation-Engine
+        """
+        es_client = elasticsearch_factory.get_client()
+        title_to_search_list = []
+
+        content_search_term = {
+            "size": 0,
+            "aggs": {
+                "most_common_titles": {
+                    "significant_terms": {
+                        "field": "titles"
+                    }
+                }
+            }
+        }
+
+        es_content_init = es_client.search(
+            index=settings.ES_RECOMMEND_USER,
+            body=content_search_term
+        )
+
+        for item_key in es_content_init['aggregations']['most_common_titles']['buckets']:
+            title_to_search_list_item = {
+                "multi_match": {
+                    "query": item_key['key'],
+                    "type": "cross_fields",
+                    "fields": ["title", "description", "description_short"],
+                    "minimum_should_match": "20%"
+                }
+            }
+            title_to_search_list.append(title_to_search_list_item)
+
+        query_compare = {
+            "size": result_size,
+            "_source": ["id", "title"],
+            "query": {
+                "bool": {
+                    "should": title_to_search_list
+                }
+            }
+        }
+
+        es_query_result = es_client.search(
+            index=settings.ES_INDEX_NAME,
+            body=query_compare
+        )
+
+        return es_query_result
 
     def recommendation_logic(self):
         """
-        Recommendation logic
-        - Create a search that will use the selected algorithm to create a recommendation list
+        Recommendation logic is where the use of Collaborative vs Content differ.  Both use the User Profile to get
+        infromation on the user, but with Content, it takes the content from user profiles on apps based on criteria
+        that is implemented in the calling method and gets a recommended list of apps to return to the user as
+        recommendations.
+        The list is then normalized and added to the recommendations database.
         """
-        '''
-        # Process for creating recommendations:
-        - Loop through all of the profiles and for each profile:
-            - Get all of the bookmarked apps and store in user recommendation profile
-            - Add category for all apps that were bookmarked to category field
-            - if so then remove the table
-        - Create a new table to store data
-        - Loop through all reviews:
-            - Search for user (aka author_id) to get all reviewed listings by user
-            - Add only items that are rated above the MIN_ES_RATING to the categories to be added to
-                the user profile.  This makes items that are not ranked high to not play a role in which categories
-                the user is associated with.
-            - If new record, then create the contents just retrieved into a document
-            - Else, append the information to the existing document
-            - Create query using bookmarked apps and categories and then search for reviewed listings
-                that match the bookmarked apps based on search results
-            - Form qurey for Elasticsearch that will take listings greater than MIN_ES_RATING and exclude bookmarked
-                apps for user in reviewed listings and then remove bookmarked apps from searching the bookmarked app listings.
-            - Run Query for each user and append recommended list to the user profile recommendations
-        '''
+        logger.debug('= Elasticsearch Content Base Recommendation Engine= ')
+        all_profiles = models.Profile.objects.all()
+        all_profiles_count = all_profiles.count()
 
-        logger.debug('Elasticsearch User Base Recommendation Engine')
-        logger.debug('Elasticsearch Health : {}'.format(es_client.cluster.health()))
+        performed_search_request = False
+        new_user_return_list = []
+        current_profile_count = 0
 
-        #########################
-        # Information on Algorithms: (as per Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/search-aggregations-bucket-significantterms-aggregation.html)
-        #       significant_terms (JLH) - Measures the statistical significance of the results of the search vs the entire set of results
-        #                                 Calculated as follows: (ForegroundPercentage / BackgroundPercentage) * (ForegroundPercentage - BackgroundPercentage)
-        #                                 =====> Results in a balance between the rare and the common items.
-        #       chi_square              - Can add siginificant scoring by adding parameters such as include_negatives and background_is_superset.
-        #       gnd (google normalized distance) - Used to determine similarity between words and phrases using the distance between them.
-        #########################
+        for profile in all_profiles:
+            current_profile_count = current_profile_count + 1
+            profile_id = profile.id
+            es_query_result = self.es_content_based_recommendation(profile_id, self.result_size)
 
-        # Set Aggrelation List size for number of results to return:
-        AGG_LIST_SIZE = 50  # Will return up to 30 results based on query.  Default is 10 if parameter is left out of query.
+            # Check if results returned are returned or if it is empty (New User):
+            if es_query_result['hits']['total'] == 0:
+                if not performed_search_request:
+                    new_user_return_list = self.new_user_return_list(int(self.result_size / 2))
+                    performed_search_request = True
+
+                recommended_items = new_user_return_list['hits']['hits']
+                max_score_es_content = new_user_return_list['hits']['max_score'] + self.content_norm_factor * new_user_return_list['hits']['max_score']
+            else:
+                recommended_items = es_query_result['hits']['hits']
+                max_score_es_content = es_query_result['hits']['max_score'] + self.content_norm_factor * es_query_result['hits']['max_score']
+
+            for indexitem in recommended_items:
+                score = recommend_utils.map_numbers(indexitem['_score'], 0, max_score_es_content, self.min_new_score, self.max_new_score)
+                itemtoadd = indexitem['_source']['id']
+                self.add_listing_to_user_profile(profile_id, itemtoadd, score, False)
+            logger.debug("= ES CONTENT RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
+
+        logger.debug("= ES CONTENT RECOMMENDATION Results Completed =")
+
+
+class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
+    """
+    Elasticsearch User based recommendation engine
+    Steps:
+       - Perform aggregations on data to obtain recommendation list
+       - Need to ensure that user apps and bookmarked apps are not in list
+       - Output with query and put into recommendation table:
+    See: https://github.com/aml-development/ozp-backend/wiki/Elasticsearch-Recommendation-Engine
+    """
+    friendly_name = 'Elasticsearch User Based Filtering'
+    recommendation_weight = 1.0  # Weight that the overall results are multiplied against.  The rating for user based is less than 1.
+    min_new_score = 5  # Min value to set for rebasing of results
+    max_new_score = 10  # Max value to rebase results to so that values
+
+    def es_user_based_recommendation(self, profile_id):
+        """
+        Recommendation Logic for Collaborative/User Based Recommendations:
+        Recommendation logic
+        - Take profile id passed in
+        - Get User Profile information based on id
+        - Get Categories, Bookmarks, Rated Apps (all and ones only greater than MIN_ES_RATING)
+        - Compose Query to match profile of bookmarked and rated apps, but remove apps that have been
+          identified by user already.
+        - Perform ES Query and get the aggregations that have all of the apps already identified by the user
+          removed.
+        - Return list of recommended items back to calling method
+        See: https://github.com/aml-development/ozp-backend/wiki/Elasticsearch-Recommendation-Engine
+        """
+        AGG_LIST_SIZE = 50  # Default is 10 if parameter is left out of query.
+
+        es_client = elasticsearch_factory.get_client()
+        es_profile_search = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"author_id": profile_id}}
+                    ],
+                }
+            }
+        }
+
+        es_search_result = es_client.search(
+            index=settings.ES_RECOMMEND_USER,
+            body=es_profile_search
+        )
+
+        agg_query_term = {}
+        categories_to_match = es_search_result['hits']['hits'][0]['_source']['categories_id']
+        tags_to_match = es_search_result['hits']['hits'][0]['_source']['tags_list']
+        bookmarks_to_match = es_search_result['hits']['hits'][0]['_source']['bookmark_ids']
+        rated_apps_list = list([rate['listing_id'] for rate in es_search_result['hits']['hits'][0]['_source']['ratings']])
+        rated_apps_list_match = list([rate['listing_id'] for rate in es_search_result['hits']['hits'][0]['_source']['ratings'] if rate['rate'] > ElasticsearchRecommender.MIN_ES_RATING])
+        agency_to_match = str(es_search_result['hits']['hits'][0]['_source']['agency_name_list'])
+
+        agg_query_term = {
+            "constant_score": {
+                "filter": {
+                    "bool": {
+                        "should": [
+                            {"terms": {"bookmark_ids": bookmarks_to_match}},
+                            {"terms": {"categories": categories_to_match}},
+                            {"terms": {"tags_list": tags_to_match}},
+                            {"term": {"agency_name_list": agency_to_match}},
+                            {
+                                "nested": {
+                                    "path": "ratings",
+                                    "query": {
+                                        "bool": {
+                                            "should": [
+                                                {"terms": {"ratings.listing_id": bookmarks_to_match}},
+                                                {"terms": {"ratings.listing_id": rated_apps_list_match}}
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+
+        agg_search_query = {
+            "size": 0,
+            "query": agg_query_term,
+            "aggs": {
+                "the_listing": {
+                    "nested": {
+                        "path": "ratings"
+                    },
+                    "aggs": {
+                        "listings": {
+                            "filter": {
+                                "range": {
+                                    "ratings.rate": {
+                                        "gte": ElasticsearchRecommender.MIN_ES_RATING
+                                    }
+                                }
+                            }
+                        },
+                        "aggs": {
+                            "significant_terms": {
+                                "field": "ratings.listing_id",
+                                "exclude": bookmarks_to_match + rated_apps_list,
+                                "min_doc_count": 1,
+                                "size": AGG_LIST_SIZE
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        es_query_result = es_client.search(
+            index=settings.ES_RECOMMEND_USER,
+            body=agg_search_query
+        )
+
+        recommended_items = es_query_result['aggregations']['the_listing']['aggs']['buckets']
+
+        return recommended_items
+
+    def recommendation_logic(self):
+        """
+        Recommendation logic is where the use of Collaborative vs Content differ.  Both use the User Profile to get
+        infromation on the user, but with Collaborative, it then matches against other users that have similar profiles to
+        return a recommendation.
+
+        Recommendation logic
+        - Cycle through each profile:
+            - Call ESRecommendUtils method to get User based Recommendations
+            - Take max score from results for profile and rebase all results while adding them to the recommendation list
+            - For each recommendation add it to the list while rescalling the score based on the max score returned
+        """
+        logger.debug('= Elasticsearch User Base Recommendation Engine =')
 
         # Retreive all of the profiles from database:
         all_profiles = models.Profile.objects.all()
+        all_profiles_count = all_profiles.count()
 
+        current_profile_count = 0
         for profile in all_profiles:
-            # ID to adivse on recommendation:
+            current_profile_count = current_profile_count + 1
+
             profile_id = profile.id
+            recommended_items = self.es_user_based_recommendation(profile_id)
 
-            # Retrieve Bookmark App Listings for user:
-            bookmarked_apps = models.ApplicationLibraryEntry.objects.for_user(profile.user.username)
-            bookmarked_list = []
-            for bkapp in bookmarked_apps:
-                bookmarked_list.append(bkapp.listing.id)
+            # If a recommendaiton list is returned then get the max score,
+            # otherwise it is a new user or there is no profile to base recommendations on:
+            if recommended_items:
+                max_score_es_user = recommended_items[0]['score']
 
-            # print("Bookmarked Apps: ", bookmarked_list)
-
-            # Create ES profile to search records:
-            es_profile_search = {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"author_id": profile_id}}
-                        ],
-                    }
-                }
-            }
-
-            # Retrieve results from ES Table for matching profile to update and get recommendations:
-            es_search_result = es_client.search(
-                index=settings.ES_RECOMMEND_USER,
-                body=es_profile_search
-            )
-
-            # Only add/change documents if the user has any bookmarks, otherwise no need to update
-            # documents with null information:
-            category_items = []
-            agg_query_term = {}
-            if len(bookmarked_list) > 0:
-                for bk_item in bookmarked_list:
-                    # For each listing_id in ratings_items get the categories associated with the listing:
-                    es_cat_query_term = {
-                        "_source": ["id", "categories"],
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {"term": {"id": bk_item}}
-                                ]
-                            }
-                        }
-                    }
-                    es_cat_search = es_client.search(
-                        index=settings.ES_INDEX_NAME,
-                        body=es_cat_query_term
-                    )
-
-                    if es_cat_search['hits']['total'] <= 1:
-                        category_items = list(set(category_items + [cat['id'] for cat in es_cat_search['hits']['hits'][0]['_source']['categories']]))
-                    else:
-                        logger.debug("== CATEGORY ITEMS MORE THAN 1 ({}) ==".format(es_cat_search['hits']['total']))
-
-                # Get Categories for bookmarked apps:
-                categories = []
-                if es_search_result['hits']['total'] > 0:
-                    categories = es_search_result['hits']['hits'][0]['_source']['categories']
-
-                # No Reviews were made, but user has bookmarked apps:
-                if es_search_result['hits']['total'] == 0:
-                    # print("PROFILE: ", profile_id)
-                    result_es = es_client.create(
-                        index=settings.ES_RECOMMEND_USER,
-                        doc_type=settings.ES_RECOMMEND_TYPE,
-                        id=profile_id,
-                        refresh=True,
-                        body={
-                            "author_id": profile_id,
-                            "bookmark_ids": bookmarked_list,
-                            "categories": category_items
-                        })
-                    logger.info("Bookmarks Created for profile: {} with result: {}".format(profile_id, result_es))
-                else:
-                    record_to_update = es_search_result['hits']['hits'][0]['_id']
-                    # Get current categories and then use to add to category_items:
-                    current_categories = es_search_result['hits']['hits'][0]['_source']['categories']
-                    result_es = es_client.update(
-                       index=settings.ES_RECOMMEND_USER,
-                       doc_type=settings.ES_RECOMMEND_TYPE,
-                       id=record_to_update,
-                       refresh=True,
-                       body={"doc":
-                            {
-                                "bookmark_ids": bookmarked_list,
-                                "categories": list(set(current_categories + category_items))
-                            }
-                       })
-                    # print("Bookmarks Updated for profile: {} with result: {}".format(profile_id, result_es))
-
-                if len(categories) > 0:
-                    agg_query_term = {
-                        "constant_score": {
-                            "filter": {
-                                "bool": {
-                                    "should": [
-                                        {"terms": {"bookmark_ids": bookmarked_list}},
-                                        {"terms": {"categories": categories}},
-                                        {
-                                            "nested": {
-                                                "path": "ratings",
-                                                "query": {
-                                                    "bool": {
-                                                        "should": [
-                                                            {"terms": {"ratings.listing_id": bookmarked_list}}
-                                                        ]
-                                                    }
-                                                }
-                                            }
-                                        }]
-                                }
-                            }
-                        }
-                    }
-                else:
-                    agg_query_term = {
-                        "constant_score": {
-                            "filter": {
-                                "bool": {
-                                    "should": [
-                                        {"terms": {"bookmark_ids": bookmarked_list}},
-                                        {
-                                            "nested": {
-                                                "path": "ratings",
-                                                "query": {
-                                                    "bool": {
-                                                        "should": [
-                                                            {"terms": {"ratings.listing_id": bookmarked_list}}
-                                                        ]
-                                                    }
-                                                }
-                                            }
-                                        }]
-                                }
-                            }
-                        }
-                    }
-
-            agg_search_query = {
-                "size": 0,
-                "query": agg_query_term,
-                "aggs": {
-                    "the_listing": {
-                        "nested": {
-                            "path": "ratings"
-                        },
-                        "aggs": {
-                            "listings": {
-                                "filter": {
-                                    "range": {
-                                        "ratings.rate": {
-                                            "gte": self.MIN_ES_RATING
-                                        }
-                                    }
-                                }
-                            },
-                            "aggs": {
-                                "significant_terms": {
-                                    "field": "ratings.listing_id",
-                                    "exclude": bookmarked_list,
-                                    "min_doc_count": 1,
-                                    "size": AGG_LIST_SIZE
-                                    # To change algorithm add the following after "size" parameter:
-                                    # Add either: (No paraneters has JLH algorithm being used)
-                                    #   "gnd": {} # optional parameters can be added if needed
-                                    #   "chi_square": {} # optional parameters can be added if needed
-                                },
-                                "aggs": {
-                                    "bookmarkedlistings": {
-                                        "significant_terms": {
-                                            "field": "bookmark_ids",
-                                            "exclude": bookmarked_list,
-                                            "min_doc_count": 1,
-                                            "size": AGG_LIST_SIZE
-                                            # To change algorithm add the following after "size" parameter:
-                                            # Add either: (No paraneters has JLH algorithm being used)
-                                            #   "gnd": {} # optional parameters can be added if needed
-                                            #   "chi_square": {} # optional parameters can be added if needed
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            # print("+++++++++++++++++++++++++++++++++++++")
-            # print("QUERY TERM: ", agg_search_query)
-            # print("+++++++++++++++++++++++++++++++++++++")
-            es_query_result = es_client.search(
-                index=settings.ES_RECOMMEND_USER,
-                body=agg_search_query
-            )
-            # print("RESULT FOR ONE SET: ", es_query_result)
-
-            recommended_items = es_query_result['aggregations']['the_listing']['aggs']['buckets']
-            # print("Length of Array: ", len(recommended_items))
-            # Add items to recommended list for the profile:
             for indexitem in recommended_items:
-                score = indexitem['score']
-                # print("INDEX ITEM: ", indexitem)
-                # print('Key {}, Score {}'.format(indexitem['key'], score))
+                score = recommend_utils.map_numbers(indexitem['score'], 0, max_score_es_user, self.min_new_score, self.max_new_score)
                 self.add_listing_to_user_profile(profile_id, indexitem['key'], score, False)
 
-            logger.info("= ES USER RECOMMENDER Engine Completed Results for {} =".format(profile_id))
-            logger.info("Creating/Updating Record Result: '{}'".format(es_query_result))
-        logger.info("= ES USER RECOMMENDATION Results Completed =")
-        ############################
-        # END
-        ############################
+            logger.debug("= ES USER RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
+        logger.debug("= ES USER RECOMMENDATION Results Completed =")
 
 
 class GraphCollaborativeFilteringBaseRecommender(Recommender):
@@ -809,7 +977,7 @@ class GraphCollaborativeFilteringBaseRecommender(Recommender):
         current_profile_count = 0
         for profile in all_profiles:
             current_profile_count = current_profile_count + 1
-            logger.info('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
+            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
 
             profile_id = profile.id
 
@@ -820,6 +988,7 @@ class GraphCollaborativeFilteringBaseRecommender(Recommender):
                 listing_id = int(listing_raw.split('-')[1])
                 score = current_tuple[1]
 
+                # No need to rebase since results are within the range of others based on testing:
                 self.add_listing_to_user_profile(profile_id, listing_id, score)
 
 
@@ -963,7 +1132,7 @@ class RecommenderDirectory(object):
         start_ms = time.time() * 1000.0
 
         for current_recommender_obj in recommender_list:
-            logger.info('=={}=='.format(current_recommender_obj.__class__.__name__))
+            logger.debug('=={}=='.format(current_recommender_obj.__class__.__name__))
 
             friendly_name = current_recommender_obj.__class__.__name__
             if hasattr(current_recommender_obj.__class__, 'friendly_name'):
@@ -980,14 +1149,14 @@ class RecommenderDirectory(object):
             recommendations_end_ms = time.time() * 1000.0
             recommendations_time = recommendations_end_ms - recommendations_start_ms
 
-            logger.info('Merging {} into results'.format(friendly_name))
+            logger.debug('Merging {} into results'.format(friendly_name))
             self.merge(friendly_name, recommendation_weight, recommendations_results, recommendations_time)
 
         start_db_ms = time.time() * 1000.0
         self.save_to_db()
         end_db_ms = time.time() * 1000.0
-        logger.info('Save to database took: {} ms'.format(end_db_ms - start_db_ms))
-        logger.info('Whole Process: {} ms'.format(end_db_ms - start_ms))
+        logger.debug('Save to database took: {} ms'.format(end_db_ms - start_db_ms))
+        logger.debug('Whole Process: {} ms'.format(end_db_ms - start_ms))
 
     def save_to_db(self):
         """

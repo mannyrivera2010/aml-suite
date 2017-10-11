@@ -207,8 +207,9 @@ class CustomisedJSONFormatter(JSONFormatter):
         # Django Request
         request = extra.get('request')
         if request:
-            extra['user'] = request.user.username
-            del extra['request']
+            if hasattr(request, 'user'):
+                extra['user'] = request.user.username
+                del extra['request']
         else:
             extra['user'] = 'system'
 
