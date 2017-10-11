@@ -1,3 +1,5 @@
+import os
+
 GIT_BASE_DIR = 'git-working'
 DAYS = 14
 
@@ -20,10 +22,10 @@ REPOS = [
     'ozp-backend'
 ]
 
-REPO_CLONE_MODE = 'git'  # git/https
+REPO_CLONE_MODE = os.getenv('REPO_CLONE_MODE', 'git')  # git/https
 
-GIT_USERNAME = 'Manny Rivera'
-GIT_EMAIL = 'mannyrivera2010@gmail.com'
+GIT_USERNAME = os.getenv('GIT_USERNAME', 'Manny Rivera')
+GIT_EMAIL = os.getenv('GIT_EMAIL', 'mannyrivera2010@gmail.com')
 
 DETECTORS = [
     'PythonFileDetector',

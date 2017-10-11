@@ -1,3 +1,17 @@
+# This is a make file to help with the commands
+root:
+	# '==Commands=='
+	# TODO Finish docs
+
+install_git_hooks:
+	cp .hooks/pre-commit ../.git/hooks/
+
+create_virtualenv: install_git_hooks
+	virtualenv env
+
+pyenv: create_virtualenv
+	(source env/bin/activate &&  pip install -r requirements.txt)
+
 test:
 	nosetests -v
 

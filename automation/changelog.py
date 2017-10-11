@@ -38,7 +38,7 @@ SECTIONS = [
 
 
 def create_changelog(repo_path, override_release=None):
-    unreleased_string ='Unreleased'
+    unreleased_string = 'Unreleased'
     include_unreleased = False
 
     if override_release:
