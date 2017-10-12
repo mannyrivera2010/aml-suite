@@ -214,7 +214,7 @@ class RepoHelper(object):
                     exc_info = sys.exc_info()
                     traceback.print_exception(*exc_info)
 
-            if self.repo_working_directory_obj.data_store['repo'][self.repo_name]['safe_commit']:
+            if datastore.get_repo_key(self.repo_name, 'safe_commit'):
                 datastore.update_repo(self.repo_name, {'push_flag': True})
                 self.commit()
             else:
