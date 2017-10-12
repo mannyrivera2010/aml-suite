@@ -1,6 +1,7 @@
 import os
 import re
 
+from db import datastore
 from changelog import create_changelog
 
 
@@ -10,19 +11,19 @@ class Detector(object):
         self.repo_helper = repo_helper
 
     def get_repo_directory_name(self):
-        return self.repo_helper.repo_working_directory_obj.data_store['repo'][self.repo_helper.repo_name]['working_directory']
+        return datastore.get_repo_key(self.repo_helper.repo_name, 'working_directory')
 
     def get_repo_name(self):
         return self.repo_helper.repo_name
 
     def get_current_version_number(self):
-        return self.repo_helper.repo_working_directory_obj.data_store['repo'][self.repo_helper.repo_name]['current_version']
+        return datastore.get_repo_key(self.repo_helper.repo_name, 'current_version')
 
     def get_next_version_number(self):
-        return self.repo_helper.repo_working_directory_obj.data_store['repo'][self.repo_helper.repo_name]['next_version']
+        return datastore.get_repo_key(self.repo_helper.repo_name, 'next_version')
 
     def repo_directory_next_version(self, repo_name):
-        return self.repo_helper.repo_working_directory_obj.data_store['repo'][repo_name]['next_version']
+        return datastore.get_repo_key(repo_name, 'next_version')
 
     def detect(self):
         raise NotImplementedError()
