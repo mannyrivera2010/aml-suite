@@ -1,5 +1,10 @@
 
-### 1.0.83 (None)
+### 1.0.84 (None)    
+
+#### Documentation  
+* **readme**:  update readme ([8a0ff2ce](https://github.com/aml-development/ozp-backend/commit/8a0ff2ce92200251862d0180e3c99e194267f723))          
+
+### 1.0.83 (2017-10-11)
 
 #### Feature  
 * **feedback**:  add new test cases for feedback ([e607c900](https://github.com/aml-development/ozp-backend/commit/e607c900dc5986b62563358a7631177a07b67596))    
