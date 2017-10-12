@@ -183,6 +183,7 @@ class Image(models.Model):
         Args:
             pil_img: PIL.Image (see https://pillow.readthedocs.org/en/latest/reference/Image.html)
         """
+        DEV_MODE = bool(os.getenv('DEV_MODE', False))
 
         exception = None
         saved_to_db = False
@@ -235,26 +236,34 @@ class Image(models.Model):
         # With io.BytesIO(): Sample Data Generator took: 16109.5576171875 ms
         # Commenting out io.BytesIO() - Sample Data Generator took: 34608.710693359375 ms
 
-        image_binary = io.BytesIO()
-        pil_img.save(image_binary, format=current_format)
+        if DEV_MODE:
+            # Ignore saving file for Tests
+            pass
+        else:
+            image_binary = io.BytesIO()
+            pil_img.save(image_binary, format=current_format)
 
-        # image_binary.seek(0)
-        size_bytes = image_binary.tell()
+            # image_binary.seek(0)
+            size_bytes = image_binary.tell()
 
-        # TODO: PIL saved images can be larger than submitted images.
-        # To avoid unexpected image save error, make the max_size_bytes
-        # larger than we expect
-        if size_bytes > (image_type.max_size_bytes * 2):
-            logger.error('Image size is {0:d} bytes, which is larger than the max \
-                allowed {1:d} bytes'.format(size_bytes, 2 * image_type.max_size_bytes))
-            exception = Exception('Image Size too big')
+            # TODO: PIL saved images can be larger than submitted images.
+            # To avoid unexpected image save error, make the max_size_bytes
+            # larger than we expect
+            if size_bytes > (image_type.max_size_bytes * 2):
+                logger.error('Image size is {0:d} bytes, which is larger than the max \
+                    allowed {1:d} bytes'.format(size_bytes, 2 * image_type.max_size_bytes))
+                exception = Exception('Image Size too big')
 
         if exception:
             if saved_to_db:
                 image_object.delete()
             raise exception
 
-        media_storage.save(file_name, image_binary)
+        if DEV_MODE:
+            # Ignore saving file for Tests
+            pass
+        else:
+            media_storage.save(file_name, image_binary)
         return image_object
 
 
