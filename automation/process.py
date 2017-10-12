@@ -36,12 +36,56 @@ log.configure_logging()
 logger = logging.getLogger('default')
 
 
+class DataStore(object):
+
+    def __init__(self):
+        self.data_store = {}
+        self.data_store['meta'] = {}
+        self.data_store['meta']['repos'] = settings.REPOS
+        self.data_store['meta']['release_directory'] = settings.GIT_BASE_DIR
+
+        self.data_store['repo'] = {}
+
+    def __str__(self):
+        return json.dumps(self.data_store, indent=2)
+
+    def repos(self):
+        return self.data_store['meta']['repos']
+
+    def update_meta(self, data):
+        for key_item, value_item in data.items():
+            self.data_store['meta'][key_item] = value_item
+        return data
+
+    def get_meta_key(self, key):
+        return self.data_store['meta'][key]
+
+    def update_repo(self, repo_name, data):
+        """
+        Update Repo
+        """
+        if self.data_store['repo'].get(repo_name) is None:
+            self.data_store['repo'][repo_name] = {}
+
+        for key_item, value_item in data.items():
+            self.data_store['repo'][repo_name][key_item] = value_item
+        return self.data_store['repo'][repo_name]
+
+    def append_repo_errors(self, repo_name, error):
+        self.data_store['repo'][self.repo_name]['errors'].append(error)
+
+    def get_repo_key(self, repo_name, key):
+        return self.data_store['repo'][repo_name][key]
+
+
+datastore = DataStore()
+
+
 class ProgressListener(RemoteProgress):
     """
     Git Progress Listener
     https://gitpython.readthedocs.io/en/0.3.4/reference.html?highlight=remoteprogress#git.remote.RemoteProgress
     """
-
     def __init__(self, name):
         super(ProgressListener, self).__init__()
         self.name = name
@@ -54,7 +98,6 @@ class ProgressListener(RemoteProgress):
         def handler(line):
             logger.info('Cloning Progress For %s - %s ' %
                         (self.name, line.rstrip()))
-        # end
         return handler
 
 
@@ -82,7 +125,6 @@ class RepoHelper(object):
     """
     This class handles everything todo with a repo
     """
-
     def __init__(self, repo_name, repo_working_directory_obj):
         self.repo_name = repo_name
         self.detector_list = None
@@ -117,38 +159,37 @@ class RepoHelper(object):
             if commit['is_release'] is True:
                 self.releases.append(commit['version_object'])
 
-        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['current_version'] = str(self.releases[0])
-        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['next_version'] = str(self.releases[0].increment())
-
         is_head_release_commit = (self.commit_log[0]['is_head'] and self.commit_log[0]['is_release'])
-        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['release_flag'] = not is_head_release_commit
+        datastore.update_repo(self.repo_name, {'current_version': str(self.releases[0]),
+                                                'next_version': str(self.releases[0].increment()),
+                                                'release_flag': not is_head_release_commit})
 
     def initize_repo(self, create_if_not_exist=False):
         """
         Return if git directory is valid
         """
-        repo_working_directory = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['working_directory']
-        repo_directory_state = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['directory_state']
-        repo_github_url = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['github_repo_url']
+        repo_working_directory = datastore.get_repo_key(self.repo_name, 'working_directory')
+        repo_directory_state = datastore.get_repo_key(self.repo_name, 'directory_state')
+        repo_github_url = datastore.get_repo_key(self.repo_name, 'github_repo_url')
 
         if repo_directory_state == 'NOT_EXIST':
             logger.info('%s - %s' % (self.repo_name, 'Cloning Repo'))
             Repo.clone_from(repo_github_url, repo_working_directory, ProgressListener(self.repo_name))
-            self.repo_working_directory_obj.data_store['repo'][self.repo_name]['directory_state'] = DirectoryState.CLONED
+            datastore.update_repo(self.repo_name, {'directory_state': DirectoryState.CLONED })
 
         self.repo = Repo(repo_working_directory)
         self.git = self.repo.git
         self._commit_log()
 
         logger.info('{} - {}'.format(self.repo_name, 'Repo directory is valid'))
-
         return True
 
     def reset_update_repo(self):
         """
         Reset Repo
         """
-        repo_directory_state = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['directory_state']
+        repo_directory_state = datastore.get_repo_key(self.repo_name, 'directory_state')
+
         if not (repo_directory_state == DirectoryState.EXIST or repo_directory_state == DirectoryState.CLONED):
             raise Exception('Need to run initize_repo method first')
 
@@ -172,10 +213,10 @@ class RepoHelper(object):
         self.init_detectors()
         # If the head commit is not a release then need to make a release
         # If force_flag is true then need to make a release
-        current_version = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['current_version']
-        next_version = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['next_version']
-        force_flag = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['force_flag']
-        release_flag = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['release_flag']
+        current_version = datastore.get_repo_key(self.repo_name, 'current_version')
+        next_version = datastore.get_repo_key(self.repo_name, 'next_version')
+        force_flag = datastore.get_repo_key(self.repo_name, 'force_flag')
+        release_flag = datastore.get_repo_key(self.repo_name, 'release_flag')
 
         if release_flag or force_flag:
             logger.info('%s - Need to Release(%s) to (%s) - Forced: %s' % (self.repo_name,
@@ -187,8 +228,7 @@ class RepoHelper(object):
                 detector_detect_flag = detector_obj.detect()
                 if detector_detect_flag:
                     logger.info('{} - {} - Detected File({})'.format(self.repo_name, detector_name, detector_detect_flag))
-            self.repo_working_directory_obj.data_store['repo'][self.repo_name]['push_flag'] = True
-
+            datastore.update_repo(self.repo_name, {'push_flag': True})
         else:
             logger.info('{} - Does not need to release({})'.format(self.repo_name, current_version))
 
@@ -198,10 +238,9 @@ class RepoHelper(object):
         if not self.detector_list:
             self.prep_release()
 
-        self.repo_working_directory_obj.data_store['repo'][self.repo_name]['safe_commit'] = True
-
-        force_flag = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['force_flag']
-        release_flag = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['release_flag']
+        datastore.update_repo(self.repo_name, {'safe_commit': True})
+        force_flag = datastore.get_repo_key(self.repo_name, 'force_flag')
+        release_flag = datastore.get_repo_key(self.repo_name, 'release_flag')
 
         if release_flag or force_flag:
             for detector_obj in self.detector_list:
@@ -210,22 +249,21 @@ class RepoHelper(object):
                         logger.info('%s - %s - Changed file(%s)' %
                                     (self.repo_name, type(detector_obj).__name__, detector_obj.detect()))
                 except Exception as error:
-                    self.repo_working_directory_obj.data_store['repo'][self.repo_name]['safe_commit'] = False
+                    datastore.update_repo(self.repo_name, {'safe_commit': False})
 
                     logger.info('%s - %s - Failed Execution File(%s) - %s' %
                                 (self.repo_name, type(detector_obj).__name__, detector_obj.detect(), error))
 
-                    self.repo_working_directory_obj.data_store['repo'][self.repo_name]['errors'].append(str(error))
+                    datastore.append_repo_errors(self.repo_name, str(error))
                     exc_info = sys.exc_info()
                     traceback.print_exception(*exc_info)
 
             if self.repo_working_directory_obj.data_store['repo'][self.repo_name]['safe_commit']:
-                self.repo_working_directory_obj.data_store['repo'][self.repo_name]['push_flag'] = True
+                datastore.update_repo(self.repo_name, {'push_flag': True})
                 self.commit()
             else:
-                self.repo_working_directory_obj.data_store['repo'][self.repo_name]['push_flag'] = False
+                datastore.update_repo(self.repo_name, {'push_flag': False})
                 logger.info('%s - Not Committing due to failure' % self.repo_name)
-
         else:
             logger.info('%s - No Need for Modifications' % (self.repo_name))
 
@@ -237,7 +275,7 @@ class RepoHelper(object):
                                                    entry['summary']))
 
     def commit(self):
-        lastest_version_number = self.repo_working_directory_obj.data_store['repo'][self.repo_name]['next_version']
+        lastest_version_number = datastore.get_repo_key(self.repo_name, 'next_version')
         git_obj = self.repo.git
         commit_release_string = ("release-%s" % str(lastest_version_number))
         tag_release_string = ("release/%s" % str(lastest_version_number))
@@ -263,40 +301,35 @@ class RepoHelper(object):
 
     def __repr__(self):
         return '(%s, %s, %s)' % (self.repo_name,
-                                 self.repo_working_directory_obj.data_store['repo'][self.repo_name]['working_directory'],
-                                 self.repo_working_directory_obj.data_store['repo'][self.repo_name]['directory_state'])
+                                 datastore.get_repo_key(self.repo_name, 'working_directory'),
+                                 datastore.get_repo_key(self.repo_name, 'directory_state'))
 
     def __str__(self):
         return '(%s, %s, %s)' % (self.repo_name,
-                                 self.repo_working_directory_obj.data_store['repo'][self.repo_name]['working_directory'],
-                                 self.repo_working_directory_obj.data_store['repo'][self.repo_name]['directory_state'])
+                                 datastore.get_repo_key(self.repo_name, 'working_directory'),
+                                 datastore.get_repo_key(self.repo_name, 'directory_state'))
 
 
 class RepoWorkingDirectory(object):
     """
     Class to manage working git directory
     """
-
     def __init__(self, github_info=None):
-        self.data_store = {}
-        self.data_store['meta'] = {}
-        self.data_store['meta']['repos'] = settings.REPOS
-        self.data_store['meta']['release_directory'] = settings.GIT_BASE_DIR
+        for repo_name in datastore.repos():
+            current_working_directory = os.path.join(datastore.get_meta_key('release_directory'), repo_name)
 
-        self.data_store['repo'] = {}
-        for repo_name in self.data_store['meta']['repos']:
-            self.data_store['repo'][repo_name] = {}
-            self.data_store['repo'][repo_name]['working_directory'] = os.path.join(self.data_store['meta']['release_directory'], repo_name)
-            self.data_store['repo'][repo_name]['github_repo_url'] = utils.generate_github_repo_url(repo_name)
-            self.data_store['repo'][repo_name]['directory_state'] = get_directory_state(self.data_store['repo'][repo_name]['working_directory'])
-            self.data_store['repo'][repo_name]['next_version'] = None
-            self.data_store['repo'][repo_name]['current_version'] = None
-            self.data_store['repo'][repo_name]['force_flag'] = False
-            self.data_store['repo'][repo_name]['release_flag'] = False
-            self.data_store['repo'][repo_name]['push_flag'] = False
-            self.data_store['repo'][repo_name]['errors'] = []
+            datastore.update_repo(repo_name,
+                {'working_directory': current_working_directory,
+                 'github_repo_url': utils.generate_github_repo_url(repo_name),
+                 'directory_state': get_directory_state(current_working_directory),
+                 'next_version': None,
+                 'current_version': None,
+                 'force_flag': False,
+                 'release_flag': False,
+                 'push_flag': False,
+                 'errors': []})
 
-        self.data_store['meta']['safe_push_flag'] = False
+        datastore.update_meta({'safe_push_flag': False})
 
         if github_info:
             self.github_info = github_info
@@ -304,7 +337,7 @@ class RepoWorkingDirectory(object):
             self.github_info = GithubRequests()
 
         self.repos = {}
-        for name in self.data_store['meta']['repos']:
+        for name in datastore.repos():
             self.repos[name] = RepoHelper(name, self)
 
     def initize_repos(self):
@@ -312,7 +345,7 @@ class RepoWorkingDirectory(object):
         Check if repos exist, if not clone repo from github
         """
         logger.info('******** Initize Repos **********')
-        for name in self.data_store['meta']['repos']:
+        for name in datastore.repos():
             self.repos[name].initize_repo()
 
     def reset_update_repos(self):
@@ -320,7 +353,7 @@ class RepoWorkingDirectory(object):
         Reset and Update Repos
         """
         logger.info('******** Reset Update Repos **********')
-        for name in self.data_store['meta']['repos']:
+        for name in datastore.repos():
             self.repos[name].reset_update_repo()
             self.repos[name].log_commits()
 
@@ -332,18 +365,18 @@ class RepoWorkingDirectory(object):
             force ozp-react-commons to make a release
         """
         logger.info('******** Pre Repos Release **********')
-        for repo_name in self.data_store['meta']['repos']:
-            release_flag = self.data_store['repo'][repo_name]['release_flag']
-            force_flag = self.data_store['repo'][repo_name]['force_flag']
+        for repo_name in datastore.repos():
+            release_flag = datastore.get_repo_key(repo_name, 'release_flag')
+            force_flag = datastore.get_repo_key(repo_name, 'force_flag')
 
             if release_flag and repo_name == 'ozp-react-commons':
-                self.data_store['repo']['ozp-hud']['force_flag'] = True
-                self.data_store['repo']['ozp-center']['force_flag'] = True
+                datastore.update_repo('ozp-hud', {'force_flag': True})
+                datastore.update_repo('ozp-center', {'force_flag': True})
 
             logger.info('{} - release_flag: {} - force_flag: {}'.format(repo_name, release_flag, force_flag))
 
         logger.info('******** Prep Repos **********')
-        for repo_name in self.data_store['meta']['repos']:
+        for repo_name in datastore.repos():
             release_flag = self.repos[repo_name].prep_release()
 
     def repos_release_modifications_commit(self):
@@ -351,31 +384,28 @@ class RepoWorkingDirectory(object):
         Make Release Modifications and commit
         """
         logger.info('******** Release Modifications **********')
-        self.data_store['meta']['safe_push_flag'] = True
+        datastore.update_meta({'safe_push_flag': True})
 
-        for repo_name in self.data_store['meta']['repos']:
+        for repo_name in datastore.repos():
             self.repos[repo_name].release_modifications_commit()
 
-            if not self.data_store['repo'][repo_name]['safe_commit']:
-                self.data_store['meta']['safe_push_flag'] = False
+
+            if not datastore.get_repo_key(repo_name, 'safe_commit'):
+                datastore.update_meta({'safe_push_flag': False})
 
     def repos_release_push(self):
         """
         Repos release push
         """
         logger.info('******** Start Shell Push Commands **********')
-
-        if self.data_store['meta']['safe_push_flag']:
-            for repo_name in self.data_store['meta']['repos']:
-                push_flag = self.data_store['repo'][repo_name]['push_flag']
+        if datastore.get_meta_key('safe_push_flag'):
+            for repo_name in datastore.repos():
+                push_flag = datastore.get_repo_key(repo_name, 'push_flag')
                 if push_flag:
                     # logger.info('%s - Push : ' % (name))
                     print('(cd git-working/{}/ && git push --follow-tags)'.format(repo_name))
         else:
             logger.info('Detected a repo modification failure - Will not push any repos')
-
-    def show_state(self):
-        return self.data_store
 
     def __repr__(self):
         return '%s' % (self.repos)
@@ -410,9 +440,8 @@ def main():
         repos_obj.repos_release_push()
 
         print('*-*-')
-        print(json.dumps(repos_obj.show_state(), indent=2))
+        print(datastore)
         print('*-*-')
-
 
 if __name__ == '__main__':
     main()
