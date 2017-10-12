@@ -909,7 +909,7 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'total_reviews',
                   'is_private',
                   'is_bookmarked',
-                  'gave_feedback',
+                  'feedback',
                   'description_short',
                   'security_marking',
                   'launch_url',
@@ -923,16 +923,20 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
         bookmarks = models.ApplicationLibraryEntry.objects.filter(listing=request_listing, owner=request_user)
         return len(bookmarks) >= 1
 
-    def _gave_feedback(self, request_user, request_listing):
+    def _feedback(self, request_user, request_listing):
         # TODO: put in listing model_access.py call from there > creative name for method
-        recommendations = models.RecommendationFeedback.objects.filter(target_listing=request_listing, target_profile=request_user)
-        return len(recommendations) >= 1
+        recommendation = models.RecommendationFeedback.objects.for_user(request_user).filter(target_profile=request_user, target_listing=request_listing).first()
+
+        if recommendation is None:
+            return 0
+
+        return recommendation.feedback
 
     def to_representation(self, data):
         ret = super(StorefrontListingSerializer, self).to_representation(data)
         request_user = generic_model_access.get_profile(self.context['request'].user)  # TODO: Get the profile from view request instead of getting it from db again
 
-        ret['gave_feedback'] = self._gave_feedback(request_user, data)
+        ret['feedback'] = self._feedback(request_user, data)
         ret['is_bookmarked'] = self._is_bookmarked(request_user, data)
         return ret
 
@@ -948,7 +952,7 @@ class CertIssuesField(serializers.ReadOnlyField):
 
 class ListingSerializer(serializers.ModelSerializer):
     is_bookmarked = serializers.ReadOnlyField()
-    gave_feedback = serializers.ReadOnlyField()
+    feedback = serializers.ReadOnlyField()
     screenshots = ScreenshotSerializer(many=True, required=False)
     doc_urls = DocUrlSerializer(many=True, required=False)
     owners = CreateListingProfileSerializer(required=False, many=True)
@@ -976,10 +980,14 @@ class ListingSerializer(serializers.ModelSerializer):
         bookmarks = models.ApplicationLibraryEntry.objects.filter(listing=request_listing, owner=request_user)
         return len(bookmarks) >= 1
 
-    def _gave_feedback(self, request_user, request_listing):
+    def _feedback(self, request_user, request_listing):
         # TODO: put in listing model_access.py call from there > creative name for method
-        recommendations = models.RecommendationFeedback.objects.filter(target_listing=request_listing, target_profile=request_user)
-        return len(recommendations) >= 1
+        recommendation = models.RecommendationFeedback.objects.for_user(request_user).filter(target_profile=request_user, target_listing=request_listing).first()
+
+        if recommendation is None:
+            return 0
+
+        return recommendation.feedback
 
     def to_representation(self, data):
         ret = super(ListingSerializer, self).to_representation(data)
@@ -1013,7 +1021,7 @@ class ListingSerializer(serializers.ModelSerializer):
                     check_failed.append(owner_profile.user.username)
 
         ret['cert_issues'] = check_failed
-        ret['gave_feedback'] = self._gave_feedback(request_user, data)
+        ret['feedback'] = self._feedback(request_user, data)
         ret['is_bookmarked'] = self._is_bookmarked(request_user, data)
         return ret
 
