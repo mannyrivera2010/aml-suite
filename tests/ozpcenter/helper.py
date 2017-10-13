@@ -4,14 +4,93 @@ Test Utility Helper
 Function to help unit tests
 """
 import os
-
 import yaml
 
 from rest_framework import status
 
 from ozpcenter import model_access as generic_model_access
 
-TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'test_data')
+TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', 'ozpcenter', 'scripts'))
+TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
+
+
+def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
+    user = generic_model_access.get_profile(username).user
+    test_case_instance.client.force_authenticate(user=user)
+    url = '/api/self/library/import_bookmarks/'
+    data = {'bookmark_notification_id': bookmark_notification_id}
+    response = test_case_instance.client.post(url, data, format='json')
+
+    if response:
+        if status_code == 201:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        elif status_code == 400:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        else:
+            raise Exception('status code is not supported')
+
+    return response
+
+
+def _edit_listing(test_case_instance, id, input_data, default_user='bigbrother'):
+    """
+    Helper Method to modify a listing
+
+    Args:
+        test_case_instance
+        id
+        input_data
+        default_user(optional)
+
+    Return:
+        response
+    """
+    user = generic_model_access.get_profile(default_user).user
+    test_case_instance.client.force_authenticate(user=user)
+    url = '/api/listing/{0!s}/'.format(id)
+    # GET Listing
+    data = test_case_instance.client.get(url, format='json').data
+
+    for current_key in input_data:
+        if current_key in data:
+            data[current_key] = input_data[current_key]
+
+    # PUT the Modification
+    response = test_case_instance.client.put(url, data, format='json')
+    test_case_instance.assertEqual(response.status_code, status.HTTP_200_OK)
+    return response
+
+
+def _create_create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
+    """
+    Create Bookmark Helper Function
+
+    Args:
+        test_case_instance
+        username
+        listing_id
+        folder_name(optional)
+        status_code
+
+    Returns:
+        response
+    """
+    user = generic_model_access.get_profile(username).user
+    test_case_instance.client.force_authenticate(user=user)
+
+    data = {'listing': {'id': listing_id}, 'folder': folder_name}
+    url = '/api/self/library/'
+    response = test_case_instance.client.post(url, data, format='json')
+
+    if response:
+        if status_code == 201:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        elif status_code == 400:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        else:
+            raise Exception('status code is not supported')
+
+    return response
 
 
 def unittest_request_helper(test_case_instance, url, method, data=None, username='bigbrother', status_code=200):
@@ -78,7 +157,7 @@ class ListingFileClass(object):
     """
     Listing File
 
-    from ozpcenter.tests.helper import ListingFile; ListingFile.filter_listings(is_enabled=True,approval_status='S')
+    from tests.ozpcenter.helper import ListingFile; ListingFile.filter_listings(is_enabled=True,approval_status='S')
     """
 
     def __init__(self, listing_file_name=None):

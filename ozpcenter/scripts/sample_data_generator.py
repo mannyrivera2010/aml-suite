@@ -76,10 +76,9 @@ from ozpcenter.recommend.recommend import RecommenderDirectory
 import ozpcenter.api.listing.model_access as listing_model_access
 import ozpcenter.api.listing.model_access_es as model_access_es
 
-
-TEST_IMG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_images') + '/'
-TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data')
-
+TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__)))
+TEST_IMG_PATH = os.path.join(TEST_BASE_PATH, 'test_images') + '/'
+TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 DEMO_APP_ROOT = settings.OZP['DEMO_APP_ROOT']
 
 

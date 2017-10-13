@@ -12,9 +12,9 @@ from rest_framework.test import APITestCase
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-from ozpcenter.tests.helper import ListingFile
+from tests.ozpcenter.helper import ListingFile
 
-from ozpcenter.tests.helper import unittest_request_helper
+from tests.ozpcenter.helper import unittest_request_helper
 from ozpcenter.api.listing import model_access_es
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 

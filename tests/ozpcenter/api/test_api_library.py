@@ -10,66 +10,8 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 
-
-def _edit_listing(test_case_instance, id, input_data, default_user='bigbrother'):
-    """
-    Helper Method to modify a listing
-
-    Args:
-        test_case_instance
-        id
-        input_data
-        default_user(optional)
-
-    Return:
-        response
-    """
-    user = generic_model_access.get_profile(default_user).user
-    test_case_instance.client.force_authenticate(user=user)
-    url = '/api/listing/{0!s}/'.format(id)
-    # GET Listing
-    data = test_case_instance.client.get(url, format='json').data
-
-    for current_key in input_data:
-        if current_key in data:
-            data[current_key] = input_data[current_key]
-
-    # PUT the Modification
-    response = test_case_instance.client.put(url, data, format='json')
-    test_case_instance.assertEqual(response.status_code, status.HTTP_200_OK)
-    return response
-
-
-def _create_create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
-    """
-    Create Bookmark Helper Function
-
-    Args:
-        test_case_instance
-        username
-        listing_id
-        folder_name(optional)
-        status_code
-
-    Returns:
-        response
-    """
-    user = generic_model_access.get_profile(username).user
-    test_case_instance.client.force_authenticate(user=user)
-
-    data = {'listing': {'id': listing_id}, 'folder': folder_name}
-    url = '/api/self/library/'
-    response = test_case_instance.client.post(url, data, format='json')
-
-    if response:
-        if status_code == 201:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        elif status_code == 400:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        else:
-            raise Exception('status code is not supported')
-
-    return response
+from tests.ozpcenter.helper import _edit_listing
+from tests.ozpcenter.helper import _create_create_bookmark
 
 
 @override_settings(ES_ENABLED=False)

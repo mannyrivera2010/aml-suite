@@ -8,8 +8,8 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
-from ozpcenter.tests.helper import validate_listing_map_keys
-from ozpcenter.tests.helper import unittest_request_helper
+from tests.ozpcenter.helper import validate_listing_map_keys
+from tests.ozpcenter.helper import unittest_request_helper
 
 
 @override_settings(ES_ENABLED=False)

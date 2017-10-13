@@ -12,25 +12,10 @@ from rest_framework.test import APITestCase
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-from ozpcenter.api.library.tests.test_api_library import _create_create_bookmark
 
-
-def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
-    user = generic_model_access.get_profile(username).user
-    test_case_instance.client.force_authenticate(user=user)
-    url = '/api/self/library/import_bookmarks/'
-    data = {'bookmark_notification_id': bookmark_notification_id}
-    response = test_case_instance.client.post(url, data, format='json')
-
-    if response:
-        if status_code == 201:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        elif status_code == 400:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        else:
-            raise Exception('status code is not supported')
-
-    return response
+from tests.ozpcenter.helper import _edit_listing
+from tests.ozpcenter.helper import _create_create_bookmark
+from tests.ozpcenter.helper import _import_bookmarks
 
 
 @override_settings(ES_ENABLED=False)

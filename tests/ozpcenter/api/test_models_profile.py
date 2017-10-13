@@ -12,7 +12,7 @@ from django.db.utils import IntegrityError
 from django.db import transaction
 
 from ozpcenter import models
-import ozpcenter.tests.factories as f
+import tests.ozpcenter.factories as f
 
 
 @override_settings(ES_ENABLED=False)

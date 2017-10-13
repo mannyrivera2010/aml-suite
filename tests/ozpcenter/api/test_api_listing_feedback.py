@@ -9,8 +9,8 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
 import ozpcenter.api.listing.model_access as model_access
-from ozpcenter.tests.helper import validate_listing_map_keys
-from ozpcenter.tests.helper import unittest_request_helper
+from tests.ozpcenter.helper import validate_listing_map_keys
+from tests.ozpcenter.helper import unittest_request_helper
 
 
 @override_settings(ES_ENABLED=False)
@@ -94,6 +94,7 @@ class ListingFeedbackApiTest(APITestCase):
 
     def test_two_user_positive_feedback_listing(self):
         """
+        test_two_user_positive_feedback_listing
         bettafish user
         """
         user = generic_model_access.get_profile('bettafish').user
@@ -127,6 +128,7 @@ class ListingFeedbackApiTest(APITestCase):
 
     def test_two_user_negative_feedback_listing(self):
         """
+        test_two_user_negative_feedback_listing
         bettafish user
         """
         user = generic_model_access.get_profile('bettafish').user
@@ -160,6 +162,7 @@ class ListingFeedbackApiTest(APITestCase):
 
     def test_two_user_diff_feedback_listing(self):
         """
+        test_two_user_diff_feedback_listing
         bettafish user
         """
         user = generic_model_access.get_profile('bettafish').user
