@@ -898,7 +898,7 @@ class ListingApiTest(APITestCase):
 
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
-        self.assertTrue(response.data['gave_feedback'])
+        self.assertEqual(response.data['feedback'], 1)
 
         # Login as betaraybill (no feedback given to listing #1)
         user = generic_model_access.get_profile('betaraybill').user
@@ -906,7 +906,7 @@ class ListingApiTest(APITestCase):
 
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
-        self.assertFalse(response.data['gave_feedback'])
+        self.assertEqual(response.data['feedback'], 0)
 
     def test_gave_double_user_feedback_listing(self):
         """
@@ -927,7 +927,7 @@ class ListingApiTest(APITestCase):
 
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
-        self.assertTrue(response.data['gave_feedback'])
+        self.assertEqual(response.data['feedback'], 1)
 
         # Login as betaraybill
         user = generic_model_access.get_profile('betaraybill').user
@@ -945,4 +945,4 @@ class ListingApiTest(APITestCase):
 
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
-        self.assertTrue(response.data['gave_feedback'])
+        self.assertEqual(response.data['feedback'], -1)
