@@ -1161,6 +1161,7 @@ class Listing(models.Model):
     total_rate1 = models.IntegerField(default=0)
     total_reviews = models.IntegerField(default=0)
     total_review_responses = models.IntegerField(default=0)
+    feedback_score = models.IntegerField(default=0)
     iframe_compatible = models.BooleanField(default=True)
 
     contacts = models.ManyToManyField(

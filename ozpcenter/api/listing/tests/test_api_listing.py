@@ -886,7 +886,7 @@ class ListingApiTest(APITestCase):
         user = generic_model_access.get_profile('bettafish').user
         self.client.force_authenticate(user=user)
 
-        # Create a negative feedback
+        # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
         response = self.client.post(url, data, format='json')
@@ -899,6 +899,7 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], 1)
+        self.assertEqual(response.data['feedback_score'], 1)
 
         # Login as betaraybill (no feedback given to listing #1)
         user = generic_model_access.get_profile('betaraybill').user
@@ -907,6 +908,7 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], 0)
+        self.assertEqual(response.data['feedback_score'], 1)
 
     def test_gave_double_user_feedback_listing(self):
         """
@@ -915,7 +917,7 @@ class ListingApiTest(APITestCase):
         user = generic_model_access.get_profile('bettafish').user
         self.client.force_authenticate(user=user)
 
-        # Create a negative feedback
+        # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
         response = self.client.post(url, data, format='json')
@@ -928,6 +930,7 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], 1)
+        self.assertEqual(response.data['feedback_score'], 1)
 
         # Login as betaraybill
         user = generic_model_access.get_profile('betaraybill').user
@@ -946,3 +949,64 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], -1)
+        self.assertEqual(response.data['feedback_score'], 0)
+
+    def test_feedback_score_positive_then_negative(self):
+        """
+        betafish user
+        """
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Create a positive feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": 1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+        self.assertEqual(response.data['feedback_score'], 1)
+
+        # Login as betaraybill
+        user = generic_model_access.get_profile('betaraybill').user
+        self.client.force_authenticate(user=user)
+
+        # Create a negative feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": -1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+        self.assertEqual(response.data['feedback_score'], 0)
+
+        # Login as bettafish again
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Create a negative feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": -1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+        self.assertEqual(response.data['feedback_score'], -2)

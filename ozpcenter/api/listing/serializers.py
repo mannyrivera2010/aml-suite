@@ -907,6 +907,7 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'agency',
                   'avg_rate',
                   'total_reviews',
+                  'feedback_score',
                   'is_private',
                   'is_bookmarked',
                   'feedback',
