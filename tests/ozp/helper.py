@@ -72,7 +72,7 @@ class Router(object):
                             pass
                     return current_method(**kargs)
 
-            return MockResponse({'message': 'Mock Service - URL Not found',
+            return MockResponse({'message': 'Mock Service - URL Not found - {}'.format(sys.argv),
                                  'protocol': protocol,
                                  'host': host, 'URL': url}, 404)
         except RuntimeError as e:
@@ -84,9 +84,19 @@ class Router(object):
 
 router = Router()
 
+load_mock_service = False
+
+if len(sys.argv) >= 1:
+    first_item = sys.argv[0]
+    if 'pytest' in first_item:
+        load_mock_service = True
+
 # Detect if test is in the arguement, ex) manage.py
 # If doing test then load the mock services
 if 'test' in sys.argv:
+    load_mock_service = True
+
+if load_mock_service:
     plugin_manager_instance.load_mock_services(router)
 
 

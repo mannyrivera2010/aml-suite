@@ -27,10 +27,10 @@ pre:
 	export DJANGO_SETTINGS_MODULE=ozp.settings
 
 test: clean pre create_static
-	DEV_MODE=True python -q -X faulthandler manage.py test
+	DEV_MODE=True pytest
 
 softtest: pre
-	DEV_MODE=True python -q -X faulthandler manage.py test
+	DEV_MODE=True pytest
 
 install_git_hooks:
 	cp .hooks/pre-commit .git/hooks/
