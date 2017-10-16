@@ -20,6 +20,6 @@ def schema_view(request):
 def version_view(request):
     data = {
         'name': 'ozp-backend',
-        'version': os.environ['OZP_BACKEND_VERSION']
+        'version': os.environ.get('OZP_BACKEND_VERSION', 'Unknown')
     }
     return response.Response(data)

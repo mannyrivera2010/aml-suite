@@ -1,3 +1,5 @@
+.cache/
+
 db.sqlite3
 *.sublime*
 __pycache__
@@ -15,6 +17,7 @@ build
 logs.txt
 cover
 .coverage
+.coverage.*
 env
 *.log
 gunicorn.pid

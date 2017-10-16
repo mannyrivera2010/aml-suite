@@ -13,7 +13,7 @@ from rest_framework import serializers
 
 from ozpcenter import models
 from ozpcenter import constants
-from plugins_util.plugin_manager import system_has_access_control
+from plugins.plugin_manager import system_has_access_control
 from ozpcenter.api.listing import elasticsearch_util
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 

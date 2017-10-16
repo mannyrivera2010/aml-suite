@@ -1,10 +1,23 @@
 env:
-  - ES_VERSION=2.4.6 ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/$ES_VERSION/elasticsearch-$ES_VERSION.tar.gz
+  global:
+    - ES_VERSION=2.4.6 ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/$ES_VERSION/elasticsearch-$ES_VERSION.tar.gz
+  matrix:
+    - TEST_FOLDER="tests/ozp tests/ozpcenter"
+    - TEST_FOLDER="tests/ozpcenter_api"
+    - TEST_FOLDER="tests/ozpcenter_model_access"
+    - TEST_FOLDER="plugins tests/plugins/ tests/ozpiwc"
+
 services:
   - redis-server
+
 language: python
+
+# cache: pip
+
 python:
   - "3.4"
+  - "3.6"
+
 # command to install dependencies
 install:
   - pip install -r requirements.txt
@@ -12,12 +25,15 @@ install:
   - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
   - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
 # command to run tests
+
 before_script:
  - mkdir -p media
  - mkdir -p static
  - DEV_MODE=True python manage.py migrate --noinput
  - python manage.py collectstatic --noinput
+
 script:
  - wget -q --waitretry=1 --retry-connrefused -T 10 -O - http://127.0.0.1:9200
- - pycodestyle ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
- - DEV_MODE=True python manage.py test
+ - pycodestyle ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
+ - echo "Number of cores `nproc`"
+ - DEV_MODE=True pytest -n `nproc` --dist=loadscope $TEST_FOLDER

@@ -17,7 +17,7 @@ else:
 # TODO Read requirements from requirements.txt file
 install_requires = [requirement.strip() for requirement in open(REQUIREMENT_FILE, "rt").readlines()]
 
-EXCLUDE_FROM_PACKAGES = ['*.tests']
+EXCLUDE_FROM_PACKAGES = ['*.tests', 'tests']
 
 package_data = {'': ['README.md', 'static']}
 

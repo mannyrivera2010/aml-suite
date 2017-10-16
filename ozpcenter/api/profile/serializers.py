@@ -9,8 +9,8 @@ from django.contrib import auth
 from rest_framework import serializers
 
 from ozpcenter import models
-from plugins_util import plugin_manager
-from plugins_util.plugin_manager import system_anonymize_identifiable_data
+from plugins import plugin_manager
+from plugins.plugin_manager import system_anonymize_identifiable_data
 import ozpcenter.model_access as generic_model_access
 import ozpcenter.api.agency.model_access as agency_model_access
 

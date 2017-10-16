@@ -46,7 +46,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = [
     '--with-coverage',
     '--cover-html',
-    '--cover-package=ozp,ozpcenter,ozpiwc,plugins,plugins_util',
+    '--cover-package=ozp,ozpcenter,ozpiwc,plugins',
     '--verbosity=2',
 ]
 
