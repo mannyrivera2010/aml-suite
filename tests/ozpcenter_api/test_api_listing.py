@@ -21,7 +21,6 @@ class ListingApiTest(APITestCase):
         setUp is invoked before each test method
         """
         self.maxDiff = None
-        pass
 
     @classmethod
     def setUpTestData(cls):

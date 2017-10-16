@@ -8,7 +8,7 @@ from ozpcenter.scripts import sample_data_generator as data_gen
 
 
 @override_settings(ES_ENABLED=False)
-class ListingScreenshotApiTest(APITestCase):
+class ListingUserActivitiesApiTest(APITestCase):
 
     def setUp(self):
         """
@@ -21,6 +21,5 @@ class ListingScreenshotApiTest(APITestCase):
         """
         Set up test data for the whole TestCase (only run once for the TestCase)
         """
-        data_gen.run()
-
-    # TODO: Add more Unit Test (rivera 20160727)
+        pass
+        # data_gen.run()

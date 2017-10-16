@@ -21,6 +21,7 @@ class TagApiTest(APITestCase):
         """
         Set up test data for the whole TestCase (only run once for the TestCase)
         """
-        data_gen.run()
+        pass
+        # data_gen.run()
 
     # TODO: Add more Unit Test (rivera 20160727)
