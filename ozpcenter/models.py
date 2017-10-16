@@ -1218,11 +1218,11 @@ class Listing(models.Model):
     def _is_bookmarked(self):
         return False
 
-    def _gave_feedback(self):
-        return False
+    def _feedback(self):
+        return 0
 
     is_bookmarked = property(_is_bookmarked)
-    gave_feedback = property(_gave_feedback)
+    feedback = property(_feedback)
 
     def __repr__(self):
         listing_name = None
