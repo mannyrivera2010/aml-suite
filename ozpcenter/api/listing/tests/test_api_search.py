@@ -188,6 +188,7 @@ class ListingSearchApiTest(APITestCase):
             "system_requirements": "None",
             "is_private": "true",
             "is_enable": "false",
+            "feedback_score": 0,
             "contacts": [
                 {"email": "a@a.com", "secure_phone": "111-222-3434",
                  "unsecure_phone": "444-555-4545", "name": "me",

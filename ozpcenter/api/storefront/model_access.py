@@ -95,6 +95,7 @@ SELECT DISTINCT
   ozpcenter_listing.total_rate5,
   ozpcenter_listing.total_votes,
   ozpcenter_listing.total_reviews,
+  ozpcenter_listing.feedback_score,
   ozpcenter_listing.iframe_compatible,
   ozpcenter_listing.security_marking,
   ozpcenter_listing.is_private,
@@ -245,6 +246,7 @@ def get_user_listings(username, request, exclude_orgs=None):
                 "avg_rate": row['avg_rate'],
                 "total_reviews": row['total_reviews'],
                 "total_votes": row['total_votes'],
+                "feedback_score": row['feedback_score'],
 
                 "approved_date": row['approved_date'],
 
