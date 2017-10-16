@@ -139,24 +139,24 @@ class GraphQueryTest(TestCase):
 
         query_results = graph.query().v('p-1').id().to_list()
         output = ['p-1']
-        self.assertEqual(query_results, output)
+        self.assertEqual(sorted(query_results), sorted(output))
 
         query_results = graph.query().v('p-1').out('bookmarked').id().to_list()
         output = ['l-1', 'l-2', 'l-3']
-        self.assertEqual(query_results, output)
+        self.assertEqual(sorted(query_results), sorted(output))
 
         query_results = graph.query().v('p-1').out('bookmarked').in_('bookmarked').id().to_list()
         output = ['p-1', 'p-2', 'p-3', 'p-3', 'p-1', 'p-4', 'p-5', 'p-1', 'p-5']
-        self.assertEqual(query_results, output)
+        self.assertEqual(sorted(query_results), sorted(output))
 
         query_results = graph.query().v('p-1').out('bookmarked').in_('bookmarked').id().distinct().to_list()
         output = ['p-1', 'p-2', 'p-3', 'p-4', 'p-5']
-        self.assertEqual(query_results, output)
+        self.assertEqual(sorted(query_results), sorted(output))
 
         query_results = graph.query().v('p-1').out('bookmarked').in_('bookmarked').distinct().id().to_list()
         output = ['p-1', 'p-2', 'p-3', 'p-4', 'p-5']
-        self.assertEqual(query_results, output)
+        self.assertEqual(sorted(query_results), sorted(output))
 
         query_results = graph.query().v('p-1').out('bookmarked').in_('bookmarked').distinct().exclude_ids(['p-1']).id().to_list()
         output = ['p-2', 'p-3', 'p-4', 'p-5']
-        self.assertEqual(query_results, output)
+        self.assertEqual(sorted(query_results), sorted(output))

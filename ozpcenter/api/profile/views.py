@@ -15,7 +15,7 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.response import Response
 
-from plugins_util.plugin_manager import system_anonymize_identifiable_data
+from plugins.plugin_manager import system_anonymize_identifiable_data
 from ozpcenter import errors
 from ozpcenter import permissions
 import ozpcenter.api.profile.serializers as serializers

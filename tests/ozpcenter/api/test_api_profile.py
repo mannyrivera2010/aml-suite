@@ -64,7 +64,7 @@ class ProfileApiTest(APITestCase):
         user_id = generic_model_access.get_profile(username).user.id
         return '/api/profile/{}/{}'.format(user_id, postfix)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_all_listing_for_self_profile_auth_enabled(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         self._all_listing_for_self_profile()
@@ -84,7 +84,7 @@ class ProfileApiTest(APITestCase):
             'Ruby', 'Ruby Miner', 'Sapphire', 'Wikipedia']
         self.assertEquals(expected_listing, titles)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_one_listing_for_self_profile_auth_enabled(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         self._one_listing_for_self_profile()
@@ -99,7 +99,7 @@ class ProfileApiTest(APITestCase):
         data = response.data
         self.assertEquals(data['id'], 2)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_all_listing_for_minitrue_profile_from_multi_org_profile_auth_enabled(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         self._all_listing_for_minitrue_profile_from_multi_org_profile()
@@ -128,7 +128,7 @@ class ProfileApiTest(APITestCase):
             'Ruby', 'Ruby Miner', 'Sapphire', 'Wikipedia']
         self.assertEquals(expected_listing, titles)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_all_listing_for_app_profile_from_multi_org_profile_auth_enabled(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         self._all_listing_for_app_profile_from_multi_org_profile()
@@ -157,7 +157,7 @@ class ProfileApiTest(APITestCase):
             'Ruby', 'Ruby Miner', 'Sapphire', 'Wikipedia']
         self.assertEquals(expected_listing, titles)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_all_listing_for_minitrue_profile_from_minitrue_profile(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         self._all_listing_for_minitrue_profile_from_minitrue_profile()
@@ -180,7 +180,7 @@ class ProfileApiTest(APITestCase):
         # ChatterBox(Miniluv, public, julia)
         self.assertEquals(expected_listing, titles)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_username_starts_with(self, mock_request):
         """
         Testing GET /api/profile/?username_starts_with={username} endpoint
@@ -193,7 +193,7 @@ class ProfileApiTest(APITestCase):
         expected_usernames = ['wsmith']
         self.assertEqual(usernames, expected_usernames)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_username_starts_with_no_results(self, mock_request):
         """
         Testing GET /api/profile/?username_starts_with={username} endpoint
@@ -206,7 +206,7 @@ class ProfileApiTest(APITestCase):
         expected_usernames = []
         self.assertEqual(usernames, expected_usernames)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_get_users_based_on_roles_for_all_access_control_levels(self, mock_request):
         """
         Testing GET /api/profile/?roles={role} endpoint
@@ -236,7 +236,7 @@ class ProfileApiTest(APITestCase):
                 displaynames = [i['display_name'] for i in response.data]
                 self.assertEqual(displaynames, sorted(displaynames))
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_get_update_self_for_all_access_control_levels(self, mock_request):
         """
         test_get_update_self_for_all_access_control_levels
@@ -356,7 +356,7 @@ class ProfileApiTest(APITestCase):
                 self.assertEqual(response.data.get('hud_tour_flag'), hud_tour_flag)
                 self.assertEqual(response.data.get('webtop_tour_flag'), webtop_tour_flag)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_self_for_apps_mall_steward_level_serializer_exception(self, mock_request):
         """
         test_update_self_for_apps_mall_steward_level_serializer_exception - serializer exception
@@ -373,7 +373,7 @@ class ProfileApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_data)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_self_for_apps_mall_steward_level_invalid_user(self, mock_request):
         """
         test_update_self_for_apps_mall_steward_level_invalid_user - invalid user
@@ -388,7 +388,7 @@ class ProfileApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data, expected_data)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_apps_mall_steward_level(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         user = generic_model_access.get_profile('bigbrother').user
@@ -404,7 +404,7 @@ class ProfileApiTest(APITestCase):
         self.assertTrue('Ministry of Love' in orgs)
         self.assertEqual(len(orgs), 2)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_apps_mall_steward_level_serializer_exception(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         user = generic_model_access.get_profile('bigbrother').user
@@ -417,7 +417,7 @@ class ProfileApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_data)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_org_steward_level(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         user = generic_model_access.get_profile('wsmith').user
@@ -429,7 +429,7 @@ class ProfileApiTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    @patch('plugins_util.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_user_level(self, mock_request):
         settings.OZP['USE_AUTH_SERVER'] = True
         user = generic_model_access.get_profile('jones').user

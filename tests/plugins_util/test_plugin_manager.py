@@ -6,10 +6,10 @@ import os
 from django.conf import settings
 from django.test import TestCase
 
-# from plugins_util.plugin_manager import dynamic_directory_importer
-# from plugins_util.plugin_manager import dynamic_importer
-# from plugins_util.plugin_manager import dynamic_mock_service_importer
-# from plugins_util.plugin_manager import plugin_manager_instance
+# from plugins.plugin_manager import dynamic_directory_importer
+# from plugins.plugin_manager import dynamic_importer
+# from plugins.plugin_manager import dynamic_mock_service_importer
+# from plugins.plugin_manager import plugin_manager_instance
 
 
 TEST_PLUGIN_DIRECTORY = '{0}/{1}'.format(os.path.realpath(os.path.join(os.path.dirname(__file__), './')), 'plugins')

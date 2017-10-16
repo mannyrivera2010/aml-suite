@@ -100,7 +100,8 @@ class UtilsTest(TestCase):
         except recommend_utils.FastNoSuchElementException:
             # Ignore FastNoSuchElementException
             pass
-        self.assertEqual(list_out, [5, 100, 8, 9])
+
+        self.assertEqual(sorted(list_out), sorted([5, 100, 8, 9]))
 
     # def test_combine(self):
     #     data = {"Sample Data Gen":

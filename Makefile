@@ -29,6 +29,10 @@ pre:
 test: clean pre create_static
 	DEV_MODE=True pytest
 
+ptest: clean pre create_static
+	echo Number of cores: `nproc`
+	DEV_MODE=True pytest -n `nproc` --dist=loadscope
+
 softtest: pre
 	DEV_MODE=True pytest
 
@@ -57,13 +61,13 @@ rung_psql_es:
 	MAIN_DATABASE=psql ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
 codecheck:
-	pycodestyle ozp ozpcenter ozpiwc plugins plugins_util tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
+	pycodestyle ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
 
 autopep:
-	autopep8 ozp ozpcenter ozpiwc plugins plugins_util tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
+	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
 
 autopepdiff:
-	autopep8 ozp ozpcenter ozpiwc plugins plugins_util tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
+	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
 
 reindex_es:
 	ES_ENABLED=TRUE python manage.py runscript reindex_es

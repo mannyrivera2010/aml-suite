@@ -2,7 +2,7 @@ import re
 import inspect
 import os
 import sys
-from plugins_util.plugin_manager import plugin_manager_instance
+from plugins.plugin_manager import plugin_manager_instance
 
 
 TEST_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -88,7 +88,7 @@ load_mock_service = False
 
 if len(sys.argv) >= 1:
     first_item = sys.argv[0]
-    if 'pytest' in first_item:
+    if 'pytest' in first_item or '-c' in first_item:
         load_mock_service = True
 
 # Detect if test is in the arguement, ex) manage.py

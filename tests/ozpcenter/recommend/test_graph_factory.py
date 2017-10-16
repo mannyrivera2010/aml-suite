@@ -39,4 +39,4 @@ class GraphTest(TestCase):
                               'l-186', 'l-1', 'l-23', 'l-29',
                               'l-30', 'l-49', 'l-50', 'l-59',
                               'l-73', 'l-87', 'l-93', 'l-94']
-        self.assertEqual(expected_bookmarks, bigbrother_bookmarks)
+        self.assertEqual(sorted(expected_bookmarks), sorted(bigbrother_bookmarks))

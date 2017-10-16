@@ -5,6 +5,7 @@ services:
 language: python
 python:
   - "3.4"
+  - "3.6"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
@@ -19,5 +20,6 @@ before_script:
  - python manage.py collectstatic --noinput
 script:
  - wget -q --waitretry=1 --retry-connrefused -T 10 -O - http://127.0.0.1:9200
- - pycodestyle ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
- - DEV_MODE=True pytest
+ - pycodestyle ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
+ - echo "Number of cores `nproc`"
+ - DEV_MODE=True pytest -n `nproc` --dist=loadscope

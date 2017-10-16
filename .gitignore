@@ -17,6 +17,7 @@ build
 logs.txt
 cover
 .coverage
+.coverage.*
 env
 *.log
 gunicorn.pid

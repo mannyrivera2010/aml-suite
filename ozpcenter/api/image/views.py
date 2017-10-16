@@ -11,7 +11,7 @@ from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.response import Response
 
 from ozpcenter import permissions
-from plugins_util.plugin_manager import system_has_access_control
+from plugins.plugin_manager import system_has_access_control
 import ozpcenter.api.image.model_access as model_access
 import ozpcenter.api.image.serializers as serializers
 from ozpcenter import errors
