@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework import response, schemas
 
 import ozp.urls
+from ozp import version
 
 
 @api_view()
@@ -14,12 +15,3 @@ import ozp.urls
 def schema_view(request):
     generator = schemas.SchemaGenerator(title='API Docs', patterns=ozp.urls.apipatterns)
     return response.Response(generator.get_schema())
-
-
-@api_view()
-def version_view(request):
-    data = {
-        'name': 'ozp-backend',
-        'version': os.environ.get('OZP_BACKEND_VERSION', 'Unknown')
-    }
-    return response.Response(data)

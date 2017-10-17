@@ -39,24 +39,9 @@ import os
 import re
 import shutil
 from subprocess import call
+from ozp import version
 
-VERSION_FILE = "_version.py"
 PACKAGE = 'ozp_backend'
-
-
-def get_version():
-    """
-    Get the version number from VERSION_FILE
-    """
-    verstrline = open(VERSION_FILE, "rt").read()
-    VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
-    mo = re.search(VSRE, verstrline, re.M)
-    if mo:
-        verstr = mo.group(1)
-        return verstr
-    else:
-        raise RuntimeError(
-            "Unable to find version string in {0!s}.".format(VERSION_FILE))
 
 
 def get_date_time():
@@ -89,7 +74,6 @@ def create_release_dir():
     shutil.copytree("ozpiwc", "release/ozpiwc")
     shutil.copytree("static", "release/static")
     shutil.copytree("plugins", "release/plugins")
-    shutil.copy("_version.py", "release")
     shutil.copy("manage.py", "release")
     shutil.copy("README.md", "release")
     shutil.copy("requirements.txt", "release")
@@ -121,7 +105,6 @@ def run():
     # wheelhouse/)
     call("pip wheel -r requirements.txt --wheel-dir wheelhouse", shell=True)
 
-
     # add our wheel to the wheelhouse
     for file in glob.glob(r'dist/*.whl'):
         shutil.copy(file, "wheelhouse")
@@ -136,7 +119,6 @@ def run():
 
     # tar everything up
     if args.version:
-        version = get_version()
         call("tar -czf {0!s}-{1!s}.tar.gz release".format('backend', version),
              shell=True)
     else:

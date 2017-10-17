@@ -4,6 +4,8 @@ urls.py
 """
 from django.conf.urls import url, include
 
+from ozpcenter import views
+
 # Wire up our API using automatic URL routing.
 urlpatterns = [
     url(r'', include('ozpcenter.api.agency.urls')),
@@ -16,5 +18,6 @@ urlpatterns = [
     url(r'', include('ozpcenter.api.notification.urls')),
     url(r'', include('ozpcenter.api.profile.urls')),
     url(r'', include('ozpcenter.api.storefront.urls')),
-    url(r'', include('ozpcenter.api.subscription.urls'))
+    url(r'', include('ozpcenter.api.subscription.urls')),
+    url(r'^version/', views.version_view),
 ]
