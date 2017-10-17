@@ -49,6 +49,7 @@ gunicorn.pid
 
 ## File-based project format:
 *.iws
+*.vscode
 
 ## Plugin-specific files:
 
