@@ -211,9 +211,6 @@ class NotificationBase(object):
     def get_notification_db_type(self):
         raise RuntimeError('Not Implemented')
 
-    def get_notification_db_subtype(self):
-        raise RuntimeError('Not Implemented')
-
     def get_target_list(self):
         raise RuntimeError('Not Implemented')
 
@@ -240,7 +237,6 @@ class NotificationBase(object):
             message=message)
 
         notification_type = self.get_notification_db_type()
-        notification.notification_subtype = self.get_notification_db_subtype()
         notification.notification_type = notification_type
         notification.entity_id = self.get_entity_id()
         notification.group_target = self.get_group_target()
@@ -289,9 +285,6 @@ class SystemWideNotification(NotificationBase):
     def get_notification_db_type(self):
         return Notification.SYSTEM
 
-    def get_notification_db_subtype(self):
-        return None
-
     def get_target_list(self):
         """
         Get every profile
@@ -310,9 +303,6 @@ class AgencyWideNotification(NotificationBase):
 
     def get_notification_db_type(self):
         return Notification.AGENCY
-
-    def get_notification_db_subtype(self):
-        return None
 
     def get_target_list(self):
         """
@@ -334,9 +324,6 @@ class AgencyWideBookmarkNotification(NotificationBase):
     def get_notification_db_type(self):
         return Notification.AGENCY_BOOKMARK
 
-    def get_notification_db_subtype(self):
-        return None
-
     def get_target_list(self):
         """
         Get every profile that belongs to an organization and get all stewards for that organization
@@ -355,9 +342,6 @@ class ListingNotification(NotificationBase):
 
     def get_notification_db_type(self):
         return Notification.LISTING
-
-    def get_notification_db_subtype(self):
-        return None
 
     def get_target_list(self):
         """
@@ -391,9 +375,6 @@ class PeerNotification(NotificationBase):
     def get_notification_db_type(self):
         return Notification.PEER
 
-    def get_notification_db_subtype(self):
-        return None
-
     def get_group_target(self):
         return Notification.USER
 
@@ -418,9 +399,6 @@ class PeerBookmarkNotification(NotificationBase):
 
     def get_notification_db_type(self):
         return Notification.PEER_BOOKMARK
-
-    def get_notification_db_subtype(self):
-        return None
 
     def get_group_target(self):
         return Notification.USER
@@ -450,9 +428,6 @@ class ListingReviewNotification(NotificationBase):  # Not Verified
 
     def get_notification_db_type(self):
         return Notification.LISTING
-
-    def get_notification_db_subtype(self):
-        return Notification.LISTING_REVIEW
 
     def get_group_target(self):
         return Notification.USER
@@ -524,9 +499,6 @@ class ListingPrivateStatusNotification(NotificationBase):
     def get_notification_db_type(self):
         return Notification.LISTING
 
-    def get_notification_db_subtype(self):
-        return Notification.LISTING_PRIVATE_STATUS
-
     def get_target_list(self):
         owner_id_list = ApplicationLibraryEntry.objects.filter(listing__in=[self.entity],
                                                                listing__isnull=False,
@@ -572,9 +544,6 @@ class PendingDeletionRequestNotification(NotificationBase):  # Not Verified
     def get_notification_db_type(self):
         return Notification.LISTING
 
-    def get_notification_db_subtype(self):
-        return Notification.PENDING_DELETION_REQUEST
-
     def get_target_list(self):
         current_listing = self.entity
         return current_listing.owners.filter(listing_notification_flag=True).all().distinct()
@@ -600,9 +569,6 @@ class PendingDeletionCancellationNotification(NotificationBase):  # Not Verified
 
     def get_notification_db_type(self):
         return Notification.LISTING
-
-    def get_notification_db_subtype(self):
-        return Notification.PENDING_DELETION_CANCELLATION
 
     def get_target_list(self):
         current_listing = self.entity
@@ -636,9 +602,6 @@ class ListingSubmissionNotification(NotificationBase):
     def get_notification_db_type(self):
         return Notification.LISTING
 
-    def get_notification_db_subtype(self):
-        return Notification.LISTING_NEW
-
     def get_target_list(self):
         current_listing = self.entity
         current_listing_agency_id = current_listing.agency.id
@@ -655,9 +618,6 @@ class TagSubscriptionNotification(NotificationBase):  # Not Verified
 
     def get_notification_db_type(self):
         return Notification.SUBSCRIPTION
-
-    def get_notification_db_subtype(self):
-        return Notification.SUBSCRIPTION_TAG
 
     def get_target_list(self):
         subscription_entries = Subscription.objects.filter(entity_type='tag', entity_id__in=list(self.metadata))
@@ -692,9 +652,6 @@ class CategorySubscriptionNotification(NotificationBase):  # Not Verified
 
     def get_notification_db_type(self):
         return Notification.SUBSCRIPTION
-
-    def get_notification_db_subtype(self):
-        return Notification.SUBSCRIPTION_CATEGORY
 
     def get_target_list(self):
         subscription_entries = Subscription.objects.filter(entity_type='category', entity_id__in=list(self.metadata))
