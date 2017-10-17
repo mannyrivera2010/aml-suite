@@ -60,13 +60,14 @@ class NotificationMailBoxSerializer(serializers.HyperlinkedModelSerializer):
     agency = NotificationAgencySerializer(required=False, source='notification.agency')
     peer = DictField(required=False, source='notification.peer')
     notification_type = serializers.CharField(required=False, source='notification.notification_type')
+    notification_subtype = serializers.CharField(required=False, source='notification.notification_subtype')
     entity_id = serializers.IntegerField(required=False, source='notification.entity_id')
     notification_id = serializers.IntegerField(required=False, source='notification.id')
 
     class Meta:
         model = models.NotificationMailBox
         fields = ('id', 'notification_id', 'created_date', 'expires_date', 'author',
-            'message', 'notification_type', 'listing', 'agency', 'entity_id', 'peer',
+            'message', 'notification_type', 'notification_subtype', 'listing', 'agency', 'entity_id', 'peer',
             'read_status', 'acknowledged_status', )
 
 

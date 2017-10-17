@@ -211,6 +211,9 @@ class NotificationBase(object):
     def get_notification_db_type(self):
         raise RuntimeError('Not Implemented')
 
+    def get_notification_db_subtype(self):
+        raise RuntimeError('Not Implemented')
+
     def get_target_list(self):
         raise RuntimeError('Not Implemented')
 
@@ -226,27 +229,28 @@ class NotificationBase(object):
     def get_group_target(self):
         return Notification.ALL
 
+    def modify_notification_before_save(self, notification_object):
+        pass
+
+    def generate_model(self, expires_date, message):
+        notification = Notification(
+            expires_date=expires_date,
+            author=self.sender_profile,
+            message=message)
+        notification_type = self.get_notification_db_type()
+        notification.notification_subtype = self.get_notification_db_subtype()
+        notification.notification_type = notification_type
+        notification.entity_id = self.get_entity_id()
+        notification.group_target = self.get_group_target()
+        return notification
+
     def notify(self, expires_date, message):
         assert (expires_date is not None), 'Expires Date is necessary'
         assert (message is not None), 'Message is necessary'
         self.permission_check()
 
-        notification = Notification(
-            expires_date=expires_date,
-            author=self.sender_profile,
-            message=message)
-
-        notification_type = self.get_notification_db_type()
-        notification.notification_type = notification_type
-        notification.entity_id = self.get_entity_id()
-        notification.group_target = self.get_group_target()
-
-        if notification_type == Notification.AGENCY or notification_type == Notification.AGENCY_BOOKMARK:
-            notification.agency = self.entity
-        elif notification_type == Notification.LISTING:
-            notification.listing = self.entity
-        elif notification_type == Notification.PEER or notification_type == Notification.PEER_BOOKMARK:
-            notification.peer = self.metadata
+        notification = self.generate_model(expires_date, message)
+        self.modify_notification_before_save(notification)
 
         notification.save()
 
@@ -285,6 +289,9 @@ class SystemWideNotification(NotificationBase):
     def get_notification_db_type(self):
         return Notification.SYSTEM
 
+    def get_notification_db_subtype(self):
+        return None
+
     def get_target_list(self):
         """
         Get every profile
@@ -301,8 +308,14 @@ class AgencyWideNotification(NotificationBase):
     Invoked: Directly
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.agency = self.entity
+
     def get_notification_db_type(self):
         return Notification.AGENCY
+
+    def get_notification_db_subtype(self):
+        return None
 
     def get_target_list(self):
         """
@@ -321,8 +334,14 @@ class AgencyWideBookmarkNotification(NotificationBase):
     Invoked: Directly
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.agency = self.entity
+
     def get_notification_db_type(self):
         return Notification.AGENCY_BOOKMARK
+
+    def get_notification_db_subtype(self):
+        return None
 
     def get_target_list(self):
         """
@@ -340,8 +359,14 @@ class ListingNotification(NotificationBase):
     Invoked: Directly
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_notification_db_type(self):
         return Notification.LISTING
+
+    def get_notification_db_subtype(self):
+        return None
 
     def get_target_list(self):
         """
@@ -372,8 +397,14 @@ class PeerNotification(NotificationBase):
     Permission Constraint:
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.peer = self.metadata
+
     def get_notification_db_type(self):
         return Notification.PEER
+
+    def get_notification_db_subtype(self):
+        return None
 
     def get_group_target(self):
         return Notification.USER
@@ -397,8 +428,14 @@ class PeerBookmarkNotification(NotificationBase):
         RESULTS: aaronson has a new notification added to the notification count.Add folder button is present and adds the shared folder to HuD screen.
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.peer = self.metadata
+
     def get_notification_db_type(self):
         return Notification.PEER_BOOKMARK
+
+    def get_notification_db_subtype(self):
+        return None
 
     def get_group_target(self):
         return Notification.USER
@@ -426,8 +463,14 @@ class ListingReviewNotification(NotificationBase):  # Not Verified
         EXPECTED RESULTS - At least two notifications should display for aaronson.
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_notification_db_type(self):
         return Notification.LISTING
+
+    def get_notification_db_subtype(self):
+        return Notification.LISTING_REVIEW
 
     def get_group_target(self):
         return Notification.USER
@@ -455,6 +498,9 @@ class ListingOwnerNotification(NotificationBase):  # Not Verified
     Targets: owners and org_steward for that listing's agency
     Invoked: Directly
     """
+
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
 
     def get_notification_db_type(self):
         return Notification.LISTING
@@ -496,8 +542,14 @@ class ListingPrivateStatusNotification(NotificationBase):
         RESULTS - I received the notification
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_notification_db_type(self):
         return Notification.LISTING
+
+    def get_notification_db_subtype(self):
+        return Notification.LISTING_PRIVATE_STATUS
 
     def get_target_list(self):
         owner_id_list = ApplicationLibraryEntry.objects.filter(listing__in=[self.entity],
@@ -541,8 +593,14 @@ class PendingDeletionRequestNotification(NotificationBase):  # Not Verified
         RESULTS The notification launched = Test Notification Listing listing was approved for deletion by steward
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_notification_db_type(self):
         return Notification.LISTING
+
+    def get_notification_db_subtype(self):
+        return Notification.PENDING_DELETION_REQUEST
 
     def get_target_list(self):
         current_listing = self.entity
@@ -567,8 +625,14 @@ class PendingDeletionCancellationNotification(NotificationBase):  # Not Verified
         RESULTS - Notificaiton launched = Listing Owner cancelled deletion of Test Notification Listing listing
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_notification_db_type(self):
         return Notification.LISTING
+
+    def get_notification_db_subtype(self):
+        return Notification.PENDING_DELETION_CANCELLATION
 
     def get_target_list(self):
         current_listing = self.entity
@@ -596,11 +660,17 @@ class ListingSubmissionNotification(NotificationBase):
         RESULTS - Notification displays = Test Notification Listing listing was submitted
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_group_target(self):
         return Notification.ORG_STEWARD
 
     def get_notification_db_type(self):
         return Notification.LISTING
+
+    def get_notification_db_subtype(self):
+        return Notification.LISTING_NEW
 
     def get_target_list(self):
         current_listing = self.entity
@@ -616,8 +686,14 @@ class TagSubscriptionNotification(NotificationBase):  # Not Verified
     Invoked: In-directly
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_notification_db_type(self):
         return Notification.SUBSCRIPTION
+
+    def get_notification_db_subtype(self):
+        return Notification.SUBSCRIPTION_TAG
 
     def get_target_list(self):
         subscription_entries = Subscription.objects.filter(entity_type='tag', entity_id__in=list(self.metadata))
@@ -650,8 +726,14 @@ class CategorySubscriptionNotification(NotificationBase):  # Not Verified
         RESULTS- Notification "A new listing in category Finance"
     """
 
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
     def get_notification_db_type(self):
         return Notification.SUBSCRIPTION
+
+    def get_notification_db_subtype(self):
+        return Notification.SUBSCRIPTION_CATEGORY
 
     def get_target_list(self):
         subscription_entries = Subscription.objects.filter(entity_type='category', entity_id__in=list(self.metadata))
@@ -691,7 +773,7 @@ def get_all_notifications():
     Returns:
         django.db.models.query.QuerySet(Notification): List of all notifications
     """
-    return Notification.objects.all()
+    return Notification.objects
 
 
 def get_all_pending_notifications(for_user=False):
