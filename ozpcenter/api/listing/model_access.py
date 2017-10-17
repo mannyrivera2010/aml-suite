@@ -601,6 +601,12 @@ def create_recommendation_feedback(target_profile, target_listing, feedback):
     """
     recommendation_feedback, created = models.RecommendationFeedback.objects.for_user(target_profile.user.username).get_or_create(target_profile=target_profile, target_listing=target_listing)
 
+    if recommendation_feedback.feedback != 0:
+        target_listing.feedback_score -= recommendation_feedback.feedback
+
+    target_listing.feedback_score += feedback
+    target_listing.save()
+
     if recommendation_feedback.feedback != feedback:
         recommendation_feedback.feedback = feedback
         recommendation_feedback.save()

@@ -72,6 +72,7 @@ class ListingApiTest(APITestCase):
             "usage_requirements": "None",
             "system_requirements": "None",
             "is_private": "true",
+            "feedback_score": 0,
             "contacts": [
                 {"email": "a@a.com", "secure_phone": "111-222-3434",
                     "unsecure_phone": "444-555-4545", "name": "me",
@@ -305,6 +306,7 @@ class ListingApiTest(APITestCase):
             "is_private": "true",
             "is_enabled": "false",
             "is_featured": "false",
+            "feedback_score": 0,
             "contacts": [
                 {"email": "a@a.com", "secure_phone": "111-222-3434",
                     "unsecure_phone": "444-555-4545", "name": "me",
@@ -465,7 +467,7 @@ class ListingApiTest(APITestCase):
 
         fields = ['title', 'description', 'description_short', 'version_name',
             'usage_requirements', 'system_requirements', 'unique_name', 'what_is_new', 'launch_url',
-            'is_enabled', 'is_featured', 'is_private', 'doc_urls', 'contacts',
+            'is_enabled', 'is_featured', 'is_private', 'feedback_score', 'doc_urls', 'contacts',
             'screenshots', 'categories', 'owners', 'tags', 'small_icon',
             'large_icon', 'banner_icon', 'large_banner_icon', 'security_marking',
             'listing_type', 'approval_status', 'intents']
@@ -477,7 +479,7 @@ class ListingApiTest(APITestCase):
                 for change in activity['change_details']:
                     # Field Set 1
                     temp_change_fields = ['title', 'description', 'description_short',
-                        'version_name', 'usage_requirements', 'system_requirements', 'what_is_new', 'unique_name', 'launch_url',
+                        'version_name', 'usage_requirements', 'system_requirements', 'what_is_new', 'unique_name', 'launch_url', 'feedback_score',
                         'is_private', 'is_featured', 'listing_type', 'security_marking']
 
                     for temp_field in temp_change_fields:
@@ -513,7 +515,7 @@ class ListingApiTest(APITestCase):
                             changed_found_fields.append(temp_field)
 
         difference_in_fields = sorted(list(set(fields) - set(changed_found_fields)))  # TODO: Better way to do this
-        self.assertEqual(difference_in_fields, ['approval_status', 'is_enabled', 'is_featured'])
+        self.assertEqual(difference_in_fields, ['approval_status', 'feedback_score', 'is_enabled', 'is_featured'])
 
     # TODO: def test_update_listing_full_access_control(self):
 
@@ -553,6 +555,7 @@ class ListingApiTest(APITestCase):
             "is_private": "true",
             "is_enabled": "false",
             "is_featured": "false",
+            "feedback_score": 0,
             "contacts": [
                 {"email": "a@a.com", "secure_phone": "111-222-3434",
                     "unsecure_phone": "444-555-4545", "name": "me",
@@ -697,6 +700,7 @@ class ListingApiTest(APITestCase):
           ],
           "avg_rate": 0,
           "total_votes": 0,
+          "feedback_score": 0,
           "tags": [],
           "usage_requirements": None,
           "system_requirements": None,
@@ -885,7 +889,7 @@ class ListingApiTest(APITestCase):
         user = generic_model_access.get_profile('bettafish').user
         self.client.force_authenticate(user=user)
 
-        # Create a negative feedback
+        # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
         response = self.client.post(url, data, format='json')
@@ -898,6 +902,7 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], 1)
+        self.assertEqual(response.data['feedback_score'], 1)
 
         # Login as betaraybill (no feedback given to listing #1)
         user = generic_model_access.get_profile('betaraybill').user
@@ -906,6 +911,7 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], 0)
+        self.assertEqual(response.data['feedback_score'], 1)
 
     def test_gave_double_user_feedback_listing(self):
         """
@@ -914,7 +920,7 @@ class ListingApiTest(APITestCase):
         user = generic_model_access.get_profile('bettafish').user
         self.client.force_authenticate(user=user)
 
-        # Create a negative feedback
+        # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
         response = self.client.post(url, data, format='json')
@@ -927,6 +933,7 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], 1)
+        self.assertEqual(response.data['feedback_score'], 1)
 
         # Login as betaraybill
         user = generic_model_access.get_profile('betaraybill').user
@@ -945,3 +952,64 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], -1)
+        self.assertEqual(response.data['feedback_score'], 0)
+
+    def test_feedback_score_positive_then_negative(self):
+        """
+        betafish user
+        """
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Create a positive feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": 1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+        self.assertEqual(response.data['feedback_score'], 1)
+
+        # Login as betaraybill
+        user = generic_model_access.get_profile('betaraybill').user
+        self.client.force_authenticate(user=user)
+
+        # Create a negative feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": -1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+        self.assertEqual(response.data['feedback_score'], 0)
+
+        # Login as bettafish again
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Create a negative feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": -1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], -1)
+        self.assertEqual(response.data['feedback_score'], -2)

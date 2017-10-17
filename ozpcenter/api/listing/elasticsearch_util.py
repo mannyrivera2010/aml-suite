@@ -820,6 +820,7 @@ def prepare_clean_listing_record(listing_serializer_record):
                       'iframe_compatible',
                       'edited_date',
                       'version_name',
+                      'feedback_score',
                       'usage_requirements',
                       'system_requirements',
                       'intents']
