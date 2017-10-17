@@ -186,7 +186,10 @@ class PluginManager(object):
 plugin_manager_instance = PluginManager()
 
 # Import helper for the mock services
-from tests.ozp import helper  # flake8: noqa TODO: Find better way to import mock services
+try:
+    from tests.ozp import helper  # flake8: noqa TODO: Find better way to import mock services
+except ImportError as err:
+    print('Mock services is not available. message: {}'.format(err))
 
 if hasattr(settings, 'ACCESS_CONTROL_PLUGIN'):
     ACCESS_CONTROL_PLUGIN = settings.ACCESS_CONTROL_PLUGIN
