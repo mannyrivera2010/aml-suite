@@ -9,6 +9,7 @@ import os
 import socket
 import traceback
 import platform
+from ozp import version
 
 BUILTIN_ATTRS = {
     'args',
@@ -187,7 +188,7 @@ class CustomisedJSONFormatter(JSONFormatter):
         extra['os'] = platform.platform()
         extra['language'] = 'Python {}'.format(platform.python_version())
         extra['app_id'] = 'ozp-backend'
-        extra['app_version'] = os.environ.get('OZP_BACKEND_VERSION', 'Unknown')
+        extra['app_version'] = version
         extra['environment'] = (os.getenv('OZP_ENVIRONMENT') or 'dev')
         extra['hostname'] = socket.gethostname()
         extra['process_id'] = record.process
