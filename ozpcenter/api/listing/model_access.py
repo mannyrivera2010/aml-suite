@@ -56,7 +56,7 @@ from ozpcenter import constants
 from ozpcenter import errors
 from ozpcenter import utils
 import ozpcenter.model_access as generic_model_access
-from plugins_util.plugin_manager import system_anonymize_identifiable_data
+from plugins.plugin_manager import system_anonymize_identifiable_data
 from ozpcenter.pubsub import dispatcher
 
 # Get an instance of a logger

@@ -20,7 +20,7 @@ TODO Add documentation
 ### Pep8
 Pep8 is the Style Guide for Python Code
 ````
-pep8 ozp ozpcenter ozpiwc plugins plugins_util --ignore=E501,E123,E128,E121,E124,E711,E402 --exclude=ozpcenter/scripts/* --show-source
+pep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --exclude=ozpcenter/scripts/* --show-source
 autopep8 . -r --diff --ignore errors=E501,E123,E128,E121,E124  --max-line-length=5000
 ````
 

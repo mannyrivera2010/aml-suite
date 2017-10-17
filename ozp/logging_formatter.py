@@ -187,7 +187,7 @@ class CustomisedJSONFormatter(JSONFormatter):
         extra['os'] = platform.platform()
         extra['language'] = 'Python {}'.format(platform.python_version())
         extra['app_id'] = 'ozp-backend'
-        extra['app_version'] = os.environ['OZP_BACKEND_VERSION']
+        extra['app_version'] = os.environ.get('OZP_BACKEND_VERSION', 'Unknown')
         extra['environment'] = (os.getenv('OZP_ENVIRONMENT') or 'dev')
         extra['hostname'] = socket.gethostname()
         extra['process_id'] = record.process
