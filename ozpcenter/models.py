@@ -1246,6 +1246,11 @@ class Listing(models.Model):
         return '({0!s}-{1!s})'.format(listing_name, [owner.user.username for owner in self.owners.all()])
 
     def save(self, *args, **kwargs):
+        """
+        TODO: This is not the best place to call elasticsearch update function because it is calling the
+             same listing many times
+        {'Aliens': 9, 'Albatron Technology': 5, 'Air Mail': 9, 'Alingano Maisu': 9, 'Acoustic Guitar': 9}
+        """
         is_new = self.pk
         super(Listing, self).save(*args, **kwargs)
         current_listing_id = self.pk
@@ -1253,6 +1258,7 @@ class Listing(models.Model):
         if settings.ES_ENABLED is True:
             serializer = ReadOnlyListingSerializer(self)
             record = serializer.data  # TODO Find a faster way to serialize data, makes test take a long time to complete
+
             elasticsearch_util.update_es_listing(current_listing_id, record, is_new)
 
 
