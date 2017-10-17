@@ -57,16 +57,20 @@ Note:  Jenkins slave is not necessary
 
 
 ## Jenkins Jobs
-There will be two jobs per git repo (release and latest)
+There will be 4 jobs per git repo (release and latest)
 
 Git Repos and Jobs names
 
 * ozp-center
-    * build-center-latest
-    * build-center-release
+    * center-latest-test
+    * center-latest-build
+    * center-release-test
+    * center-release-build
 * ozp-backend
-    * build-backend-latest
-    * build-backend-release
+    * backend-latest-test
+    * backend-latest-build
+    * backend-release-test
+    * backend-release-build
 
 etc....
 
@@ -90,7 +94,7 @@ etc....
 * Under `Source Code Management`, Select Git
     * Repository URL: `https://github.com/aml-development/{RepositoryName}.git`
     * Branches to build: `*/master` , for release `*/tags/release/*`
-* Under `Build Triggers`,
+* Under `Build Triggers` (Only for test jobs)
     * Select `GitHub hook trigger for GITScm polling`
 * Under `Build Environment`
     * Select `Delete workspace before build starts`
@@ -197,7 +201,7 @@ npm run tarDate
 
 
 ### Setting up ozp-iwc on Jenkins CI
-* Create a new `freestyle project` called `build-iwc-latest` and `build-iwc-release`
+* Create a new `freestyle project` called `iwc-latest-build` and `iwc-release-build`
 * Under `Build`
     * Execute Shell
 ```
@@ -240,36 +244,32 @@ npm run test
     * `Archive the archive`,  File to archive: `target\*.jar`
 
 ### Setting up ozp-backend on Jenkins CI
-* Create a new `freestyle project` called `build-backend-latest` and `build-backend-release`
+#### Build jobs
+* Create a new `freestyle project` called `backend-latest-build` and `backend-release-build`
 * Under `Build`
     * Execute Shell
 ```
-# create clean python env
-rm -rf ~/python_envs/ci-env/
-mkdir ~/python_envs/ci-env/
-pyvenv-3.4 ~/python_envs/ci-env/
-source ~/python_envs/ci-env/bin/activate
-# install prereqs (clean)
-pip install --upgrade pip
-# this is super sketchy, but without it, psycopg2 will fail to install (won't be
-# able to find lib2to3 stuff)
-# /opt/lib2to3 was copied from a clean Python-3.4.3 build (Lib directory)
-cp -r /opt/lib2to3 ~/python_envs/ci-env/lib/python3.4/site-packages/
-export PATH=/usr/local/pgsql/bin:$PATH
-pip install -r requirements.txt --no-cache-dir -I
-
-# Install Wheel in the env
-pip install wheel
-
-# make the release
-python release.py --no-version
+sh jenkins/build.sh
 ```
-
 * Under `Post-build Actions`
     * `Archive the archive`,  File to archive: `backend*.tar.gz`
     * Send build artifacts over ssh
         * SSH Server Name: `ci-latest.proj.domain.com`
         * Exec command: `sudo /home/jenkins/ozp_deploy.sh ${JOB_NAME} ${BUILD_NUMBER} --es_enabled=True`
+
+#### Test jobs
+* Create a new `freestyle project` called `backend-latest-test` and `backend-release-test`
+* Under `Build`
+    * Execute Shell
+```
+sh jenkins/test.sh
+```
+
+* Under `Post-build Actions`
+    * `Archive the archive`,  File to archive: `ozp.log`
+    * `Build Other Projects`=`build-backend-latest`, Trigger only if build is stable
+    * `Publish HTML Report`
+        * `HTML directory to archive`: cover
 
 ### Setting up `bundle-front-end-master` on jenkins ci
 * Project Name `bundle-front-end-master`    

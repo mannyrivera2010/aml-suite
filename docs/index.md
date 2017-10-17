@@ -10,9 +10,8 @@ Notable differences include:
 * Postgres vs. MySQL
 
 ## 3rd Party Services
-Project relays on
-Travis-CI
-[![Build Status](https://travis-ci.org/aml-development/ozp-backend.svg?branch=master)](https://travis-ci.org/ozone-development/ozp-backend)
+Project relays on    
+Travis-CI  [![Build Status](https://travis-ci.org/aml-development/ozp-backend.svg?branch=master)](https://travis-ci.org/aml-development/ozp-backend)
 
 ## Getting Started
 ### Development environment preparation
@@ -38,18 +37,25 @@ make dev
 ### MakeFile
 There is a MakeFile in the project to run repetitive commands    
 
-Commands:    
-`make dev run` - Setup up the Development environment and run server on a SQLite Database (without Elasticsearch)  
+**Commands to setup server**    
 `make pyenv` - Create Python environment and install requirements    
-`make dev` - Setup up the development environment running on a SQLite Database (without Elasticsearch)    
-`make dev_psql` - Setup up the development environment running on a Postgres Database (without Elasticsearch)    
-`make dev_es` - Setup up the development environment running on a SQLite Database with Elasticsearch)    
+`make dev run` - Setup up the Development environment and run server on a SQLite Database without Elasticsearch    
+`make dev` - Setup up the development environment running on a SQLite Database without Elasticsearch    
+`make dev_psql` - Setup up the development environment running on a Postgres Database without Elasticsearch    
+`make dev_es` - Setup up the development environment running on a SQLite Database with Elasticsearch     
 `make reindex_es` - Reindex the data into Elasticsearch    
+
+**Commands to run server**    
 `make run` - Run the server    
 `make run_es` - Run the server with Elasticsearch    
 `make rung` - Run Server with gunicorn with a worker per core    
+`make rung_es` - Run Server with gunicorn with a worker per core    
 `make test` - Run all test    
+`make ptest` - Run all test in parallel (increase speed of unit tests)
+
+**Commands server**    
 `make codecheck` - Run pycodestyle python linter on the code    
+`make autopep` - Run tool to fix python code    
 `make upgrade_requirements` - Update project python dependencies    
 
 ### Postgres Setup
