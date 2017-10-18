@@ -1,5 +1,50 @@
 
-### 1.0.84 (None)    
+### 1.0.85 (None)
+
+#### Feature  
+* **feedback**:  add aggregate feedback score for listings ([ed725113](https://github.com/aml-development/ozp-backend/commit/ed72511357939b3e895e28e04efebdeee5c45e9e))    
+
+#### Fixes  
+* **plugin_manager**:  Fix mock service import ([375e5809](https://github.com/aml-development/ozp-backend/commit/375e5809d7bb9b8cd410092b262b92ee12104ed1))   
+* **feedback**
+  *  fix migration issues ([aac99861](https://github.com/aml-development/ozp-backend/commit/aac998612839872eb6e050729e45e94b0cc4a4d6))
+  *  fix test cases for feedback_score ([bacbf069](https://github.com/aml-development/ozp-backend/commit/bacbf069c07ac435e29935e7ff0abf63e74be464))     
+
+#### Refactor  
+* **version**:  Refactor Version TODO ([d06f967a](https://github.com/aml-development/ozp-backend/commit/d06f967a51bb67c81cedc3ccde08ddb59e1ef0ac))    
+* **travis**:  TravisCI Test Parallelization ([1c2651c3](https://github.com/aml-development/ozp-backend/commit/1c2651c3e3f84e5937633245847e1ac32f148d62))   
+* **unittest**
+  *  Add Pytest distributed test ([00e11fab](https://github.com/aml-development/ozp-backend/commit/00e11fabbdf179a0cdd9e4adefff80322911b00a))
+  *  Upgrade to Pytest ([81bc72d6](https://github.com/aml-development/ozp-backend/commit/81bc72d6d98eca4bd56077ff83462d1616c7fc74))
+  *  Move test to tests folder ([957dd42c](https://github.com/aml-development/ozp-backend/commit/957dd42caee752b50033d1fa366c3040167e8234))
+  *  Increase Performance of unittest ([44b5cc91](https://github.com/aml-development/ozp-backend/commit/44b5cc911a35549710bfc311f2568a3ac3e17ef1))     
+
+#### Merge Pull Requests  
+* Merge pull request #364 from aml-development/version_todo ([74dc5ecf](https://github.com/aml-development/ozp-backend/commit/74dc5ecf0bdcd9459c7dfd05f2552d5a07164332))
+* Merge pull request #369 from aml-development/migration_fix ([1ce14345](https://github.com/aml-development/ozp-backend/commit/1ce143450dd553188903b29d5f2e5182ce2156c1))
+* Merge pull request #362 from aml-development/feedback ([5c28946d](https://github.com/aml-development/ozp-backend/commit/5c28946d97c44f0659226f867888216450a0ed95))
+* Merge branch 'master' into feedback ([6680f986](https://github.com/aml-development/ozp-backend/commit/6680f986877cfa7a045607ce1ced38ad226db25b))
+* Merge pull request #361 from aml-development/unit_test_improve ([dfdc10ec](https://github.com/aml-development/ozp-backend/commit/dfdc10ecdb5f7f034a20f087d89a497297cb0ad1))
+* Merge branch 'master' into unit_test_improve ([3fd42bf4](https://github.com/aml-development/ozp-backend/commit/3fd42bf4378bad49c5822ca78db48c2e21a8e490))
+* Merge pull request #360 from aml-development/feedback ([7702f673](https://github.com/aml-development/ozp-backend/commit/7702f67390961eaac5236ca167ea09834b9d9b79))    
+
+#### Documentation  
+* **readme**:  Updated Docs ([7e076a53](https://github.com/aml-development/ozp-backend/commit/7e076a53862a6af7ff35e56a8433df2b87419d7e))        
+
+#### Changes  
+* Create LICENSE ([e418a982](https://github.com/aml-development/ozp-backend/commit/e418a98228babe8b8545080449a4714a104270e1))
+* Update notification (#368) ([c2f4c8f1](https://github.com/aml-development/ozp-backend/commit/c2f4c8f12af6eecd841984e28c8d64b9714b1283))
+* Revert "Update notification (#366)" (#367) ([681c8e20](https://github.com/aml-development/ozp-backend/commit/681c8e20565d53bf55d9778f90de38bf85130b52))
+* Update notification (#366) ([9a235f16](https://github.com/aml-development/ozp-backend/commit/9a235f16fc66fa830c4c20a33ff14b5cd03d27ba))
+* Revert "JIRA-447 Add links to notifications  (#355)" (#365) ([d2f938f4](https://github.com/aml-development/ozp-backend/commit/d2f938f44607d0712643dcdc9c6482c9c66764a6))
+* JIRA-447 Add links to notifications  (#355) ([72980e68](https://github.com/aml-development/ozp-backend/commit/72980e68e9e4330ce0a5c02758af607d44acc0a6))
+* Create CODE_OF_CONDUCT.md ([7aa92a3f](https://github.com/aml-development/ozp-backend/commit/7aa92a3fa28ecb04a466f9416eb5749876ffd6a2))    
+* **listing**:  Todo item for saving listing ([ae55b0f3](https://github.com/aml-development/ozp-backend/commit/ae55b0f3e0317063d228039391673de39df57602))     
+
+### 1.0.84 (2017-10-12)
+
+#### Feature  
+* **feedback**:  change gave_feedback to return actual feedback from request user ([240ae5ba](https://github.com/aml-development/ozp-backend/commit/240ae5baa1bb09edc14fc37214824328d1d3a41e))       
 
 #### Documentation  
 * **readme**:  update readme ([8a0ff2ce](https://github.com/aml-development/ozp-backend/commit/8a0ff2ce92200251862d0180e3c99e194267f723))          
