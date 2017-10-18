@@ -976,6 +976,40 @@ class ListingSerializer(serializers.ModelSerializer):
         depth = 2
         fields = '__all__'
 
+    @staticmethod
+    def setup_eager_loading(queryset):
+        # prefetch_related many-to-many relationships
+        queryset = queryset.prefetch_related('agency__icon')
+        queryset = queryset.prefetch_related('screenshots')
+        queryset = queryset.prefetch_related('screenshots__small_image')
+        queryset = queryset.prefetch_related('screenshots__large_image')
+        queryset = queryset.prefetch_related('doc_urls')
+        queryset = queryset.prefetch_related('owners')
+        queryset = queryset.prefetch_related('owners__user')
+        queryset = queryset.prefetch_related('owners__organizations')
+        queryset = queryset.prefetch_related('owners__stewarded_organizations')
+        queryset = queryset.prefetch_related('categories')
+        queryset = queryset.prefetch_related('tags')
+        queryset = queryset.prefetch_related('contacts')
+        queryset = queryset.prefetch_related('contacts__contact_type')
+        queryset = queryset.prefetch_related('listing_type')
+        queryset = queryset.prefetch_related('last_activity')
+        queryset = queryset.prefetch_related('last_activity__change_details')
+        queryset = queryset.prefetch_related('last_activity__author')
+        queryset = queryset.prefetch_related('last_activity__author__organizations')
+        queryset = queryset.prefetch_related('last_activity__author__stewarded_organizations')
+        queryset = queryset.prefetch_related('last_activity__listing')
+        queryset = queryset.prefetch_related('last_activity__listing__contacts')
+        queryset = queryset.prefetch_related('last_activity__listing__owners')
+        queryset = queryset.prefetch_related('last_activity__listing__owners__user')
+        queryset = queryset.prefetch_related('last_activity__listing__categories')
+        queryset = queryset.prefetch_related('last_activity__listing__tags')
+        queryset = queryset.prefetch_related('last_activity__listing__intents')
+        queryset = queryset.prefetch_related('current_rejection')
+        queryset = queryset.prefetch_related('intents')
+        queryset = queryset.prefetch_related('intents__icon')
+        return queryset
+
     def _is_bookmarked(self, request_user, request_listing):
         # TODO: put in listing model_access.py call from there > creative name for method
         bookmarks = models.ApplicationLibraryEntry.objects.filter(listing=request_listing, owner=request_user)

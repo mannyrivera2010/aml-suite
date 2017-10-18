@@ -1095,6 +1095,7 @@ class AccessControlListingManager(models.Manager):
         exclude_orgs = get_user_excluded_orgs(username)
 
         objects = objects.exclude(is_private=True, agency__in=exclude_orgs)
+        objects = self.apply_select_related(objects)
         return objects
 
 

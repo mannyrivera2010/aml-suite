@@ -199,7 +199,6 @@ class SimilarViewSet(viewsets.ModelViewSet):
     Response:
         200 - Successful operation - ListingSerializer
     """
-
     permission_classes = (permissions.IsUser,)
     serializer_class = serializers.ListingSerializer
     # pagination_class = pagination.StandardPagination
@@ -723,7 +722,8 @@ class ListingViewSet(viewsets.ModelViewSet):
         return listings
 
     def list(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = serializers.ListingSerializer.setup_eager_loading(self.get_queryset())
+        queryset = self.filter_queryset(queryset)
         counts_data = model_access.put_counts_in_listings_endpoint(queryset)
         # it appears that because we override the queryset here, we must
         # manually invoke the pagination methods
