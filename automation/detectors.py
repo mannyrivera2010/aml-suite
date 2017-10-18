@@ -40,19 +40,20 @@ class PythonFileDetector(Detector):
     def detect(self):
         """
         This is used to detect if the repo has a _version.py file
-        If it does run 'glup changelog'
         """
         if os.path.isfile(os.path.join(self.get_repo_directory_name(), '_version.py')):
             return os.path.join(self.get_repo_directory_name(), '_version.py')
         return None
 
     def execute(self):
+        # TODO Figure out better way to modify file
         input_file_dir = self.detect()
+
         if input_file_dir:
             lines = []
             with open(input_file_dir, 'r') as f:
                 lines = f.readlines()
-
+                print(lines)
             output_lines = []
 
             version_flag = True
@@ -61,7 +62,7 @@ class PythonFileDetector(Detector):
                 if version_flag:
                     if line.find('version') >= 1:
                         version_flag = False
-                        line = line = re.sub(r'"(\d+\.{0,1})+"', '"%s"' % str(self.get_next_version_number()), line)
+                        line = re.sub(r'\'(\d+\.{0,1})+\'', '\'%s\'' % str(self.get_next_version_number()), line)
                         output_lines.append(line)
                     else:
                         output_lines.append(line)
@@ -71,6 +72,19 @@ class PythonFileDetector(Detector):
             with open(input_file_dir, 'w') as f:
                 for current_line in output_lines:
                     f.write(current_line)
+            return True
+
+
+class DjangoPythonFileDetector(PythonFileDetector):
+
+    def detect(self):
+        """
+        This is used to detect if the repo has a _version.py file
+        """
+        temp_path = os.path.join(self.get_repo_directory_name(), 'ozp', '_version.py')
+        if os.path.isfile(temp_path):
+            return temp_path
+        return None
 
 
 class PackageFileDetector(Detector):

@@ -92,6 +92,7 @@ class RepoHelper(object):
         if not self.detector_list:
             self.detector_list = []
             self.detector_list.append(detectors.PythonFileDetector(self))
+            self.detector_list.append(detectors.DjangoPythonFileDetector(self))
             self.detector_list.append(detectors.PackageFileDetector(self))
             self.detector_list.append(detectors.NpmShrinkwrapDetector(self))
             self.detector_list.append(detectors.ChangeLogDetector(self))
@@ -201,7 +202,8 @@ class RepoHelper(object):
         if release_flag or force_flag:
             for detector_obj in self.detector_list:
                 try:
-                    if detector_obj.execute():
+                    if detector_obj.detect():
+                        detector_obj.execute()
                         logger.info('%s - %s - Changed file(%s)' %
                                     (self.repo_name, type(detector_obj).__name__, detector_obj.detect()))
                 except Exception as error:
