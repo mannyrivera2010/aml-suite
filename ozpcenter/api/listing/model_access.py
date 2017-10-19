@@ -59,7 +59,7 @@ import ozpcenter.model_access as generic_model_access
 from plugins.plugin_manager import system_anonymize_identifiable_data
 from ozpcenter.pubsub import dispatcher
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

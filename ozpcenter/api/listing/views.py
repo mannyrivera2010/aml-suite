@@ -23,7 +23,7 @@ import ozpcenter.api.listing.serializers as serializers
 import ozpcenter.model_access as generic_model_access
 import ozpcenter.api.listing.model_access_es as model_access_es
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
@@ -249,7 +249,6 @@ class SimilarViewSet(viewsets.ModelViewSet):
 class RecommendationFeedbackViewSet(viewsets.ModelViewSet):
     """
     Recommendation Feedback for a given listing
-
 
     Access Control
     ===============

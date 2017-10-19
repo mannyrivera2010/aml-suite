@@ -6,6 +6,24 @@ Model Definitions for ozpcenter
 
 TODO: Find more effective way to do exclude security_marking
 
+Many models use a custom manager to control access to model instances
+
+Ex) Instead of using models.Listing.objects.all() or .filter(...) etc, use:
+models.Listing.objects.for_user(user).all() or .filter(...) etc
+
+This way there is a single place to implement this 'tailored view' logic
+for model queries
+
+* To Debug select_related
+tail -f /var/lib/pgsql/data/pg_log/postgresql-Tue.log -n 0| perl -pe '$_ = "$. $_"'
+
+* inside apply_select_related issues
+prefetch_related many-to-many relationships
+prefetch_related causes caches issues.
+https://github.com/django/django/blob/fea9cb46aacc73cabac883a806ccb7fdc1f979dd/django/db/models/fields/related_descriptors.py
+_remove_prefetched_objects does not work property due to self.field.related_query_name() returning wrong value
+
+http://scottlobdell.me/2015/01/sql-database-best-practices-django-orm/
 """
 import json
 import logging
@@ -35,25 +53,28 @@ from plugins.plugin_manager import system_has_access_control
 from ozp.storage import media_storage
 
 
-# Get an instance of a logger
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
-def get_user_excluded_orgs(username):
+def get_user_excluded_orgs(profile_instance):
     """
-    Get user exclude orgs
+    Get exclude organizations for private apps
+
+    from ozpcenter.models import get_user_excluded_orgs; get_user_excluded_orgs(Profile.objects.get(user__username='wsmith'))
     """
-    user = Profile.objects.get(user__username=username)
-    if user.highest_role() == 'APPS_MALL_STEWARD':
+    highest_role = profile_instance.highest_role()
+    # having highest_role variable reduce 1949 to 1574 (wsmith)
+    if highest_role == 'APPS_MALL_STEWARD':
         exclude_orgs = []
-    elif user.highest_role() == 'ORG_STEWARD':
-        user_orgs = user.stewarded_organizations.all()
-        user_orgs = [i.title for i in user_orgs]
-        exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+    elif highest_role == 'ORG_STEWARD':
+        user_orgs = profile_instance.stewarded_organizations.all()
+        # Commenting this out reduce DB 3811 to 3623 for /api/listing
+        # user_orgs = [i.title for i in user_orgs]
+        exclude_orgs = Agency.objects.exclude(pk__in=user_orgs)
     else:
-        user_orgs = user.organizations.all()
-        user_orgs = [i.title for i in user_orgs]
-        exclude_orgs = Agency.objects.exclude(title__in=user_orgs)
+        user_orgs = profile_instance.organizations.all()
+        exclude_orgs = Agency.objects.exclude(pk__in=user_orgs)
+
     return exclude_orgs
 
 
@@ -111,13 +132,7 @@ def post_delete_image_type(sender, instance, **kwargs):
 
 class AccessControlImageManager(models.Manager):
     """
-    Use a custom manager to control access to Images
-
-    Instead of using models.Image.objects.all() or .filter(...) etc, use:
-    models.Image.objects.for_user(user).all() or .filter(...) etc
-
-    This way there is a single place to implement this 'tailored view' logic
-    for image queries
+    Custom manager to control access to Images
     """
 
     def apply_select_related(self, queryset):
@@ -183,7 +198,7 @@ class Image(models.Model):
         Args:
             pil_img: PIL.Image (see https://pillow.readthedocs.org/en/latest/reference/Image.html)
         """
-        DEV_MODE = bool(os.getenv('DEV_MODE', False))
+        TEST_MODE = bool(os.getenv('TEST_MODE', False))
 
         exception = None
         saved_to_db = False
@@ -236,7 +251,7 @@ class Image(models.Model):
         # With io.BytesIO(): Sample Data Generator took: 16109.5576171875 ms
         # Commenting out io.BytesIO() - Sample Data Generator took: 34608.710693359375 ms
 
-        if DEV_MODE:
+        if TEST_MODE:
             # Ignore saving file for Tests
             pass
         else:
@@ -259,7 +274,7 @@ class Image(models.Model):
                 image_object.delete()
             raise exception
 
-        if DEV_MODE:
+        if TEST_MODE:
             # Ignore saving file for Tests
             pass
         else:
@@ -307,10 +322,6 @@ class Agency(models.Model):
     Agency (like of the three letter variety)
 
     TODO: Auditing for create, update, delete
-
-    Additional db.relationships:
-        * profiles
-        * steward_profiles
     """
     title = models.CharField(max_length=255, unique=True)
     icon = models.ForeignKey(Image, related_name='agency', null=True, blank=True)
@@ -338,13 +349,7 @@ def post_delete_agency(sender, instance, **kwargs):
 
 class AccessControlApplicationLibraryEntryManager(models.Manager):
     """
-    Use a custom manager to control access to Listings
-
-    Instead of using models.Listing.objects.all() or .filter(...) etc, use:
-    models.Listing.objects.for_user(user).all() or .filter(...) etc
-
-    This way there is a single place to implement this 'tailored view' logic
-    for listing queries
+    Use a custom manager to control access to Library
     """
 
     def apply_select_related(self, queryset):
@@ -368,8 +373,9 @@ class AccessControlApplicationLibraryEntryManager(models.Manager):
 
     def for_user(self, username):
         objects = super(AccessControlApplicationLibraryEntryManager, self).get_queryset()
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
         objects = objects.filter(owner__user__username=username)
         objects = objects.filter(listing__is_enabled=True)
@@ -388,9 +394,9 @@ class AccessControlApplicationLibraryEntryManager(models.Manager):
 
     def for_user_organization_minus_security_markings(self, username, filter_for_user=False):
         objects = super(AccessControlApplicationLibraryEntryManager, self).get_queryset()
-
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
         objects = objects.exclude(listing__is_private=True,
                                   listing__agency__in=exclude_orgs)
@@ -406,9 +412,6 @@ class AccessControlApplicationLibraryEntryManager(models.Manager):
 class ApplicationLibraryEntry(models.Model):
     """
     A Listing that a user (Profile) has in their 'application library'/bookmarks
-
-    Additional db.relationships:
-        * owner
 
     TODO: Auditing for create, update, delete
     TODO: folder seems HUD-specific
@@ -510,9 +513,6 @@ class Contact(models.Model):
     """
     A contact for a Listing
 
-    Additional db.relationships:
-        * listings
-
     TODO: Auditing for create, update, delete
     """
     secure_phone = models.CharField(
@@ -550,8 +550,7 @@ class Contact(models.Model):
 
     def clean(self):
         if not self.secure_phone and not self.unsecure_phone:
-            raise ValidationError({'secure_phone': 'Both phone numbers cannot \
-                be blank'})
+            raise ValidationError({'secure_phone': 'Both phone numbers cannot be blank'})
 
     def __repr__(self):
         val = '{0!s}, {1!s}'.format(self.name, self.email)
@@ -571,7 +570,6 @@ class Contact(models.Model):
 class ContactType(models.Model):
     """
     Contact Type
-
     Examples: TechnicalPOC, GovieGuy, etc
 
     TODO: Auditing for create, update, delete
@@ -619,9 +617,6 @@ class DocUrlManager(models.Manager):
 class DocUrl(models.Model):
     """
     A documentation link that belongs to a Listing
-
-    Additional db.relationships:
-        * listing
 
     TODO: unique_together constraint on name and url
     """
@@ -691,12 +686,6 @@ def post_delete_intents(sender, instance, **kwargs):
 class AccessControlReviewManager(models.Manager):
     """
     Use a custom manager to control access to Reviews
-
-    Instead of using models.Review.objects.all() or .filter(...) etc, use:
-    models.Review.objects.for_user(user).all() or .filter(...) etc
-
-    This way there is a single place to implement this 'tailored view' logic
-    for review queries
     """
 
     def apply_select_related(self, queryset):
@@ -753,7 +742,6 @@ class Review(models.Model):
     edited_date = models.DateTimeField(default=utils.get_now_utc)
     created_date = models.DateTimeField(default=utils.get_now_utc)
 
-    # use a custom Manager class to limit returned Reviews
     objects = AccessControlReviewManager()
 
     def validate_unique(self, exclude=None):
@@ -789,9 +777,6 @@ class ProfileManager(models.Manager):
     def get_queryset(self):
         queryset = super(ProfileManager, self).get_queryset()
         queryset = queryset.select_related('user')
-        # .prefetch_related('user__groups')
-        # .prefetch_related('organizations')
-        # .prefetch_related('stewarded_organizations')
         return queryset
 
 
@@ -1002,15 +987,6 @@ class Profile(models.Model):
 class AccessControlListingManager(models.Manager):
     """
     Use a custom manager to control access to Listings
-
-    Instead of using models.Listing.objects.all() or .filter(...) etc, use:
-    models.Listing.objects.for_user(user).all() or .filter(...) etc
-
-    This way there is a single place to implement this 'tailored view' logic
-    for listing queries
-
-    To Debug select_related
-    tail -f /var/lib/pgsql/data/pg_log/postgresql-Tue.log -n 0| perl -pe '$_ = "$. $_"'
     """
 
     def apply_select_related(self, queryset):
@@ -1029,40 +1005,6 @@ class AccessControlListingManager(models.Manager):
         queryset = queryset.select_related('required_listings')
         queryset = queryset.select_related('last_activity')
         queryset = queryset.select_related('current_rejection')
-
-        # prefetch_related many-to-many relationships
-        # prefetch_related causes caches issues.
-        # https://github.com/django/django/blob/fea9cb46aacc73cabac883a806ccb7fdc1f979dd/django/db/models/fields/related_descriptors.py
-        # _remove_prefetched_objects does not work property due to self.field.related_query_name() returning wrong value
-        # queryset = queryset.prefetch_related('screenshots')
-        # queryset = queryset.prefetch_related('screenshots__small_image')
-        # queryset = queryset.prefetch_related('screenshots__large_image')
-        # queryset = queryset.prefetch_related('doc_urls')
-        # queryset = queryset.prefetch_related('owners')
-        # queryset = queryset.prefetch_related('owners__user')
-
-        # queryset = queryset.prefetch_related('owners__organizations')
-        # queryset = queryset.prefetch_related('owners__stewarded_organizations')
-        # queryset = queryset.prefetch_related('categories')
-        # queryset = queryset.prefetch_related('tags')
-        # queryset = queryset.prefetch_related('contacts')
-        # queryset = queryset.prefetch_related('contacts__contact_type')
-        # queryset = queryset.prefetch_related('listing_type')
-        # queryset = queryset.prefetch_related('last_activity')
-        # queryset = queryset.prefetch_related('last_activity__change_details')
-        # queryset = queryset.prefetch_related('last_activity__author')
-        # queryset = queryset.prefetch_related('last_activity__author__organizations')
-        # queryset = queryset.prefetch_related('last_activity__author__stewarded_organizations')
-        # queryset = queryset.prefetch_related('last_activity__listing')
-        # queryset = queryset.prefetch_related('last_activity__listing__contacts')
-        # queryset = queryset.prefetch_related('last_activity__listing__owners')
-        # queryset = queryset.prefetch_related('last_activity__listing__owners__user')
-        # queryset = queryset.prefetch_related('last_activity__listing__categories')
-        # queryset = queryset.prefetch_related('last_activity__listing__tags')
-        # queryset = queryset.prefetch_related('last_activity__listing__intents')
-        # queryset = queryset.prefetch_related('current_rejection')
-        # queryset = queryset.prefetch_related('intents')
-        # queryset = queryset.prefetch_related('intents__icon')
         return queryset
 
     def get_queryset(self):
@@ -1071,9 +1013,9 @@ class AccessControlListingManager(models.Manager):
 
     def for_user(self, username):
         objects = super(AccessControlListingManager, self).get_queryset()
-
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
         objects = objects.exclude(is_private=True, agency__in=exclude_orgs)
         objects = self.apply_select_related(objects)
@@ -1091,8 +1033,9 @@ class AccessControlListingManager(models.Manager):
 
     def for_user_organization_minus_security_markings(self, username):
         objects = super(AccessControlListingManager, self).get_queryset()
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
         objects = objects.exclude(is_private=True, agency__in=exclude_orgs)
         objects = self.apply_select_related(objects)
@@ -1287,12 +1230,6 @@ def post_delete_listing(sender, instance, **kwargs):
 class AccessControlRecommendationsEntryManager(models.Manager):
     """
     Use a custom manager to control access to RecommendationsEntry
-
-    Instead of using models.Listing.objects.all() or .filter(...) etc, use:
-    models.Listing.objects.for_user(user).all() or .filter(...) etc
-
-    This way there is a single place to implement this 'tailored view' logic
-    for listing queries
     """
 
     def apply_select_related(self, queryset):
@@ -1306,11 +1243,11 @@ class AccessControlRecommendationsEntryManager(models.Manager):
     def for_user(self, username):
         objects = super(AccessControlRecommendationsEntryManager, self).get_queryset()
 
-        user = Profile.objects.get(user__username=username)
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
-        objects = objects.filter(target_profile=user,
+        objects = objects.filter(target_profile=profile_instance,
                     listing__is_enabled=True,
                     listing__approval_status=Listing.APPROVED,
                     listing__is_deleted=False)
@@ -1331,9 +1268,9 @@ class AccessControlRecommendationsEntryManager(models.Manager):
     def for_user_organization_minus_security_markings(self, username):
         objects = super(AccessControlRecommendationsEntryManager, self).get_queryset()
 
-        user = Profile.objects.get(user__username=username)
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
         objects = objects.filter(target_profile=user,
                     listing__is_enabled=True,
@@ -1366,12 +1303,6 @@ class RecommendationsEntry(models.Model):
 class AccessControlRecommendationFeedbackManager(models.Manager):
     """
     Use a custom manager to control access to RecommendationsEntry
-
-    Instead of using models.Listing.objects.all() or .filter(...) etc, use:
-    models.Listing.objects.for_user(user).all() or .filter(...) etc
-
-    This way there is a single place to implement this 'tailored view' logic
-    for listing queries
     """
 
     def apply_select_related(self, queryset):
@@ -1386,11 +1317,11 @@ class AccessControlRecommendationFeedbackManager(models.Manager):
     def for_user(self, username):
         objects = super(AccessControlRecommendationFeedbackManager, self).get_queryset()
 
-        user = Profile.objects.get(user__username=username)
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
-        objects = objects.filter(target_profile=user,
+        objects = objects.filter(target_profile=profile_instance,
                     target_listing__is_enabled=True,
                     target_listing__approval_status=Listing.APPROVED,
                     target_listing__is_deleted=False)
@@ -1411,11 +1342,11 @@ class AccessControlRecommendationFeedbackManager(models.Manager):
     def for_user_organization_minus_security_markings(self, username):
         objects = super(AccessControlRecommendationFeedbackManager, self).get_queryset()
 
-        user = Profile.objects.get(user__username=username)
+        profile_instance = Profile.objects.get(user__username=username)
         # filter out private listings
-        exclude_orgs = get_user_excluded_orgs(username)
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
 
-        objects = objects.filter(target_profile=user,
+        objects = objects.filter(target_profile=profile_instance,
                     target_listing__is_enabled=True,
                     target_listing__approval_status=Listing.APPROVED,
                     target_listing__is_deleted=False)
@@ -1448,12 +1379,6 @@ class RecommendationFeedback(models.Model):
 class AccessControlListingActivityManager(models.Manager):
     """
     Use a custom manager to control access to ListingActivities
-
-    Instead of using models.ListingActivity.objects.all() or .filter(...) etc,
-    use: models.ListingActivity.objects.for_user(user).all() or .filter(...) etc
-
-    This way there is a single place to implement this 'tailored view' logic
-    for ListingActivity queries
     """
 
     def apply_select_related(self, queryset):
@@ -1618,7 +1543,6 @@ class NotificationManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # select_related foreign keys
         # select_related cut down db calls from 717 to 8
         queryset = queryset.select_related('author')
         queryset = queryset.select_related('author__user')
@@ -1783,27 +1707,34 @@ class NotificationMailBoxManager(models.Manager):
     """
 
     def apply_select_related(self, queryset):
-        # queryset = queryset.select_related('target_profile')
-        # queryset = queryset.select_related('notification')
+        queryset = queryset.select_related('target_profile')
+        queryset = queryset.select_related('notification')
         return queryset
 
     def get_queryset(self):
-        queryset = super(NotificationMailBox, self).get_queryset()
+        queryset = super(NotificationMailBoxManager, self).get_queryset()
         return self.apply_select_related(queryset)
 
 
 class NotificationMailBox(models.Model):
-    # Mailbox Profile ID
+    """
+    Notification MailBox
+    Represents all the notifications for all users
+
+    Fields:
+        target_profile: Mailbox Profile ID
+        notification: notification ForeignKey
+        emailed_status: If it has been emailed. then make value true
+        read_status: Read Flag
+        acknowledged_status: Acknowledged Flag
+    """
     target_profile = models.ForeignKey(Profile, related_name='mailbox_profiles')
     notification = models.ForeignKey(Notification, related_name='mailbox_notifications')
-    # If it has been emailed. then make value true
     emailed_status = models.BooleanField(default=False)
-    # Read Flag
     read_status = models.BooleanField(default=False)
-    # Acknowledged Flag
     acknowledged_status = models.BooleanField(default=False)
 
-    # objects = NotificationMailBoxManager()
+    objects = NotificationMailBoxManager()
 
     def __repr__(self):
         return '{0!s}: {1!s}'.format(self.target_profile.user.username, self.notification.pk)

@@ -26,7 +26,7 @@ from django.conf import settings
 
 from ozpcenter import errors
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

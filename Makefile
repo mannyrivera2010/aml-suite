@@ -27,14 +27,14 @@ pre:
 	export DJANGO_SETTINGS_MODULE=ozp.settings
 
 test: clean pre create_static
-	DEV_MODE=True pytest
+	TEST_MODE=True pytest
 
 ptest: clean pre create_static
 	echo Number of cores: `nproc`
-	DEV_MODE=True pytest -n `nproc` --dist=loadscope
+	TEST_MODE=True pytest -n `nproc` --dist=loadscope
 
 softtest: pre
-	DEV_MODE=True pytest
+	TEST_MODE=True pytest
 
 install_git_hooks:
 	cp .hooks/pre-commit .git/hooks/
@@ -90,7 +90,7 @@ recommend_es_content:
 sqlite_migrate:
 	MAIN_DATABASE=sqlite python manage.py makemigrations ozpcenter
 	MAIN_DATABASE=sqlite python manage.py makemigrations ozpiwc
-	MAIN_DATABASE=sqlite DEV_MODE=True python manage.py migrate
+	MAIN_DATABASE=sqlite TEST_MODE=True python manage.py migrate
 
 dev: clean pre create_static install_git_hooks sqlite_migrate
 	MAIN_DATABASE=sqlite python manage.py runscript sample_data_generator
@@ -102,7 +102,7 @@ dev_es: clean pre create_static install_git_hooks sqlite_migrate
 dev_psql: clean pre create_static install_git_hooks
 	MAIN_DATABASE=psql python manage.py makemigrations ozpcenter
 	MAIN_DATABASE=psql python manage.py makemigrations ozpiwc
-	MAIN_DATABASE=psql DEV_MODE=True python manage.py migrate
+	MAIN_DATABASE=psql TEST_MODE=True python manage.py migrate
 
 	MAIN_DATABASE=psql python manage.py flush --noinput # For Postgres
 

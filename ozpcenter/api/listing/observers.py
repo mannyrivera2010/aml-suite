@@ -10,7 +10,7 @@ from ozpcenter.pubsub import Observer
 from ozpcenter.models import Notification
 import ozpcenter.api.notification.model_access as notification_model_access
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

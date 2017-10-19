@@ -4,9 +4,41 @@ Utility functions
 import datetime
 import pytz
 import re
+import os
 
 from django.template import Context
 from django.template import Template
+
+
+def str_to_bool(user_input):
+    """
+    Convert string to Boolean value
+    """
+    if isinstance(user_input, bool):
+        return user_input
+    else:
+        if user_input.lower() in ['1', 'true']:
+            return True
+        else:
+            return False
+
+
+def interactive_migration():
+    TEST_MODE = str_to_bool(os.getenv('TEST_MODE', False))
+
+    if TEST_MODE is True:
+        return
+
+    print('Please Run - python manage.py runscript notification_mailbox')
+    print('If it is the first time say N, run the script, and next time say Y')
+    print('For Development Machines: Always say Y')
+
+    response = input('Have you run command: Y/N    ').lower()
+
+    if response == 'y':
+        return
+    else:
+        raise Exception('You need to run command first')
 
 
 def make_keysafe(key):

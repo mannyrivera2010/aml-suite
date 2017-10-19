@@ -26,7 +26,7 @@ from ozpcenter.recommend import recommend_utils
 from ozpcenter.recommend.algorithms import GraphAlgoritms
 from ozpcenter.recommend.query import Query
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

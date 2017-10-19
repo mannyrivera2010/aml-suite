@@ -18,7 +18,7 @@ from ozpcenter import errors
 import ozpcenter.model_access as generic_model_access
 from ozp.storage import media_storage
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

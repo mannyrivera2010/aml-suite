@@ -14,7 +14,7 @@ from ozpcenter.models import Subscription
 
 import ozpcenter.model_access as generic_model_access
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

@@ -13,7 +13,7 @@ from ozpcenter import models
 from plugins.plugin_manager import system_has_access_control
 import ozpcenter.model_access as generic_model_access
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

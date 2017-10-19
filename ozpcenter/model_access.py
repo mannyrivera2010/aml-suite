@@ -8,7 +8,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from ozpcenter import models
 
 
-# Get an instance of a logger
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

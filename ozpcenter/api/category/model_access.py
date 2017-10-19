@@ -7,7 +7,7 @@ from django.db.models.functions import Lower
 
 from ozpcenter import models
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
@@ -15,7 +15,7 @@ def get_all_categories():
     """
     Get all categories
     """
-    return models.Category.objects.all().order_by(Lower('title'))
+    return models.Category.objects.order_by(Lower('title')).all()
 
 
 def get_category_by_title(title, reraise=False):
