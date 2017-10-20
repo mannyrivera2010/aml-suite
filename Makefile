@@ -113,10 +113,10 @@ email:
 	python manage.py runscript notification_email
 
 shell:
-	python manage.py shell_plus
+	python manage.py shell_plus --print-sql
 
 shell_psql:
-	MAIN_DATABASE='psql' python manage.py shell_plus
+	MAIN_DATABASE='psql' python manage.py shell_plus  --print-sql
 
 create_virtualenv:
 	virtualenv env
