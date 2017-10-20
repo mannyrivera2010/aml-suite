@@ -136,12 +136,9 @@ import time
 from django.db import transaction
 
 
-def show_db_calls(print_queries=False):
+def show_db_calls():
     db_connection = transaction.get_connection()
     number_of_calls = len(db_connection.queries)
-    if print_queries:
-        [print(query) for query in db_connection.queries]
-
     db_connection.queries_log.clear()
     return number_of_calls
 
@@ -388,4 +385,107 @@ This function took 7 milliseconds and took 2 database calls
    "_db_calls": 2,
    "APPROVED": 3
 }
+```
+
+## Improving `put_counts_in_listings_endpoint` database example
+
+**`_update_rating` original code**   
+```
+def _update_rating(username, listing):
+    """
+    Invoked each time a review is created, deleted, or updated
+    """
+    reviews = models.Review.objects.filter(listing=listing, review_parent__isnull=True)
+    rate1 = reviews.filter(rate=1).count()
+    rate2 = reviews.filter(rate=2).count()
+    rate3 = reviews.filter(rate=3).count()
+    rate4 = reviews.filter(rate=4).count()
+    rate5 = reviews.filter(rate=5).count()
+    total_votes = reviews.count()
+    total_reviews = total_votes - reviews.filter(text=None).count()
+
+    review_responses = models.Review.objects.filter(listing=listing, review_parent__isnull=False)
+    total_review_responses = review_responses.count()
+
+    # calculate weighted average
+    if total_votes == 0:
+        avg_rate = 0
+    else:
+        avg_rate = (5 * rate5 + 4 * rate4 + 3 * rate3 + 2 * rate2 + rate1) / total_votes
+        avg_rate = float('{0:.1f}'.format(avg_rate))
+
+    # update listing
+    listing.total_rate1 = rate1
+    listing.total_rate2 = rate2
+    listing.total_rate3 = rate3
+    listing.total_rate4 = rate4
+    listing.total_rate5 = rate5
+    listing.total_votes = total_votes
+    listing.total_reviews = total_reviews
+    listing.total_review_responses = total_review_responses
+    listing.avg_rate = avg_rate
+    listing.edited_date = utils.get_now_utc()
+    listing.save()
+    return listing
+```
+
+Code for benchmark (running user `make shell`)    
+```
+import time
+
+def show_db_calls():
+    db_connection = transaction.get_connection()
+    number_of_calls = len(db_connection.queries)
+    db_connection.queries_log.clear()
+    return number_of_calls
+
+
+show_db_calls()
+
+start_time = int(round(time.time() * 1000))
+
+
+from ozpcenter.api.listing.model_access import _update_rating
+l = Listing.objects.all()
+[_update_rating('bigbrother', la) for la in l]
+
+print(int(round(time.time() * 1000)) - start_time)
+print(show_db_calls())  # Not working
+print('')
+
+# 1434 Comment
+# 3492 with counts()
+
+```
+
+
+**`_update_rating new code` function results**   
+
+```
+from django.db.models.expressions import RawSQL
+l=Listing.objects.get(id=2);
+Review.objects.filter(listing=l).values('rate').annotate(review_parent_isnull=RawSQL('"review_parent_id" is %s ', (None,)), rate_count=Count('rate'))
+
+
+SQLITE3:
+<QuerySet [{'rate_count': 1, 'rate': 1, 'review_parent_isnull': 0},
+	{'rate_count': 1, 'rate': 1, 'review_parent_isnull': 1},
+	{'rate_count': 1, 'rate': 3, 'review_parent_isnull': 1},
+	{'rate_count': 1, 'rate': 4, 'review_parent_isnull': 1},
+	{'rate_count': 1, 'rate': 5, 'review_parent_isnull': 1}]>
+
+Postgresql
+<QuerySet [{'rate': 3, 'rate_count': 1, 'review_parent_isnull': True},
+           {'rate': 4, 'rate_count': 1, 'review_parent_isnull': True},
+           {'rate': 1, 'rate_count': 1, 'review_parent_isnull': False},
+           {'rate': 5, 'rate_count': 1, 'review_parent_isnull': True},
+           {'rate': 1, 'rate_count': 1, 'review_parent_isnull': True}]>
+
+```
+SELECT "ozpcenter_review"."rate",
+COUNT("ozpcenter_review"."rate") AS "rate_count",
+("review_parent_id" is NULL ) AS "review_parent_isnull"
+FROM "ozpcenter_review"
+WHERE "ozpcenter_review"."listing_id" = 2
+GROUP BY "ozpcenter_review"."rate", ("review_parent_id" is NULL )
 ```
