@@ -614,6 +614,16 @@ def create_recommendation_feedback(target_profile, target_listing, feedback):
     return recommendation_feedback
 
 
+def delete_recommendation_feedback(target_listing, recommendation_feedback):
+    """
+    Delete recommendation feedback entry for listing
+    """
+    target_listing.feedback_score -= recommendation_feedback.feedback
+    target_listing.save()
+
+    recommendation_feedback.delete()
+
+
 def create_listing_review(username, listing, rating, text=None, review_parent=None):
     """
     Create a new review for a listing
