@@ -49,8 +49,41 @@ class StorefrontApiTest(APITestCase):
         self.client.force_authenticate(user=user)
         response = self.client.get(url, format='json')
         self.assertIn('featured', response.data)
+        self.assertTrue(len(response.data['featured']) >= 1)
         self.assertIn('recent', response.data)
+        self.assertTrue(len(response.data['recent']) >= 1)
         self.assertIn('most_popular', response.data)
+        self.assertTrue(len(response.data['most_popular']) >= 1)
+        self.assertIn('recommended', response.data)
+        self.assertTrue(len(response.data['recommended']) >= 1)
+
+    def test_storefront_authorized_recommended(self):
+        url = '/api/storefront/recommended/'
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+        response = self.client.get(url, format='json')
+        self.assertIn('featured', response.data)
+        self.assertEqual(response.data['featured'], [])
+        self.assertIn('recent', response.data)
+        self.assertEqual(response.data['recent'], [])
+        self.assertIn('most_popular', response.data)
+        self.assertEqual(response.data['most_popular'], [])
+        self.assertIn('recommended', response.data)
+        self.assertTrue(len(response.data['recommended']) >= 1)
+
+    def test_storefront_authorized_featured(self):
+        url = '/api/storefront/featured/'
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+        response = self.client.get(url, format='json')
+        self.assertIn('featured', response.data)
+        self.assertTrue(len(response.data['featured']) >= 1)
+        self.assertIn('recent', response.data)
+        self.assertTrue(len(response.data['recent']) == 0)
+        self.assertIn('most_popular', response.data)
+        self.assertTrue(len(response.data['most_popular']) == 0)
+        self.assertIn('recommended', response.data)
+        self.assertTrue(len(response.data['recommended']) == 0)
 
     def test_storefront_unauthorized(self):
         url = '/api/storefront/'

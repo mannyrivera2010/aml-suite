@@ -493,8 +493,8 @@ def get_storefront_recommended(username, pre_fetch=True):
 
     profile = models.Profile.objects.get(user__username=username)
 
-    if not profile.is_beta_user():
-        return [], extra_data
+    # if not profile.is_beta_user():
+    #     return [], extra_data
 
     # Retrieve List of Recommended Apps for profile:
     listing_ids_list, recommended_entry_data = get_recommendation_listing_ids(profile)
@@ -638,7 +638,7 @@ def get_storefront(username, pre_fetch=False, section=None):
         if section == 'all' or section == 'featured':
             data['featured'] = get_storefront_featured(username, pre_fetch)
         else:
-            data['featured'] = []
+            data['featured'] = ['3']
 
         if section == 'all' or section == 'recent':
             data['recent'] = get_storefront_recent(username, pre_fetch)
