@@ -16,7 +16,7 @@ import ozpcenter.api.notification.model_access as model_access
 import ozpcenter.model_access as generic_model_access
 import ozpcenter.api.profile.serializers as profile_serializers
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 import ozpcenter.api.listing.serializers as listing_serializers
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

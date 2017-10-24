@@ -29,7 +29,7 @@ if settings.ES_ENABLED is True:
 else:
     RECOMMENDATION_ENGINE = os.getenv('RECOMMENDATION_ENGINE', 'baseline,graph_cf')
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

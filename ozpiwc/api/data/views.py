@@ -15,7 +15,7 @@ import ozpiwc.renderers as renderers
 import ozpiwc.api.data.serializers as serializers
 import ozpiwc.api.data.model_access as model_access
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-iwc.' + str(__name__))
 
 

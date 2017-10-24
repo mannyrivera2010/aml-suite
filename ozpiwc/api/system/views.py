@@ -16,7 +16,7 @@ import ozpcenter.api.listing.serializers as listing_serializers
 import ozpiwc.hal as hal
 import ozpiwc.renderers as renderers
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-iwc.' + str(__name__))
 
 

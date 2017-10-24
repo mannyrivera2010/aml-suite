@@ -41,7 +41,7 @@ from ozpcenter.recommend import recommend_utils
 from ozpcenter.recommend.graph_factory import GraphFactory
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

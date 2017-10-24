@@ -13,7 +13,7 @@ import ozpcenter.api.listing.model_access as listing_model_access
 import ozpcenter.api.category.model_access as category_model_access
 import ozpcenter.api.profile.serializers as profile_serializers
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 

@@ -49,6 +49,7 @@ Check for the listings that has been approved more than once
 """
 import logging
 
+from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
 from ozpcenter import models
@@ -59,7 +60,7 @@ import ozpcenter.model_access as generic_model_access
 from plugins.plugin_manager import system_anonymize_identifiable_data
 from ozpcenter.pubsub import dispatcher
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
@@ -777,6 +778,39 @@ def delete_listing(username, listing):
                        new_approval_status=listing.approval_status)
 
 
+def group_by_sum(count_data_list, group_key, count_key='agency_count'):
+    """
+    { "agency__id": 1, "agency_count": 39, "approval_status": "APPROVED", "is_enabled": true},
+
+    returns
+        dict
+    """
+    count_dict = {}
+
+    for record_dict in count_data_list:
+        group_key_in_record = group_key in record_dict
+
+        if group_key_in_record:
+            group_key_value = record_dict[group_key]
+            group_key_count_value = record_dict[count_key]
+            group_key_value_in_count_dict = group_key_value in count_dict
+
+            if group_key_value_in_count_dict:
+                count_dict[group_key_value] = count_dict[group_key_value] + group_key_count_value
+            else:
+                count_dict[group_key_value] = group_key_count_value
+
+    total_count = 0
+
+    for key in count_dict:
+        value = count_dict[key]
+        total_count = total_count + value
+
+    count_dict['_total_count'] = total_count
+
+    return count_dict
+
+
 def put_counts_in_listings_endpoint(queryset):
     """
     Add counts to the listing/ endpoint
@@ -786,73 +820,60 @@ def put_counts_in_listings_endpoint(queryset):
 
     Returns:
         {
-            "total": <total listings>,
-            "organizations": {
+            total": <total listings>,
+            organizations: {
                 <org_id>: <int>,
                 ...
             },
-            "enabled": <enabled listings>,
-            "IN_PROGRESS": <int>,
-            "PENDING": <int>,
-            "PENDING_DELETION: <int>"
-            "REJECTED": <int>,
-            "APPROVED_ORG": <int>,
-            "APPROVED": <int>,
-            "DELETED": <int>
+            enabled: <enabled listings>,
+            IN_PROGRESS: <int>,
+            PENDING: <int>,
+            PENDING_DELETION: <int>"
+            REJECTED: <int>,
+            APPROVED_ORG: <int>,
+            APPROVED: <int>,
+            DELETED: <int>
         }
     """
     # TODO: Take in account 2pki user (rivera-20160908)
-
     data = {}
 
-    # Number of total listings
-    num_total = queryset.count()
-    # Number of listing that is Enabled
-    num_enabled = queryset.filter(is_enabled=True).count()
+    count_data = (models.Listing
+                        .objects.filter(pk__in=queryset)
+                        .values('agency__id', 'is_enabled', 'approval_status')
+                        .annotate(agency_count=Count('agency__id')))
 
-    # Number of listing that is IN_PROGRESS
-    num_in_progress = queryset.filter(
-        approval_status=models.Listing.IN_PROGRESS).count()
+    enabled_count = group_by_sum(count_data, 'is_enabled')
 
-    # Number of listing that is PENDING
-    num_pending = queryset.filter(
-        approval_status=models.Listing.PENDING).count()
+    data['total'] = enabled_count.get('_total_count', 0)
+    data['enabled'] = enabled_count.get(True, 0)
 
-    # Number of listing that is REJECTED
-    num_rejected = queryset.filter(
-        approval_status=models.Listing.REJECTED).count()
+    agency_count = group_by_sum(count_data, 'agency__id')
 
-    # Number of listing that is APPROVED_ORG
-    num_approved_org = queryset.filter(
-        approval_status=models.Listing.APPROVED_ORG).count()
-
-    # Number of listing that is APPROVED
-    num_approved = queryset.filter(
-        approval_status=models.Listing.APPROVED).count()
-
-    # Number of listing that is DELETED
-    num_deleted = queryset.filter(
-        approval_status=models.Listing.DELETED).count()
-
-    # Number of listing that is PENDING_DELETION
-    num_pending_deletion = queryset.filter(
-        approval_status=models.Listing.PENDING_DELETION).count()
-
-    data['total'] = num_total
-    data['enabled'] = num_enabled
     data['organizations'] = {}
-    data[models.Listing.IN_PROGRESS] = num_in_progress
-    data[models.Listing.PENDING] = num_pending
-    data[models.Listing.REJECTED] = num_rejected
-    data[models.Listing.APPROVED_ORG] = num_approved_org
-    data[models.Listing.APPROVED] = num_approved
-    data[models.Listing.DELETED] = num_deleted
-    data[models.Listing.PENDING_DELETION] = num_pending_deletion
 
-    orgs = models.Agency.objects.all()
-    for i in orgs:
-        data['organizations'][str(i.id)] = queryset.filter(
-            agency__id=i.id).count()
+    agency_ids = list(models.Agency.objects.values_list('id', flat=True))
+    for agency_id in agency_ids:
+        agency_id_str = str(agency_id)
+        if agency_id in agency_count:
+            data['organizations'][agency_id_str] = agency_count[agency_id]
+        else:
+            data['organizations'][agency_id_str] = '0'
+
+    approval_status_count = group_by_sum(count_data, 'approval_status')
+    approval_status_list = [
+        models.Listing.IN_PROGRESS,
+        models.Listing.PENDING,
+        models.Listing.REJECTED,
+        models.Listing.APPROVED_ORG,
+        models.Listing.APPROVED,
+        models.Listing.DELETED,
+        models.Listing.PENDING_DELETION
+    ]
+
+    for current_approval_status in approval_status_list:
+        data[current_approval_status] = approval_status_count.get(current_approval_status, 0)
+
     return data
 
 

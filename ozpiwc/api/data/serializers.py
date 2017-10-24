@@ -8,7 +8,7 @@ from rest_framework import serializers
 import ozpiwc.models as models
 import ozpiwc.serializer_fields as serializer_fields
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-iwc.' + str(__name__))
 
 

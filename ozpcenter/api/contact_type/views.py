@@ -9,7 +9,7 @@ from ozpcenter import permissions
 import ozpcenter.api.contact_type.model_access as model_access
 import ozpcenter.api.contact_type.serializers as serializers
 
-# Get an instance of a logger
+
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
