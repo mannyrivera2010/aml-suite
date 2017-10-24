@@ -638,7 +638,7 @@ def get_storefront(username, pre_fetch=False, section=None):
         if section == 'all' or section == 'featured':
             data['featured'] = get_storefront_featured(username, pre_fetch)
         else:
-            data['featured'] = ['3']
+            data['featured'] = []
 
         if section == 'all' or section == 'recent':
             data['recent'] = get_storefront_recent(username, pre_fetch)
