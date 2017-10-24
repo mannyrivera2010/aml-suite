@@ -493,9 +493,6 @@ def get_storefront_recommended(username, pre_fetch=True):
 
     profile = models.Profile.objects.get(user__username=username)
 
-    if not profile.is_beta_user():
-        return [], extra_data
-
     # Retrieve List of Recommended Apps for profile:
     listing_ids_list, recommended_entry_data = get_recommendation_listing_ids(profile)
     extra_data['recommended_entry_data'] = recommended_entry_data
