@@ -63,12 +63,14 @@ import os
 import time
 import pytz
 import sys
+import yaml
+
 from collections import deque
 
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '../../')))
 from django.conf import settings
 from django.db import transaction
-import yaml
+from django.core.management import call_command
 
 from ozpcenter import models
 from ozpcenter.api.notification import model_access as notification_model_access
@@ -300,6 +302,9 @@ def run():
     """
     Creates basic sample data
     """
+    print('--flushing database')
+    call_command('flush', '--noinput')  # Used to make postgresql work in unittest
+
     total_start_time = time_ms()
 
     db_connection = transaction.get_connection()

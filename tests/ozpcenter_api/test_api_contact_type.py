@@ -16,7 +16,8 @@ class ContactTypeApiTest(APITestCase):
         """
         setUp is invoked before each test method
         """
-        self
+        self.expected_error = {'detail': 'You do not have permission to perform this action.',
+                               'error': True}
 
     @classmethod
     def setUpTestData(cls):
@@ -31,12 +32,12 @@ class ContactTypeApiTest(APITestCase):
 
         url = '/api/contact_type/'
         response = self.client.get(url, format='json')
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        names = [i['name'] for i in response.data]
-        self.assertTrue('Civilian' in names)
-        self.assertTrue('Government' in names)
-        self.assertTrue(len(names) > 2)
+
+        names = ['{}.{}'.format(i['name'], i['required']) for i in response.data]
+        names_expected = ['Civilian.False', 'Government.False', 'Military.False']
+
+        self.assertEqual(names, names_expected)
 
     def test_get_contact_type(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -49,7 +50,7 @@ class ContactTypeApiTest(APITestCase):
         name = response.data['name']
         self.assertEqual(name, 'Civilian')
 
-    def test_create_contact_type(self):
+    def test_create_contact_type_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -61,9 +62,20 @@ class ContactTypeApiTest(APITestCase):
         name = response.data['name']
         self.assertEqual(name, 'New Contact Type')
 
+    def test_create_contact_type_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/contact_type/'
+        data = {'name': 'New Contact Type'}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
+
     # TODO def test_create_contact_type(self): test different user groups access control
 
-    def test_update_contact_type(self):
+    def test_update_contact_type_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -77,9 +89,20 @@ class ContactTypeApiTest(APITestCase):
         self.assertEqual(name, 'Updated Type')
         self.assertEqual(required, True)
 
+    def test_update_contact_type_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/contact_type/1/'
+        data = {'name': 'Updated Type', 'required': True}
+        response = self.client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
+
     # TODO def test_update_contact_type(self): test different user groups access control
 
-    def test_delete_contact_type(self):
+    def test_delete_contact_type_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -87,5 +110,15 @@ class ContactTypeApiTest(APITestCase):
         response = self.client.delete(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_contact_type_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/contact_type/1/'
+        response = self.client.delete(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
 
     # TODO def test_delete_contact_type(self): test different user groups access control

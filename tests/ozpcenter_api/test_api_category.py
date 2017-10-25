@@ -16,7 +16,9 @@ class CategoryApiTest(APITestCase):
         """
         setUp is invoked before each test method
         """
-        self
+        self.maxDiff = None
+        self.expected_error = {'detail': 'You do not have permission to perform this action.',
+                               'error': True}
 
     @classmethod
     def setUpTestData(cls):
@@ -33,10 +35,24 @@ class CategoryApiTest(APITestCase):
         response = self.client.get(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        titles = [i['title'] for i in response.data]
-        self.assertTrue('Business' in titles)
-        self.assertTrue('Education' in titles)
-        self.assertTrue(len(titles) > 5)
+        titles = ['{}.{}'.format(i['title'], i['description']) for i in response.data]
+        expected_results = ['Accessories.Accessories Description',
+                            'Books and Reference.Things made of paper',
+                            'Business.For making money',
+                            'Communication.Moving info between people and things',
+                            'Education.Educational in nature',
+                            'Entertainment.For fun',
+                            'Finance.For managing money',
+                            'Health and Fitness.Be healthy, be fit',
+                            'Media and Video.Videos and media stuff',
+                            'Music and Audio.Using your ears',
+                            "News.What's happening where",
+                            'Productivity.Do more in less time',
+                            'Shopping.For spending your money',
+                            'Sports.Score more points than your opponent',
+                            'Tools.Tools and Utilities',
+                            'Weather.Get the temperature']
+        self.assertListEqual(titles, expected_results)
 
     def test_get_category(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -51,7 +67,7 @@ class CategoryApiTest(APITestCase):
         self.assertEqual(title, 'Accessories')
         self.assertEqual(description, 'Accessories Description')
 
-    def test_create_category(self):
+    def test_create_category_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -65,9 +81,20 @@ class CategoryApiTest(APITestCase):
         self.assertEqual(title, 'new category')
         self.assertEqual(description, 'category description')
 
+    def test_create_category_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/category/'
+        data = {'title': 'new category', 'description': 'category description'}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
+
     # TODO def test_create_category(self): test different user groups access control
 
-    def test_update_category(self):
+    def test_update_category_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -80,6 +107,17 @@ class CategoryApiTest(APITestCase):
         description = response.data['description']
         self.assertEqual(title, 'updated category')
         self.assertEqual(description, 'updated description')
+
+    def test_update_category_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/category/1/'
+        data = {'title': 'updated category', 'description': 'updated description'}
+        response = self.client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
 
     # TODO def test_update_category(self): test different user groups access control
 
@@ -102,10 +140,27 @@ class CategoryApiTest(APITestCase):
         response = self.client.get(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        titles = [i['title'] for i in response.data]
-        self.assertEqual(titles[0], 'AAA new category')
+        titles = ['{}.{}'.format(i['title'], i['description']) for i in response.data]
+        expected_results = ['AAA new category.category description',
+                            'Accessories.Accessories Description',
+                            'Books and Reference.Things made of paper',
+                            'Business.For making money',
+                            'Communication.Moving info between people and things',
+                            'Education.Educational in nature',
+                            'Entertainment.For fun',
+                            'Finance.For managing money',
+                            'Health and Fitness.Be healthy, be fit',
+                            'Media and Video.Videos and media stuff',
+                            'Music and Audio.Using your ears',
+                            "News.What's happening where",
+                            'Productivity.Do more in less time',
+                            'Shopping.For spending your money',
+                            'Sports.Score more points than your opponent',
+                            'Tools.Tools and Utilities',
+                            'Weather.Get the temperature']
+        self.assertListEqual(titles, expected_results)
 
-    def test_delete_category(self):
+    def test_delete_category_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -113,5 +168,15 @@ class CategoryApiTest(APITestCase):
         response = self.client.delete(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_category_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/category/1/'
+        response = self.client.delete(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
 
     # TODO def test_delete_category(self): test different user groups access control

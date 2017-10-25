@@ -16,7 +16,8 @@ class AgencyApiTest(APITestCase):
         """
         setUp is invoked before each test method
         """
-        self
+        self.expected_error = {'detail': 'You do not have permission to perform this action.',
+                               'error': True}
 
     @classmethod
     def setUpTestData(cls):
@@ -33,9 +34,20 @@ class AgencyApiTest(APITestCase):
         response = self.client.get(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        titles = [i['title'] for i in response.data]
-        self.assertTrue('Ministry of Truth' in titles)
-        self.assertTrue(len(titles) > 3)
+
+        titles = ['{}.{}'.format(i['short_name'], i['title']) for i in response.data]
+
+        expected_results = ['Miniluv.Ministry of Love',
+                            'Minipax.Ministry of Peace',
+                            'Miniplen.Ministry of Plenty',
+                            'Minitrue.Ministry of Truth',
+                            'Test.Test',
+                            'Test 1.Test 1',
+                            'Test2.Test 2',
+                            'Test 3.Test 3',
+                            'Test 4.Test 4']
+
+        self.assertEqual(titles, expected_results)
 
     def test_get_agency(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -50,7 +62,7 @@ class AgencyApiTest(APITestCase):
         self.assertEqual(title, 'Ministry of Truth')
         self.assertEqual(short_name, 'Minitrue')
 
-    def test_create_agency(self):
+    def test_create_agency_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -64,12 +76,20 @@ class AgencyApiTest(APITestCase):
         self.assertEqual(title, 'new agency')
         self.assertEqual(short_name, 'orgname')
 
+    def test_create_agency_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/agency/'
+        data = {'title': 'new agency', 'short_name': 'orgname'}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
+
     # TODO def test_create_agency(self): test different user groups access control
 
-    def test_update_agency(self):
-        """
-        Update Agency /api/agency/1/
-        """
+    def test_update_agency_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -83,12 +103,20 @@ class AgencyApiTest(APITestCase):
         self.assertEqual(title, 'updated agency')
         self.assertEqual(short_name, 'uporg')
 
+    def test_update_agency_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/agency/1/'
+        data = {'title': 'updated agency', 'short_name': 'uporg'}
+        response = self.client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
+
     # TODO def test_update_agency(self): test different user groups access control
 
-    def test_delete_agency(self):
-        """
-        Delete /api/agency/1/
-        """
+    def test_delete_agency_apps_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
 
@@ -96,5 +124,15 @@ class AgencyApiTest(APITestCase):
         response = self.client.delete(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_agency_org_steward(self):
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/agency/1/'
+        response = self.client.delete(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, self.expected_error)
 
     # TODO def test_delete_agency(self): test different user groups access control

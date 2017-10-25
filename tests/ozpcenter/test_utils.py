@@ -27,19 +27,19 @@ class UtilsTest(TestCase):
     def test_make_keysafe_unwanted(self):
         name = 'Test @string\'s !'
         key_name = utils.make_keysafe(name)
-        self.assertEqual('teststrings', key_name)
+        self.assertEqual(key_name, 'teststrings')
 
     def test_make_keysafe_period(self):
         name = 'Test User Jr.'
         key_name = utils.make_keysafe(name)
-        self.assertEqual('testuserjr.', key_name)
+        self.assertEqual(key_name, 'testuserjr.')
 
     def test_make_keysafe_doublequote(self):
         name = 'Robert "Bob" User'
         key_name = utils.make_keysafe(name)
-        self.assertEqual('robert"bob"user', key_name)
+        self.assertEqual(key_name, 'robert"bob"user')
 
     def test_make_keysafe_backtick(self):
         name = 'Unexpected`Name'
         key_name = utils.make_keysafe(name)
-        self.assertEqual('unexpected`name', key_name)
+        self.assertEqual(key_name, 'unexpected`name')

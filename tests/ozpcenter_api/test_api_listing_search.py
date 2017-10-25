@@ -46,7 +46,7 @@ class ListingSearchApiTest(APITestCase):
         self.assertEqual(titles, sorted_listings_from_file)
 
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_categories_multiple_with_space(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -64,7 +64,7 @@ class ListingSearchApiTest(APITestCase):
         self.assertEqual(titles, sorted_listings_from_file)
         # TODO: TEST listing_title = Newspaper when is_private = True
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_text(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -82,7 +82,7 @@ class ListingSearchApiTest(APITestCase):
         excepted_titles = ['Air Mail']
         self.assertEqual(titles, excepted_titles)
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     @skip("TODO See Below todo (rivera 20170818)")
     def test_search_text_partial(self):
@@ -101,7 +101,7 @@ class ListingSearchApiTest(APITestCase):
         #                     'Double Heroides',  'KIAA0319',  'Karta GPS',  'Sir Baboon McGood']
         self.assertEqual(titles, excepted_titles)
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_type(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -118,7 +118,7 @@ class ListingSearchApiTest(APITestCase):
         self.assertEqual(titles, sorted_listings_from_file)
 
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_tags(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -137,7 +137,7 @@ class ListingSearchApiTest(APITestCase):
         self.assertEqual(titles, sorted_listings_from_file)
 
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_tags_startwith(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -150,7 +150,7 @@ class ListingSearchApiTest(APITestCase):
         self.assertTrue('Air Mail' in titles)
         self.assertTrue(len(titles) == 1)
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_is_enable(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -167,7 +167,7 @@ class ListingSearchApiTest(APITestCase):
         self.assertEqual(titles, expected_titles)
 
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
         # Disable one app
         user = generic_model_access.get_profile('bigbrother').user
@@ -251,7 +251,7 @@ class ListingSearchApiTest(APITestCase):
 
         self.assertEqual(titles, expected_titles)
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_agency(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -263,7 +263,7 @@ class ListingSearchApiTest(APITestCase):
         titles = [i['title'] for i in response.data]
         self.assertTrue('Chatter Box' in titles)
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_limit(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -277,7 +277,7 @@ class ListingSearchApiTest(APITestCase):
         self.assertTrue('Global Navigation Grid Code' in titles)
         self.assertEqual(len(titles), 1)
         for listing_map in response.data['results']:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_offset_limit(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -291,4 +291,4 @@ class ListingSearchApiTest(APITestCase):
         self.assertTrue('Map of the world' in titles)
         self.assertEqual(len(titles), 1)
         for listing_map in response.data['results']:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])

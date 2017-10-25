@@ -39,8 +39,8 @@ class ListingFeedbackApiTest(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], title)
-        self.assertEquals(validate_listing_map_keys(response.data), [])
-        self.assertEquals(response.data['is_bookmarked'], False)
+        self.assertEqual(validate_listing_map_keys(response.data), [])
+        self.assertEqual(response.data['is_bookmarked'], False)
 
     def test_no_feedback_listing(self):
         user = generic_model_access.get_profile('bettafish').user

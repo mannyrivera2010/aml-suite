@@ -33,6 +33,10 @@ ptest: clean pre create_static
 	echo Number of cores: `nproc`
 	TEST_MODE=True pytest -n `nproc` --dist=loadscope
 
+ptest_psql: clean pre create_static
+	echo Number of cores: `nproc`
+	MAIN_DATABASE=psql TEST_MODE=True pytest -n `nproc` --dist=loadscope
+
 softtest: pre
 	TEST_MODE=True pytest
 

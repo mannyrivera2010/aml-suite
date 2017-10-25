@@ -41,11 +41,10 @@ class SampleDataGeneratorTest(TestCase):
         self.assertListEqual(ministry_of_truth_stewards, expected_ministry_of_truth_stewards)
 
         # for kicks, also test by getting this from the Agency model
-        a = models.Agency.objects.filter(stewarded_profiles__user__username='wsmith')
-        self.assertEquals(len(a), 1)
-        a = a[0]
-        self.assertEquals(a.title, 'Ministry of Truth')
+        wsmith_agencies = list(models.Agency.objects.filter(stewarded_profiles__user__username='wsmith').values_list('title', flat=True))
+        expected_wsmith_agencies = ['Ministry of Truth']
+        self.assertEqual(wsmith_agencies, expected_wsmith_agencies)
 
-        # find pboss, the Apps Mall Steward
-        p = models.Profile.objects.get(user__username='bigbrother')
-        self.assertEqual(p.highest_role(), 'APPS_MALL_STEWARD')
+        # find bigbrother, the Apps Mall Steward
+        bigbrother_instance = models.Profile.objects.get(user__username='bigbrother')
+        self.assertEqual(bigbrother_instance.highest_role(), 'APPS_MALL_STEWARD')

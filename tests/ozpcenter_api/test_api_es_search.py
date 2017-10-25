@@ -102,7 +102,7 @@ class ListingESSearchApiTest(APITestCase):
     #     excepted_titles = ['Air Mail']
     #     self.assertEqual(titles, excepted_titles)
     #     for listing_map in response.data:
-    #         self.assertEquals(validate_listing_map_keys(listing_map), [])
+    #         self.assertEqual(validate_listing_map_keys(listing_map), [])
     #
     # @skip("TODO See Below todo (rivera 20170818)")
     # def test_search_text_partial(self):
@@ -121,7 +121,7 @@ class ListingESSearchApiTest(APITestCase):
     #     #                     'Double Heroides',  'KIAA0319',  'Karta GPS',  'Sir Baboon McGood']
     #     self.assertEqual(titles, excepted_titles)
     #     for listing_map in response.data:
-    #         self.assertEquals(validate_listing_map_keys(listing_map), [])
+    #         self.assertEqual(validate_listing_map_keys(listing_map), [])
     #
 
     @override_settings(ES_ENABLED=True)
@@ -187,7 +187,7 @@ class ListingESSearchApiTest(APITestCase):
     #     self.assertTrue('Air Mail' in titles)
     #     self.assertTrue(len(titles) == 1)
     #     for listing_map in response.data:
-    #         self.assertEquals(validate_listing_map_keys(listing_map), [])
+    #         self.assertEqual(validate_listing_map_keys(listing_map), [])
     #
     @override_settings(ES_ENABLED=True)
     def test_essearch_is_enable(self):
@@ -294,7 +294,7 @@ class ListingESSearchApiTest(APITestCase):
     #     titles = [i['title'] for i in response.data['results']]
     #     self.assertTrue('Chatter Box' in titles)
     #     for listing_map in response.data:
-    #         self.assertEquals(validate_listing_map_keys(listing_map), [])
+    #         self.assertEqual(validate_listing_map_keys(listing_map), [])
     #
     # def test_search_limit(self):
     #     user = generic_model_access.get_profile('wsmith').user
@@ -308,7 +308,7 @@ class ListingESSearchApiTest(APITestCase):
     #     self.assertTrue('Global Navigation Grid Code' in titles)
     #     self.assertEqual(len(titles), 1)
     #     for listing_map in response.data['results']:
-    #         self.assertEquals(validate_listing_map_keys(listing_map), [])
+    #         self.assertEqual(validate_listing_map_keys(listing_map), [])
     #
     # def test_search_offset_limit(self):
     #     user = generic_model_access.get_profile('wsmith').user
@@ -322,4 +322,4 @@ class ListingESSearchApiTest(APITestCase):
     #     self.assertTrue('Map of the world' in titles)
     #     self.assertEqual(len(titles), 1)
     #     for listing_map in response.data['results']:
-    #         self.assertEquals(validate_listing_map_keys(listing_map), [])
+    #         self.assertEqual(validate_listing_map_keys(listing_map), [])

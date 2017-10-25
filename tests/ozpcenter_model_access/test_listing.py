@@ -29,13 +29,12 @@ class ListingTest(TestCase):
         data_gen.run()
 
     def test_get_listings_for_user(self):
-        username = 'wsmith'
-        listings = model_access.get_listings(username)
-        self.assertTrue(len(listings) >= 2)
+        listings = model_access.get_listings('wsmith')
+        self.assertEqual(len(listings), 187)
 
     def test_get_all_listings(self):
-        all_listings = models.Listing.objects.all()
-        self.assertEqual(len(all_listings), len(ListingFile.listings_titles()))
+        all_listings_titles = [i.title for i in models.Listing.objects.all()]
+        self.assertEqual(sorted(all_listings_titles), sorted(ListingFile.listings_titles()))
 
     def test_filter_listings(self):
         username = 'wsmith'
@@ -221,14 +220,14 @@ class ListingTest(TestCase):
         username = 'wsmith'
         air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
         model_access.delete_listing(username, air_mail)
-        self.assertEquals(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
+        self.assertEqual(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
         self.assertTrue(models.Listing.objects.for_user(username).filter(title='Air Mail').first().is_deleted)
 
     def test_delete_listing_no_permission(self):
         username = 'jones'
         air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
         self.assertRaises(errors.PermissionDenied, model_access.delete_listing, username, air_mail)
-        self.assertEquals(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
+        self.assertEqual(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
 
     def test_doc_urls_to_string_dict(self):
         doc_urls = [

@@ -30,6 +30,7 @@ class PkiAuthenticationTest(TestCase):
         profile_before_count = models.Profile.objects.count()
         profile = pkiauth._get_profile_by_dn('Jones jones')
         profile_after_count = models.Profile.objects.count()
+
         self.assertEqual(profile.user.username, 'jones')
         self.assertEqual(profile_before_count, profile_after_count)
 
@@ -37,6 +38,7 @@ class PkiAuthenticationTest(TestCase):
         profile = model_access.get_profile('jones')
         profile.user.is_active = False
         profile.user.save()
+
         profile = pkiauth._get_profile_by_dn('Jones jones')
         self.assertEqual(profile, None)
 
