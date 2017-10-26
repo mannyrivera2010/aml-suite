@@ -265,11 +265,19 @@ class ListingTest(TestCase):
 
     def test_screenshots_to_string_object(self):
         screenshots = models.Screenshot.objects.filter(listing__unique_name='ozp.test.air_mail')
-        screenshots_ids = [{'small_image_id': screenshot.small_image.id, 'large_image_id': screenshot.large_image.id} for screenshot in screenshots]
+        screenshots_expected = str(sorted([(i.order,
+                            i.small_image.id,
+                            i.small_image.security_marking,
+                            i.large_image.id,
+                            i.large_image.security_marking,
+                            i.description) for i in screenshots]))
 
         out = model_access.screenshots_to_string(screenshots, True)
-        self.assertEqual(out, str([(0, screenshots_ids[0]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[0]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 1'),
-                                   (1, screenshots_ids[1]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[1]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 2')]))
+        # Below does not work with both postgresql and sqlite
+        # screenshots_ids = [{'small_image_id': screenshot.small_image.id, 'large_image_id': screenshot.large_image.id} for screenshot in screenshots]
+        # self.assertEqual(out, str([(0, screenshots_ids[0]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[0]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 1'),
+        #                            (1, screenshots_ids[1]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[1]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 2')]))
+        self.assertEqual(out, screenshots_expected)
 
     def test_image_to_string_dict(self):
         image = {
