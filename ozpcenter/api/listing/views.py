@@ -295,6 +295,16 @@ class RecommendationFeedbackViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def destroy(self, request, listing_pk=None, pk=None):
+        listing = model_access.get_listing_by_id(request.user.username, listing_pk, True)
+        feedback = model_access.get_recommendation_feedback(request.user.username, listing)
+
+        if feedback is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        model_access.delete_recommendation_feedback(listing, feedback)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ListingTypeViewSet(viewsets.ModelViewSet):
     """

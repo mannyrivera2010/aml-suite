@@ -1013,3 +1013,34 @@ class ListingApiTest(APITestCase):
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], -1)
         self.assertEqual(response.data['feedback_score'], -2)
+
+    def test_feedback_score_after_feedback_delete(self):
+        """
+        betafish user
+        """
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Create a positive feedback
+        url = '/api/listing/1/feedback/'
+        data = {"feedback": 1}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/feedback/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 1)
+        self.assertEqual(response.data['feedback_score'], 1)
+
+        url = '/api/listing/1/feedback/1/'
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['feedback'], 0)
+        self.assertEqual(response.data['feedback_score'], 0)
