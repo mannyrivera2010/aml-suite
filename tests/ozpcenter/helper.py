@@ -93,7 +93,7 @@ def _create_create_bookmark(test_case_instance, username, listing_id, folder_nam
     return response
 
 
-def unittest_request_helper(test_case_instance, url, method, data=None, username='bigbrother', status_code=200):
+def unittest_request_helper(test_case_instance, url, method, data=None, username='bigbrother', status_code=200, validator=None):
     user = generic_model_access.get_profile(username).user
     test_case_instance.client.force_authenticate(user=user)
 
@@ -117,13 +117,32 @@ def unittest_request_helper(test_case_instance, url, method, data=None, username
             test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
         elif status_code == 204:
             test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        elif status_code == 403:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         else:
             raise Exception('status code is not supported')
+
+    try:
+        if validator:
+            validator(response.data, test_case_instance=test_case_instance)
+    except Exception as err:
+        # print(response.data)
+        raise err
 
     return response
 
 
-def validate_listing_map_keys(listing_map):
+def validate_listing_map_keys_list(response_data, test_case_instance=None):
+    for listing_map in response_data:
+        test_case_instance.assertEqual(validate_listing_map_keys(listing_map), [])
+
+
+def validate_listing_search_keys_list(response_data, test_case_instance=None):
+    for listing_map in response_data['results']:
+        test_case_instance.assertEqual(validate_listing_map_keys(listing_map), [])
+
+
+def validate_listing_map_keys(listing_map, test_case_instance=None):
     """
     Used to validate the keys of a listing
     """

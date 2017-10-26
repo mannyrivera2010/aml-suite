@@ -143,7 +143,9 @@ def bulk_reindex():
     elasticsearch_factory.check_elasticsearch()
     recreate_index_mapping()
     # Convert Listing Objects into Python Objects
-    all_listings = models.Listing.objects.all()
+    # Had to add order_by for test_essearch_is_enable to pass for both sqlite/postgresql
+    # TODO: Investigate if results coming back from elasticsearch is order by 'Relevance score'
+    all_listings = models.Listing.objects.order_by('id').all()
     serializer = ReadOnlyListingSerializer(all_listings, many=True)
     serializer_results = serializer.data
 
@@ -182,6 +184,7 @@ def get_user_exclude_orgs(username):
     """
     Get User's Orgs to exclude
     """
+    # TODO: Refactor to use Model.get_user_exclude_orgs, code duplication
     exclude_orgs = None
 
     user = models.Profile.objects.get(user__username=username)

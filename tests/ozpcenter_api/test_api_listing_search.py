@@ -1,7 +1,5 @@
 """
 Tests for listing endpoints
-
-TODO: Refactor Code to use unittest_request_helper
 """
 from django.test import override_settings
 from unittest import skip
@@ -13,6 +11,8 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import ListingFile
 from tests.ozpcenter.helper import validate_listing_map_keys
+from tests.ozpcenter.helper import validate_listing_map_keys_list
+from tests.ozpcenter.helper import validate_listing_search_keys_list
 from tests.ozpcenter.helper import unittest_request_helper
 
 
@@ -33,9 +33,8 @@ class ListingSearchApiTest(APITestCase):
         data_gen.run()
 
     def test_search_categories_single_with_space(self):
-        search_category = 'Health and Fitness'
-        url = '/api/listings/search/?category={}'.format(search_category)
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        url = '/api/listings/search/?category={}'.format('Health and Fitness')
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -45,15 +44,9 @@ class ListingSearchApiTest(APITestCase):
         # TODO: TEST listing_title = Newspaper when is_private = True
         self.assertEqual(titles, sorted_listings_from_file)
 
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
-
     def test_search_categories_multiple_with_space(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?category=Health and Fitness&category=Communication'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -62,36 +55,20 @@ class ListingSearchApiTest(APITestCase):
         sorted_listings_from_file = sorted([listing['title'] for listing in listings_from_file])
 
         self.assertEqual(titles, sorted_listings_from_file)
-        # TODO: TEST listing_title = Newspaper when is_private = True
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
+        # TODO: TEST listing_title = Newspaper when is_private = True (Private apps)
 
     def test_search_text(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?search=air mail'
-        #  url = '/api/listings/search/?search=air ma'
-        #  TODO: Figure out why 'air ma' returns
-        # ['Sun',  'Barbecue',  'Wolf Finder',  'LIT RANCH',  'Navigation using Maps',
-        #                     'Air Mail',  'Rogue',  'Cheese and Crackers',
-        #                     'Double Heroides',  'KIAA0319',  'Karta GPS',  'Sir Baboon McGood']
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         excepted_titles = ['Air Mail']
         self.assertEqual(titles, excepted_titles)
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     @skip("TODO See Below todo (rivera 20170818)")
     def test_search_text_partial(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?search=air ma'
-
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         excepted_titles = ['Air Mail']
@@ -100,15 +77,10 @@ class ListingSearchApiTest(APITestCase):
         #                     'Air Mail',  'Rogue',  'Cheese and Crackers',
         #                     'Double Heroides',  'KIAA0319',  'Karta GPS',  'Sir Baboon McGood']
         self.assertEqual(titles, excepted_titles)
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_type(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?type=Web Application'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -117,47 +89,30 @@ class ListingSearchApiTest(APITestCase):
         sorted_listings_from_file = sorted([listing['title'] for listing in listings_from_file])
         self.assertEqual(titles, sorted_listings_from_file)
 
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
-
     def test_search_tags(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?search=demo_tag'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
                                         approval_status='APPROVED',
                                         tags__in=['demo_tag'])
         sorted_listings_from_file = sorted([listing['title'] for listing in listings_from_file])
-        print(titles)
-        print(sorted_listings_from_file)
+
         self.assertEqual(titles, sorted_listings_from_file)
 
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
-
     def test_search_tags_startwith(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?search=tag_'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         self.assertTrue('Air Mail' in titles)
         self.assertTrue(len(titles) == 1)
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_is_enable(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?search=demo_tag&type=Web Application'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+
         titles_ids = [[record.get('title'), record.get('id')] for record in response.data]
         titles = sorted([i[0] for i in titles_ids])
         expected_titles = ['Air Mail', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
@@ -166,13 +121,7 @@ class ListingSearchApiTest(APITestCase):
 
         self.assertEqual(titles, expected_titles)
 
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
-
         # Disable one app
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-
         url = '/api/listing/{}/'.format(titles_ids[0][1])
         title = 'JotSpot_disabled'
 
@@ -232,15 +181,11 @@ class ListingSearchApiTest(APITestCase):
 
             }
 
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'PUT', username='bigbrother', data=data, status_code=200, validator=validate_listing_map_keys)
 
         # Check
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?search=demo_tag&type=Web Application'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles_ids = [[record.get('title'), record.get('id')] for record in response.data]
         titles = sorted([i[0] for i in titles_ids])
@@ -250,45 +195,39 @@ class ListingSearchApiTest(APITestCase):
                            'LocationLister', 'LocationViewer', 'Monkey Finder', 'Skybox']
 
         self.assertEqual(titles, expected_titles)
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_agency(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/search/?agency=Minipax&agency=Miniluv'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         self.assertTrue('Chatter Box' in titles)
-        for listing_map in response.data:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_search_limit(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        url = '/api/listings/search/?limit=1'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        """
+        test_search_limit
 
-        titles = [i['title'] for i in response.data['results']]
-        # TODO: Not predictable, This will change every time listing.yaml changes
-        self.assertTrue('Global Navigation Grid Code' in titles)
-        self.assertEqual(len(titles), 1)
-        for listing_map in response.data['results']:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
+        testing for limit
+        """
+        # TODO rivera-20171026: Titles not predictable, This will change every time
+        # url = '/api/listings/search/'
+        # response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        # all_titles = [i['title'] for i in response.data]
+
+        for limit_number in [1, 5, 10]:
+            url = '/api/listings/search/?limit={}'.format(limit_number)
+            response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_search_keys_list)
+            titles = [i['title'] for i in response.data['results']]
+            self.assertEqual(len(titles), limit_number)
+            # self.assertEqual(titles, all_titles[:limit_number])
 
     def test_search_offset_limit(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        url = '/api/listings/search/?offset=1&limit=1'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        titles = [i['title'] for i in response.data['results']]
-        # TODO: Not predictable, This will change every time listing.yaml changes
-        self.assertTrue('Map of the world' in titles)
-        self.assertEqual(len(titles), 1)
-        for listing_map in response.data['results']:
-            self.assertEqual(validate_listing_map_keys(listing_map), [])
+        """
+        test_search_offset_limit
+        """
+        # TODO rivera-20171026: Figure out how to make sure offset is working
+        for limit_number in [1, 5, 10]:
+            url = '/api/listings/search/?offset=1&limit={}'.format(limit_number)
+            response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_search_keys_list)
+            titles = [i['title'] for i in response.data['results']]
+            self.assertEqual(len(titles), limit_number)

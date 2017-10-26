@@ -13,8 +13,8 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import ListingFile
-
 from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import _edit_listing
 from ozpcenter.api.listing import model_access_es
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 
@@ -191,93 +191,42 @@ class ListingESSearchApiTest(APITestCase):
     #
     @override_settings(ES_ENABLED=True)
     def test_essearch_is_enable(self):
+        """
+        test_essearch_is_enable
+
+        Elasticsearch Search should be independent from database(sqlite/postgresql)
+        """
         if self.es_failed:
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
         response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
 
-        titles_ids = [[record.get('title'), record.get('id')] for record in response.data['results']]
-        titles = sorted([i[0] for i in titles_ids])
+        titles_ids = [{'title': record.get('title'), 'id': record.get('id')} for record in response.data['results']]
+        titles = sorted([i['title'] for i in titles_ids])
         expected_titles = ['Air Mail', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
             'FrameIt', 'Hatch Latch', 'JotSpot', 'LocationAnalyzer', 'LocationLister',
             'LocationViewer', 'Monkey Finder', 'Skybox', 'Smart Phone', 'Taxonomy Classifier']
 
         self.assertEqual(titles, expected_titles)
 
+        first_record = titles_ids[0]
+        id_to_disable = first_record['id']
+
+        replace_dict = {'title': '{}_disabled'.format(first_record['title']),
+                        'is_enabled': False}
+
         # Disable one app
-        url = '/api/listing/{}/'.format(titles_ids[0][1])
-        title = '{}_disabled'.format(titles_ids[0][0])
-
-        data = {
-            "title": title,
-            "description": "description of app",
-            "launch_url": "http://www.google.com/launch",
-            "version_name": "1.0.0",
-            "unique_name": "org.apps.julia-one",
-            "what_is_new": "nothing is new",
-            "description_short": "a shorter description",
-            "usage_requirements": "None",
-            "system_requirements": "None",
-            "is_private": "true",
-            "is_enable": "false",
-            "feedback_score": 0,
-            "contacts": [
-                {"email": "a@a.com", "secure_phone": "111-222-3434",
-                 "unsecure_phone": "444-555-4545", "name": "me",
-                 "contact_type": {"name": "Government"}
-                    },
-                {"email": "b@b.com", "secure_phone": "222-222-3333",
-                 "unsecure_phone": "555-555-5555", "name": "you",
-                 "contact_type": {"name": "Military"}
-                    }
-                ],
-            "security_marking": "UNCLASSIFIED",
-            "listing_type": {"title": "Web Application"},
-            "small_icon": {"id": 1},
-            "large_icon": {"id": 2},
-            "banner_icon": {"id": 3},
-            "large_banner_icon": {"id": 4},
-            "categories": [
-                {"title": "Business"},
-                {"title": "Education"}
-                ],
-            "owners": [
-                {"user": {"username": "wsmith"}},
-                {"user": {"username": "julia"}}
-                ],
-            "tags": [
-                {"name": "demo"},
-                {"name": "map"}
-                ],
-            "intents": [
-                {"action": "/application/json/view"},
-                {"action": "/application/json/edit"}
-                ],
-            "doc_urls": [
-                {"name": "wiki", "url": "http://www.google.com/wiki"},
-                {"name": "guide", "url": "http://www.google.com/guide"}
-                ],
-            "screenshots": [
-                {"small_image": {"id": 1}, "large_image": {"id": 2}, "description": "Test Description"},
-                {"small_image": {"id": 3}, "large_image": {"id": 4}, "description": "Test Description"}
-                ]
-
-            }
-        response = unittest_request_helper(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
+        _edit_listing(self, id_to_disable, replace_dict, 'bigbrother')
 
         elasticsearch_factory.wait_for_yellow_cluster_heath()
 
         # Check
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
 
-        titles_ids = [[record.get('title'), record.get('id')] for record in response.data['results']]
-        titles = sorted([i[0] for i in titles_ids])
-
+        titles_ids = [{'title': record.get('title'), 'id': record.get('id')} for record in response.data['results']]
+        titles = sorted([i['title'] for i in titles_ids])
         expected_titles = ['Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
             'FrameIt', 'Hatch Latch', 'JotSpot', 'LocationAnalyzer', 'LocationLister',
             'LocationViewer', 'Monkey Finder', 'Skybox', 'Smart Phone', 'Taxonomy Classifier']
