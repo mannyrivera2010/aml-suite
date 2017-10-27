@@ -1,10 +1,13 @@
 AMLNG-XXX
 
-**Purpose**     
-*Add description*    
+**Description**     
+*Copy and paste Description from orginal issue*  
+
+**Acceptance Criteria**   
+*Copy and paste Acceptance Criteria from orginal issue*
  
 **How to test code**    
-*Also add how to test locally*   
+*Add how to test locally*   
 
 **Please Review**     
 @aml-development/ozp-backend-team    
