@@ -1234,6 +1234,7 @@ class AccessControlRecommendationsEntryManager(models.Manager):
 
     def apply_select_related(self, queryset):
         queryset = queryset.select_related('target_profile')
+        queryset = queryset.select_related('target_profile__user')
         return queryset
 
     def get_queryset(self):

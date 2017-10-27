@@ -139,7 +139,7 @@ def bulk_reindex():
     # Create ES client
     es_client = elasticsearch_factory.get_client()
 
-    logger.info('Starting Indexing Process')
+    logger.debug('Starting Indexing Process')
     elasticsearch_factory.check_elasticsearch()
     recreate_index_mapping()
     # Convert Listing Objects into Python Objects
@@ -167,13 +167,13 @@ def bulk_reindex():
         bulk_data.append(record_clean_obj)
 
     # Bulk index the data
-    logger.info('Bulk indexing listings...')
+    logger.debug('Bulk indexing listings...')
     res = es_client.bulk(index=settings.ES_INDEX_NAME, body=bulk_data, refresh=True)
 
     if res.get('errors', True):
         logger.error('Error Bulk Indexing')
     else:
-        logger.info('Bulk Indexing Successful')
+        logger.debug('Bulk Indexing Successful')
 
     logger.debug('Waiting for cluster to turn yellow')
     es_client.cluster.health(wait_for_status='yellow', request_timeout=20)
