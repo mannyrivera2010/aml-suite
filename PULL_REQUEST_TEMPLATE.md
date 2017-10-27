@@ -1,14 +1,13 @@
+AMLNG-XXX
+
 **Purpose**     
 *Add description*    
  
-**How to test code** 
+**How to test code**    
 *Also add how to test locally*   
 
 **Please Review**     
 @aml-development/ozp-backend-team    
-
-**Linked Issues**    
-AMLNG-XXX
 
 **Checklist**
 - [ ] Read CONTRIBUTING.md
