@@ -159,9 +159,9 @@ class PipelineTest(TestCase):
         pipeline_test = pipeline.Pipeline(graph.get_vertices_iterator(),
                                           [pipes.GraphVertexPipe(),
                                            pipes.ElementPropertiesPipe()])
-        output = [
+        expected_output = [
             {'test_field': 8},
             {'test_field': 10},
             {'test_field': 12, 'time': 'now'}
         ]
-        self.assertEqual(pipeline_test.to_list(), output)
+        self.assertEqual(pipeline_test.to_list(), expected_output)

@@ -26,11 +26,11 @@ class GraphTest(TestCase):
 
     def test_load_db_into_graph(self):
         graph = GraphFactory.load_db_into_graph()
-        self.assertEqual('Graph(vertices: 222, edges: 529)', str(graph))
+        self.assertEqual(str(graph), 'Graph(vertices: 222, edges: 529)')
 
         bigbrother_dict = graph.query().v('p-1').to_dict().next()
         expected_dict = {'highest_role': 'APPS_MALL_STEWARD', 'username': 'bigbrother'}
-        self.assertEqual(expected_dict, bigbrother_dict)
+        self.assertEqual(bigbrother_dict, expected_dict)
 
         bigbrother_bookmarks = graph.query().v('p-1').out('bookmarked').id().to_list()
         expected_bookmarks = ['l-108', 'l-122', 'l-127',
@@ -39,4 +39,4 @@ class GraphTest(TestCase):
                               'l-186', 'l-1', 'l-23', 'l-29',
                               'l-30', 'l-49', 'l-50', 'l-59',
                               'l-73', 'l-87', 'l-93', 'l-94']
-        self.assertEqual(sorted(expected_bookmarks), sorted(bigbrother_bookmarks))
+        self.assertEqual(sorted(bigbrother_bookmarks), sorted(expected_bookmarks))

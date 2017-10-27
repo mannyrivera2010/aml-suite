@@ -184,10 +184,10 @@ class ListingReviewApiTest(APITestCase):
         response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
         data = response.data
 
-        self.assertEquals(validate_listing_map_keys(data), [])
-        self.assertEquals(data['last_activity']['author']['user']['username'], 'julia')
-        self.assertEquals(data['last_activity']['action'], 'REVIEW_DELETED')
-        self.assertEquals(data['last_activity']['listing']['id'], air_mail_id)
+        self.assertEqual(validate_listing_map_keys(data), [])
+        self.assertEqual(data['last_activity']['author']['user']['username'], 'julia')
+        self.assertEqual(data['last_activity']['action'], 'REVIEW_DELETED')
+        self.assertEqual(data['last_activity']['listing']['id'], air_mail_id)
 
     def test_rating_updates(self):
         """

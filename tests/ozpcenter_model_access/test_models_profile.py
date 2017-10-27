@@ -9,6 +9,7 @@ import json
 from django.test import override_settings
 from django.test import TestCase
 from django.db.utils import IntegrityError
+from django.db.utils import DataError
 from django.db import transaction
 
 from ozpcenter import models
@@ -103,6 +104,10 @@ class ProfileTest(TestCase):
             # self.assertTrue(0, 'username of excess length allowed')
         except IntegrityError:
             # this is expected for PostgreSQL and MySQL
+            pass
+        except DataError:
+                # this is expected for PostgreSQL and MySQL
+                # django.db.utils.DataError: value too long for type character varying(150)
             pass
 
     def test_created_date(self):

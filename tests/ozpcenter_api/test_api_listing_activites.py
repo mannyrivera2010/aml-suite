@@ -52,7 +52,7 @@ class ListingActivitiesApiTest(APITestCase):
         action_log.insert(0, models.ListingActivity.CREATED)
         self.assertEqual(activity_actions, action_log)
         activity_agency = [i['listing']['agency'] for i in response.data]
-        self.assertEquals(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
+        self.assertEqual(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
 
         # MODIFIED
         data['title'] = "mr jones mod app"
@@ -69,7 +69,7 @@ class ListingActivitiesApiTest(APITestCase):
         action_log.insert(0, models.ListingActivity.MODIFIED)
         self.assertEqual(activity_actions, action_log)
         activity_agency = [i['listing']['agency'] for i in response.data]
-        self.assertEquals(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
+        self.assertEqual(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
 
         # SUBMITTED
         data['approval_status'] = models.Listing.PENDING
@@ -81,12 +81,12 @@ class ListingActivitiesApiTest(APITestCase):
         response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
 
         activity_actions = [i['action'] for i in response.data]
-        self.assertEquals(len(activity_actions), 3)
+        self.assertEqual(len(activity_actions), 3)
         action_log.insert(0, models.ListingActivity.SUBMITTED)
         self.assertEqual(activity_actions, action_log)
         self.assertTrue(models.ListingActivity.SUBMITTED in activity_actions)
         activity_agency = [i['listing']['agency'] for i in response.data]
-        self.assertEquals(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
+        self.assertEqual(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
 
         # APPROVED_ORG
 
@@ -101,11 +101,11 @@ class ListingActivitiesApiTest(APITestCase):
         url = '/api/listing/{0!s}/activity/'.format(app_id)
         response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
         activity_actions = [i['action'] for i in response.data]
-        self.assertEquals(len(activity_actions), 4)
+        self.assertEqual(len(activity_actions), 4)
         action_log.insert(0, models.ListingActivity.DISABLED)
         self.assertEqual(activity_actions, action_log)
         activity_agency = [i['listing']['agency'] for i in response.data]
-        self.assertEquals(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
+        self.assertEqual(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
 
         # ENABLED
         data['is_enabled'] = True
@@ -116,11 +116,11 @@ class ListingActivitiesApiTest(APITestCase):
         url = '/api/listing/{0!s}/activity/'.format(app_id)
         response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
         activity_actions = [i['action'] for i in response.data]
-        self.assertEquals(len(activity_actions), 5)
+        self.assertEqual(len(activity_actions), 5)
         action_log.insert(0, models.ListingActivity.ENABLED)
         self.assertEqual(activity_actions, action_log)
         activity_agency = [i['listing']['agency'] for i in response.data]
-        self.assertEquals(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
+        self.assertEqual(json.dumps(activity_agency[0]), '{"title": "Ministry of Truth", "short_name": "Minitrue"}')
 
     def test_get_all_listing_activities(self):
         """

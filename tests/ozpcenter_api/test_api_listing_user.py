@@ -38,7 +38,7 @@ class ListingUserApiTest(APITestCase):
         self.assertTrue('Chatter Box' in titles)
         self.assertTrue('Air Mail' not in titles)
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])
 
     def test_self_deleted_listing(self):
         user = generic_model_access.get_profile('wsmith').user
@@ -50,4 +50,4 @@ class ListingUserApiTest(APITestCase):
         titles = [i['id'] for i in response.data]
         self.assertTrue('1' not in titles)
         for listing_map in response.data:
-            self.assertEquals(validate_listing_map_keys(listing_map), [])
+            self.assertEqual(validate_listing_map_keys(listing_map), [])

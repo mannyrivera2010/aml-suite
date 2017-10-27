@@ -29,13 +29,12 @@ class ListingTest(TestCase):
         data_gen.run()
 
     def test_get_listings_for_user(self):
-        username = 'wsmith'
-        listings = model_access.get_listings(username)
-        self.assertTrue(len(listings) >= 2)
+        listings = model_access.get_listings('wsmith')
+        self.assertEqual(len(listings), 187)
 
     def test_get_all_listings(self):
-        all_listings = models.Listing.objects.all()
-        self.assertEqual(len(all_listings), len(ListingFile.listings_titles()))
+        all_listings_titles = [i.title for i in models.Listing.objects.all()]
+        self.assertEqual(sorted(all_listings_titles), sorted(ListingFile.listings_titles()))
 
     def test_filter_listings(self):
         username = 'wsmith'
@@ -221,14 +220,14 @@ class ListingTest(TestCase):
         username = 'wsmith'
         air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
         model_access.delete_listing(username, air_mail)
-        self.assertEquals(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
+        self.assertEqual(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
         self.assertTrue(models.Listing.objects.for_user(username).filter(title='Air Mail').first().is_deleted)
 
     def test_delete_listing_no_permission(self):
         username = 'jones'
         air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
         self.assertRaises(errors.PermissionDenied, model_access.delete_listing, username, air_mail)
-        self.assertEquals(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
+        self.assertEqual(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
 
     def test_doc_urls_to_string_dict(self):
         doc_urls = [
@@ -266,11 +265,19 @@ class ListingTest(TestCase):
 
     def test_screenshots_to_string_object(self):
         screenshots = models.Screenshot.objects.filter(listing__unique_name='ozp.test.air_mail')
-        screenshots_ids = [{'small_image_id': screenshot.small_image.id, 'large_image_id': screenshot.large_image.id} for screenshot in screenshots]
+        screenshots_expected = str(sorted([(i.order,
+                            i.small_image.id,
+                            i.small_image.security_marking,
+                            i.large_image.id,
+                            i.large_image.security_marking,
+                            i.description) for i in screenshots]))
 
         out = model_access.screenshots_to_string(screenshots, True)
-        self.assertEqual(out, str([(0, screenshots_ids[0]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[0]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 1'),
-                                   (1, screenshots_ids[1]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[1]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 2')]))
+        # Below does not work with both postgresql and sqlite
+        # screenshots_ids = [{'small_image_id': screenshot.small_image.id, 'large_image_id': screenshot.large_image.id} for screenshot in screenshots]
+        # self.assertEqual(out, str([(0, screenshots_ids[0]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[0]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 1'),
+        #                            (1, screenshots_ids[1]['small_image_id'], 'UNCLASSIFIED', screenshots_ids[1]['large_image_id'], 'UNCLASSIFIED', 'airmail screenshot set 2')]))
+        self.assertEqual(out, screenshots_expected)
 
     def test_image_to_string_dict(self):
         image = {

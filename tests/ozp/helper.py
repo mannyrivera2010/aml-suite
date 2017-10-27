@@ -2,8 +2,8 @@ import re
 import inspect
 import os
 import sys
-from plugins.plugin_manager import plugin_manager_instance
 
+from plugins.plugin_manager import plugin_manager_instance
 
 TEST_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

@@ -82,7 +82,7 @@ class ProfileApiTest(APITestCase):
             'Diamond', 'FrameIt', 'Hatch Latch', 'Intelligence Unleashed', 'JotSpot',
             'LocationAnalyzer', 'LocationLister', 'LocationViewer', 'Project Management',
             'Ruby', 'Ruby Miner', 'Sapphire', 'Wikipedia']
-        self.assertEquals(expected_listing, titles)
+        self.assertEqual(expected_listing, titles)
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_one_listing_for_self_profile_auth_enabled(self, mock_request):
@@ -97,7 +97,7 @@ class ProfileApiTest(APITestCase):
         url = '/api/profile/self/listing/2/'  # 2/7/18/26/27
         response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
         data = response.data
-        self.assertEquals(data['id'], 2)
+        self.assertEqual(data['id'], 2)
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_all_listing_for_minitrue_profile_from_multi_org_profile_auth_enabled(self, mock_request):
@@ -126,7 +126,7 @@ class ProfileApiTest(APITestCase):
             'Diamond', 'FrameIt', 'Hatch Latch', 'Intelligence Unleashed', 'JotSpot',
             'LocationAnalyzer', 'LocationLister', 'LocationViewer', 'Project Management',
             'Ruby', 'Ruby Miner', 'Sapphire', 'Wikipedia']
-        self.assertEquals(expected_listing, titles)
+        self.assertEqual(expected_listing, titles)
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_all_listing_for_app_profile_from_multi_org_profile_auth_enabled(self, mock_request):
@@ -155,7 +155,7 @@ class ProfileApiTest(APITestCase):
             'Diamond', 'FrameIt', 'Hatch Latch', 'Intelligence Unleashed', 'JotSpot',
             'LocationAnalyzer', 'LocationLister', 'LocationViewer', 'Project Management',
             'Ruby', 'Ruby Miner', 'Sapphire', 'Wikipedia']
-        self.assertEquals(expected_listing, titles)
+        self.assertEqual(expected_listing, titles)
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_all_listing_for_minitrue_profile_from_minitrue_profile(self, mock_request):
@@ -178,7 +178,7 @@ class ProfileApiTest(APITestCase):
         expected_listing = ['Bread Basket', 'Chatter Box']
         # BreadBasket(Minitrue, private, julia)
         # ChatterBox(Miniluv, public, julia)
-        self.assertEquals(expected_listing, titles)
+        self.assertEqual(expected_listing, titles)
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_username_starts_with(self, mock_request):
@@ -230,11 +230,12 @@ class ProfileApiTest(APITestCase):
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 usernames = [i['user']['username'] for i in response.data]
 
-                self.assertEquals('bigbrother' in usernames, bool(combo[0]), 'bigbrother role [{0!s}] in {1!s}'.format(role, bool(combo[0])))
-                self.assertEquals('julia' in usernames, bool(combo[1]))
-                self.assertEquals('jones' in usernames, bool(combo[2]))
-                displaynames = [i['display_name'] for i in response.data]
-                self.assertEqual(displaynames, sorted(displaynames))
+                self.assertEqual('bigbrother' in usernames, bool(combo[0]), 'bigbrother role [{0!s}] in {1!s}'.format(role, bool(combo[0])))
+                self.assertEqual('julia' in usernames, bool(combo[1]))
+                self.assertEqual('jones' in usernames, bool(combo[2]))
+                # Reference
+                # displaynames = [i['display_name'] for i in response.data]
+                # self.assertEqual(displaynames, sorted(displaynames))
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_get_update_self_for_all_access_control_levels(self, mock_request):
