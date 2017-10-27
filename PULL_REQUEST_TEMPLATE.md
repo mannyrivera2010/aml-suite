@@ -1,12 +1,20 @@
-**Purpose**
-*Add description*
-*Also add how to test locally*
+**Purpose**     
+*Add description*    
+ 
+**How to test code** 
+*Also add how to test locally*   
 
-**Please Review**
-*Add reviewers here*
+**Please Review**     
+@aml-development/ozp-backend-team    
+
+**Linked Issues**    
+AMLNG-XXX
 
 **Checklist**
-[ ] 2 people reviewed code
-[ ] Add unit tests for code
-[ ] Code is PEP8 Compliant 
+- [ ] Read CONTRIBUTING.md
+- [ ] Write code to complete task 
+- [ ] Python Code is PEP8 Compliant
+- [ ] Add unit tests for new code
+- [ ] All tests must pass before merging the pull request
+- [ ] At least 2 people reviewed code
 
