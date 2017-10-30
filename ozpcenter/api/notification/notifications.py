@@ -63,6 +63,7 @@ from ozpcenter import errors
 from ozpcenter.models import Notification
 from ozpcenter.models import NotificationMailBox
 from ozpcenter.models import Profile
+from ozpcenter.models import Agency
 from ozpcenter.models import Listing
 from ozpcenter.models import ApplicationLibraryEntry
 from ozpcenter.models import Subscription
