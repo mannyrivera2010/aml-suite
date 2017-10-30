@@ -1,5 +1,41 @@
 
-### 1.0.85 (None)
+### 1.0.86 (None)
+
+#### Feature  
+* **feedback**:  allow delete method for feedback. added tests for delete method ([4b21c5f7](https://github.com/aml-development/ozp-backend/commit/4b21c5f7d12d490592809fa77dcecc97136b7be1))     
+
+#### Refactor 
+* **test**
+  *  fixed screenshot ([35548f64](https://github.com/aml-development/ozp-backend/commit/35548f64488da48cd7de0c7379b595c2d5abb041))
+  *  delete duplicate test ([00b37d8d](https://github.com/aml-development/ozp-backend/commit/00b37d8d2053e8df998eee237e8d53966bb9f110))     
+* **notification**:  refactor notification code ([0a2900c4](https://github.com/aml-development/ozp-backend/commit/0a2900c4bdaac9ba6a235d83c6cd82b445df8883))    
+* **tests**:  refactor tests to use unittest_request_helper ([3f27b2c7](https://github.com/aml-development/ozp-backend/commit/3f27b2c71c4cdbe484cb0bdecd0924b52e2983f7))    
+* **unittests**:  refactor tests, enable travis-ci postgresql ([3a99c9dd](https://github.com/aml-development/ozp-backend/commit/3a99c9dd939e4f42df613582f3295a8e9e3faa1b))   
+* **flag**
+  *  remove code per review ([3740607d](https://github.com/aml-development/ozp-backend/commit/3740607d5f5318f63080c5f8208c260d305a169b))
+  * remove betauser flag ([2651c5b0](https://github.com/aml-development/ozp-backend/commit/2651c5b0feb60f0425298205cfb521ae890a764a))     
+* **fix**: in progress ([da6bd7df](https://github.com/aml-development/ozp-backend/commit/da6bd7dfb4402e42f60ab881dccefd7b5e241ba3))    
+* **listing**:  improve put_counts_in_listings_endpoint function ([1ea93873](https://github.com/aml-development/ozp-backend/commit/1ea93873417cab1dd0a53cac849b941915b97bab))    
+* **unittest**:  Refactor Test ([af983433](https://github.com/aml-development/ozp-backend/commit/af983433b211077dbf9c9af82db32c656b5bc773))    
+
+#### Merge Pull Requests  
+* Merge pull request #373 from aml-development/unit_test ([94cc26d1](https://github.com/aml-development/ozp-backend/commit/94cc26d1e5b5a44a3bc42877a9e9765e423b24ed))
+* Merge pull request #372 from aml-development/feedback ([be25be19](https://github.com/aml-development/ozp-backend/commit/be25be191759ab07f0474b2905490395769ae6d5))
+* Merge pull request #370 from aml-development/performance_prefetch ([77c686ca](https://github.com/aml-development/ozp-backend/commit/77c686ca6349abfc7ce3d88ad0497e80cd92222e))
+* Merge pull request #371 from aml-development/remove_betauser ([deabed93](https://github.com/aml-development/ozp-backend/commit/deabed935eed19f4fe6b27e97a91c997d7472841))    
+
+#### Documentation  
+* **listing**:  update rating docs ([4c1c8be5](https://github.com/aml-development/ozp-backend/commit/4c1c8be5c8bb4db382d95982127c7541a6470d2f))        
+
+#### Changes  
+* Update README.md ([60d8285c](https://github.com/aml-development/ozp-backend/commit/60d8285c9696089df441a0ba511af75861853c4c))
+* Update PULL_REQUEST_TEMPLATE.md ([c40a6066](https://github.com/aml-development/ozp-backend/commit/c40a60669a99da99a0c2a818d88922aabccc46b6))
+* Update PULL_REQUEST_TEMPLATE.md ([051e5732](https://github.com/aml-development/ozp-backend/commit/051e5732329975586a7dcdf3e37df98d9e06cf51))
+* Update PULL_REQUEST_TEMPLATE.md ([6476aa29](https://github.com/aml-development/ozp-backend/commit/6476aa292dd8edfa0686a2a8c2ddc57da1b2fc81))
+* Create PULL_REQUEST_TEMPLATE.md ([025834dd](https://github.com/aml-development/ozp-backend/commit/025834dd325494fb550887dd8687e4cbf0fcb4fc))
+* add similar test ([d0bb71bd](https://github.com/aml-development/ozp-backend/commit/d0bb71bde0dc9a159fc09cb932366f2b39475f01))     
+
+### 1.0.85 (2017-10-18)
 
 #### Feature  
 * **feedback**:  add aggregate feedback score for listings ([ed725113](https://github.com/aml-development/ozp-backend/commit/ed72511357939b3e895e28e04efebdeee5c45e9e))    
@@ -11,6 +47,7 @@
   *  fix test cases for feedback_score ([bacbf069](https://github.com/aml-development/ozp-backend/commit/bacbf069c07ac435e29935e7ff0abf63e74be464))     
 
 #### Refactor  
+* **listing**:  Add setup_eager_loading to listing view; ([7d048373](https://github.com/aml-development/ozp-backend/commit/7d048373f82f89e581c3b5b61065a83b9d4e89b8))    
 * **version**:  Refactor Version TODO ([d06f967a](https://github.com/aml-development/ozp-backend/commit/d06f967a51bb67c81cedc3ccde08ddb59e1ef0ac))    
 * **travis**:  TravisCI Test Parallelization ([1c2651c3](https://github.com/aml-development/ozp-backend/commit/1c2651c3e3f84e5937633245847e1ac32f148d62))   
 * **unittest**
