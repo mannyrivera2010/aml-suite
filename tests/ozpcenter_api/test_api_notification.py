@@ -575,7 +575,7 @@ class NotificationApiTest(APITestCase):
 
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
-        response = self.client.put(url, data, format='json')
+        response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @skip("should work when data script gets refactored (rivera 20160620)")
