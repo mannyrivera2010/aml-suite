@@ -556,7 +556,7 @@ class NotificationApiTest(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(response.data['message'], 'Please review your agency's apps and make sure their information is up to date')
+        self.assertEqual(response.data['message'], "Please review your agency's apps and make sure their information is up to date")
         self.assertEqual(response.data['notification_type'], 'system')
         self.assertEqual(response.data['notification_subtype'], 'review_request')
         self.assertEqual(response.data['agency'], None)
