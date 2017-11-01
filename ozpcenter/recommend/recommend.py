@@ -117,6 +117,46 @@ class RecommenderResultSet(object):
             profile_id#1: RecommenderProfileResultSet(),
             profile_id#2: RecommenderProfileResultSet(),
         }
+
+        recommender_result_set serialized
+        {
+            profile_id#1: {
+                recommender_friendly_name#1:{
+                    recommendations:[
+                        [listing_id#1, score#1],
+                        [listing_id#2, score#2]
+                    ]
+                    weight: 1.0
+                    ms_took: 5050
+                },
+                recommender_friendly_name#2:{
+                    recommendations:[
+                        [listing_id#1, score#1],
+                        [listing_id#2, score#2]
+                    ]
+                    weight: 2.0
+                    ms_took: 5050
+                }
+            },
+            profile_id#2: {
+                recommender_friendly_name#1:{
+                    recommendations:[
+                        [listing_id#1, score#1],
+                        [listing_id#2, score#2]
+                    ]
+                    weight: 1.0,
+                    ms_took: 5050
+                },
+                recommender_friendly_name#2:{
+                    recommendations:[
+                        [listing_id#1, score#1],
+                        [listing_id#2, score#2]
+                    ]
+                    weight: 1.0
+                    ms_took: 5050
+                }
+            }
+        }
         """
         self.recommender_result_set = {}
 
@@ -280,61 +320,19 @@ def bulk_recommendations_saver(recommendation_entries):
         target_profile = recommendation_entry['target_profile']
         recommendation_data = recommendation_entry['recommendation_data']
 
-        try:
-            obj = models.RecommendationsEntry.objects.get(target_profile=target_profile)
-            obj.recommendation_data = recommendation_data
-            obj.save()
-        except models.RecommendationsEntry.DoesNotExist:
-            obj = models.RecommendationsEntry(target_profile=target_profile, recommendation_data=recommendation_data)
-            obj.save()
+        # models.RecommendationsEntry.objects.filter(target_profile__in=profile_query).delete() occured
+        # try:
+        #     obj = models.RecommendationsEntry.objects.get(target_profile=target_profile)
+        #     obj.recommendation_data = recommendation_data
+        #     obj.save()
+        # except models.RecommendationsEntry.DoesNotExist:
+        recommendation_entry_obj = models.RecommendationsEntry(target_profile=target_profile, recommendation_data=recommendation_data)
+        recommendation_entry_obj.save()
 
 
 class RecommenderDirectory(object):
     """
     Wrapper for all Recommenders
-    It maps strings to classes.
-
-    recommender_result_set
-    {
-        profile_id#1: {
-            recommender_friendly_name#1:{
-                recommendations:[
-                    [listing_id#1, score#1],
-                    [listing_id#2, score#2]
-                ]
-                weight: 1.0
-                ms_took: 5050
-            },
-            recommender_friendly_name#2:{
-                recommendations:[
-                    [listing_id#1, score#1],
-                    [listing_id#2, score#2]
-                ]
-                weight: 2.0
-                ms_took: 5050
-            }
-        },
-        profile_id#2: {
-            recommender_friendly_name#1:{
-                recommendations:[
-                    [listing_id#1, score#1],
-                    [listing_id#2, score#2]
-                ]
-                weight: 1.0,
-                ms_took: 5050
-            },
-            recommender_friendly_name#2:{
-                recommendations:[
-                    [listing_id#1, score#1],
-                    [listing_id#2, score#2]
-                ]
-                weight: 1.0
-                ms_took: 5050
-            }
-        }
-    }
-
-    recommendations key is a list of tuples of listing_id and scores in which it is sorted by value
     """
 
     def __init__(self):
