@@ -106,7 +106,28 @@ class RecommenderProfileResultSet(object):
         }
         """
         self.profile_id = profile_id
-        self.data = {}
+        self.recommender_result_set = {}
+
+    def merge(self, recommender_friendly_name, recommendation_weight, current_recommendations, recommendations_time):
+        """
+        Purpose is to merge all of the different Recommender's algorthim recommender result together.
+        This function is responsible for merging the results of the other Recommender recommender_result_set diction into self recommender_result_set
+
+        Args:
+            friendly_name: Recommender friendly name
+            recommendation_weight: Recommender weight
+            profile_result_set(ProfileResultSet): Recommender results
+            recommendations_time: Recommender time
+        """
+        if recommender_friendly_name not in self.recommender_result_set:
+            self.recommender_result_set[recommender_friendly_name] = {
+                'recommendations': current_recommendations,
+                'weight': recommendation_weight,
+                'ms_took': recommendations_time
+            }
+
+    def __repr__(self):
+        return str(self.recommender_result_set)
 
 
 class RecommenderResultSet(object):
@@ -160,14 +181,25 @@ class RecommenderResultSet(object):
         """
         self.recommender_result_set = {}
 
-    def add_listing_to_user_profile(self, profile_id, listing_id, score, cumulative=False):
+    def __repr__(self):
+        return str(self.recommender_result_set)
+
+    def merge(self, recommender_friendly_name, recommendation_weight, profile_result_set, recommendations_time):
         """
-        Add listing and score to user profile
+        Purpose is to merge all of the different Recommender's algorthim recommender result together.
+        This function is responsible for merging the results of the other Recommender recommender_result_set diction into self recommender_result_set
+
+        Args:
+            friendly_name: Recommender friendly name
+            recommendation_weight: Recommender weight
+            profile_result_set(ProfileResultSet): Recommender results
+            recommendations_time: Recommender time
         """
-        if profile_id not in recommender_result_set:
-            self.recommender_result_set = RecommenderProfileResultSet(profile_id)
-        else:
-            self.recommender_result_set[profile_id].add_listing_to_user_profile(listing_id, score, cumulative)
+        for profile_id in profile_result_set.recommender_result_set:
+            if profile_id not in self.recommender_result_set:
+                self.recommender_result_set[profile_id] = RecommenderProfileResultSet(profile_id)
+            current_recommendations = profile_result_set.recommender_result_set[profile_id]
+            self.recommender_result_set[profile_id].merge(recommender_friendly_name, recommendation_weight, current_recommendations, recommendations_time)
 
 
 class BaselineRecommender(object):
@@ -342,44 +374,7 @@ class RecommenderDirectory(object):
             'baseline': BaselineRecommender,
             'graph_cf': GraphCollaborativeFilteringBaseRecommender,
         }
-        self.recommender_result_set = {}
-
-    def get_recommender_class_obj(self, recommender_class_string):
-        """
-        Get Recommender class and make a instance of it
-        """
-
-    def merge(self, recommender_friendly_name, recommendation_weight, recommendations_results, recommendations_time):
-        """
-        Purpose is to merge all of the different Recommender's algorthim recommender result together.
-        This function is responsible for merging the results of the other Recommender recommender_result_set diction into self recommender_result_set
-
-        Args:
-            friendly_name: Recommender friendly name
-            recommendation_weight: Recommender weight
-            recommendations_results: Recommender results
-            recommendations_time: Recommender time
-        """
-        # print('recommender_friendly_name: {}'.format(recommender_friendly_name))
-        # print('recommendation_weight: {}'.format(recommendation_weight))
-        # print('recommendations_results: {}'.format(recommendations_results))
-        # print('recommendations_time: {}'.format(recommendations_time))
-
-        if recommendations_results is None:
-            return False
-        for profile_id in recommendations_results:
-            current_recommendations = recommendations_results[profile_id]
-
-            if profile_id not in self.recommender_result_set:
-                self.recommender_result_set[profile_id] = {}
-            if recommender_friendly_name not in self.recommender_result_set[profile_id]:
-                self.recommender_result_set[profile_id][recommender_friendly_name] = {
-                    'recommendations': current_recommendations,
-                    'weight': recommendation_weight,
-                    'ms_took': recommendations_time
-                }
-
-        return True
+        self.recommender_result_set_obj = RecommenderResultSet()
 
     def _iterate_recommenders(self, recommender_string):
         """
@@ -429,14 +424,14 @@ class RecommenderDirectory(object):
 
             recommender_obj.recommendation_logic()
 
-            recommender_results = recommender_obj.profile_result_set.recommender_result_set
-            logger.debug(recommender_results)
+            profile_result_set = recommender_obj.profile_result_set
+            logger.debug(profile_result_set)
 
             recommendations_end_ms = time.time() * 1000.0
             recommendations_time = recommendations_end_ms - recommendations_start_ms
 
             logger.info('Merging {} into results'.format(friendly_name))
-            self.merge(friendly_name, recommendation_weight, recommender_results, recommendations_time)
+            self.recommender_result_set_obj.merge(friendly_name, recommendation_weight, profile_result_set, recommendations_time)
 
         logger.info('==Start saving recommendations into database==')
         start_db_ms = time.time() * 1000.0
@@ -456,10 +451,12 @@ class RecommenderDirectory(object):
             transaction.atomic() - 430 ms
             Without Atomic and Batch - 1400 ms
         """
+        recommender_result_set = self.recommender_result_set_obj.recommender_result_set
+
         batch_list = []
 
         # Get all profiles in recommender_result_set
-        profile_id_list = list(set([profile_id for profile_id in self.recommender_result_set]))
+        profile_id_list = list(set([profile_id for profile_id in recommender_result_set]))
 
         profile_query = models.Profile.objects.filter(id__in=profile_id_list)
         profile_dict = {profile.id: profile for profile in profile_query}
@@ -470,15 +467,15 @@ class RecommenderDirectory(object):
         profile_query = models.Profile.objects.filter(id__in=profile_id_list)
         models.RecommendationsEntry.objects.filter(target_profile__in=profile_query).delete()
 
-        for profile_id in self.recommender_result_set:
+        for profile_id in recommender_result_set:
             # print('*-*-*-*-'); import json; print(json.dumps(self.recommender_result_set[profile_id])); print('*-*-*-*-')
             profile = profile_dict.get(profile_id)
 
             if profile:
-                for current_recommender_friendly_name in self.recommender_result_set[profile_id]:
+                for current_recommender_friendly_name in recommender_result_set[profile_id].recommender_result_set:
                     output_current_tuples = []
 
-                    current_recommendations = self.recommender_result_set[profile_id][current_recommender_friendly_name]['recommendations']
+                    current_recommendations = recommender_result_set[profile_id].recommender_result_set[current_recommender_friendly_name]['recommendations']
                     sorted_recommendations = recommend_utils.get_top_n_score(current_recommendations, 20)
 
                     for current_recommendation_tuple in sorted_recommendations:
@@ -489,10 +486,10 @@ class RecommenderDirectory(object):
                         if current_listing:
                             output_current_tuples.append(current_recommendation_tuple)
 
-                    self.recommender_result_set[profile_id][current_recommender_friendly_name]['recommendations'] = output_current_tuples
+                    recommender_result_set[profile_id].recommender_result_set[current_recommender_friendly_name]['recommendations'] = output_current_tuples
 
                 batch_list.append({'target_profile': profile,
-                                   'recommendation_data': msgpack.packb(self.recommender_result_set[profile_id])})
+                                   'recommendation_data': msgpack.packb(recommender_result_set[profile_id].recommender_result_set)})
 
                 if len(batch_list) >= 1000:
                     bulk_recommendations_saver(batch_list)
