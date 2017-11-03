@@ -704,6 +704,7 @@ class ListingViewSet(viewsets.ModelViewSet):
         orgs = self.request.query_params.getlist('org', False)
         enabled = self.request.query_params.get('enabled', None)
         ordering = self.request.query_params.getlist('ordering', None)
+        owners_id = self.request.query_params.get('owners_id', None)
         if enabled:
             enabled = enabled.lower()
             if enabled in ['true', '1']:
@@ -712,6 +713,8 @@ class ListingViewSet(viewsets.ModelViewSet):
                 enabled = False
 
         listings = model_access.get_listings(self.request.user.username)
+        if owners_id:
+            listings = listings.filter(owners__id=owners_id)
         if approval_status:
             listings = listings.filter(approval_status=approval_status)
         if orgs:
