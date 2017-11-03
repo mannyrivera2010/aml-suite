@@ -793,6 +793,21 @@ class ListingApiTest(APITestCase):
         self.assertTrue(len(response.data) > 5)
         # TODO: more tests
 
+    def test_get_listings_with_query_params_owner(self):
+        """
+        test_get_listings_with_query_params
+        """
+        user = generic_model_access.get_profile('julia').user
+        self.client.force_authenticate(user=user)
+        url = '/api/listing/?approval_status=APPROVED&org=Ministry of Truth&enabled=true&owners_id=4'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        for listing_record in response.data:
+            if 'owners' in listing_record:
+                owners_list = [owner_dict['id'] for owner_dict in listing_record['owners']]
+                self.assertTrue(4 in owners_list)
+
     def test_counts_in_listings(self):
         """
         test_counts_in_listings
