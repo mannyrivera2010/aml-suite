@@ -63,6 +63,7 @@ from ozpcenter import errors
 from ozpcenter.models import Notification
 from ozpcenter.models import NotificationMailBox
 from ozpcenter.models import Profile
+from ozpcenter.models import Agency
 from ozpcenter.models import Listing
 from ozpcenter.models import ApplicationLibraryEntry
 from ozpcenter.models import Subscription
@@ -748,3 +749,33 @@ class CategorySubscriptionNotification(NotificationBase):  # Not Verified
                 target_profiles.add(target_profile)
 
         return list(target_profiles)
+
+
+class StewardAppNotification(NotificationBase):
+    """
+    AMLNG-745 - Listing Review Notification
+    Targets: All ORG_STEWARDS
+    Permission Constraint: Only APP_MALL_STEWARDs can send notifications
+    Invoked: Directly
+    """
+
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
+    def get_notification_db_type(self):
+        return Notification.SYSTEM
+
+    def get_notification_db_subtype(self):
+        return Notification.REVIEW_REQUEST
+
+    def get_group_target(self):
+        return Notification.ORG_STEWARD
+
+    def get_target_list(self):
+
+        target_set = set()
+        agencies = Agency.objects.all()
+        for steward in Profile.objects.filter(stewarded_organizations__in=agencies, listing_notification_flag=True).all():
+            target_set.add(steward)
+
+        return list(target_set)

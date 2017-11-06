@@ -1612,6 +1612,7 @@ class Notification(models.Model):
     LISTING_PRIVATE_STATUS = 'listing_private_status'  # When a listing is changed to private
     PENDING_DELETION_REQUEST = 'pending_deletion_request'  # When a steward approves an app deletion request
     PENDING_DELETION_CANCELLATION = 'pending_deletion_cancellation'  # When a steward rejects an app deletion request
+    REVIEW_REQUEST = 'review_request'  # When an APP_STEWARD notifies ORG_STEWARDS to review their apps and makes sure they are up to date
     SUBSCRIPTION_CATEGORY = 'subscription_category'  # When there is a new app in a subscribed category
     SUBSCRIPTION_TAG = 'subscription_tag'  # When there is a new app in a subscribed tag
 
@@ -1621,6 +1622,7 @@ class Notification(models.Model):
         (LISTING_PRIVATE_STATUS, 'listing_private_status'),
         (PENDING_DELETION_REQUEST, 'pending_deletion_request'),
         (PENDING_DELETION_CANCELLATION, 'pending_deletion_cancellation'),
+        (REVIEW_REQUEST, 'review_request'),
         (SUBSCRIPTION_CATEGORY, 'subscription_category'),
         (SUBSCRIPTION_TAG, 'subscription_tag')
     )

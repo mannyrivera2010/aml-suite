@@ -80,16 +80,22 @@ class NotificationTypeField(serializers.ReadOnlyField):
         return obj
 
 
+class NotificationSubtypeField(serializers.ReadOnlyField):
+    def to_native(self, obj):
+        return obj
+
+
 class NotificationSerializer(serializers.HyperlinkedModelSerializer):
     author = profile_serializers.ShortProfileSerializer(required=False)
     listing = NotificationListingSerializer(required=False)
     agency = NotificationAgencySerializer(required=False)
     notification_type = NotificationTypeField(required=False)
+    notification_subtype = NotificationSubtypeField(required=False)
 
     class Meta:
         model = models.Notification
         fields = ('id', 'created_date', 'expires_date', 'author',
-            'message', 'notification_type', 'listing', 'agency', 'entity_id', 'peer', )
+            'message', 'notification_type', 'notification_subtype', 'listing', 'agency', 'entity_id', 'peer', )
 
         extra_kwargs = {
             'listing': {'validators': []},

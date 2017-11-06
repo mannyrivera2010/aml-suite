@@ -542,6 +542,57 @@ class NotificationApiTest(APITestCase):
         self.assertEqual(response.data['peer'], {'user': {'username': 'jones'}})
         self.assertTrue('expires_date' in data)
 
+    def test_create_review_request_notification_app_mall_steward(self):
+        now = datetime.datetime.now(pytz.utc)
+        data = {"expires_date": str(now),
+                "message": "Please review your agency's apps and make sure their information is up to date",
+                "notification_type": "StewardAppNotification"
+                }
+
+        url = '/api/notification/'
+
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(response.data['message'], "Please review your agency's apps and make sure their information is up to date")
+        self.assertEqual(response.data['notification_type'], 'system')
+        self.assertEqual(response.data['notification_subtype'], 'review_request')
+        self.assertEqual(response.data['agency'], None)
+        self.assertEqual(response.data['listing'], None)
+        self.assertEqual(response.data['peer'], None)
+        self.assertTrue('expires_date' in data)
+
+    @skip("should work when data script gets refactored so org stewards cant create system notifications (semesky 20171102)")
+    def test_create_review_request_notification_unauthorized_org_steward(self):
+        now = datetime.datetime.now(pytz.utc)
+        data = {"expires_date": str(now),
+                "message": "Please review your agency's apps and make sure their information is up to date",
+                "notification_type": "StewardAppNotification"
+                }
+
+        url = '/api/notification/'
+
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_review_request_notification_unauthorized_user(self):
+        now = datetime.datetime.now(pytz.utc)
+        data = {"expires_date": str(now),
+                "message": "Please review your agency's apps and make sure their information is up to date",
+                "notification_type": "StewardAppNotification"
+                }
+
+        url = '/api/notification/'
+
+        user = generic_model_access.get_profile('jones').user
+        self.client.force_authenticate(user=user)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     @skip("should work when data script gets refactored (rivera 20160620)")
     def test_create_peer_bookmark_notification_app_mall_steward(self):
         user = generic_model_access.get_profile('bigbrother').user

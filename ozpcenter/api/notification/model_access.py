@@ -194,6 +194,10 @@ def create_notification(author_username=None,
         notification_instance = notifications.TagSubscriptionNotification()
         notification_instance.set_sender_and_entity(author_username, listing, entities)
 
+    elif notification_type == 'StewardAppNotification':
+        notification_instance = notifications.StewardAppNotification()
+        notification_instance.set_sender_and_entity(author_username, None)
+
     elif listing is not None:
         notification_instance = notifications.ListingNotification()
         notification_instance.set_sender_and_entity(author_username, listing)
