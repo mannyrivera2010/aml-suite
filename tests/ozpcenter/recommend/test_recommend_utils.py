@@ -24,31 +24,61 @@ class UtilsTest(TestCase):
         """
         data_gen.run()
 
-    def test_get_top_n_score(self):
+    # OLD REF
+    # def test_get_top_n_score(self):
+    #     input_data = {
+    #         1: {
+    #             4: 8,
+    #             5: 2,
+    #             2: 3
+    #         },
+    #         2: {
+    #             1: 10,
+    #             2: 20,
+    #             3: 30
+    #         }
+    #     }
+    #     expected_results = {
+    #         1: [
+    #             [4, 8],
+    #             [2, 3]
+    #         ],
+    #         2: [
+    #             [3, 30],
+    #             [2, 20]
+    #         ]
+    #     }
+    #
+    #     results = recommend_utils.get_top_n_score(input_data, 2)
+    #     self.assertEqual(results, expected_results)
+
+    def test_get_top_n_score_len_2(self):
         input_data = {
-            1: {
-                4: 8,
-                5: 2,
-                2: 3
-            },
-            2: {
-                1: 10,
-                2: 20,
-                3: 30
-            }
+            4: 8,
+            5: 2,
+            2: 3
         }
-        expected_results = {
-            1: [
-                [4, 8],
-                [2, 3]
-            ],
-            2: [
-                [3, 30],
-                [2, 20]
-            ]
-        }
+        expected_results = [
+            [4, 8],
+            [2, 3],
+        ]
 
         results = recommend_utils.get_top_n_score(input_data, 2)
+        self.assertEqual(results, expected_results)
+
+    def test_get_top_n_score_len_3(self):
+        input_data = {
+            4: 8,
+            5: 2,
+            2: 3
+        }
+        expected_results = [
+            [4, 8],
+            [2, 3],
+            [5, 2]
+        ]
+
+        results = recommend_utils.get_top_n_score(input_data, 3)
         self.assertEqual(results, expected_results)
 
     def test_map_numbers(self):

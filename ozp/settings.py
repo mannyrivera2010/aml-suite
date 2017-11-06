@@ -128,7 +128,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'json',
+            'formatter': 'simple'
         },
         'file': {
             'level': 'DEBUG',
@@ -139,7 +139,10 @@ LOGGING = {
     },
     'formatters': {
         'json': {
-           '()': 'ozp.logging_formatter.CustomisedJSONFormatter', }
+           '()': 'ozp.logging_formatter.CustomisedJSONFormatter', },
+        'simple': {
+            'format': '%(asctime)s - %(levelname)s - %(module)s - %(message)s'
+        },
     },
     'loggers': {
         'django': {
