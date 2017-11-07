@@ -14,6 +14,17 @@ TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 
 
+class ExceptionUnitTestHelper(object):
+    """
+    This class responsible of return dictionaries of exceptions to compare with
+    """
+    @staticmethod
+    def permission_denied():
+        return {'detail': 'You do not have permission to perform this action.',
+                'error': True,
+                'error_code': 'permission_denied'}
+
+
 def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
     user = generic_model_access.get_profile(username).user
     test_case_instance.client.force_authenticate(user=user)
