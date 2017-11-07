@@ -31,6 +31,12 @@ class CategoryTest(TestCase):
         category = model_access.get_category_by_title('Non Existent Category')
         self.assertIsNone(category)
 
+    def test_get_non_existent_category_by_title_err(self):
+        self.assertRaises(models.Category.DoesNotExist, model_access.get_category_by_title, 'Not Existent', True)
+
     def test_get_non_existent_category_by_id(self):
-        category = model_access.get_category_by_id(9999)
+        category = model_access.get_category_by_id(0)
         self.assertIsNone(category)
+
+    def test_get_non_existent_category_by_id_err(self):
+        self.assertRaises(models.Category.DoesNotExist, model_access.get_category_by_id, 0, True)
