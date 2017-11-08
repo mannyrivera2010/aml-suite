@@ -72,7 +72,7 @@ class CategoryApiTest(APITestCase):
         data = {'title': 'new category', 'description': 'category description'}
         response = unittest_request_helper(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_create_category(self): test different user groups access control
 
@@ -91,7 +91,7 @@ class CategoryApiTest(APITestCase):
         data = {'title': 'updated category', 'description': 'updated description'}
         response = unittest_request_helper(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_update_category(self): test different user groups access control
 
@@ -137,6 +137,6 @@ class CategoryApiTest(APITestCase):
         url = '/api/category/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_delete_category(self): test different user groups access control

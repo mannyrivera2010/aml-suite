@@ -15,6 +15,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.response import Response
 
+from ozpcenter import errors
 from ozpcenter import permissions
 from ozpcenter.api.library import serializers
 from ozpcenter.api.library import model_access
@@ -101,8 +102,8 @@ class UserLibraryViewSet(viewsets.ViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-            return Response(serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
+            raise errors.RequestException('{0!s}'.format(serializer.errors))
+
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -169,9 +170,9 @@ class UserLibraryViewSet(viewsets.ViewSet):
         current_request_username = request.user.username
         bookmark_notification_id = request.data.get('bookmark_notification_id')
 
-        errors, data = model_access.import_bookmarks(current_request_username, bookmark_notification_id)
-        if errors:
-            return Response({'message': '{0}'.format(errors)}, status=status.HTTP_400_BAD_REQUEST)
+        error, data = model_access.import_bookmarks(current_request_username, bookmark_notification_id)
+        if error:
+            raise errors.RequestException('{0!s}'.format(error))
         else:
             serializer = serializers.UserLibrarySerializer(data,
                 many=True, context={'request': request})
@@ -234,8 +235,9 @@ class UserLibraryViewSet(viewsets.ViewSet):
         omit_serializer: true
         """
         current_request_username = request.user.username
-        errors, data = model_access.batch_update_user_library_entry(current_request_username, request.data)
-        if errors:
-            return Response({'message': '{0}'.format(errors)}, status=status.HTTP_400_BAD_REQUEST)
+        error, data = model_access.batch_update_user_library_entry(current_request_username, request.data)
+        if error:
+            raise errors.RequestException('{0!s}'.format(errors))
+
         else:
             return Response(data, status=status.HTTP_200_OK)

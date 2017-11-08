@@ -13,6 +13,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
 
+from ozpcenter import errors
 from ozpcenter import pagination
 from ozpcenter import permissions
 from ozpcenter.pipe import pipes
@@ -151,7 +152,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer = serializers.ReviewSerializer(data=request.data, context={'request': request, 'listing': listing}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            raise errors.ValidationException('{0}'.format(serializer.errors))
+
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -165,7 +168,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer = serializers.ReviewSerializer(review, data=request.data, context={'request': request, 'listing': listing}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            raise errors.ValidationException('{0}'.format(serializer.errors))
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -289,7 +293,8 @@ class RecommendationFeedbackViewSet(viewsets.ModelViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            raise errors.ValidationException('{0}'.format(serializer.errors))
 
         serializer.save()
 
@@ -540,8 +545,7 @@ class ListingRejectionViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error('Exception: {}'.format(e), extra={'request': request})
-            return Response("Error rejecting listing",
-                    status=status.HTTP_400_BAD_REQUEST)
+            raise errors.RequestException('Error rejecting listing')
 
 
 class ScreenshotViewSet(viewsets.ModelViewSet):
@@ -836,8 +840,9 @@ class ListingViewSet(viewsets.ModelViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-            return Response(serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
+
+            raise errors.ValidationException('{0}'.format(serializer.errors))
+
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -957,7 +962,8 @@ class ListingViewSet(viewsets.ModelViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            raise errors.ValidationException('{0}'.format(serializer.errors))
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1128,28 +1134,28 @@ class ElasticsearchListingSearchViewSet(viewsets.ViewSet):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb Not Supported')
 
     def retrieve(self, request, pk=None):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb Not Supported')
 
     def update(self, request, pk=None):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb Not Supported')
 
     def partial_update(self, request, pk=None):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb Not Supported')
 
     def destroy(self, request, pk=None):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb Not Supported')

@@ -100,8 +100,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
             data=request.data, context={'request': request}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-            return Response(serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
+
+            raise errors.RequestException('{0!s}'.format(serializer.errors))
 
         serializer.save()
 
@@ -192,25 +192,25 @@ class ProfileListingViewSet(viewsets.ModelViewSet):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb(POST) Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb(POST) Not Supported')
 
     def update(self, request, pk=None, profile_pk=None):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb(PUT) Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb(PUT) Not Supported')
 
     def partial_update(self, request, pk=None, profile_pk=None):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb(PATCH) Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb(PATCH) Not Supported')
 
     def destroy(self, request, pk=None, profile_pk=None):
         """
         This method is not supported
         """
-        return Response({'detail': 'HTTP Verb(DELETE) Not Supported'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        raise errors.NotImplemented('HTTP Verb(DELETE) Not Supported')
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -348,8 +348,8 @@ class CurrentUserViewSet(viewsets.ViewSet):
             data=request.data, context={'request': request}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-            return Response(serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
+
+            raise errors.ValidationException('{0!s}'.format(serializer.errors))
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)

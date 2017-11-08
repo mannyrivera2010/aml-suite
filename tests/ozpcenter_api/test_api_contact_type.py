@@ -54,7 +54,7 @@ class ContactTypeApiTest(APITestCase):
         data = {'name': 'New Contact Type'}
         response = unittest_request_helper(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_create_contact_type(self): test different user groups access control
 
@@ -73,7 +73,7 @@ class ContactTypeApiTest(APITestCase):
         data = {'name': 'Updated Type', 'required': True}
         response = unittest_request_helper(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_update_contact_type(self): test different user groups access control
 
@@ -85,6 +85,6 @@ class ContactTypeApiTest(APITestCase):
         url = '/api/contact_type/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_delete_contact_type(self): test different user groups access control

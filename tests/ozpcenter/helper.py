@@ -16,13 +16,98 @@ TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 
 class ExceptionUnitTestHelper(object):
     """
-    This class responsible of return dictionaries of exceptions to compare with
+    This class returns dictionaries of exceptions to compare with response data
     """
+
+    # HTTP_400
     @staticmethod
-    def permission_denied():
-        return {'detail': 'You do not have permission to perform this action.',
+    def validation_error(detailmsg=None):
+        detail = detailmsg or 'Invalid input.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'validation_error'}
+
+    # HTTP_400
+    @staticmethod
+    def parse_error(detailmsg=None):
+        detail = detailmsg or 'Malformed request.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'parse_error'}
+
+    # HTTP_400
+    @staticmethod
+    def request_error(detailmsg=None):
+        detail = detailmsg or 'Invalid input.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'request'}
+
+    # HTTP_401
+    @staticmethod
+    def authorization_failure(detailmsg=None):
+        detail = detailmsg or 'Not authorized to view.'
+        # 'Incorrect authentication credentials'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'authorization_failed'}
+
+    # HTTP_401
+    @staticmethod
+    def not_authenticated(detailmsg=None):
+        detail = detailmsg or 'Authentication credentials were not provided.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'not_authenticated'}
+        # 'error_code': 'authorization_failure'}
+
+    # HTTP_403
+    @staticmethod
+    def permission_denied(detailmsg=None):
+        detail = detailmsg or 'You do not have permission to perform this action.'
+        return {'detail': detail,
                 'error': True,
                 'error_code': 'permission_denied'}
+
+    # HTTP_404
+    @staticmethod
+    def not_found(detailmsg=None):
+        detail = detailmsg or 'Not found.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'not_found'}
+
+    # HTTP_405
+    @staticmethod
+    def method_not_allowed(detailmsg=None):
+        detail = detailmsg or 'Method < > not allowed.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'method_not_allowed'}
+
+    # HTTP_406
+    @staticmethod
+    def not_acceptable(detailmsg=None):
+        detail = detailmsg or 'Could not satisfy the request Accept header.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'not_acceptable'}
+
+    # HTTP_416
+    @staticmethod
+    def unsupported_media_type(detailmsg=None):
+        detail = detailmsg or 'Unsupported media type < > in request.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'unsupported_media_type'}
+
+    # HTTP_429
+    @staticmethod
+    def too_many_requests(detailmsg=None):
+        detail = detailmsg or 'Request was throttled.'
+        return {'detail': detail,
+                'error': True,
+                'error_code': 'throttled'}
 
 
 def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
@@ -118,6 +203,8 @@ def unittest_request_helper(test_case_instance, url, method, data=None, username
         response = test_case_instance.client.put(url, data, format='json')
     elif method.upper() == 'DELETE':
         response = test_case_instance.client.delete(url, format='json')
+    elif method.upper() == 'PATCH':
+        response = test_case_instance.client.patch(url, format='json')
     else:
         raise Exception('method is not supported')
 
@@ -130,6 +217,10 @@ def unittest_request_helper(test_case_instance, url, method, data=None, username
             test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         elif status_code == 403:
             test_case_instance.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        elif status_code == 405:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        elif status_code == 501:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
         else:
             raise Exception('status code is not supported')
 

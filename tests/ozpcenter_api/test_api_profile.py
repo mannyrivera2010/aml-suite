@@ -8,10 +8,12 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from ozpcenter import errors
 from tests.ozp import helper
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 
 
 @override_settings(ES_ENABLED=False)
@@ -368,11 +370,7 @@ class ProfileApiTest(APITestCase):
         url = '/api/self/profile/'
         data = {'id': 5, 'center_tour_flag': 4}
         response = self.client.put(url, data, format='json')
-
-        expected_data = {'center_tour_flag': ['"4" is not a valid boolean.']}
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_data)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('"4" is not a valid boolean.'))['error_code'])
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_self_for_apps_mall_steward_level_invalid_user(self, mock_request):
@@ -384,10 +382,7 @@ class ProfileApiTest(APITestCase):
         data = {'id': 5, 'center_tour_flag': False}
         self.client.login(username='invalid', password='invalid')
         response = self.client.put(url, data, format='json')
-
-        expected_data = {'detail': 'Authentication credentials were not provided.', 'error': True}
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.data, expected_data)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.not_authenticated('Authentication credentials were not provided.'))['error_code'])
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_apps_mall_steward_level(self, mock_request):
@@ -414,9 +409,7 @@ class ProfileApiTest(APITestCase):
         data = {'display_name': 'Winston Smith', 'stewarded_organizations': False}
         response = self.client.put(url, data, format='json')
 
-        expected_data = {'stewarded_organizations': {'non_field_errors': ['Expected a list of items but got type "bool".']}}
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_data)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.request_error('Expected a list of items but got type "bool".'))['error_code'])
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_org_steward_level(self, mock_request):

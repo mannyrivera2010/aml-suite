@@ -11,6 +11,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 
@@ -23,12 +24,13 @@ from tests.ozpcenter.helper import _import_bookmarks
 class NotificationApiTest(APITestCase):
 
     def setUp(self):
+        pass
         """
         setUp is invoked before each test method
         """
-        self.expected_error = {'detail': 'Permission denied.',
-                               'error': True,
-                               'message': 'Only Stewards can delete notifications'}
+        # self.expected_error = {'detail': 'Permission denied.',
+        #                       'error': True,
+        #                       'message': 'Only Stewards can delete notifications'}
 
     @classmethod
     def setUpTestData(cls):
@@ -374,9 +376,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.data['non_field_errors'], ['Valid Listing ID is required'])
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Valid Listing ID is required'))['error_code'])
 
     def test_create_listing_notification_app_mall_steward_invalid_id(self):
         now = datetime.datetime.now(pytz.utc)
@@ -390,9 +390,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.data['non_field_errors'], ['Could not find listing'])
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Could not find listing'))['error_code'])
 
     def test_create_listing_agency_notification_app_mall_steward_invalid(self):
         now = datetime.datetime.now(pytz.utc)
@@ -407,9 +405,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.data['non_field_errors'], ["Notifications can only be one type. Input: ['listing', 'agency']"])
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error("Notifications can only be one type. Input: ['listing', 'agency']"))['error_code'])
 
     def test_create_listing_notification_org_steward(self):
         now = datetime.datetime.now(pytz.utc)
@@ -443,9 +439,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.data['non_field_errors'], ["Valid Listing ID is required"])
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Valid Listing ID is required'))['error_code'])
 
     def test_create_listing_notification_org_steward_invalid_id(self):
         now = datetime.datetime.now(pytz.utc)
@@ -459,9 +453,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.data['non_field_errors'], ["Could not find listing"])
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Could not find listing'))['error_code'])
 
     # TODO: test_create_listing_notification_org_steward_invalid (rivera 20160617)
     # TODO: test_create_listing_notification_user_unauthorized (rivera 20160617)
@@ -495,9 +487,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.data['non_field_errors'], ['Valid Agency ID is required'])
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Valid Agency ID is required'))['error_code'])
 
     def test_create_agency_notification_app_mall_steward_invalid_id(self):
         now = datetime.datetime.now(pytz.utc)
@@ -510,9 +500,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.data['non_field_errors'], ['Could not find agency'])
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Could not find agency'))['error_code'])
 
     # TODO: test_create_agency_notification_org_steward (rivera 20160617)
     # TODO: test_create_agency_notification_org_steward_invalid (rivera 20160617)
@@ -1047,12 +1035,17 @@ class NotificationApiTest(APITestCase):
     def test_delete_system_notification_org_steward(self):
         url = '/api/notification/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
-        self.assertEqual(response.data, self.expected_error)
+        # replaced for consistent errors
+        # self.assertEqual(response.data, self.expected_error)
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
 
     def test_delete_system_notification_user_unauthorized(self):
         url = '/api/notification/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='jones', status_code=403)
-        self.assertEqual(response.data, self.expected_error)
+        # replaced for consistent errors
+        # self.assertEqual(response.data, self.expected_error)
+        # self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Stewards can delete notifications'))
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Stewards can delete notifications'))
 
     # TODO: Unittest for below
     # AMLNG-378 - As a user, I want to receive notification about changes on Listings I've bookmarked

@@ -11,6 +11,7 @@ from ozpcenter.scripts import sample_data_generator as data_gen
 import ozpcenter.api.listing.model_access as model_access
 from tests.ozpcenter.helper import validate_listing_map_keys
 from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 
 
 @override_settings(ES_ENABLED=False)
@@ -237,7 +238,8 @@ class ListingApiTest(APITestCase):
         self.client.force_authenticate(user=user)
         url = '/api/listing/1/'
         response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     def test_delete_listing_permission_denied_2nd_party(self):
         user = generic_model_access.get_profile('johnson').user
@@ -245,9 +247,11 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        data = response.data
-        expected_data = {'detail': 'Permission denied.', 'error': True, 'message': 'Current profile has does not have delete permissions'}
-        self.assertEqual(data, expected_data)
+        # replaced for consistent errors
+        # data = response.data
+        # expected_data = {'detail': 'Permission denied.', 'error': True, 'message': 'Current profile does not have delete permissions'}
+        # self.assertEqual(data, expected_data)
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Current profile does not have delete permissions'))
 
     def test_update_listing_partial(self):
         """
@@ -532,10 +536,7 @@ class ListingApiTest(APITestCase):
         response = self.client.put(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        data = response.data
-        expected_data = {'non_field_errors': ['Permissions are invalid for current profile']}
-
-        self.assertEqual(data, expected_data)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Permissions are invalid for current profile'))['error_code'])
 
     def test_update_listing_full_2nd_party_owner(self):
         user = generic_model_access.get_profile('julia').user
@@ -601,10 +602,7 @@ class ListingApiTest(APITestCase):
         response = self.client.put(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        data = response.data
-        expected_data = {'non_field_errors': ['Permissions are invalid for current owner profile']}
-
-        self.assertEqual(data, expected_data)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Permissions are invalid for current owner profile'))['error_code'])
 
     def test_z_create_update(self):
         user = generic_model_access.get_profile('julia').user
@@ -772,7 +770,7 @@ class ListingApiTest(APITestCase):
 
         url = '/api/listing/{0!s}/'.format(listing_id)
         response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied('Only an APPS_MALL_STEWARD can mark a listing as APPROVED')['error_code']))
 
         # double check that the status wasn't changed
         # TODO: listing doesn't exist?

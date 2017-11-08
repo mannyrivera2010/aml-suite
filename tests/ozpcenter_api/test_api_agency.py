@@ -67,8 +67,7 @@ class AgencyApiTest(APITestCase):
         url = '/api/agency/'
         data = {'title': 'new agency', 'short_name': 'orgname'}
         response = unittest_request_helper(self, url, 'POST', data=data, username='wsmith', status_code=403)
-
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_create_agency(self): test different user groups access control
 
@@ -88,7 +87,7 @@ class AgencyApiTest(APITestCase):
         data = {'title': 'updated agency', 'short_name': 'uporg'}
         response = unittest_request_helper(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_update_agency(self): test different user groups access control
 
@@ -100,6 +99,6 @@ class AgencyApiTest(APITestCase):
         url = '/api/agency/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_delete_agency(self): test different user groups access control

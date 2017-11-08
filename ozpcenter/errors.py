@@ -37,10 +37,22 @@ class RequestException(APIException):
     default_code = 'request'
 
 
+class ValidationException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _('Validation Error')
+    default_code = 'validation_error'
+
+
 class AuthorizationFailure(APIException):
     status_code = status.HTTP_401_UNAUTHORIZED
     default_detail = _('Not authorized to view')
     default_code = 'authorization_failure'
+
+
+class NotImplemented(APIException):
+    status_code = status.HTTP_501_NOT_IMPLEMENTED
+    default_detail = _('Not implemented')
+    default_code = 'not_implemented'
 
 
 class ElasticsearchServiceUnavailable(APIException):
@@ -96,7 +108,7 @@ def exception_handler(exc, context):
 
         message = six.text_type(exc)
         if message:
-            data['message'] = message
+            data['detail'] = message
 
         set_rollback()
         return Response(data, status=status.HTTP_403_FORBIDDEN)
