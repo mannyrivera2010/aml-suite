@@ -650,6 +650,23 @@ def create_listing_review(username, listing, rating, text=None, review_parent=No
     review = models.Review(listing=listing, author=author, rate=rating, text=text, review_parent=review_parent)
     review.save()
 
+    # add this action to the log
+    change_details = [
+        {
+            'field_name': 'rate',
+            'old_value': None,
+            'new_value': rating
+        },
+        {
+            'field_name': 'text',
+            'old_value': None,
+            'new_value': text
+        }
+    ]
+    listing = review.listing
+    listing = _add_listing_activity(author, listing,
+        models.ListingActivity.REVIEWED, change_details=change_details)
+
     # update this listing's rating
     _update_rating(username, listing)
 
