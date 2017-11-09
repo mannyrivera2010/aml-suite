@@ -83,6 +83,8 @@ TEST_IMG_PATH = os.path.join(TEST_BASE_PATH, 'test_images') + '/'
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 DEMO_APP_ROOT = settings.OZP['DEMO_APP_ROOT']
 
+FAST_MODE = bool(os.getenv('FAST_MODE', False))
+
 
 def time_ms():
     return time.time() * 1000.0
@@ -298,18 +300,67 @@ def load_yaml_file(filename):
             raise exc
 
 
+def parse_sqlite_dump(filename):
+    sql_statement = open(os.path.join(TEST_DATA_PATH, filename), 'r').readlines()
+    all_sql = []
+    temp_string = []
+    for letter in sql_statement:
+        temp_string.append(letter)
+        if letter.strip().endswith(';'):
+            all_sql.append(''.join(temp_string))
+            temp_string = []
+    return all_sql
+
+
+def load_data_from_sql(db_connection, filename):
+    sql_statements = parse_sqlite_dump(filename)
+    with db_connection.cursor() as cursor:
+        for sql_statement in sql_statements:
+            sql_statement = sql_statement.strip()
+
+            # ignore_lines = ['BEGIN TRANSACTION;',
+            #                 'COMMIT;',
+            #                 'CREATE UNIQUE INDEX',
+            #                 'CREATE INDEX',
+            #                 'CREATE TABLE',
+            #                 'DELETE FROM',
+            #                 'INSERT INTO "django_migrations"',
+            #                 "INSERT INTO \"auth_group\" VALUES(5,'BETA_USER');"
+            #                 'INSERT INTO "django_content_type" ']
+            #
+            # ignore_line = False
+            #
+            # for ignore_str in ignore_lines:
+            #     if sql_statement.startswith(ignore_str):
+            #         ignore_line = True
+            #
+            # if not ignore_line:
+            #     print(sql_statement)
+            cursor.execute(sql_statement)
+
+
 def run():
     """
     Creates basic sample data
     """
-    print('--flushing database')
-    call_command('flush', '--noinput')  # Used to make postgresql work in unittest
-
     total_start_time = time_ms()
 
     db_connection = transaction.get_connection()
     db_connection.queries_limit = 100000
     db_connection.queries_log = deque(maxlen=db_connection.queries_limit)
+
+    ############################################################################
+    #                           Fast Mode
+    ############################################################################
+    if FAST_MODE:
+        section_file_start_time = time_ms()
+
+        load_data_from_sql(db_connection, 'dump_sqlite3.sql')
+
+        print('-----Took: {} ms'.format(time_ms() - section_file_start_time))
+        print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
+        return
 
     ############################################################################
     #                           Security Markings
@@ -383,6 +434,8 @@ def run():
     model_access_es.recreate_index_mapping()
     print('-----Took: {} ms'.format(time_ms() - section_file_start_time))
 
+    print('--flushing database')
+    call_command('flush', '--noinput')  # Used to make postgresql work in unittest
     ############################################################################
     #                           Groups
     ############################################################################

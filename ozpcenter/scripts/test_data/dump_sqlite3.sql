@@ -5166,7 +5166,7 @@ INSERT INTO "ozpcenter_listing" VALUES(59,'Gallery of Maps','2017-11-08 22:18:21
 Gallery of Maps
 This page is a gallery of featured pictures that the community has chosen to be highlighted as some of the finest on Commons.
 
-Contents  
+Contents
 1	  Gallery of Maps
 2	Maps
 2.1	Maps of Africa
