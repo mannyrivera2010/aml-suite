@@ -6,9 +6,6 @@ from django.test import TestCase
 
 from ozpcenter.scripts import sample_data_generator as data_gen
 import ozpcenter.api.image.model_access as model_access
-from ozpcenter import errors
-import ozpcenter.model_access as generic_model_access
-from ozpcenter import models
 
 
 @override_settings(ES_ENABLED=False)
