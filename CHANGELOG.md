@@ -1,5 +1,26 @@
 
-### 1.0.86 (None)
+### 1.0.87 (None)  
+
+#### Refactor 
+* **recommend**
+  *  refactor code ([c6fa5dcf](https://github.com/aml-development/ozp-backend/commit/c6fa5dcfff0540b5be4574be55493ccdc3c959ac))
+  *  add es recommender unit tests ([bee013fc](https://github.com/aml-development/ozp-backend/commit/bee013fc2d444d298f5291842753395cde7c375f))
+  *  refactor notification ([200ddb5b](https://github.com/aml-development/ozp-backend/commit/200ddb5b607faa8509aedab4fa12631b168458aa))     
+
+#### Merge Pull Requests  
+* Merge pull request #375 from aml-development/orgstewardNotification ([33252855](https://github.com/aml-development/ozp-backend/commit/33252855ef2c072e96440fefca6cf36a0493099d))
+* Merge pull request #374 from aml-development/recommend_refactor ([a1f31e19](https://github.com/aml-development/ozp-backend/commit/a1f31e1995798297d4dd2d8bfe9709854a8f6378))         
+
+#### Changes  
+* adding test for new API call ([0b3a3980](https://github.com/aml-development/ozp-backend/commit/0b3a398056560c1869297f78238332212ed49e8c))
+* correcting tests ([f1e4d352](https://github.com/aml-development/ozp-backend/commit/f1e4d352fbe8e0b3fa0b57547d31828aa8bd36bc))
+* change test from put to post ([10e21124](https://github.com/aml-development/ozp-backend/commit/10e21124aca6ecfd8a3a163bd23750a6da493ab0))
+* changed single quote to double quote ([87f268c4](https://github.com/aml-development/ozp-backend/commit/87f268c4eae65a50714f53d6a7cf53fabcbcd8b1))
+* added tests ([2b3d2667](https://github.com/aml-development/ozp-backend/commit/2b3d2667b8ca5e86dbbac8b03d0506b4d8327f58))
+* updated org steward notification for custom text ([dede77e5](https://github.com/aml-development/ozp-backend/commit/dede77e5ab9f4cda9bcb51063a66b3b9e9eda840))    
+* **views**:  API query for listings by owner ([576e8467](https://github.com/aml-development/ozp-backend/commit/576e84675a00c2c4ac8321febc9dc1e8f523ad18))     
+
+### 1.0.86 (2017-10-30)
 
 #### Feature  
 * **feedback**:  allow delete method for feedback. added tests for delete method ([4b21c5f7](https://github.com/aml-development/ozp-backend/commit/4b21c5f7d12d490592809fa77dcecc97136b7be1))     
@@ -28,6 +49,8 @@
 * **listing**:  update rating docs ([4c1c8be5](https://github.com/aml-development/ozp-backend/commit/4c1c8be5c8bb4db382d95982127c7541a6470d2f))        
 
 #### Changes  
+* adding migration ([46646cf2](https://github.com/aml-development/ozp-backend/commit/46646cf246ad39e808a0f8abf77b1eec97799a93))
+* redid new notification type ([517a4fd8](https://github.com/aml-development/ozp-backend/commit/517a4fd82201e9cef5767f3df252fc47f860a30a))
 * Update README.md ([60d8285c](https://github.com/aml-development/ozp-backend/commit/60d8285c9696089df441a0ba511af75861853c4c))
 * Update PULL_REQUEST_TEMPLATE.md ([c40a6066](https://github.com/aml-development/ozp-backend/commit/c40a60669a99da99a0c2a818d88922aabccc46b6))
 * Update PULL_REQUEST_TEMPLATE.md ([051e5732](https://github.com/aml-development/ozp-backend/commit/051e5732329975586a7dcdf3e37df98d9e06cf51))
