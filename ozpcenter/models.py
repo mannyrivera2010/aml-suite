@@ -1428,6 +1428,7 @@ class ListingActivity(models.Model):
     # a review for a listing has been deleted
     REVIEW_DELETED = 'REVIEW_DELETED'
     PENDING_DELETION = 'PENDING_DELETION'
+    REVIEWED = 'REVIEWED'
 
     ACTION_CHOICES = (
         (CREATED, 'CREATED'),
@@ -1439,6 +1440,7 @@ class ListingActivity(models.Model):
         (ENABLED, 'ENABLED'),
         (DISABLED, 'DISABLED'),
         (DELETED, 'DELETED'),
+        (REVIEWED, 'REVIEWED'),
         (REVIEW_EDITED, 'REVIEW_EDITED'),
         (REVIEW_DELETED, 'REVIEW_DELETED'),
         (PENDING_DELETION, 'PENDING_DELETION')
