@@ -228,8 +228,6 @@ def get_recommendation_listing_ids(profile_instance):
         if recommendation_data:
             recommended_entry_data = msgpack.unpackb(recommendation_data, encoding='utf-8')
 
-    print(recommended_entry_data)
-
     recommendation_combined_dict = {'profile': {}}
 
     for recommender_friendly_name in recommended_entry_data:

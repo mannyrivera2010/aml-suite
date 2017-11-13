@@ -180,8 +180,6 @@ def create_listing(listing_builder_dict, object_cache):
 
     10-01-2017 - Total Database Calls: 11842
     10-02-2017 - Total Database Calls: 7737
-
-
     """
     listing_data = listing_builder_dict['listing']
 

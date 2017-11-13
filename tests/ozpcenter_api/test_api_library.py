@@ -11,7 +11,7 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 
 from tests.ozpcenter.helper import _edit_listing
-from tests.ozpcenter.helper import _create_create_bookmark
+from tests.ozpcenter.helper import _create_bookmark
 
 
 @override_settings(ES_ENABLED=False)
@@ -44,19 +44,19 @@ class LibraryApiTest(APITestCase):
         POST to /self/library
         """
         # Listing is Enabled
-        response = _create_create_bookmark(self, 'wsmith', 1, folder_name='', status_code=201)
+        response = _create_bookmark(self, 'wsmith', 1, folder_name='', status_code=201)
         self.assertEqual(response.data['listing']['id'], 1)
 
         # Disable Listing
         _edit_listing(self, 1, {'is_enabled': False}, 'wsmith')
 
         # POST to /self/library after listing disabled
-        response = _create_create_bookmark(self, 'wsmith', 1, folder_name='', status_code=400)
+        response = _create_bookmark(self, 'wsmith', 1, folder_name='', status_code=400)
 
         # Enabled Listing
         _edit_listing(self, 1, {'is_enabled': True}, 'wsmith')
         # POST to /self/library after listing disabled
-        response = _create_create_bookmark(self, 'wsmith', 1, folder_name='', status_code=201)
+        response = _create_bookmark(self, 'wsmith', 1, folder_name='', status_code=201)
         self.assertEqual(response.data['listing']['id'], 1)
 
     def test_get_library_list(self):

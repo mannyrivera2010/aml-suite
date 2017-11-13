@@ -66,17 +66,18 @@ class ProfileResultSet(object):
         self.recommender_result_set = {}
 
     def add_listing_to_user_profile(self, profile_id, listing_id, score, cumulative=False):
+        score = float(score)
         if profile_id in self.recommender_result_set:
             if self.recommender_result_set[profile_id].get(listing_id):
                 if cumulative:
-                    self.recommender_result_set[profile_id][listing_id] = self.recommender_result_set[profile_id][listing_id] + float(score)
+                    self.recommender_result_set[profile_id][listing_id] = round(self.recommender_result_set[profile_id][listing_id] + score, 3)
                 else:
-                    self.recommender_result_set[profile_id][listing_id] = float(score)
+                    self.recommender_result_set[profile_id][listing_id] = round(score, 3)
             else:
-                self.recommender_result_set[profile_id][listing_id] = float(score)
+                self.recommender_result_set[profile_id][listing_id] = round(score, 3)
         else:
             self.recommender_result_set[profile_id] = {}
-            self.recommender_result_set[profile_id][listing_id] = float(score)
+            self.recommender_result_set[profile_id][listing_id] = round(score, 3)
 
 
 class RecommenderProfileResultSet(object):
