@@ -228,6 +228,8 @@ def get_recommendation_listing_ids(profile_instance):
         if recommendation_data:
             recommended_entry_data = msgpack.unpackb(recommendation_data, encoding='utf-8')
 
+    print(recommended_entry_data)
+
     recommendation_combined_dict = {'profile': {}}
 
     for recommender_friendly_name in recommended_entry_data:
@@ -328,71 +330,67 @@ def get_storefront_new(username, request):
     return data, extra_data
 
 
-def get_storefront_recommended(username, pre_fetch=True):
+def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recommended=True):
     """
     Get Recommended Listings for storefront
+
+    from ozpcenter.api.storefront.model_access import get_storefront_recommended
+    get_storefront_recommended(Profile.objects.first())
+    from ozpcenter import models
+    listing_ids_list = [1,5,6,7]
+    request_profile = Profile.objects.first()
     """
+    username = request_profile.user.username
+
     extra_data = {}
 
-    profile = models.Profile.objects.get(user__username=username)
-
     # Retrieve List of Recommended Apps for profile:
-    listing_ids_list, recommended_entry_data = get_recommendation_listing_ids(profile)
+    listing_ids_list, recommended_entry_data = get_recommendation_listing_ids(request_profile)
     extra_data['recommended_entry_data'] = recommended_entry_data
 
-    # Retrieve Profile Bookmarks and remove bookmarked from recommendation list
-    bookmarked_apps_list = set([application_library_entry.listing.id for application_library_entry in models.ApplicationLibraryEntry.objects.for_user(username)])
     # Retrieve negative feedback and remove from recommendation list
-    negative_feedback_listing_ids = set([recommendation_feedback.target_listing.id for recommendation_feedback in models.RecommendationFeedback.objects.filter(target_profile=profile, feedback=-1)])
-
-    listing_ids_list_temp = []
-
-    for current_listing_id in listing_ids_list:
-        include_flag = True
-
-        if current_listing_id in bookmarked_apps_list:
-            include_flag = False
-
-        if current_listing_id in negative_feedback_listing_ids:
-            include_flag = False
-
-        if include_flag:
-            listing_ids_list_temp.append(current_listing_id)
-
-    listing_ids_list = listing_ids_list_temp
+    negative_feedback_listing_ids = models.RecommendationFeedback.objects.filter(target_profile=request_profile, feedback=-1).values('target_listing')
+    # Retrieve Profile Bookmarks and remove bookmarked from recommendation list
+    bookmarked_apps_list = models.ApplicationLibraryEntry.objects.for_user_organization_minus_security_markings(request_profile.user.username, True).values('listing')
 
     # Send new recommendation list minus bookmarked apps to User Interface
-    recommended_listings_queryset = models.Listing.objects.for_user_organization_minus_security_markings(username).filter(pk__in=listing_ids_list,
-                                                                                                                          approval_status=models.Listing.APPROVED,
-                                                                                                                          is_enabled=True,
-                                                                                                                          is_deleted=False).all()
-
+    recommended_listings_queryset = (models.Listing.objects
+                                           .for_user_organization_minus_security_markings(request_profile.user.username)
+                                           .filter(pk__in=listing_ids_list,
+                                                   approval_status=models.Listing.APPROVED,
+                                                   is_enabled=True,
+                                                   is_deleted=False)
+                                     .exclude(id__in=negative_feedback_listing_ids)
+                                     .exclude(id__in=bookmarked_apps_list)
+                                     .all())
     # Fix Order of Recommendations
     id_recommended_object_mapper = {}
     for recommendation_entry in recommended_listings_queryset:
         id_recommended_object_mapper[recommendation_entry.id] = recommendation_entry
 
-    # recommended_listings_raw = [id_recommended_object_mapper[listing_id] for listing_id in listing_ids_list]
-
     recommended_listings_raw = []
-
     for listing_id in listing_ids_list:
         if listing_id in id_recommended_object_mapper:
             recommended_listings_raw.append(id_recommended_object_mapper[listing_id])
 
     # Post security_marking check - lazy loading
+
+    pipeline_list = [pipes.ListingPostSecurityMarkingCheckPipe(username), pipes.LimitPipe(10)]
+
+    if randomize_recommended:
+        pipeline_list.insert(0, pipes.JitterPipe())
+
     recommended_listings = pipeline.Pipeline(recommend_utils.ListIterator([recommendations_listing for recommendations_listing in recommended_listings_raw]),
-                                      [pipes.JitterPipe(),
-                                       pipes.ListingPostSecurityMarkingCheckPipe(username),
-                                       pipes.LimitPipe(10)]).to_list()
+                                      pipeline_list).to_list()
 
     return recommended_listings, extra_data
 
 
-def get_storefront_featured(username, pre_fetch=True):
+def get_storefront_featured(request_profile, pre_fetch=True):
     """
     Get Featured Listings for storefront
     """
+    username = request_profile.user.username
     # Get Featured Listings
     featured_listings_raw = models.Listing.objects.for_user_organization_minus_security_markings(
         username).filter(
@@ -406,10 +404,11 @@ def get_storefront_featured(username, pre_fetch=True):
     return featured_listings
 
 
-def get_storefront_recent(username, pre_fetch=True):
+def get_storefront_recent(request_profile, pre_fetch=True):
     """
     Get Recent Listings for storefront
     """
+    username = request_profile.user.username
     # Get Recent Listings
     recent_listings_raw = models.Listing.objects.for_user_organization_minus_security_markings(
         username).order_by('-approved_date').filter(
@@ -423,10 +422,11 @@ def get_storefront_recent(username, pre_fetch=True):
     return recent_listings
 
 
-def get_storefront_most_popular(username, pre_fetch=True):
+def get_storefront_most_popular(request_profile, pre_fetch=True):
     """
     Get Most Popular Listings for storefront
     """
+    username = request_profile.user.username
     # Get most popular listings via a weighted average
     most_popular_listings_raw = models.Listing.objects.for_user_organization_minus_security_markings(
         username).filter(
@@ -440,7 +440,10 @@ def get_storefront_most_popular(username, pre_fetch=True):
     return most_popular_listings
 
 
-def get_storefront(username, pre_fetch=False, section=None):
+from ozpcenter.utils import str_to_bool
+
+
+def get_storefront(request, pre_fetch=False, section=None):
     """
     Returns data for /storefront api invocation including:
         * recommended listings (max=10)
@@ -464,29 +467,33 @@ def get_storefront(username, pre_fetch=False, section=None):
         }
     """
     try:
+        request_profile = models.Profile.objects.get(user__username=request.user)
+
+        randomize_recommended = str_to_bool(request.query_params.get('randomize', True))
+
         section = section or 'all'
 
         data = {}
         extra_data = {}
 
         if section == 'all' or section == 'recommended':
-            recommended_listings, extra_data = get_storefront_recommended(username, pre_fetch)
+            recommended_listings, extra_data = get_storefront_recommended(request_profile, pre_fetch, randomize_recommended)
             data['recommended'] = recommended_listings
         else:
             data['recommended'] = []
 
         if section == 'all' or section == 'featured':
-            data['featured'] = get_storefront_featured(username, pre_fetch)
+            data['featured'] = get_storefront_featured(request_profile, pre_fetch)
         else:
             data['featured'] = []
 
         if section == 'all' or section == 'recent':
-            data['recent'] = get_storefront_recent(username, pre_fetch)
+            data['recent'] = get_storefront_recent(request_profile, pre_fetch)
         else:
             data['recent'] = []
 
         if section == 'all' or section == 'most_popular':
-            data['most_popular'] = get_storefront_most_popular(username, pre_fetch)
+            data['most_popular'] = get_storefront_most_popular(request_profile, pre_fetch)
         else:
             data['most_popular'] = []
 

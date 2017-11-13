@@ -408,10 +408,13 @@ class RecommenderDirectory(object):
         Args:
             recommender_string: Comma Delimited list of Recommender Engine to execute
         """
+        results = {}
+
         start_ms = time.time() * 1000.0
 
         for recommender_obj, friendly_name, recommendation_weight in self._iterate_recommenders(recommender_string):
             logger.info('=={}=='.format(friendly_name))
+            results[friendly_name] = {}
 
             if hasattr(recommender_obj, 'initiate'):
                 # initiate - Used for initiating variables, classes, objects, connecting to service
@@ -439,6 +442,8 @@ class RecommenderDirectory(object):
         end_db_ms = time.time() * 1000.0
         logger.info('Save to database took: {} ms'.format(end_db_ms - start_db_ms))
         logger.info('Whole Process: {} ms'.format(end_db_ms - start_ms))
+
+        return results
 
     def save_to_db(self):
         """

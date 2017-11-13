@@ -97,9 +97,8 @@ class StorefrontViewSet(viewsets.ViewSet):
         ---
         serializer: ozpcenter.api.storefront.serializers.StorefrontSerializer
         """
-        data, extra_data = model_access.get_storefront(request.user, True)
-        serializer = serializers.StorefrontSerializer(data,
-            context={'request': request})
+        data, extra_data = model_access.get_storefront(request, True)
+        serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data
         self._add_recommended_scores(serialized_data, extra_data)
@@ -107,9 +106,8 @@ class StorefrontViewSet(viewsets.ViewSet):
         return Response(serialized_data)
 
     def retrieve(self, request, pk=None):
-        data, extra_data = model_access.get_storefront(request.user, True, pk)
-        serializer = serializers.StorefrontSerializer(data,
-            context={'request': request})
+        data, extra_data = model_access.get_storefront(request, True, pk)
+        serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data
         self._add_recommended_scores(serialized_data, extra_data)
