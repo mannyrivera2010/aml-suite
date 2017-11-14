@@ -109,6 +109,22 @@ class RecommenderProfileResultSet(object):
         self.profile_id = profile_id
         self.recommender_result_set = {}
 
+    @staticmethod
+    def from_profile_instance(profile_instance):
+        # Get Recommended Listings for owner
+        target_profile_recommended_entry = models.RecommendationsEntry.objects.filter(target_profile=profile_instance).first()
+
+        recommender_profile_result_set = RecommenderProfileResultSet(profile_instance.id)
+
+        recommended_entry_data = {}
+        if target_profile_recommended_entry:
+            recommendation_data = target_profile_recommended_entry.recommendation_data
+            if recommendation_data:
+                recommended_entry_data = msgpack.unpackb(recommendation_data, encoding='utf-8')
+                recommender_profile_result_set.recommender_result_set = recommended_entry_data
+
+        return recommender_profile_result_set
+
     def merge(self, recommender_friendly_name, recommendation_weight, current_recommendations, recommendations_time):
         """
         Purpose is to merge all of the different Recommender's algorthim recommender result together.
@@ -248,7 +264,7 @@ class BaselineRecommender(object):
                     is_featured=True,
                     approval_status=models.Listing.APPROVED,
                     is_enabled=True,
-                    is_deleted=False)[:36]
+                    is_deleted=False)
 
             for current_listing in featured_listings:
                 self.profile_result_set.add_listing_to_user_profile(profile_id, current_listing.id, 3.0, True)
@@ -260,7 +276,7 @@ class BaselineRecommender(object):
                         is_featured=False,
                         approval_status=models.Listing.APPROVED,
                         is_enabled=True,
-                        is_deleted=False)[:36]
+                        is_deleted=False)
 
             for current_listing in recent_listings:
                 self.profile_result_set.add_listing_to_user_profile(profile_id, current_listing.id, 2.0, True)
@@ -270,7 +286,7 @@ class BaselineRecommender(object):
                 profile_username).filter(
                     approval_status=models.Listing.APPROVED,
                     is_enabled=True,
-                    is_deleted=False).order_by('-avg_rate', '-total_reviews')[:36]
+                    is_deleted=False).order_by('-avg_rate', '-total_reviews')
 
             for current_listing in most_popular_listings:
                 if current_listing.avg_rate != 0:
@@ -466,7 +482,6 @@ class RecommenderDirectory(object):
 
         profile_query = models.Profile.objects.filter(id__in=profile_id_list)
         profile_dict = {profile.id: profile for profile in profile_query}
-
         listing_dict = {listing.id: listing for listing in models.Listing.objects.all()}
 
         # Delete RecommendationsEntry Entries for profiles
@@ -478,22 +493,6 @@ class RecommenderDirectory(object):
             profile = profile_dict.get(profile_id)
 
             if profile:
-                for current_recommender_friendly_name in recommender_result_set[profile_id].recommender_result_set:
-                    output_current_tuples = []
-
-                    current_recommendations = recommender_result_set[profile_id].recommender_result_set[current_recommender_friendly_name]['recommendations']
-                    sorted_recommendations = recommend_utils.get_top_n_score(current_recommendations, 20)
-
-                    for current_recommendation_tuple in sorted_recommendations:
-                        current_listing_id = current_recommendation_tuple[0]
-                        # current_listing_score = current_recommendation_tuple[1]
-                        current_listing = listing_dict.get(current_listing_id)
-
-                        if current_listing:
-                            output_current_tuples.append(current_recommendation_tuple)
-
-                    recommender_result_set[profile_id].recommender_result_set[current_recommender_friendly_name]['recommendations'] = output_current_tuples
-
                 batch_list.append({'target_profile': profile,
                                    'recommendation_data': msgpack.packb(recommender_result_set[profile_id].recommender_result_set)})
 

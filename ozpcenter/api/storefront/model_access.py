@@ -15,6 +15,7 @@ from ozpcenter import models
 from ozpcenter.pipe import pipes
 from ozpcenter.pipe import pipeline
 from ozpcenter.recommend import recommend_utils
+from ozpcenter.recommend.recommend import RecommenderProfileResultSet
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -219,26 +220,20 @@ def get_user_listings(username, request, exclude_orgs=None):
 
 
 def get_recommendation_listing_ids(profile_instance):
-    # Get Recommended Listings for owner
-    target_profile_recommended_entry = models.RecommendationsEntry.objects.filter(target_profile=profile_instance).first()
-
-    recommended_entry_data = {}
-    if target_profile_recommended_entry:
-        recommendation_data = target_profile_recommended_entry.recommendation_data
-        if recommendation_data:
-            recommended_entry_data = msgpack.unpackb(recommendation_data, encoding='utf-8')
+    recommender_profile_result_set = RecommenderProfileResultSet.from_profile_instance(profile_instance)
+    recommended_entry_data = recommender_profile_result_set.recommender_result_set
 
     recommendation_combined_dict = {'profile': {}}
 
     for recommender_friendly_name in recommended_entry_data:
         recommender_name_data = recommended_entry_data[recommender_friendly_name]
-        # print(recommender_name_data)
         recommender_name_weight = recommender_name_data['weight']
         recommender_name_recommendations = recommender_name_data['recommendations']
 
-        for recommendation_tuple in recommender_name_recommendations:
-            current_listing_id = recommendation_tuple[0]
-            current_listing_score = recommendation_tuple[1]
+        for recommendation_listing_key in recommender_name_recommendations:
+
+            current_listing_id = recommendation_listing_key
+            current_listing_score = recommender_name_recommendations[current_listing_id]
 
             if current_listing_id in recommendation_combined_dict['profile']:
                 recommendation_combined_dict['profile'][current_listing_id] = recommendation_combined_dict['profile'][current_listing_id] + (current_listing_score * recommender_name_weight)
@@ -246,11 +241,10 @@ def get_recommendation_listing_ids(profile_instance):
                 recommendation_combined_dict['profile'][current_listing_id] = current_listing_score * recommender_name_weight
 
     sorted_recommendations_combined_dict = recommend_utils.get_top_n_score(recommendation_combined_dict['profile'], 40)
-    # sorted_recommendations_combined_dict = {'profile': [[11, 8.5], [112, 8.0], [85, 7.0], [86, 7.0], [87, 7.0],
+    # sorted_recommendations_combined_dict = [[11, 8.5], [112, 8.0], [85, 7.0], [86, 7.0], [87, 7.0],
     #    [88, 7.0], [89, 7.0], [90, 7.0], [81, 6.0], [62, 6.0],
-    #    [21, 5.5], [1, 5.0], [113, 5.0], [111, 5.0], [114, 5.0], [64, 4.0], [66, 4.0], [68, 4.0], [70, 4.0], [72, 4.0]]}
-    listing_ids_list = [entry[0] for entry in sorted_recommendations_combined_dict]
-    return listing_ids_list, recommended_entry_data
+    #    [21, 5.5], [1, 5.0], [113, 5.0], [111, 5.0], [114, 5.0], [64, 4.0], [66, 4.0], [68, 4.0], [70, 4.0], [72, 4.0]]
+    return sorted_recommendations_combined_dict, recommended_entry_data
 
 
 def get_storefront_new(username, request):
@@ -343,8 +337,11 @@ def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recomm
     extra_data = {}
 
     # Retrieve List of Recommended Apps for profile:
-    listing_ids_list, recommended_entry_data = get_recommendation_listing_ids(request_profile)
+    sorted_recommendations_combined_list, recommended_entry_data = get_recommendation_listing_ids(request_profile)
+    listing_ids_list = [entry[0] for entry in sorted_recommendations_combined_list]
+
     extra_data['recommended_entry_data'] = recommended_entry_data
+    extra_data['sorted_recommendations_combined_dict'] = {item[0]: item[1] for item in sorted_recommendations_combined_list}
 
     # Retrieve negative feedback and remove from recommendation list
     negative_feedback_listing_ids = models.RecommendationFeedback.objects.filter(target_profile=request_profile, feedback=-1).values('target_listing')
