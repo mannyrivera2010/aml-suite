@@ -1,5 +1,24 @@
 
-### 1.0.87 (None)  
+### 1.0.88 (None)
+
+#### Feature  
+* **activity log**:  add new review to activity log ([84f95acd](https://github.com/aml-development/ozp-backend/commit/84f95acda1d6421c6d642d118e8e28868db8f918))   
+* **makefile**
+  *  modify sqlite and pgsql dump ([4f00ae92](https://github.com/aml-development/ozp-backend/commit/4f00ae92a66b13928622346ee2ab17c704ac49a8))
+  *  add sqlite and pgsql dump ([defead28](https://github.com/aml-development/ozp-backend/commit/defead2850184cbb45ee524256fb141a5fb4c1ae))     
+
+#### Fixes  
+* **review**:  fix bug where notifications get sent on review responses ([718188c0](https://github.com/aml-development/ozp-backend/commit/718188c04744297852eda2f10345f7146cae3d70))    
+* **listing**:  add missing migration ([e8cb98a6](https://github.com/aml-development/ozp-backend/commit/e8cb98a6094a10dcaa513009edc5cc2bf445928d))     
+
+#### Merge Pull Requests  
+* Merge pull request #380 from aml-development/review_response_bugfix ([46094bf8](https://github.com/aml-development/ozp-backend/commit/46094bf8fb215470e7c0514e54db7d4174087ab2))
+* Merge pull request #378 from aml-development/New_Action_log_addition ([f7b74d72](https://github.com/aml-development/ozp-backend/commit/f7b74d72fe3f75f1130ee59f6bdbf343bb859e61))       
+
+#### Test  
+* **review**:  add test cases for review notifications ([cfbafbb7](https://github.com/aml-development/ozp-backend/commit/cfbafbb71456c6e08d220eda7bf147853889a871))       
+
+### 1.0.87 (2017-11-08)  
 
 #### Refactor 
 * **recommend**
