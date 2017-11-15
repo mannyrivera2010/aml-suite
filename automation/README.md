@@ -16,7 +16,7 @@ source env/bin/activate
 
 ````
 
-Preq: Goto to ~/git/dev-tools/settings.py
+Preq: Goto to ~/git/dev-tools/automation/settings.py
  - If REPO_CLONE_MODE=git, the github private/public keys is required
  - Goto settings.py Change GIT_USERNAME and GIT_EMAIL
  
