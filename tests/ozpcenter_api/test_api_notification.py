@@ -617,6 +617,74 @@ class NotificationApiTest(APITestCase):
         self.assertEqual(response.data['listing'], None)
         self.assertTrue('expires_date' in data)
 
+    def test_create_review_notification(self):
+        user = generic_model_access.get_profile('jones').user
+        self.client.force_authenticate(user=user)
+
+        # Review for Lamprey listing owned by bigbrother
+        review_data = {
+            "listing": 91,
+            "rate": 5,
+            "text": "This is a review for the listing"
+        }
+        url = '/api/listing/91/review/'
+        response = self.client.post(url, review_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Check notifications for new review notification
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/self/notification/'
+        response = self.client.get(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['entity_id'], review_data['listing'])
+        self.assertEqual(response.data[0]['author']['user']['username'], 'jones')
+        self.assertEqual(response.data[0]['listing']['title'], 'Lamprey')
+        self.assertEqual(response.data[0]['message'], 'A user has rated listing <b>Lamprey</b> 5 stars')
+
+    def test_create_review_response(self):
+        user = generic_model_access.get_profile('jones').user
+        self.client.force_authenticate(user=user)
+
+        # Review for Lamprey listing owned by bigbrother
+        review_data = {
+            "listing": 91,
+            "rate": 5,
+            "text": "This is a review for the listing"
+        }
+        url = '/api/listing/91/review/'
+        response = self.client.post(url, review_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Create response to the review created
+        review_response_data = {
+            "listing": 91,
+            "rate": 1,
+            "text": "This is a response to a review",
+            "review_parent": response.data['id']
+        }
+        url = '/api/listing/91/review/'
+        response = self.client.post(url, review_response_data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Verify no notifications has been created for creating a review response
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/self/notification/'
+        response = self.client.get(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['entity_id'], review_data['listing'])
+        self.assertEqual(response.data[0]['author']['user']['username'], 'jones')
+        self.assertEqual(response.data[0]['listing']['title'], 'Lamprey')
+        self.assertEqual(response.data[0]['message'], 'A user has rated listing <b>Lamprey</b> 5 stars')
+
     # TODO test_create_peer_notification_invalid (rivera 20160617)
     # TODO test_create_peer_bookmark_notification (rivera 20160617)
 

@@ -670,7 +670,8 @@ def create_listing_review(username, listing, rating, text=None, review_parent=No
     # update this listing's rating
     _update_rating(username, listing)
 
-    dispatcher.publish('listing_review_created', listing=listing, profile=author, rating=rating, text=text)
+    if review.review_parent is None:
+        dispatcher.publish('listing_review_created', listing=listing, profile=author, rating=rating, text=text)
     return review
 
 
