@@ -15,6 +15,7 @@ from tests.ozpcenter.helper import unittest_request_helper
 from tests.ozpcenter.helper import _edit_listing
 from ozpcenter.api.listing import model_access_es
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
+from ozpcenter.recommend.recommend import RecommenderDirectory
 
 
 @override_settings(ES_ENABLED=False)
@@ -48,10 +49,115 @@ class ElasticsearchBaseRecommenderTest(APITestCase):
     def test_recommendation_content_base(self):
         if self.es_failed:
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
-        # TODO: Finish Logic
+        recommender_wrapper_obj = RecommenderDirectory()
+        actual_result = recommender_wrapper_obj.recommend('elasticsearch_content_base')
+        expected_result = {'Elasticsearch Content Filtering': {}}
+        self.assertEquals(actual_result, expected_result)
+
+        url = '/api/storefront/recommended/?randomize=False'
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+
+        title_scores = [{'title': listing['title'], '_score': listing['_score']} for listing in response.data['recommended']]
+
+        expected_result = [{'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.762,
+                                                 'weight': 0.9},
+                                       '_sort_score': 7.886},
+                            'title': 'Wolverine'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.315,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.483},
+                            'title': 'Beast'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.268,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.441},
+                            'title': 'Magneto'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.213,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.392},
+                            'title': 'Jupiter'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.112,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.301},
+                            'title': 'Pokemon Ruby and Sapphire'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.096,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.286},
+                            'title': 'Cyclops'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.094,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.285},
+                            'title': 'Barsoom'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.088,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.279},
+                            'title': 'Blink'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 8.08,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.272},
+                            'title': 'Clerks'},
+                           {'_score': {'Elasticsearch Content Filtering': {'raw_score': 7.999,
+                                                                           'weight': 0.9},
+                                       '_sort_score': 7.199},
+                            'title': 'Rogue'}]
+        # import pprint
+        # print(pprint.pprint(title_scores))
+        self.assertEquals(expected_result, title_scores)
 
     @override_settings(ES_ENABLED=True)
     def test_recommendation_user_base(self):
         if self.es_failed:
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
-        # TODO: Finish Logic
+        recommender_wrapper_obj = RecommenderDirectory()
+        actual_result = recommender_wrapper_obj.recommend('elasticsearch_user_base')
+        expected_result = {'Elasticsearch User Based Filtering': {}}
+
+        self.assertEquals(actual_result, expected_result)
+
+        url = '/api/storefront/recommended/?randomize=False'
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+
+        title_scores = [{'title': listing['title'], '_score': listing['_score']} for listing in response.data['recommended']]
+
+        expected_result = [{'_score': {'Elasticsearch User Based Filtering': {'raw_score': 10.0,
+                                                    'weight': 1.0},
+                                       '_sort_score': 10.0},
+                            'title': 'Railroad'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 10.0,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 10.0},
+                            'title': 'Barsoom'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 10.0,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 10.0},
+                            'title': 'Snow'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 10.0,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 10.0},
+                            'title': 'Business Management System'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 10.0,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 10.0},
+                            'title': 'Tornado'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 8.333,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 8.333},
+                            'title': 'Pluto (Not a planet)'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 8.333,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 8.333},
+                            'title': 'Project Management'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 8.333,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 8.333},
+                            'title': 'BeiDou Navigation Satellite System'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 8.333,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 8.333},
+                            'title': 'Satellite navigation'},
+                           {'_score': {'Elasticsearch User Based Filtering': {'raw_score': 8.333,
+                                                                              'weight': 1.0},
+                                       '_sort_score': 8.333},
+                            'title': 'Stop sign'}]
+        # import pprint
+        # print(pprint.pprint(title_scores))
+        self.assertEquals(expected_result, title_scores)

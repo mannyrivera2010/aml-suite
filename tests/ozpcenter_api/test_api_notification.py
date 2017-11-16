@@ -15,7 +15,7 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 
 from tests.ozpcenter.helper import _edit_listing
-from tests.ozpcenter.helper import _create_create_bookmark
+from tests.ozpcenter.helper import _create_bookmark
 from tests.ozpcenter.helper import _import_bookmarks
 
 
@@ -765,13 +765,13 @@ class NotificationApiTest(APITestCase):
                                    'Saturn-planets']}
 
         # Create Bookmark
-        response = _create_create_bookmark(self, 'wsmith', 3, folder_name='foldername1', status_code=201)
+        response = _create_bookmark(self, 'wsmith', 3, folder_name='foldername1', status_code=201)
         self.assertEqual(response.data['listing']['id'], 3)
         user_library['wsmith'].append('{}-{}'.format(response.data['listing']['title'], response.data['folder']))
         self._compare_library(user_library)
 
         # Create Bookmark
-        response = _create_create_bookmark(self, 'wsmith', 4, folder_name='foldername1', status_code=201)
+        response = _create_bookmark(self, 'wsmith', 4, folder_name='foldername1', status_code=201)
         self.assertEqual(response.data['listing']['id'], 4)
         user_library['wsmith'].append('{}-{}'.format(response.data['listing']['title'], response.data['folder']))
         self._compare_library(user_library)
@@ -996,7 +996,7 @@ class NotificationApiTest(APITestCase):
         self._compare_library(user_library)
 
         # Create Bookmark
-        response = _create_create_bookmark(self, 'bigbrother', 4, folder_name='foldername2', status_code=201)
+        response = _create_bookmark(self, 'bigbrother', 4, folder_name='foldername2', status_code=201)
         self.assertEqual(response.data['listing']['id'], 4)
         user_library['bigbrother'].append('{}-{}'.format(response.data['listing']['title'], response.data['folder']))
         self._compare_library(user_library)

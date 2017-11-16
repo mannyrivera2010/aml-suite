@@ -61,7 +61,7 @@ def _edit_listing(test_case_instance, id, input_data, default_user='bigbrother')
     return response
 
 
-def _create_create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
+def _create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
     """
     Create Bookmark Helper Function
 
