@@ -119,6 +119,8 @@ def unittest_request_helper(test_case_instance, url, method, data=None, username
             test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         elif status_code == 403:
             test_case_instance.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        elif status_code == 404:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         else:
             raise Exception('status code is not supported')
 

@@ -6,6 +6,9 @@ from rest_framework.test import APITestCase
 
 from tests.ozpcenter.helper import unittest_request_helper
 from ozpcenter.scripts import sample_data_generator as data_gen
+from ozpcenter import models
+import ozpcenter.api.listing.model_access as listing_model_access
+import ozpcenter.model_access as generic_model_access
 
 
 @override_settings(ES_ENABLED=False)
@@ -139,5 +142,18 @@ class CategoryApiTest(APITestCase):
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
 
         self.assertEqual(response.data, self.expected_error)
+
+    def test_delete_category_with_existing_listings(self):
+        author = generic_model_access.get_profile('wsmith')
+        air_mail = models.Listing.objects.for_user(author.user.username).get(title='Air Mail')
+        listing_model_access.create_listing(author, air_mail)
+
+        air_mail = models.Listing.objects.for_user(author.user.username).get(title='Air Mail')
+        self.assertEqual(air_mail.last_activity.action, models.ListingActivity.CREATED)
+        self.assertEqual(air_mail.approval_status, models.Listing.IN_PROGRESS)
+
+        # Air Mail Categories: Communication(4) & Productivity(12)
+        url = '/api/category/4/'
+        response = unittest_request_helper(self, url, 'DELETE', username='bigbrother', status_code=403)
 
     # TODO def test_delete_category(self): test different user groups access control

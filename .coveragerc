@@ -1,0 +1,4 @@
+[run]
+omit = 
+    ozpcenter/migrations/*
+    ozpcenter/scripts/*

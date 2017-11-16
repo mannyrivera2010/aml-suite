@@ -86,9 +86,6 @@ class ImageCreateSerializer(serializers.Serializer):
             if not system_has_access_control(profile.user.username, value):
                 raise serializers.ValidationError(
                     'Security marking too high for current user')
-        else:
-            raise serializers.ValidationError(
-                'Security marking is required')
 
         return value
 
