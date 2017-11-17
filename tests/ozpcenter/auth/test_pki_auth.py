@@ -3,6 +3,7 @@ Tests for (most) of the PkiAuthentication mechanism
 """
 from django.test import override_settings
 from django.test import TestCase
+from unittest.mock import MagicMock
 
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
@@ -17,7 +18,17 @@ class PkiAuthenticationTest(TestCase):
         """
         setUp is invoked before each test method
         """
-        pass
+        self.meta_dict = {
+            'HTTP_X_SSL_AUTHENTICATED': 'SUCCESS',
+            'HTTP_X_SSL_USER_DN': '',
+            'HTTP_X_SSL_ISSUER_DN': ''
+        }
+        self.request = MagicMock()
+        self.request.is_secure.side_effect = lambda *arg: True
+
+        self.request.META.get.side_effect = lambda *arg: self.meta_dict.get(arg[0], arg[1])
+
+        self.pki_authentication = pkiauth.PkiAuthentication()
 
     @classmethod
     def setUpTestData(cls):
@@ -25,6 +36,118 @@ class PkiAuthenticationTest(TestCase):
         Set up test data for the whole TestCase (only run once for the TestCase)
         """
         data_gen.run()
+
+    def test_authenticate_is_secure_false(self):
+        self.request.is_secure.side_effect = lambda *arg: False
+        results = self.pki_authentication.authenticate(self.request)
+        expected_results = None
+
+        self.assertEquals(expected_results, results)
+
+    def test_authenticate_http_x_ssl_authenticated_missing(self):
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = False
+
+        results = self.pki_authentication.authenticate(self.request)
+        expected_results = None
+
+        self.assertEquals(expected_results, results)
+
+    def test_authenticate_http_x_ssl_authenticated(self):
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+
+        results = self.pki_authentication.authenticate(self.request)
+        expected_results = None
+
+        self.assertEquals(expected_results, results)
+
+    def test_authenticate_http_x_ssl_authenticated_fail(self):
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'FAIL'
+
+        results = self.pki_authentication.authenticate(self.request)
+        expected_results = None
+
+        self.assertEquals(expected_results, results)
+
+    def test_authenticate_http_x_ssl_user_dn_missing(self):
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+
+        results = self.pki_authentication.authenticate(self.request)
+        expected_results = None
+
+        self.assertEquals(expected_results, results)
+
+    def test_authenticate_http_x_ssl_issuer_dn_missing(self):
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+        self.meta_dict['HTTP_X_SSL_USER_DN'] = 'user'
+
+        results = self.pki_authentication.authenticate(self.request)
+        expected_results = None
+
+        self.assertEquals(expected_results, results)
+
+    def test_authenticate_full_preprocess_dn(self):
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+        self.meta_dict['HTTP_X_SSL_USER_DN'] = '/user'
+        self.meta_dict['HTTP_X_SSL_ISSUER_DN'] = 'issuer'
+
+        results = self.pki_authentication.authenticate(self.request)
+
+        user_obj = results[0]
+        error_obj = results[1]
+
+        self.assertEquals(str(user_obj.__class__), "<class 'django.contrib.auth.models.User'>")
+        self.assertEquals(error_obj, None)
+
+        self.assertEquals(user_obj.username, 'user')
+
+    def test_authenticate_full_with_cn_preprocess_dn(self):
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+        self.meta_dict['HTTP_X_SSL_USER_DN'] = '/CN=user1'
+        self.meta_dict['HTTP_X_SSL_ISSUER_DN'] = 'issuer'
+
+        results = self.pki_authentication.authenticate(self.request)
+
+        user_obj = results[0]
+        error_obj = results[1]
+
+        self.assertEquals(str(user_obj.__class__), "<class 'django.contrib.auth.models.User'>")
+        self.assertEquals(error_obj, None)
+
+        self.assertEquals(user_obj.username, 'user1')
+
+    def test_authenticate_full_with_cn_preprocess_dn_already_exist(self):
+        self.skipTest('TODO: Disable preprocess dn')
+        # Mock user.objects.count()
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+        self.meta_dict['HTTP_X_SSL_USER_DN'] = '/CN=user1'
+        self.meta_dict['HTTP_X_SSL_ISSUER_DN'] = 'issuer'
+
+        results = self.pki_authentication.authenticate(self.request)
+
+        user_obj = results[0]
+        error_obj = results[1]
+
+        self.assertEquals(str(user_obj.__class__), "<class 'django.contrib.auth.models.User'>")
+        self.assertEquals(error_obj, None)
+
+        self.assertEquals(user_obj.username, 'user1')
+
+    def test_authenticate_full_with_cn_preprocess_dn_false(self):
+        self.skipTest('TODO: Disable preprocess dn')
+
+        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+        self.meta_dict['HTTP_X_SSL_USER_DN'] = '/CN=user1'
+        self.meta_dict['HTTP_X_SSL_ISSUER_DN'] = 'issuer'
+
+        results = self.pki_authentication.authenticate(self.request)
+
+        user_obj = results[0]
+        error_obj = results[1]
+
+        self.assertEquals(str(user_obj.__class__), "<class 'django.contrib.auth.models.User'>")
+        self.assertEquals(error_obj, None)
+
+        self.assertEquals(user_obj.username, 'user1')
 
     def test_existing_profile(self):
         profile_before_count = models.Profile.objects.count()
