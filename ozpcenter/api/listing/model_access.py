@@ -147,26 +147,26 @@ def get_listing_by_id(username, id, reraise=False):
         else:
             return None
 
+# Not being used
+# def get_listing_by_title(username, title, reraise=True):
+#     """
+#     Get listing by title
 
-def get_listing_by_title(username, title, reraise=True):
-    """
-    Get listing by title
+#     Args:
+#         username(str)
+#         title
+#         reraise(bool)
 
-    Args:
-        username(str)
-        title
-        reraise(bool)
-
-    Returns:
-        Listing
-    """
-    try:
-        return models.Listing.objects.for_user(username).get(title=title)
-    except models.Listing.DoesNotExist as err:
-        if reraise:
-            raise err
-        else:
-            return None
+#     Returns:
+#         Listing
+#     """
+#     try:
+#         return models.Listing.objects.for_user(username).get(title=title)
+#     except models.Listing.DoesNotExist as err:
+#         if reraise:
+#             raise err
+#         else:
+#             return None
 
 
 def filter_listings(username, filter_params):
