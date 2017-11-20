@@ -253,8 +253,8 @@ class BaselineRecommender(object):
 
         current_profile_count = 0
         for profile in all_profiles:
+            start_ms = time.time() * 1000.0
             current_profile_count = current_profile_count + 1
-            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
 
             profile_id = profile.id
             profile_username = profile.user.username
@@ -325,6 +325,9 @@ class BaselineRecommender(object):
                 calculation = recommend_utils.map_numbers(count, old_min, old_max, new_min, new_max)
                 self.profile_result_set.add_listing_to_user_profile(profile_id, listing_id, calculation, True)
 
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, all_profiles_count, round(end_ms - start_ms, 3)))
+
 
 class GraphCollaborativeFilteringBaseRecommender(object):
     """
@@ -347,11 +350,12 @@ class GraphCollaborativeFilteringBaseRecommender(object):
         """
         current_profile_count = 0
         for profile in self.all_profiles:
+            start_ms = time.time() * 1000.0
+
             profile_id = profile.id
             current_profile_count = current_profile_count + 1
-            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, self.all_profiles_count))
 
-            results = self.graph.algo().recommend_listings_for_profile('p-{}'.format(profile_id))  # bigbrother
+            results = self.graph.algo().recommend_listings_for_profile('p-{}'.format(profile_id))
 
             for current_tuple in results:
                 listing_raw = current_tuple[0]  # 'l-#'
@@ -359,6 +363,9 @@ class GraphCollaborativeFilteringBaseRecommender(object):
                 score = current_tuple[1]
                 # No need to rebase since results are within the range of others based on testing:
                 self.profile_result_set.add_listing_to_user_profile(profile_id, listing_id, score)
+
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, self.all_profiles_count, round(end_ms - start_ms, 3)))
 
 
 # Method is decorated with @transaction.atomic to ensure all logic is executed in a single transaction
@@ -428,14 +435,20 @@ class RecommenderDirectory(object):
         results = {}
 
         start_ms = time.time() * 1000.0
+        stat_times = []
 
         for recommender_obj, friendly_name, recommendation_weight in self._iterate_recommenders(recommender_string):
             logger.info('=={}=='.format(friendly_name))
             results[friendly_name] = {}
 
+            initiation_start_ms = time.time() * 1000.0
+
             if hasattr(recommender_obj, 'initiate'):
                 # initiate - Used for initiating variables, classes, objects, connecting to service
                 recommender_obj.initiate()
+
+            initiation_end_ms = time.time() * 1000.0
+            initiation_time = initiation_end_ms - initiation_start_ms
 
             recommendations_start_ms = time.time() * 1000.0
 
@@ -449,16 +462,20 @@ class RecommenderDirectory(object):
 
             recommendations_end_ms = time.time() * 1000.0
             recommendations_time = recommendations_end_ms - recommendations_start_ms
-
-            logger.info('Merging {} into results'.format(friendly_name))
+            stat_times.append((friendly_name, initiation_time, recommendations_time))
+            logger.debug('Merging {} into results'.format(friendly_name, recommendations_time))
             self.recommender_result_set_obj.merge(friendly_name, recommendation_weight, profile_result_set, recommendations_time)
+
+        logger.info('==Statistics==')
+        for stat_time in stat_times:
+            logger.info('[{}] took [{}] to initiate and [{}] for recommendation logic'.format(stat_time[0], round(stat_time[1], 3), round(stat_time[2], 3)))
 
         logger.info('==Start saving recommendations into database==')
         start_db_ms = time.time() * 1000.0
         self.save_to_db()
         end_db_ms = time.time() * 1000.0
-        logger.info('Save to database took: {} ms'.format(end_db_ms - start_db_ms))
-        logger.info('Whole Process: {} ms'.format(end_db_ms - start_ms))
+        logger.info('Save to database took: {} ms'.format(round(end_db_ms - start_db_ms, 3)))
+        logger.info('Whole Process: {} ms'.format(round(end_db_ms - start_ms, 3)))
 
         return results
 
