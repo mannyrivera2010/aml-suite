@@ -1,6 +1,8 @@
 """
 Tests for storefront endpoints
+TODO: should we test keys of each item in the list of listings for storefront
 """
+
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
