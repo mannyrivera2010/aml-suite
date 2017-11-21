@@ -18,11 +18,14 @@ class Dispatcher(object):
     def __init__(self):
         self.observers = {}
 
-    def register(self, observer_class):
+    def register(self, observer_class, **kwargs):
         observer_name = observer_class.__name__
 
         if observer_name not in self.observers:
-            self.observers[observer_name] = observer_class()  # Making instance of class
+            if kwargs:
+                self.observers[observer_name] = observer_class(**kwargs)  # Making instance of class
+            else:
+                self.observers[observer_name] = observer_class()  # Making instance of class
 
     def publish(self, event_type, **kwargs):
         for key in self.observers:

@@ -524,7 +524,6 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
         recommendations.
         The list is then normalized and added to the recommendations database.
         """
-        logger.debug('= Elasticsearch Content Base Recommendation Engine= ')
         all_profiles = models.Profile.objects.all()
         all_profiles_count = len(all_profiles)
 
@@ -533,6 +532,7 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
         current_profile_count = 0
 
         for profile in all_profiles:
+            start_ms = time.time() * 1000.0
             current_profile_count = current_profile_count + 1
             profile_id = profile.id
             es_query_result = self.es_content_based_recommendation(profile_id, self.result_size)
@@ -553,9 +553,9 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
                 score = recommend_utils.map_numbers(indexitem['_score'], 0, max_score_es_content, self.min_new_score, self.max_new_score)
                 itemtoadd = indexitem['_source']['id']
                 self.profile_result_set.add_listing_to_user_profile(profile_id, itemtoadd, score, False)
-            logger.debug("= ES CONTENT RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
 
-        logger.debug("= ES CONTENT RECOMMENDATION Results Completed =")
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, all_profiles_count, round(end_ms - start_ms, 3)))
 
 
 class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
@@ -692,14 +692,13 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
             - Take max score from results for profile and rebase all results while adding them to the recommendation list
             - For each recommendation add it to the list while rescalling the score based on the max score returned
         """
-        logger.debug('= Elasticsearch User Base Recommendation Engine =')
-
         # Retreive all of the profiles from database:
         all_profiles = models.Profile.objects.all()
         all_profiles_count = len(all_profiles)
 
         current_profile_count = 0
         for profile in all_profiles:
+            start_ms = time.time() * 1000.0
             current_profile_count = current_profile_count + 1
 
             profile_id = profile.id
@@ -714,5 +713,5 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
                 score = recommend_utils.map_numbers(indexitem['score'], 0, max_score_es_user, self.min_new_score, self.max_new_score)
                 self.profile_result_set.add_listing_to_user_profile(profile_id, indexitem['key'], score, False)
 
-            logger.debug("= ES USER RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
-        logger.debug("= ES USER RECOMMENDATION Results Completed =")
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, all_profiles_count, round(end_ms - start_ms, 3)))
