@@ -912,6 +912,8 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'feedback',
                   'description_short',
                   'security_marking',
+                  'usage_requirements',
+                  'system_requirements',
                   'launch_url',
                   'large_banner_icon',
                   'banner_icon',
