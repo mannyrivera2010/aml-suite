@@ -53,12 +53,16 @@ class StorefrontApiTest(APITestCase):
 
         self.assertIn('featured', response.data)
         self.assertTrue(len(response.data['featured']) >= 1)
+        self._check_listing_properties(response.data['featured'])
         self.assertIn('recent', response.data)
         self.assertTrue(len(response.data['recent']) >= 1)
+        self._check_listing_properties(response.data['recent'])
         self.assertIn('most_popular', response.data)
         self.assertTrue(len(response.data['most_popular']) >= 1)
+        self._check_listing_properties(response.data['most_popular'])
         self.assertIn('recommended', response.data)
         self.assertTrue(len(response.data['recommended']) >= 1)
+        self._check_listing_properties(response.data['recommended'], ['_score'])
 
     def test_storefront_authorized_recommended(self):
         url = '/api/storefront/recommended/'
@@ -73,6 +77,7 @@ class StorefrontApiTest(APITestCase):
         self.assertEqual(response.data['most_popular'], [])
         self.assertIn('recommended', response.data)
         self.assertTrue(len(response.data['recommended']) >= 1)
+        self._check_listing_properties(response.data['recommended'], ['_score'])
 
     def test_storefront_authorized_featured(self):
         url = '/api/storefront/featured/'
@@ -81,6 +86,7 @@ class StorefrontApiTest(APITestCase):
         response = self.client.get(url, format='json')
         self.assertIn('featured', response.data)
         self.assertTrue(len(response.data['featured']) >= 1)
+        self._check_listing_properties(response.data['featured'])
         self.assertIn('recent', response.data)
         self.assertEqual(response.data['recent'], [])
         self.assertIn('most_popular', response.data)
@@ -99,6 +105,7 @@ class StorefrontApiTest(APITestCase):
         self.assertEqual(response.data['recent'], [])
         self.assertIn('most_popular', response.data)
         self.assertTrue(len(response.data['most_popular']) >= 1)
+        self._check_listing_properties(response.data['most_popular'])
         self.assertIn('recommended', response.data)
         self.assertEqual(response.data['recommended'], [])
 
@@ -111,6 +118,7 @@ class StorefrontApiTest(APITestCase):
         self.assertEqual(response.data['featured'], [])
         self.assertIn('recent', response.data)
         self.assertTrue(len(response.data['recent']) >= 1)
+        self._check_listing_properties(response.data['recent'])
         self.assertIn('most_popular', response.data)
         self.assertEqual(response.data['most_popular'], [])
         self.assertIn('recommended', response.data)
@@ -120,3 +128,18 @@ class StorefrontApiTest(APITestCase):
         url = '/api/storefront/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, 401)
+
+    def _check_listing_properties(self, listings, additional_keys=None):
+        additional_keys = [] if additional_keys is None else additional_keys
+        desired_keys = ['id', 'title', 'agency', 'avg_rate',
+            'total_reviews', 'feedback_score', 'is_private', 'is_bookmarked',
+            'feedback', 'description_short', 'security_marking',
+            'usage_requirements', 'system_requirements', 'launch_url',
+            'large_banner_icon', 'banner_icon', 'unique_name', 'is_enabled']
+        desired_keys += additional_keys
+        desired_keys = sorted(desired_keys)
+
+        for listing in listings:
+            actual_keys = sorted(listing.keys())
+
+            self.assertEqual(desired_keys, actual_keys)
