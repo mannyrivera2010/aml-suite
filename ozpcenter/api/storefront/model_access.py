@@ -247,79 +247,79 @@ def get_recommendation_listing_ids(profile_instance):
     return sorted_recommendations_combined_dict, recommended_entry_data
 
 
-def get_storefront_new(username, request):
-    """
-    Returns data for /storefront api invocation including:
-        * recommended listings (max=10)
-        * featured listings (max=12)
-        * recent (new) listings (max=24)
-        * most popular listings (max=36)
+# def get_storefront_new(username, request):
+#     """
+#     Returns data for /storefront api invocation including:
+#         * recommended listings (max=10)
+#         * featured listings (max=12)
+#         * recent (new) listings (max=24)
+#         * most popular listings (max=36)
 
-    Args:
-        username
+#     Args:
+#         username
 
-    Returns:
-        {
-            'recommended': [Listing],
-            'featured': [Listing],
-            'recent': [Listing],
-            'most_popular': [Listing]
-        }
-    """
-    extra_data = {}
-    profile = models.Profile.objects.get(user__username=username)
+#     Returns:
+#         {
+#             'recommended': [Listing],
+#             'featured': [Listing],
+#             'recent': [Listing],
+#             'most_popular': [Listing]
+#         }
+#     """
+#     extra_data = {}
+#     profile = models.Profile.objects.get(user__username=username)
 
-    if profile.highest_role() == 'APPS_MALL_STEWARD':
-        exclude_orgs = []
-    elif profile.highest_role() == 'ORG_STEWARD':
-        user_orgs = profile.stewarded_organizations.all()
-        user_orgs = [i.title for i in user_orgs]
-        exclude_orgs = [agency.title for agency in models.Agency.objects.exclude(title__in=user_orgs)]
-    else:
-        user_orgs = profile.organizations.all()
-        user_orgs = [i.title for i in user_orgs]
-        exclude_orgs = [agency.title for agency in models.Agency.objects.exclude(title__in=user_orgs)]
+#     if profile.highest_role() == 'APPS_MALL_STEWARD':
+#         exclude_orgs = []
+#     elif profile.highest_role() == 'ORG_STEWARD':
+#         user_orgs = profile.stewarded_organizations.all()
+#         user_orgs = [i.title for i in user_orgs]
+#         exclude_orgs = [agency.title for agency in models.Agency.objects.exclude(title__in=user_orgs)]
+#     else:
+#         user_orgs = profile.organizations.all()
+#         user_orgs = [i.title for i in user_orgs]
+#         exclude_orgs = [agency.title for agency in models.Agency.objects.exclude(title__in=user_orgs)]
 
-    current_listings = get_user_listings(username, request, exclude_orgs)
+#     current_listings = get_user_listings(username, request, exclude_orgs)
 
-    # Get Recommended Listings for owner
-    if profile.is_beta_user():
-        recommendation_listing_ids, recommended_entry_data = get_recommendation_listing_ids(profile)
-        listing_ids_list = set(recommendation_listing_ids)
+#     # Get Recommended Listings for owner
+#     if profile.is_beta_user():
+#         recommendation_listing_ids, recommended_entry_data = get_recommendation_listing_ids(profile)
+#         listing_ids_list = set(recommendation_listing_ids)
 
-        recommended_listings_raw = []
-        for current_listing in current_listings:
-            if current_listing['id'] in listing_ids_list:
-                recommended_listings_raw.append(current_listing)
+#         recommended_listings_raw = []
+#         for current_listing in current_listings:
+#             if current_listing['id'] in listing_ids_list:
+#                 recommended_listings_raw.append(current_listing)
 
-        recommended_listings = pipeline.Pipeline(recommend_utils.ListIterator(recommended_listings_raw),
-                                            [pipes.JitterPipe(),
-                                             pipes.ListingDictPostSecurityMarkingCheckPipe(username),
-                                             pipes.LimitPipe(10)]).to_list()
-    else:
-        recommended_listings = []
+#         recommended_listings = pipeline.Pipeline(recommend_utils.ListIterator(recommended_listings_raw),
+#                                             [pipes.JitterPipe(),
+#                                              pipes.ListingDictPostSecurityMarkingCheckPipe(username),
+#                                              pipes.LimitPipe(10)]).to_list()
+#     else:
+#         recommended_listings = []
 
-    # Get Featured Listings
-    featured_listings = pipeline.Pipeline(recommend_utils.ListIterator(current_listings),
-                                      [pipes.ListingDictPostSecurityMarkingCheckPipe(username, featured=True),
-                                       pipes.LimitPipe(12)]).to_list()
-    # Get Recent Listings
-    recent_listings = pipeline.Pipeline(recommend_utils.ListIterator(current_listings),
-                                      [pipes.ListingDictPostSecurityMarkingCheckPipe(username),
-                                       pipes.LimitPipe(24)]).to_list()
+#     # Get Featured Listings
+#     featured_listings = pipeline.Pipeline(recommend_utils.ListIterator(current_listings),
+#                                       [pipes.ListingDictPostSecurityMarkingCheckPipe(username, featured=True),
+#                                        pipes.LimitPipe(12)]).to_list()
+#     # Get Recent Listings
+#     recent_listings = pipeline.Pipeline(recommend_utils.ListIterator(current_listings),
+#                                       [pipes.ListingDictPostSecurityMarkingCheckPipe(username),
+#                                        pipes.LimitPipe(24)]).to_list()
 
-    most_popular_listings = pipeline.Pipeline(recommend_utils.ListIterator(sorted(current_listings, key=lambda k: (k['avg_rate'], ['total_reviews']), reverse=True)),
-                                      [pipes.ListingDictPostSecurityMarkingCheckPipe(username),
-                                       pipes.LimitPipe(36)]).to_list()
-    # TODO 2PI filtering
-    data = {
-        'recommended': recommended_listings,
-        'featured': featured_listings,
-        'recent': recent_listings,
-        'most_popular': most_popular_listings
-    }
+#     most_popular_listings = pipeline.Pipeline(recommend_utils.ListIterator(sorted(current_listings, key=lambda k: (k['avg_rate'], ['total_reviews']), reverse=True)),
+#                                       [pipes.ListingDictPostSecurityMarkingCheckPipe(username),
+#                                        pipes.LimitPipe(36)]).to_list()
+#     # TODO 2PI filtering
+#     data = {
+#         'recommended': recommended_listings,
+#         'featured': featured_listings,
+#         'recent': recent_listings,
+#         'most_popular': most_popular_listings
+#     }
 
-    return data, extra_data
+#     return data, extra_data
 
 
 def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recommended=True):

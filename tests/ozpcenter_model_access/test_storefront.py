@@ -83,3 +83,15 @@ class StorefrontTest(TestCase):
         keys = list(listing_types[0].keys()).sort()
         expected_keys = ['title', 'description'].sort()
         self.assertEqual(keys, expected_keys)
+
+    # TODO: Fails on postgres
+    # def test_get_sql_statement(self):
+    #     sql = model_access.get_sql_statement()
+
+    # def test_get_user_listings(self):
+    #     request = MagicMock()
+    #     request.user = 'wsmith'
+    #     request.query_params.get.side_effect = lambda *arg: True
+
+    #     data = model_access.get_user_listings(request.user, request)
+        # TODO: Finish test

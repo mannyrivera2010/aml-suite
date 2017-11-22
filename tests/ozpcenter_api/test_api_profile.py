@@ -320,6 +320,10 @@ class ProfileApiTest(APITestCase):
             self.assertEqual(response.data.get('center_tour_flag'), True)
             self.assertEqual(response.data.get('hud_tour_flag'), True)
             self.assertEqual(response.data.get('webtop_tour_flag'), True)
+            self.assertEqual(response.data.get('email_notification_flag'), True)
+            self.assertEqual(response.data.get('listing_notification_flag'), True)
+            self.assertEqual(response.data.get('subscription_notification_flag'), True)
+            self.assertEqual(response.data.get('leaving_ozp_warning_flag'), True)
 
             combinations = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
                             [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]
@@ -329,11 +333,19 @@ class ProfileApiTest(APITestCase):
                 center_tour_flag = bool(combination[0])
                 hud_tour_flag = bool(combination[1])
                 webtop_tour_flag = bool(combination[2])
+                # email_notification_flag = bool(combination[3])
+                # listing_notification_flag = bool(combination[4])
+                # subscription_notification_flag = bool(combination[5])
+                # leaving_ozp_warning_flag = bool(combination[6])
 
                 data = {'id': -1,
                         'center_tour_flag': center_tour_flag,
                         'hud_tour_flag': hud_tour_flag,
                         'webtop_tour_flag': webtop_tour_flag}
+                # 'email_notification_flag': email_notification_flag,
+                # 'listing_notification_flag': listing_notification_flag,
+                # 'subscription_notifcation_flag': subscription_notification_flag,
+                # 'leaving_ozp_warning_flag': leaving_ozp_warning_flag}
 
                 # Testing to make sure that profiles that are lower than
                 # APP Mall Steward profile can't edit the stewarded_organizations
@@ -351,11 +363,19 @@ class ProfileApiTest(APITestCase):
                 self.assertEqual(response.data.get('center_tour_flag'), center_tour_flag)
                 self.assertEqual(response.data.get('hud_tour_flag'), hud_tour_flag)
                 self.assertEqual(response.data.get('webtop_tour_flag'), webtop_tour_flag)
+                # self.assertEqual(response.data.get('email_notification_flag'), email_notification_flag)
+                # self.assertEqual(response.data.get('listing_notification_flag'), listing_notification_flag)
+                # self.assertEqual(response.data.get('subscription_notification_flag'), subscription_notification_flag)
+                # self.assertEqual(response.data.get('leaving_ozp_warning_flag'), leaving_ozp_warning_flag)
 
                 response = self.client.get(url, format='json')
                 self.assertEqual(response.data.get('center_tour_flag'), center_tour_flag)
                 self.assertEqual(response.data.get('hud_tour_flag'), hud_tour_flag)
                 self.assertEqual(response.data.get('webtop_tour_flag'), webtop_tour_flag)
+                # self.assertEqual(response.data.get('email_notification_flag'), email_notification_flag)
+                # self.assertEqual(response.data.get('listing_notification_flag'), listing_notification_flag)
+                # self.assertEqual(response.data.get('subscription_notification_flag'), subscription_notification_flag)
+                # self.assertEqual(response.data.get('leaving_ozp_warning_flag'), leaving_ozp_warning_flag)
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_self_for_apps_mall_steward_level_serializer_exception(self, mock_request):
