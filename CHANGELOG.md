@@ -1,22 +1,45 @@
 
-### 1.0.88 (None)
+### 1.0.89 (None) 
+
+#### Fixes  
+* **launch popup**:  show requirements information ([6fc0b46c](https://github.com/aml-development/ozp-backend/commit/6fc0b46c804ce5d586a07491f7b7f7de2875dd41))    
+
+#### Refactor  
+* **recommend**:  refactor code, add pubsub test ([35229e6d](https://github.com/aml-development/ozp-backend/commit/35229e6db10ccfac43c5c2fb62d6c303077d969c))    
+
+#### Merge Pull Requests  
+* Merge pull request #382 from aml-development/amlng798 ([3d00bf53](https://github.com/aml-development/ozp-backend/commit/3d00bf53eb9aa8d8dd431c9ff10398deba8bfb2f))
+* Merge pull request #384 from aml-development/er_test_coverage ([fca65090](https://github.com/aml-development/ozp-backend/commit/fca65090bb03d58aee46310d7a7d112e14b657f0))
+* Merge pull request #381 from aml-development/test_coverage ([084f8444](https://github.com/aml-development/ozp-backend/commit/084f8444770b052e26747222252931b611ed8c03))
+* Merge pull request #379 from aml-development/es_recommend_test ([d7886d69](https://github.com/aml-development/ozp-backend/commit/d7886d697e8645b4ccd7d64039c60ae057f2eef3))       
+
+#### Test  
+* **storefront**:  unit tests now check listing properties ([891acff0](https://github.com/aml-development/ozp-backend/commit/891acff00973ab3fe9d954306063ba323fa50697))    
+* **auth**:  add pkiauth tests ([a392fb53](https://github.com/aml-development/ozp-backend/commit/a392fb53c2bd7e2135228dd7980eeca2dba6d62a))    
+* **ozpcenter**:  increase test coverage all around ([4111ddfa](https://github.com/aml-development/ozp-backend/commit/4111ddfab459c38f991ebefdd1101c78f90faa62))       
+
+### 1.0.88 (2017-11-15)
 
 #### Feature  
+* **recommend**:  add sort score ([b1217260](https://github.com/aml-development/ozp-backend/commit/b1217260f43b4ad18f5152fef0b5c182da6da887))    
 * **activity log**:  add new review to activity log ([84f95acd](https://github.com/aml-development/ozp-backend/commit/84f95acda1d6421c6d642d118e8e28868db8f918))   
 * **makefile**
   *  modify sqlite and pgsql dump ([4f00ae92](https://github.com/aml-development/ozp-backend/commit/4f00ae92a66b13928622346ee2ab17c704ac49a8))
   *  add sqlite and pgsql dump ([defead28](https://github.com/aml-development/ozp-backend/commit/defead2850184cbb45ee524256fb141a5fb4c1ae))     
 
 #### Fixes  
+* **tests**:  fixed Storefront test ([d927a077](https://github.com/aml-development/ozp-backend/commit/d927a07739e4807064c331aedd72ed300ed6fce7))    
 * **review**:  fix bug where notifications get sent on review responses ([718188c0](https://github.com/aml-development/ozp-backend/commit/718188c04744297852eda2f10345f7146cae3d70))    
 * **listing**:  add missing migration ([e8cb98a6](https://github.com/aml-development/ozp-backend/commit/e8cb98a6094a10dcaa513009edc5cc2bf445928d))     
 
 #### Merge Pull Requests  
 * Merge pull request #380 from aml-development/review_response_bugfix ([46094bf8](https://github.com/aml-development/ozp-backend/commit/46094bf8fb215470e7c0514e54db7d4174087ab2))
+* Merge branch 'master' of github.com:aml-development/ozp-backend into test_coverage ([c312ce02](https://github.com/aml-development/ozp-backend/commit/c312ce02bdbecaea0387ad4bf477874f19d19c51))
 * Merge pull request #378 from aml-development/New_Action_log_addition ([f7b74d72](https://github.com/aml-development/ozp-backend/commit/f7b74d72fe3f75f1130ee59f6bdbf343bb859e61))       
 
 #### Test  
-* **review**:  add test cases for review notifications ([cfbafbb7](https://github.com/aml-development/ozp-backend/commit/cfbafbb71456c6e08d220eda7bf147853889a871))       
+* **review**:  add test cases for review notifications ([cfbafbb7](https://github.com/aml-development/ozp-backend/commit/cfbafbb71456c6e08d220eda7bf147853889a871))    
+* **recommend**:  elasticsearch ([edb7618d](https://github.com/aml-development/ozp-backend/commit/edb7618d89ccf56a2489d07d4938346380100d41))       
 
 ### 1.0.87 (2017-11-08)  
 
@@ -28,7 +51,11 @@
 
 #### Merge Pull Requests  
 * Merge pull request #375 from aml-development/orgstewardNotification ([33252855](https://github.com/aml-development/ozp-backend/commit/33252855ef2c072e96440fefca6cf36a0493099d))
-* Merge pull request #374 from aml-development/recommend_refactor ([a1f31e19](https://github.com/aml-development/ozp-backend/commit/a1f31e1995798297d4dd2d8bfe9709854a8f6378))         
+* Merge pull request #374 from aml-development/recommend_refactor ([a1f31e19](https://github.com/aml-development/ozp-backend/commit/a1f31e1995798297d4dd2d8bfe9709854a8f6378))       
+
+#### Test  
+* **ozp**:  add more model_access tests ([1b5f0ca5](https://github.com/aml-development/ozp-backend/commit/1b5f0ca595b5fa3d480ed6ba0a688632bb3ff406))    
+* **category**:  add tests for model_access when category not found ([390f4f22](https://github.com/aml-development/ozp-backend/commit/390f4f2268f3dbd3632ac72ca6d894c4635edebb))     
 
 #### Changes  
 * adding test for new API call ([0b3a3980](https://github.com/aml-development/ozp-backend/commit/0b3a398056560c1869297f78238332212ed49e8c))
