@@ -1,4 +1,5 @@
 [run]
-omit = 
+omit =
     ozpcenter/migrations/*
     ozpcenter/scripts/*
+    ozpiwc/tst_iwc_compatible_server.py 

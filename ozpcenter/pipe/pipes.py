@@ -85,8 +85,13 @@ class Pipe(object):
         instance_vars = {}
         variables = vars(self)
         for variable_key in variables:
+            variable_value = variables[variable_key]
             if variable_key not in default_keys:
-                instance_vars[variable_key] = variables[variable_key]
+                if callable(variable_value):
+                    variable_value = variable_value.__class__
+
+                if not variable_key.startswith('_'):
+                    instance_vars[variable_key] = variable_value
 
         variables_string = ', '.join(['{}:{}'.format(key, instance_vars[key]) for key in instance_vars])
         output = '{}({})'.format(self.__class__.__name__, variables_string)
@@ -324,7 +329,7 @@ class LimitPipe(Pipe):
 
     def __init__(self, limit_number):
         super().__init__()
-        self.count = 1
+        self._count = 1
         self.limit_number = limit_number
 
     def process_next_start(self):
@@ -332,11 +337,11 @@ class LimitPipe(Pipe):
         Limit number of items
         """
         while True:
-            if self.count > self.limit_number:
+            if self._count > self.limit_number:
                 raise FastNoSuchElementException()
             else:
                 current_item = self.starts.next()
-                self.count = self.count + 1
+                self._count = self._count + 1
                 return current_item
 
 
@@ -344,7 +349,7 @@ class DistinctPipe(Pipe):
 
     def __init__(self):
         super().__init__()
-        self.items = set()
+        self._items = set()
 
     def process_next_start(self):
         """
@@ -353,8 +358,8 @@ class DistinctPipe(Pipe):
         while True:
             current_item = self.starts.next()
 
-            if current_item not in self.items:
-                self.items.add(current_item)
+            if current_item not in self._items:
+                self._items.add(current_item)
                 return current_item
 
 
@@ -362,10 +367,10 @@ class ExcludePipe(Pipe):
 
     def __init__(self, object_list):
         super().__init__()
-        self.items = set()
+        self._items = set()
 
         for current_object in object_list:
-            self.items.add(current_object)
+            self._items.add(current_object)
 
     def process_next_start(self):
         """
@@ -374,7 +379,7 @@ class ExcludePipe(Pipe):
         while True:
             current_item = self.starts.next()
 
-            if current_item not in self.items:
+            if current_item not in self._items:
                 return current_item
 
 
@@ -382,10 +387,10 @@ class ExcludeIdsPipe(Pipe):
 
     def __init__(self, object_list):
         super().__init__()
-        self.items = set()
+        self._items = set()
 
         for current_object in object_list:
-            self.items.add(current_object)
+            self._items.add(current_object)
 
     def process_next_start(self):
         """
@@ -395,7 +400,7 @@ class ExcludeIdsPipe(Pipe):
             current_element = self.starts.next()
             current_element_id = current_element.id
 
-            if current_element_id not in self.items:
+            if current_element_id not in self._items:
                 return current_element
 
 

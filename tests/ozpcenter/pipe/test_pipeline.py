@@ -8,7 +8,7 @@ if not len_pipe.has_next():
 from django.test import override_settings
 from django.test import TestCase
 
-from ozpcenter.scripts import sample_data_generator as data_gen
+from ozpcenter.recommend.graph_factory import GraphFactory
 from ozpcenter.recommend import recommend_utils
 from ozpcenter.pipe import pipes
 from ozpcenter.pipe import pipeline
@@ -22,30 +22,33 @@ class PipelineTest(TestCase):
         """
         setUp is invoked before each test method
         """
-        pass
+        self.graph_test_1 = Graph()
+        self.graph_test_1.add_vertex('test_label', {'test_field': 1})
+        self.graph_test_1.add_vertex('test_label', {'test_field': 2})
+
+        self.graph_test_2 = Graph()
+        self.graph_test_2.add_vertex('test_label', {'test_field': 8})
+        self.graph_test_2.add_vertex('test_label', {'test_field': 10})
+        self.graph_test_2.add_vertex('test_label', {'test_field': 12, 'time': 'now'})
 
     @classmethod
     def setUpTestData(cls):
         """
         Set up test data for the whole TestCase (only run once for the TestCase)
         """
-        data_gen.run()
+        pass
 
-    def test_pipe_cap(self):
-        caps_pipe = pipes.CapitalizePipe()
-        caps_pipe.set_starts(recommend_utils.ListIterator(['this', 'is', 'the', 'test']))
-
+    def _iterate_pipeline(self, current_pipeline):
         list_out = []
 
         try:
-            while caps_pipe.has_next():
-                current_object = caps_pipe.next()
+            while current_pipeline.has_next():
+                current_object = current_pipeline.next()
                 list_out.append(current_object)
         except recommend_utils.FastNoSuchElementException:
             # Ignore FastNoSuchElementException
             pass
-
-        self.assertEqual(list_out, ['THIS', 'IS', 'THE', 'TEST'])
+        return list_out
 
     def test_pipeline_limit(self):
         pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
@@ -63,26 +66,14 @@ class PipelineTest(TestCase):
 
         self.assertEqual(pipeline_test.to_list(), [1, 2, 3])
 
-    def test_pipe_cap_len_chain(self):
-        caps_pipe = pipes.CapitalizePipe()
-        len_pipe = pipes.LenPipe()
+    def test_pipeline_exclude_limit(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
 
-        caps_pipe.set_starts(recommend_utils.ListIterator(['this', 'is', 'the', 'test']))
-        len_pipe.set_starts(caps_pipe)
+        self.assertEqual(pipeline_test.to_list(), [2, 3, 4, 5, 6])
 
-        list_out = []
-
-        try:
-            while len_pipe.has_next():  # Make this refresh has loop
-                current_object = len_pipe.next()
-                list_out.append(current_object)
-        except recommend_utils.FastNoSuchElementException:
-            # Ignore FastNoSuchElementException
-            pass
-
-        self.assertEqual(list_out, [4, 2, 3, 4])
-
-    def test_pipeline_1(self):
+    def test_pipeline_capitalize(self):
         caps_pipe = pipes.CapitalizePipe()
 
         pipeline_test = pipeline.Pipeline()
@@ -90,31 +81,17 @@ class PipelineTest(TestCase):
 
         pipeline_test.set_starts(recommend_utils.ListIterator(['this', 'is', 'the', 'test']))
 
-        list_out = []
-        try:
-            while pipeline_test.has_next():
-                current_object = pipeline_test.next()
-                list_out.append(current_object)
-        except recommend_utils.FastNoSuchElementException:
-            # Ignore FastNoSuchElementException
-            pass
+        list_out = self._iterate_pipeline(pipeline_test)
         self.assertEqual(list_out, ['THIS', 'IS', 'THE', 'TEST'])
 
-    def test_pipeline_chain_2(self):
+    def test_pipeline_capitalize_len(self):
         pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator(['this', 'is', 'the', 'test']),
                                           [pipes.CapitalizePipe(),
                                            pipes.LenPipe()])
-        list_out = []
-        try:
-            while pipeline_test.has_next():
-                current_object = pipeline_test.next()
-                list_out.append(current_object)
-        except recommend_utils.FastNoSuchElementException:
-            # Ignore FastNoSuchElementException
-            pass
+        list_out = self._iterate_pipeline(pipeline_test)
         self.assertEqual(list_out, [4, 2, 3, 4])
 
-    def test_pipeline_chain_to_list(self):
+    def test_pipeline_capitalize_len_list(self):
         pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator(['this', 'is', 'the', 'test']),
                                           [pipes.CapitalizePipe(),
                                            pipes.LenPipe()])
@@ -122,41 +99,23 @@ class PipelineTest(TestCase):
         self.assertEqual(pipeline_test.to_list(), [4, 2, 3, 4])
 
     def test_pipeline_graph_vertex_while(self):
-        graph = Graph()
-        graph.add_vertex('test_label', {'test_field': 1})
-        graph.add_vertex('test_label', {'test_field': 2})
-
-        pipeline_test = pipeline.Pipeline(graph.get_vertices_iterator(),
+        pipeline_test = pipeline.Pipeline(self.graph_test_1.get_vertices_iterator(),
                                           [pipes.GraphVertexPipe()])
 
-        try:
-            list_out = []
-            while pipeline_test.has_next():
-                current_object = pipeline_test.next()
-                list_out.append(current_object.id)
-        except recommend_utils.FastNoSuchElementException:
-            # Ignore FastNoSuchElementException
-            pass
-        self.assertEqual(list_out, [1, 2])
+        list_out = self._iterate_pipeline(pipeline_test)
+        self.assertEquals(str(list_out), '[Vertex(test_label), Vertex(test_label)]')
+        # self.assertEqual(list_out, [1, 2])
 
     def test_pipeline_graph_vertex_chain_to_list(self):
-        graph = Graph()
-        graph.add_vertex('test_label', {'test_field': 1})
-        graph.add_vertex('test_label', {'test_field': 2})
-
-        pipeline_test = pipeline.Pipeline(graph.get_vertices_iterator(),
+        pipeline_test = pipeline.Pipeline(self.graph_test_1.get_vertices_iterator(),
                                           [pipes.GraphVertexPipe(),
                                            pipes.ElementIdPipe()])
 
         self.assertEqual(pipeline_test.to_list(), [1, 2])
+        self.assertEqual(str(pipeline_test), '[GraphVertexPipe(), ElementIdPipe()]')
 
     def test_pipeline_graph_vertex_chain_dict_to_list(self):
-        graph = Graph()
-        graph.add_vertex('test_label', {'test_field': 8})
-        graph.add_vertex('test_label', {'test_field': 10})
-        graph.add_vertex('test_label', {'test_field': 12, 'time': 'now'})
-
-        pipeline_test = pipeline.Pipeline(graph.get_vertices_iterator(),
+        pipeline_test = pipeline.Pipeline(self.graph_test_2.get_vertices_iterator(),
                                           [pipes.GraphVertexPipe(),
                                            pipes.ElementPropertiesPipe()])
         expected_output = [
@@ -165,3 +124,16 @@ class PipelineTest(TestCase):
             {'test_field': 12, 'time': 'now'}
         ]
         self.assertEqual(pipeline_test.to_list(), expected_output)
+        self.assertEqual(str(pipeline_test), '[GraphVertexPipe(), ElementPropertiesPipe(internal:False)]')
+
+    def test_pipeline_graph_vertex_chain_dict_to_list_internal(self):
+        pipeline_test = pipeline.Pipeline(self.graph_test_2 .get_vertices_iterator(),
+                                          [pipes.GraphVertexPipe(),
+                                           pipes.ElementPropertiesPipe(internal=True)])
+        expected_output = [
+            {'_id': 1, '_label': 'test_label', 'test_field': 8},
+            {'_id': 2, '_label': 'test_label', 'test_field': 10},
+            {'_id': 3, '_label': 'test_label', 'test_field': 12, 'time': 'now'}
+        ]
+        self.assertEqual(pipeline_test.to_list(), expected_output)
+        self.assertEqual(str(pipeline_test), '[GraphVertexPipe(), ElementPropertiesPipe(internal:True)]')
