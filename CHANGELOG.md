@@ -1,5 +1,18 @@
 
-### 1.0.89 (None) 
+### 1.0.90 (None) 
+
+#### Fixes  
+* **recommend**:  add error handling ([b6d31ce4](https://github.com/aml-development/ozp-backend/commit/b6d31ce463077dc827134a5d71ae53b0ea2f44a2))     
+
+#### Merge Pull Requests  
+* Merge pull request #385 from aml-development/fix_recommender ([75118481](https://github.com/aml-development/ozp-backend/commit/751184810431569fdaf2c82653e901b149cb9ef4))
+* Merge pull request #383 from aml-development/test_coverage ([d3db526e](https://github.com/aml-development/ozp-backend/commit/d3db526e43aec0123218084b0365845f7dc95bd0))       
+
+#### Test  
+* **library**:  add more tests ([23c6bd65](https://github.com/aml-development/ozp-backend/commit/23c6bd6555218f7757fd8bdf9329e61c3bd0c81a))    
+* **pipe**:  add more test ([418e612c](https://github.com/aml-development/ozp-backend/commit/418e612cde5a8e44b088239ff5e6b575a9312be0))       
+
+### 1.0.89 (2017-11-22) 
 
 #### Fixes  
 * **launch popup**:  show requirements information ([6fc0b46c](https://github.com/aml-development/ozp-backend/commit/6fc0b46c804ce5d586a07491f7b7f7de2875dd41))    
@@ -15,6 +28,7 @@
 
 #### Test  
 * **storefront**:  unit tests now check listing properties ([891acff0](https://github.com/aml-development/ozp-backend/commit/891acff00973ab3fe9d954306063ba323fa50697))    
+* **listing**:  add test cases for listing reviews ([92391895](https://github.com/aml-development/ozp-backend/commit/92391895e327cae4d569ea5eae9e87a60dea56e4))    
 * **auth**:  add pkiauth tests ([a392fb53](https://github.com/aml-development/ozp-backend/commit/a392fb53c2bd7e2135228dd7980eeca2dba6d62a))    
 * **ozpcenter**:  increase test coverage all around ([4111ddfa](https://github.com/aml-development/ozp-backend/commit/4111ddfab459c38f991ebefdd1101c78f90faa62))       
 
