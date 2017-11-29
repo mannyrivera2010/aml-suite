@@ -120,7 +120,7 @@ def get_listing_type_by_title(title, reraise=True):
     """
     try:
         return models.ListingType.objects.get(title=title)
-    except models.Listing.DoesNotExist as err:
+    except ObjectDoesNotExist as err:
         if reraise:
             raise err
         else:
@@ -141,7 +141,7 @@ def get_listing_by_id(username, id, reraise=False):
     """
     try:
         return models.Listing.objects.for_user(username).get(id=id)
-    except models.Listing.DoesNotExist as err:
+    except ObjectDoesNotExist as err:
         if reraise:
             raise err
         else:
@@ -162,7 +162,7 @@ def get_listing_by_id(username, id, reraise=False):
 #     """
 #     try:
 #         return models.Listing.objects.for_user(username).get(title=title)
-#     except models.Listing.DoesNotExist as err:
+#     except ObjectDoesNotExist as err:
 #         if reraise:
 #             raise err
 #         else:

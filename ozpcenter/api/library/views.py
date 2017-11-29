@@ -96,13 +96,11 @@ class UserLibraryViewSet(viewsets.ViewSet):
             query: replace
         omit_serializer: true
         """
-        serializer = serializers.UserLibrarySerializer(data=request.data,
-            context={'request': request})
+        serializer = serializers.UserLibrarySerializer(data=request.data, context={'request': request})
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-            return Response(serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -114,8 +112,7 @@ class UserLibraryViewSet(viewsets.ViewSet):
         serializer: ozpcenter.api.library.serializers.UserLibrarySerializer
         """
         queryset = self.get_queryset()
-        serializer = serializers.UserLibrarySerializer(queryset,
-            many=True, context={'request': request})
+        serializer = serializers.UserLibrarySerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
@@ -124,8 +121,7 @@ class UserLibraryViewSet(viewsets.ViewSet):
         """
         queryset = self.get_queryset()
         library_entry = get_object_or_404(queryset, pk=pk)
-        serializer = serializers.UserLibrarySerializer(library_entry,
-            context={'request': request})
+        serializer = serializers.UserLibrarySerializer(library_entry, context={'request': request})
 
         request_username = request.user.username
         listing_type = self.request.query_params.get('type', None)
@@ -181,15 +177,14 @@ class UserLibraryViewSet(viewsets.ViewSet):
     @list_route(methods=['post'], permission_classes=[permissions.IsUser])
     def create_batch(self, request):
         """
-        Import Bookmarks
+        Create Batch
         """
         current_request_username = request.user.username
         request_data = request.data
 
         data = model_access.create_batch_library_entries(current_request_username, request_data)
 
-        serializer = serializers.UserLibrarySerializer(data,
-            many=True, context={'request': request})
+        serializer = serializers.UserLibrarySerializer(data, many=True, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
