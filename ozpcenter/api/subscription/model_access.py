@@ -128,10 +128,10 @@ def update_subscription(request_username,
                                                    entity_id=entity_id).values_list("id", flat=True)
     # If subscription_ids >= 1 if means that there is already that subscription that exist
     if len(subscription_ids) >= 1:
-        if subscription_instance.id in subscription_ids:
-            return subscription_instance
-        else:
-            raise Exception('Can not update a subscription that already exist')
+        # if subscription_instance.id in subscription_ids:
+        return subscription_instance
+        # else:
+        #     raise Exception('Can not update a subscription that already exist')  # TODO: Is this possible
 
     subscription_instance.entity_type = entity_type
     subscription_instance.entity_id = entity_id
