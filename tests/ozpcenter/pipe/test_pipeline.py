@@ -106,6 +106,12 @@ class PipelineTest(TestCase):
         self.assertEquals(str(list_out), '[Vertex(test_label), Vertex(test_label)]')
         # self.assertEqual(list_out, [1, 2])
 
+    def test_pipeline_to_list_exception(self):
+        pipeline_test = pipeline.Pipeline()
+
+        with self.assertRaisesRegex(Exception, 'No Start Iterator set') as err:
+            pipeline_test.to_list()
+
     def test_pipeline_graph_vertex_chain_to_list(self):
         pipeline_test = pipeline.Pipeline(self.graph_test_1.get_vertices_iterator(),
                                           [pipes.GraphVertexPipe(),
@@ -137,3 +143,73 @@ class PipelineTest(TestCase):
         ]
         self.assertEqual(pipeline_test.to_list(), expected_output)
         self.assertEqual(str(pipeline_test), '[GraphVertexPipe(), ElementPropertiesPipe(internal:True)]')
+
+    def test_pipeline_get_starts(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
+        result = pipeline_test.get_starts()
+
+        self.assertEqual(str(result), 'ListIterator([1, 2, 3, 4, 5, 6, 7])')
+
+    def test_pipeline_get_pipes(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
+        result = ', '.join([str(pipe) for pipe in pipeline_test.get_pipes()])
+
+        self.assertEqual(str(result), 'ExcludePipe(), LimitPipe(limit_number:5)')
+
+    def test_pipeline_size(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
+        result = pipeline_test.size()
+
+        self.assertEqual(result, 2)
+
+    def test_pipeline_count(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
+        result = pipeline_test.count()
+        self.assertEqual(result, 5)
+
+        result = pipeline_test.count()
+        self.assertEqual(result, 0)
+        # TODO: A way to reset pipeline to iterate again
+
+    def test_pipeline_count_exception(self):
+        pipeline_test = pipeline.Pipeline()
+
+        with self.assertRaisesRegex(Exception, 'No Start Iterator set') as err:
+            pipeline_test.count()
+
+    def test_pipeline_iterate(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
+        result = pipeline_test.iterate()
+        self.assertEqual(result, None)
+        # TODO: Have a SideEffectPipe to prove that it is iterating
+
+    def test_pipeline_iterate_exception(self):
+        pipeline_test = pipeline.Pipeline()
+
+        with self.assertRaisesRegex(Exception, 'No Start Iterator set') as err:
+            pipeline_test.iterate()
+
+    def test_pipeline_remove(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
+
+        self.assertRaises(recommend_utils.UnsupportedOperationException, pipeline_test.remove)
+
+    def test_pipeline_refresh_as_pipes(self):
+        pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
+                                          [pipes.ExcludePipe([1]),
+                                           pipes.LimitPipe(5)])
+        result = pipeline_test.refresh_as_pipes()
+        self.assertEqual(result, None)
+        # TODO: Finish Test
