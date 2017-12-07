@@ -14,6 +14,38 @@ TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 
 
+def patch_environ(new_environ=None, clear_orig=False):
+    """
+    https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/34333710#34333710
+    """
+    if not new_environ:
+        new_environ = dict()
+
+    def actual_decorator(func):
+        from functools import wraps
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            original_env = dict(os.environ)
+
+            if clear_orig:
+                os.environ.clear()
+
+            os.environ.update(new_environ)
+            try:
+                result = func(*args, **kwargs)
+            except:
+                raise
+            finally:  # restore even if Exception was raised
+                os.environ = original_env
+
+            return result
+
+        return wrapper
+
+    return actual_decorator
+
+
 def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
     user = generic_model_access.get_profile(username).user
     test_case_instance.client.force_authenticate(user=user)

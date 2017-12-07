@@ -212,3 +212,5 @@ class SubscriptionApiTest(APITestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.data['entity_description'], 'OBJECT NOT FOUND')
+
+    # TODO POST (Update) Tests

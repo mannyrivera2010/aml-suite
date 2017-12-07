@@ -124,6 +124,9 @@ class ListIterator(GenericIterator):
     def remove(self):
         raise UnsupportedOperationException()
 
+    def __str__(self):
+        return 'ListIterator({})'.format(self.input_list)
+
 
 class EmptyIterator(GenericIterator):
 
