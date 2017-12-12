@@ -19,7 +19,7 @@ class DataResourceSerializer(serializers.Serializer):
     content_type = serializers.CharField(max_length=512, required=False)
     version = serializers.CharField(max_length=128, required=False)
     pattern = serializers.CharField(max_length=1024, required=False)
-    permissions = serializers.CharField(max_length=8192, required=False)
+    permissions = serializer_fields.JsonField(required=False)
 
     class Meta:
         model = models.DataResource
