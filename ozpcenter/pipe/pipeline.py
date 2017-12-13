@@ -86,7 +86,7 @@ class Pipeline(object):
         """
         Remove Pipe
         """
-        raise recommend_utils.UnsupportedOperation()
+        raise recommend_utils.UnsupportedOperationException()
 
     def has_next(self):
         """

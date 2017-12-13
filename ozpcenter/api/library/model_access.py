@@ -21,10 +21,7 @@ def get_all_library_entries():
     Return:
         [ApplicationLibraryEntry]: List of All ApplicationLibrary Entry Objects
     """
-    try:
-        return models.ApplicationLibraryEntry.objects.filter(listing__is_deleted=False).all()
-    except ObjectDoesNotExist:
-        return None
+    return models.ApplicationLibraryEntry.objects.filter(listing__is_deleted=False).all()
 
 
 def get_library_entry_by_id(library_entry_id):
@@ -93,8 +90,8 @@ def create_self_user_library_entry(username, listing_id, folder_name=None, posit
         Exception: if profile was not found based on username or
             or listing was not found based on listing_id
     """
-    listing = listing_model_access.get_listing_by_id(username, listing_id)
     owner = generic_model_access.get_profile(username)
+    listing = listing_model_access.get_listing_by_id(username, listing_id)
 
     if not listing or not owner:
         raise Exception('Listing or user not found')
@@ -163,7 +160,7 @@ def create_batch_library_entries(username, data):
         if 'folder' not in data_entry:
             new_data_entry['folder'] = None
         else:
-            new_data_entry['folder'] = data_entry['folder']
+            new_data_entry['folder'] = str(data_entry['folder'])
 
         if 'position' not in data_entry:
             new_data_entry['position'] = None
@@ -182,9 +179,6 @@ def create_batch_library_entries(username, data):
         listing = data_entry.get('listing')
         folder_name = data_entry.get('folder')
         position = data_entry.get('position')
-
-        if not listing:
-            raise Exception('Listing not found')
 
         logger.debug('Adding bookmark for listing[{0!s}], user[{1!s}]'.format(listing.title, username), extra={'user': username})
 

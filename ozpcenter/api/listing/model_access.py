@@ -120,7 +120,7 @@ def get_listing_type_by_title(title, reraise=True):
     """
     try:
         return models.ListingType.objects.get(title=title)
-    except models.Listing.DoesNotExist as err:
+    except ObjectDoesNotExist as err:
         if reraise:
             raise err
         else:
@@ -141,32 +141,32 @@ def get_listing_by_id(username, id, reraise=False):
     """
     try:
         return models.Listing.objects.for_user(username).get(id=id)
-    except models.Listing.DoesNotExist as err:
+    except ObjectDoesNotExist as err:
         if reraise:
             raise err
         else:
             return None
 
+# Not being used
+# def get_listing_by_title(username, title, reraise=True):
+#     """
+#     Get listing by title
 
-def get_listing_by_title(username, title, reraise=True):
-    """
-    Get listing by title
+#     Args:
+#         username(str)
+#         title
+#         reraise(bool)
 
-    Args:
-        username(str)
-        title
-        reraise(bool)
-
-    Returns:
-        Listing
-    """
-    try:
-        return models.Listing.objects.for_user(username).get(title=title)
-    except models.Listing.DoesNotExist as err:
-        if reraise:
-            raise err
-        else:
-            return None
+#     Returns:
+#         Listing
+#     """
+#     try:
+#         return models.Listing.objects.for_user(username).get(title=title)
+#     except ObjectDoesNotExist as err:
+#         if reraise:
+#             raise err
+#         else:
+#             return None
 
 
 def filter_listings(username, filter_params):
@@ -650,10 +650,28 @@ def create_listing_review(username, listing, rating, text=None, review_parent=No
     review = models.Review(listing=listing, author=author, rate=rating, text=text, review_parent=review_parent)
     review.save()
 
+    # add this action to the log
+    change_details = [
+        {
+            'field_name': 'rate',
+            'old_value': None,
+            'new_value': rating
+        },
+        {
+            'field_name': 'text',
+            'old_value': None,
+            'new_value': text
+        }
+    ]
+    listing = review.listing
+    listing = _add_listing_activity(author, listing,
+        models.ListingActivity.REVIEWED, change_details=change_details)
+
     # update this listing's rating
     _update_rating(username, listing)
 
-    dispatcher.publish('listing_review_created', listing=listing, profile=author, rating=rating, text=text)
+    if review.review_parent is None:
+        dispatcher.publish('listing_review_created', listing=listing, profile=author, rating=rating, text=text)
     return review
 
 

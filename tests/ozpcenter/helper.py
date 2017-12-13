@@ -14,6 +14,38 @@ TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 
 
+def patch_environ(new_environ=None, clear_orig=False):
+    """
+    https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/34333710#34333710
+    """
+    if not new_environ:
+        new_environ = dict()
+
+    def actual_decorator(func):
+        from functools import wraps
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            original_env = dict(os.environ)
+
+            if clear_orig:
+                os.environ.clear()
+
+            os.environ.update(new_environ)
+            try:
+                result = func(*args, **kwargs)
+            except:
+                raise
+            finally:  # restore even if Exception was raised
+                os.environ = original_env
+
+            return result
+
+        return wrapper
+
+    return actual_decorator
+
+
 class ExceptionUnitTestHelper(object):
     """
     This class returns dictionaries of exceptions to compare with response data
@@ -157,7 +189,7 @@ def _edit_listing(test_case_instance, id, input_data, default_user='bigbrother')
     return response
 
 
-def _create_create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
+def _create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
     """
     Create Bookmark Helper Function
 
@@ -215,9 +247,13 @@ def unittest_request_helper(test_case_instance, url, method, data=None, username
             test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
         elif status_code == 204:
             test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        elif status_code == 400:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         elif status_code == 403:
             test_case_instance.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        elif status_code == 405:
+	elif status_code == 404:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)        
+	elif status_code == 405:
             test_case_instance.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         elif status_code == 501:
             test_case_instance.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)

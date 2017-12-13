@@ -97,8 +97,26 @@ sqlite_migrate:
 	MAIN_DATABASE=sqlite python manage.py makemigrations ozpiwc
 	MAIN_DATABASE=sqlite TEST_MODE=True python manage.py migrate
 
+sqlite_dump: dev
+	sqlite3 db.sqlite3 .dump > ozpcenter/scripts/test_data/dump_sqlite3.sql
+
+sqlite_restore:
+	if [ -e 'db.sqlite3' ]; then rm db.sqlite3 ; fi && cat ozpcenter/scripts/test_data/dump_sqlite3.sql | sqlite3 db.sqlite3
+
+pgsql_dump: dev_psql
+	pg_dump --username=ozp_user --host=localhost ozp > ozpcenter/scripts/test_data/dump_pgsql.sql
+
+pgsql_restore:
+	if [ `psql -tA -c "SELECT 1 AS result FROM pg_database WHERE datname='ozp'" -U postgres --host=localhost` == '1' ] ; then psql -c 'DROP DATABASE ozp;' -U postgres --host=localhost ; fi
+	psql -c 'CREATE DATABASE ozp;' -U postgres --host=localhost
+	psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;' -U postgres --host=localhost
+	psql --username=ozp_user --host=localhost ozp < ozpcenter/scripts/test_data/dump_pgsql.sql
+
 dev: clean pre create_static install_git_hooks sqlite_migrate
 	MAIN_DATABASE=sqlite python manage.py runscript sample_data_generator
+
+dev_fast: clean pre create_static install_git_hooks
+	FAST_MODE=True MAIN_DATABASE=sqlite python manage.py runscript sample_data_generator
 
 dev_es: clean pre create_static install_git_hooks sqlite_migrate
 	MAIN_DATABASE=sqlite ES_ENABLED=FALSE python manage.py runscript sample_data_generator

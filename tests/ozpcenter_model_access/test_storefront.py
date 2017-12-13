@@ -3,6 +3,7 @@ Utils tests
 """
 from django.test import override_settings
 from django.test import TestCase
+from unittest.mock import MagicMock
 
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
@@ -34,10 +35,16 @@ class StorefrontTest(TestCase):
             sample data generator)
 
         """
-        username = 'wsmith'
-        data, extra_data = model_access.get_storefront(username)
+        request = MagicMock()
+        request.user = 'wsmith'
+        request.query_params.get.side_effect = lambda *arg: True
+
+        data, extra_data = model_access.get_storefront(request)
 
         # test that only APPROVED listings are returned
+        for i in data['recommended']:
+            self.assertEqual(i.approval_status, models.Listing.APPROVED)
+
         for i in data['featured']:
             self.assertEqual(i.approval_status, models.Listing.APPROVED)
 
@@ -76,3 +83,15 @@ class StorefrontTest(TestCase):
         keys = list(listing_types[0].keys()).sort()
         expected_keys = ['title', 'description'].sort()
         self.assertEqual(keys, expected_keys)
+
+    # TODO: Fails on postgres
+    # def test_get_sql_statement(self):
+    #     sql = model_access.get_sql_statement()
+
+    # def test_get_user_listings(self):
+    #     request = MagicMock()
+    #     request.user = 'wsmith'
+    #     request.query_params.get.side_effect = lambda *arg: True
+
+    #     data = model_access.get_user_listings(request.user, request)
+        # TODO: Finish test

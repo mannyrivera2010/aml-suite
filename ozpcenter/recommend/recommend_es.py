@@ -356,11 +356,20 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             body=query
         )
 
-        each_profile_source = es_profile_result['hits']['hits'][0]['_source']
+        if len(es_profile_result['hits']['hits']) >= 1:
+            each_profile_source = es_profile_result['hits']['hits'][0]['_source']
+        else:
+            return {'hits': {'total': 0}}
+
+        # each_profile_source_keys = ['titles', 'author', 'tags_list', 'categories_id',
+        # 'categories_text', 'descriptions', 'author_id',
+        # 'bookmark_ids', 'agency_name_list', 'ratings', 'description_shorts']
 
         query_object = []
 
         agency_text_query = str(each_profile_source['agency_name_list']).strip('[').strip(']')
+        # TODO: Figure out if agency_text_query should be below results, str(?)
+        # agency_text_query = 'Minitrue' / 'Minitrue', 'Minipax', 'Miniluv'
         agency_to_query = {
             "query": {
                 "bool": {
@@ -371,7 +380,8 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             }
         }
         query_object.append(agency_to_query)
-
+        # TODO: Figure out if each_profile_source['categories_id'] should be below results
+        # each_profile_source['categories_id'] = [3, 4, 5, 6, 8, 10, 12, 14, 15, 16] / [6] / []
         categories_to_query = {
             "nested": {
                 "path": "categories",
@@ -385,7 +395,8 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             }
         }
         query_object.append(categories_to_query)
-
+        # TODO: Figure out if each_profile_source['tags_list'] should be below results
+        # each_profile_source['tags_list'] = [] / ['tag_0', 'demo', 'demo_tag', 'example']
         tags_to_query = {
             "nested": {
                 "path": "tags",
@@ -460,6 +471,10 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             body=query_compare
         )
 
+        # es_query_result = {'took':9,'timed_out':False,'hits':{ 'max_score':6.6793613, 'hits':[
+        #  {'_type':'listings',
+        #     '_source':{ 'title':'LocationAnalyzer','id':95},'_index':'appsmall', '_id':'95',
+        #     '_score':6.6793613},....],'total':185}}
         return es_query_result
 
     def new_user_return_list(self, result_size):
@@ -524,7 +539,6 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
         recommendations.
         The list is then normalized and added to the recommendations database.
         """
-        logger.debug('= Elasticsearch Content Base Recommendation Engine= ')
         all_profiles = models.Profile.objects.all()
         all_profiles_count = len(all_profiles)
 
@@ -533,6 +547,7 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
         current_profile_count = 0
 
         for profile in all_profiles:
+            start_ms = time.time() * 1000.0
             current_profile_count = current_profile_count + 1
             profile_id = profile.id
             es_query_result = self.es_content_based_recommendation(profile_id, self.result_size)
@@ -553,9 +568,9 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
                 score = recommend_utils.map_numbers(indexitem['_score'], 0, max_score_es_content, self.min_new_score, self.max_new_score)
                 itemtoadd = indexitem['_source']['id']
                 self.profile_result_set.add_listing_to_user_profile(profile_id, itemtoadd, score, False)
-            logger.debug("= ES CONTENT RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
 
-        logger.debug("= ES CONTENT RECOMMENDATION Results Completed =")
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, all_profiles_count, round(end_ms - start_ms, 3)))
 
 
 class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
@@ -605,6 +620,11 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
         )
 
         agg_query_term = {}
+
+        if len(es_search_result['hits']['hits']) == 0:
+            logger.warn('es_user_based_recommendation, profile_id[{}] returned no results'.format(profile_id))
+            return []
+
         categories_to_match = es_search_result['hits']['hits'][0]['_source']['categories_id']
         tags_to_match = es_search_result['hits']['hits'][0]['_source']['tags_list']
         bookmarks_to_match = es_search_result['hits']['hits'][0]['_source']['bookmark_ids']
@@ -692,18 +712,21 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
             - Take max score from results for profile and rebase all results while adding them to the recommendation list
             - For each recommendation add it to the list while rescalling the score based on the max score returned
         """
-        logger.debug('= Elasticsearch User Base Recommendation Engine =')
-
         # Retreive all of the profiles from database:
         all_profiles = models.Profile.objects.all()
         all_profiles_count = len(all_profiles)
 
         current_profile_count = 0
         for profile in all_profiles:
+            start_ms = time.time() * 1000.0
             current_profile_count = current_profile_count + 1
 
             profile_id = profile.id
             recommended_items = self.es_user_based_recommendation(profile_id)
+
+            # recommended_item = [{'key_as_string': '154', 'doc_count': 3, 'score': 0.025898896404414385, 'bg_count': 3, 'key': 154},
+            #  {'key_as_string': '1', 'doc_count': 3, 'score': 0.025898896404414385, 'bg_count': 3, 'key': 1},
+            #  {'key_as_string': '173', 'doc_count': 2, 'score': 0.017265930936276253, 'bg_count': 2, 'key': 173}, ...]
 
             # If a recommendaiton list is returned then get the max score,
             # otherwise it is a new user or there is no profile to base recommendations on:
@@ -714,5 +737,5 @@ class ElasticsearchUserBaseRecommender(ElasticsearchRecommender):
                 score = recommend_utils.map_numbers(indexitem['score'], 0, max_score_es_user, self.min_new_score, self.max_new_score)
                 self.profile_result_set.add_listing_to_user_profile(profile_id, indexitem['key'], score, False)
 
-            logger.debug("= ES USER RECOMMENDER Engine Completed Results for {}/{} =".format(current_profile_count, all_profiles_count))
-        logger.debug("= ES USER RECOMMENDATION Results Completed =")
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, all_profiles_count, round(end_ms - start_ms, 3)))

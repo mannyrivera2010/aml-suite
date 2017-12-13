@@ -66,17 +66,18 @@ class ProfileResultSet(object):
         self.recommender_result_set = {}
 
     def add_listing_to_user_profile(self, profile_id, listing_id, score, cumulative=False):
+        score = float(score)
         if profile_id in self.recommender_result_set:
             if self.recommender_result_set[profile_id].get(listing_id):
                 if cumulative:
-                    self.recommender_result_set[profile_id][listing_id] = self.recommender_result_set[profile_id][listing_id] + float(score)
+                    self.recommender_result_set[profile_id][listing_id] = round(self.recommender_result_set[profile_id][listing_id] + score, 3)
                 else:
-                    self.recommender_result_set[profile_id][listing_id] = float(score)
+                    self.recommender_result_set[profile_id][listing_id] = round(score, 3)
             else:
-                self.recommender_result_set[profile_id][listing_id] = float(score)
+                self.recommender_result_set[profile_id][listing_id] = round(score, 3)
         else:
             self.recommender_result_set[profile_id] = {}
-            self.recommender_result_set[profile_id][listing_id] = float(score)
+            self.recommender_result_set[profile_id][listing_id] = round(score, 3)
 
 
 class RecommenderProfileResultSet(object):
@@ -107,6 +108,22 @@ class RecommenderProfileResultSet(object):
         """
         self.profile_id = profile_id
         self.recommender_result_set = {}
+
+    @staticmethod
+    def from_profile_instance(profile_instance):
+        # Get Recommended Listings for owner
+        target_profile_recommended_entry = models.RecommendationsEntry.objects.filter(target_profile=profile_instance).first()
+
+        recommender_profile_result_set = RecommenderProfileResultSet(profile_instance.id)
+
+        recommended_entry_data = {}
+        if target_profile_recommended_entry:
+            recommendation_data = target_profile_recommended_entry.recommendation_data
+            if recommendation_data:
+                recommended_entry_data = msgpack.unpackb(recommendation_data, encoding='utf-8')
+                recommender_profile_result_set.recommender_result_set = recommended_entry_data
+
+        return recommender_profile_result_set
 
     def merge(self, recommender_friendly_name, recommendation_weight, current_recommendations, recommendations_time):
         """
@@ -236,8 +253,8 @@ class BaselineRecommender(object):
 
         current_profile_count = 0
         for profile in all_profiles:
+            start_ms = time.time() * 1000.0
             current_profile_count = current_profile_count + 1
-            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, all_profiles_count))
 
             profile_id = profile.id
             profile_username = profile.user.username
@@ -247,7 +264,7 @@ class BaselineRecommender(object):
                     is_featured=True,
                     approval_status=models.Listing.APPROVED,
                     is_enabled=True,
-                    is_deleted=False)[:36]
+                    is_deleted=False)
 
             for current_listing in featured_listings:
                 self.profile_result_set.add_listing_to_user_profile(profile_id, current_listing.id, 3.0, True)
@@ -259,7 +276,7 @@ class BaselineRecommender(object):
                         is_featured=False,
                         approval_status=models.Listing.APPROVED,
                         is_enabled=True,
-                        is_deleted=False)[:36]
+                        is_deleted=False)
 
             for current_listing in recent_listings:
                 self.profile_result_set.add_listing_to_user_profile(profile_id, current_listing.id, 2.0, True)
@@ -269,7 +286,7 @@ class BaselineRecommender(object):
                 profile_username).filter(
                     approval_status=models.Listing.APPROVED,
                     is_enabled=True,
-                    is_deleted=False).order_by('-avg_rate', '-total_reviews')[:36]
+                    is_deleted=False).order_by('-avg_rate', '-total_reviews')
 
             for current_listing in most_popular_listings:
                 if current_listing.avg_rate != 0:
@@ -308,6 +325,9 @@ class BaselineRecommender(object):
                 calculation = recommend_utils.map_numbers(count, old_min, old_max, new_min, new_max)
                 self.profile_result_set.add_listing_to_user_profile(profile_id, listing_id, calculation, True)
 
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, all_profiles_count, round(end_ms - start_ms, 3)))
+
 
 class GraphCollaborativeFilteringBaseRecommender(object):
     """
@@ -330,11 +350,12 @@ class GraphCollaborativeFilteringBaseRecommender(object):
         """
         current_profile_count = 0
         for profile in self.all_profiles:
+            start_ms = time.time() * 1000.0
+
             profile_id = profile.id
             current_profile_count = current_profile_count + 1
-            logger.debug('Calculating Profile {}/{}'.format(current_profile_count, self.all_profiles_count))
 
-            results = self.graph.algo().recommend_listings_for_profile('p-{}'.format(profile_id))  # bigbrother
+            results = self.graph.algo().recommend_listings_for_profile('p-{}'.format(profile_id))
 
             for current_tuple in results:
                 listing_raw = current_tuple[0]  # 'l-#'
@@ -342,6 +363,9 @@ class GraphCollaborativeFilteringBaseRecommender(object):
                 score = current_tuple[1]
                 # No need to rebase since results are within the range of others based on testing:
                 self.profile_result_set.add_listing_to_user_profile(profile_id, listing_id, score)
+
+            end_ms = time.time() * 1000.0
+            logger.debug('Calculated Profile {}/{}, took {} ms'.format(current_profile_count, self.all_profiles_count, round(end_ms - start_ms, 3)))
 
 
 # Method is decorated with @transaction.atomic to ensure all logic is executed in a single transaction
@@ -408,14 +432,23 @@ class RecommenderDirectory(object):
         Args:
             recommender_string: Comma Delimited list of Recommender Engine to execute
         """
+        results = {}
+
         start_ms = time.time() * 1000.0
+        stat_times = []
 
         for recommender_obj, friendly_name, recommendation_weight in self._iterate_recommenders(recommender_string):
             logger.info('=={}=='.format(friendly_name))
+            results[friendly_name] = {}
+
+            initiation_start_ms = time.time() * 1000.0
 
             if hasattr(recommender_obj, 'initiate'):
                 # initiate - Used for initiating variables, classes, objects, connecting to service
                 recommender_obj.initiate()
+
+            initiation_end_ms = time.time() * 1000.0
+            initiation_time = initiation_end_ms - initiation_start_ms
 
             recommendations_start_ms = time.time() * 1000.0
 
@@ -429,16 +462,22 @@ class RecommenderDirectory(object):
 
             recommendations_end_ms = time.time() * 1000.0
             recommendations_time = recommendations_end_ms - recommendations_start_ms
-
-            logger.info('Merging {} into results'.format(friendly_name))
+            stat_times.append((friendly_name, initiation_time, recommendations_time))
+            logger.debug('Merging {} into results'.format(friendly_name, recommendations_time))
             self.recommender_result_set_obj.merge(friendly_name, recommendation_weight, profile_result_set, recommendations_time)
+
+        logger.info('==Statistics==')
+        for stat_time in stat_times:
+            logger.info('[{}] took [{}] to initiate and [{}] for recommendation logic'.format(stat_time[0], round(stat_time[1], 3), round(stat_time[2], 3)))
 
         logger.info('==Start saving recommendations into database==')
         start_db_ms = time.time() * 1000.0
         self.save_to_db()
         end_db_ms = time.time() * 1000.0
-        logger.info('Save to database took: {} ms'.format(end_db_ms - start_db_ms))
-        logger.info('Whole Process: {} ms'.format(end_db_ms - start_ms))
+        logger.info('Save to database took: {} ms'.format(round(end_db_ms - start_db_ms, 3)))
+        logger.info('Whole Process: {} ms'.format(round(end_db_ms - start_ms, 3)))
+
+        return results
 
     def save_to_db(self):
         """
@@ -460,7 +499,6 @@ class RecommenderDirectory(object):
 
         profile_query = models.Profile.objects.filter(id__in=profile_id_list)
         profile_dict = {profile.id: profile for profile in profile_query}
-
         listing_dict = {listing.id: listing for listing in models.Listing.objects.all()}
 
         # Delete RecommendationsEntry Entries for profiles
@@ -472,22 +510,6 @@ class RecommenderDirectory(object):
             profile = profile_dict.get(profile_id)
 
             if profile:
-                for current_recommender_friendly_name in recommender_result_set[profile_id].recommender_result_set:
-                    output_current_tuples = []
-
-                    current_recommendations = recommender_result_set[profile_id].recommender_result_set[current_recommender_friendly_name]['recommendations']
-                    sorted_recommendations = recommend_utils.get_top_n_score(current_recommendations, 20)
-
-                    for current_recommendation_tuple in sorted_recommendations:
-                        current_listing_id = current_recommendation_tuple[0]
-                        # current_listing_score = current_recommendation_tuple[1]
-                        current_listing = listing_dict.get(current_listing_id)
-
-                        if current_listing:
-                            output_current_tuples.append(current_recommendation_tuple)
-
-                    recommender_result_set[profile_id].recommender_result_set[current_recommender_friendly_name]['recommendations'] = output_current_tuples
-
                 batch_list.append({'target_profile': profile,
                                    'recommendation_data': msgpack.packb(recommender_result_set[profile_id].recommender_result_set)})
 

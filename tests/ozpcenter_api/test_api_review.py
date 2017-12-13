@@ -61,6 +61,13 @@ class ListingReviewApiTest(APITestCase):
         new_review = models.Review.objects.get(id=created_id)
         self.assertEqual(created_id, new_review.id)
 
+        # test the listing/<id>/activity endpoint
+        url = '/api/listing/{0!s}/activity/'.format(air_mail_id)
+        response = self.client.get(url, format='json')
+        activiy_actions = [i['action'] for i in response.data]
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(models.ListingActivity.REVIEWED in activiy_actions)
+
         # creating a duplicate review should fail
         # http://stackoverflow.com/questions/21458387/transactionmanagementerror-you-cant-execute-queries-until-the-end-of-the-atom
         # try:

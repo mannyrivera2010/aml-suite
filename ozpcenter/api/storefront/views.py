@@ -71,8 +71,8 @@ class StorefrontViewSet(viewsets.ViewSet):
                 recommendations = recommended_entry_data[friendly_name]['recommendations']
 
                 for current_recommendations in recommendations:
-                    current_listing = current_recommendations[0]
-                    current_score = current_recommendations[1]
+                    current_listing = current_recommendations
+                    current_score = recommendations[current_listing]
 
                     if current_listing in listing_recommend_data:
                         listing_recommend_data[current_listing][friendly_name] = {'raw_score': current_score, 'weight': current_weight}
@@ -86,6 +86,7 @@ class StorefrontViewSet(viewsets.ViewSet):
                 serialized_listing_id = serialized_listing['id']
 
                 serialized_listing['_score'] = listing_recommend_data[serialized_listing_id]
+                serialized_listing['_score']['_sort_score'] = round(extra_data['sorted_recommendations_combined_dict'][serialized_listing_id], 3)
 
                 recommendation_serialized_list.append(serialized_listing)
 
@@ -97,9 +98,8 @@ class StorefrontViewSet(viewsets.ViewSet):
         ---
         serializer: ozpcenter.api.storefront.serializers.StorefrontSerializer
         """
-        data, extra_data = model_access.get_storefront(request.user, True)
-        serializer = serializers.StorefrontSerializer(data,
-            context={'request': request})
+        data, extra_data = model_access.get_storefront(request, True)
+        serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data
         self._add_recommended_scores(serialized_data, extra_data)
@@ -107,9 +107,8 @@ class StorefrontViewSet(viewsets.ViewSet):
         return Response(serialized_data)
 
     def retrieve(self, request, pk=None):
-        data, extra_data = model_access.get_storefront(request.user, True, pk)
-        serializer = serializers.StorefrontSerializer(data,
-            context={'request': request})
+        data, extra_data = model_access.get_storefront(request, True, pk)
+        serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data
         self._add_recommended_scores(serialized_data, extra_data)

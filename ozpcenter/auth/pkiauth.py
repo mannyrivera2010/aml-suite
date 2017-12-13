@@ -47,15 +47,15 @@ class PkiAuthentication(authentication.BaseAuthentication):
             logger.error('Value of HTTP_X_SSL_AUTHENTICATED header not SUCCESS, got {0!s} instead'.format(authentication_status))
             return None
 
+        # TODO: do we need to preprocess/sanitize this in any way?
         # get the user's DN
         dn = request.META.get('HTTP_X_SSL_USER_DN', None)
-
-        # get the issuer DN:
-        issuer_dn = request.META.get('HTTP_X_SSL_ISSUER_DN', None)
-        # TODO: do we need to preprocess/sanitize this in any way?
         if not dn:
             logger.error('HTTP_X_SSL_USER_DN missing from header')
             return None
+
+        # get the issuer DN:
+        issuer_dn = request.META.get('HTTP_X_SSL_ISSUER_DN', None)
         if not issuer_dn:
             logger.error('HTTP_X_SSL_ISSUER_DN missing from header')
             return None
@@ -72,7 +72,7 @@ class PkiAuthentication(authentication.BaseAuthentication):
         profile = _get_profile_by_dn(dn, issuer_dn)
 
         if profile:
-            logger.info('found user {0!s}, authentication succeeded'.format(profile.user.username), extra={'user', profile.user.username})
+            logger.info('found user {0!s}, authentication succeeded'.format(profile.user.username))  # , extra={'user', profile.user.username})
             return (profile.user, None)
         else:
             logger.error('Failed to find/create user for dn {0!s}. Authentication failed'.format(dn))
@@ -130,9 +130,8 @@ def _get_profile_by_dn(dn, issuer_dn='default issuer dn'):
             new_username = '{0!s}_{1!s}'.format(new_username, count + 1)
             username = new_username
 
-        # now check again - if this username exists, we have a problem
-        count = User.objects.filter(
-            username=username).count()
+        # now check again - if this username exists, we have a problemce
+        count = User.objects.filter(username=username).count()
         if count != 0:
             logger.error('Cannot create new user for dn {0!s}, username {1!s} already exists'.format(dn, username))
             return None

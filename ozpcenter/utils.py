@@ -6,8 +6,9 @@ import pytz
 import re
 import os
 
-from django.template import Context
-from django.template import Template
+# Reference - Code not used
+# from django.template import Context
+# from django.template import Template
 
 
 def str_to_bool(user_input):
@@ -66,15 +67,15 @@ def get_now_utc():
     """
     return datetime.datetime.now(pytz.utc)
 
-
-def render_template_string(template_string, context_dict):
-    """
-    Render Django Template
-
-    Args:
-        template_string(str): Template String
-        context_dict(dict): Context Variable Dictionary
-    """
-    template_context = Context(context_dict)
-    template = Template(template_string)
-    return template.render(template_context)
+# Reference - Code not used
+# def render_template_string(template_string, context_dict):
+#     """
+#     Render Django Template
+#
+#     Args:
+#         template_string(str): Template String
+#         context_dict(dict): Context Variable Dictionary
+#     """
+#     template_context = Context(context_dict)
+#     template = Template(template_string)
+#     return template.render(template_context)
