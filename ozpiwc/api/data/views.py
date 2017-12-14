@@ -44,7 +44,7 @@ class DataApiViewSet(viewsets.ViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     renderer_classes = (renderers.DataObjectResourceRenderer, rf_renderers.JSONRenderer)
 
-    lookup_value_regex = '[0-9a-zA-Z/]+'
+    lookup_value_regex = '[0-9a-zA-Z/_\-]+'
 
     def list(self, request):
         """
