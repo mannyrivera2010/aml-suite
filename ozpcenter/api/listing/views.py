@@ -152,7 +152,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer = serializers.ReviewSerializer(data=request.data, context={'request': request, 'listing': listing}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-
             raise errors.ValidationException('{0}'.format(serializer.errors))
 
         serializer.save()
@@ -168,8 +167,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer = serializers.ReviewSerializer(review, data=request.data, context={'request': request, 'listing': listing}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-
             raise errors.ValidationException('{0}'.format(serializer.errors))
+
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -293,7 +292,6 @@ class RecommendationFeedbackViewSet(viewsets.ModelViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-
             raise errors.ValidationException('{0}'.format(serializer.errors))
 
         serializer.save()
@@ -840,7 +838,6 @@ class ListingViewSet(viewsets.ModelViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-
             raise errors.ValidationException('{0}'.format(serializer.errors))
 
         serializer.save()
@@ -962,7 +959,6 @@ class ListingViewSet(viewsets.ModelViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
-
             raise errors.ValidationException('{0}'.format(serializer.errors))
 
         serializer.save()

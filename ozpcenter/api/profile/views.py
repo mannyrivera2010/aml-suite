@@ -95,12 +95,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
         current_request_profile = model_access.get_self(request.user.username)
         if current_request_profile.highest_role() != 'APPS_MALL_STEWARD':
             raise errors.PermissionDenied
+
         profile_instance = self.get_queryset().get(pk=pk)
         serializer = serializers.ProfileSerializer(profile_instance,
             data=request.data, context={'request': request}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-
             raise errors.RequestException('{0!s}'.format(serializer.errors))
 
         serializer.save()
@@ -348,7 +348,6 @@ class CurrentUserViewSet(viewsets.ViewSet):
             data=request.data, context={'request': request}, partial=True)
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-
             raise errors.ValidationException('{0!s}'.format(serializer.errors))
 
         serializer.save()

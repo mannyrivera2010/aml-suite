@@ -1103,16 +1103,11 @@ class NotificationApiTest(APITestCase):
     def test_delete_system_notification_org_steward(self):
         url = '/api/notification/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
-        # replaced for consistent errors
-        # self.assertEqual(response.data, self.expected_error)
         self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
 
     def test_delete_system_notification_user_unauthorized(self):
         url = '/api/notification/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='jones', status_code=403)
-        # replaced for consistent errors
-        # self.assertEqual(response.data, self.expected_error)
-        # self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Stewards can delete notifications'))
         self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Stewards can delete notifications'))
 
     # TODO: Unittest for below

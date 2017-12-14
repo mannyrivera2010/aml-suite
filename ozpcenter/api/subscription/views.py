@@ -62,8 +62,8 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-
             raise errors.ValidationException('{0!s}'.format(serializer.errors))
+
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)

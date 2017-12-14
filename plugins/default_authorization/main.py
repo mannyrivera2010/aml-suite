@@ -66,6 +66,7 @@ class PluginMain(object):
 
         if r.status_code != 200:
             raise errors.AuthorizationFailure('Error contacting authorization server: {0!s}'.format(r.text))
+
         user_data = r.json()
 
         user_json_keys = ['dn', 'formalAccesses', 'clearances', 'dutyorg', 'visas']
@@ -87,6 +88,7 @@ class PluginMain(object):
         r = self.requests.get(url, cert=(server_crt, server_key), verify=False)
         if r.status_code != 200:
             raise errors.AuthorizationFailure('Error contacting authorization server: {0!s}'.format(r.text))
+
         group_data = r.json()
 
         if 'groups' not in group_data:
@@ -134,6 +136,7 @@ class PluginMain(object):
         seconds_to_cache_data = int(settings.OZP['OZP_AUTHORIZATION']['SECONDS_TO_CACHE_DATA'])
         if seconds_to_cache_data > 24 * 3600:
             raise errors.AuthorizationFailure('Cannot cache data for more than 1 day')
+
         expires_in = profile.auth_expires - now
         if expires_in.days >= 1:
             raise errors.AuthorizationFailure('User {0!s} had auth expires set to expire in more than 24 hours'.format(username))
