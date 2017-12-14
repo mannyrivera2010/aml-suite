@@ -1,5 +1,25 @@
 
-### 1.0.90 (None) 
+### 1.0.91 (None)  
+
+#### Refactor  
+* **errors**:  Make Errors Consistent ([021d1924](https://github.com/aml-development/ozp-backend/commit/021d19244b1480699116827e5755656d9e85c937))   
+* **iwc**
+  *  fixed lookup_value_regex for data api ([2660698e](https://github.com/aml-development/ozp-backend/commit/2660698e35fd2de3643688a27ba6458840c0baf0))
+  *  refactor code to use viewsets ([bcb0f6de](https://github.com/aml-development/ozp-backend/commit/bcb0f6de027e9f0cf877c22c652de7e0326ce1ae))     
+* **exceptions**:  Consistent Errors Standardized ([0d3a8dec](https://github.com/aml-development/ozp-backend/commit/0d3a8dec85b10c51029757a1580065d49ff41dc7))    
+
+#### Merge Pull Requests  
+* Merge pull request #377 from aml-development/er_consistent_errors ([88f0ad1e](https://github.com/aml-development/ozp-backend/commit/88f0ad1ead7d775a5b4c7e87a18f78f3711fd065))
+* Merge pull request #387 from aml-development/iwc ([f706ea0c](https://github.com/aml-development/ozp-backend/commit/f706ea0c69bf41fb4a347ae8d4ab27de80da93d9))
+* Merge branch 'master' into er_consistent_errors ([f82d3498](https://github.com/aml-development/ozp-backend/commit/f82d3498198ca8e3877e0f98d9312a605b3828a4))
+* Merge pull request #386 from aml-development/tests_12_04 ([eb3adc4a](https://github.com/aml-development/ozp-backend/commit/eb3adc4a07766f72307281f5aaf45624388fce33))       
+
+#### Test  
+* **pipeline**:  increase code coverage ([fe61bee9](https://github.com/aml-development/ozp-backend/commit/fe61bee94ce4382e6d7729224914a5e8027ce4ba))    
+* **utils**:  increase code coverage ([77bd7d56](https://github.com/aml-development/ozp-backend/commit/77bd7d56835f7d94aefb26112e774921b8e720dc))    
+* **subscription**:  increase code coverage ([6485cdc4](https://github.com/aml-development/ozp-backend/commit/6485cdc479737451e6842673465ffff0e16ee61c))       
+
+### 1.0.90 (2017-11-29) 
 
 #### Fixes  
 * **recommend**:  add error handling ([b6d31ce4](https://github.com/aml-development/ozp-backend/commit/b6d31ce463077dc827134a5d71ae53b0ea2f44a2))     
@@ -57,7 +77,8 @@
 
 ### 1.0.87 (2017-11-08)  
 
-#### Refactor 
+#### Refactor  
+* **tests**:  make error consistent ([c680409a](https://github.com/aml-development/ozp-backend/commit/c680409a41c88e4d6a529080f04db66815e9469b))   
 * **recommend**
   *  refactor code ([c6fa5dcf](https://github.com/aml-development/ozp-backend/commit/c6fa5dcfff0540b5be4574be55493ccdc3c959ac))
   *  add es recommender unit tests ([bee013fc](https://github.com/aml-development/ozp-backend/commit/bee013fc2d444d298f5291842753395cde7c375f))
