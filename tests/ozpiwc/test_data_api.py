@@ -31,7 +31,7 @@ class DataApiTest(APITestCase):
     def test_data_api_non_existent(self):
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
-        key = '/transportation/car'
+        key = '/transportation/car/'
         url = '/iwc-api/self/data' + key
 
         # Trying to get a non-existent key should produce a 404
@@ -42,7 +42,7 @@ class DataApiTest(APITestCase):
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
         key = '/transportation/car'
-        url = '/iwc-api/self/data' + key
+        url = '/iwc-api/self/data' + key + '/'
 
         # Create a new entry
         entity = {"details": {"color": "black", "year": 2000}}
@@ -55,7 +55,7 @@ class DataApiTest(APITestCase):
             "content_type": content_type,
             "version": version,
             "pattern": pattern,
-            "permissions": str(permissions)
+            "permissions": permissions
         }
 
         response = self.client.put(url, data, format='json')
@@ -64,7 +64,7 @@ class DataApiTest(APITestCase):
         self.assertEqual(response.data['key'], key)
         self.assertEqual(response.data['version'], version)
         self.assertEqual(response.data['pattern'], pattern)
-        self.assertEqual(response.data['permissions'], str(permissions))
+        self.assertEqual(response.data['permissions'], (permissions))
 
         entity_resp = response.data['entity']
         self.assertEqual(entity_resp['details']['color'], entity['details']['color'])
@@ -77,7 +77,7 @@ class DataApiTest(APITestCase):
         self.assertEqual(response.data['key'], key)
         self.assertEqual(response.data['version'], version)
         self.assertEqual(response.data['pattern'], pattern)
-        self.assertEqual(response.data['permissions'], str(permissions))
+        self.assertEqual(response.data['permissions'], (permissions))
 
         # new
         entity_resp = response.data['entity']
@@ -95,7 +95,7 @@ class DataApiTest(APITestCase):
         # update an existing entry
         new_pattern = '/new/pattern'
         data['pattern'] = new_pattern
-        url = '/iwc-api/self/data' + key
+        url = '/iwc-api/self/data' + key + '/'
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.data['pattern'], new_pattern)
 
