@@ -122,8 +122,8 @@ class ImageViewSet(viewsets.ModelViewSet):
             context={'request': request})
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
-            return Response(serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
+            raise errors.ValidationException('{0!s}'.format(serializer.errors))
+
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -73,7 +73,7 @@ class ImageApiTest(APITestCase):
 
     # TODO: Fix the retrieve in image views. It always finds nothing when searching by ID
     def test_get_image_by_id(self):
-        url = '/api/image/1/'
+        url = '/api/image/9001/'
         response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=404)
 
     def test_delete_image(self):

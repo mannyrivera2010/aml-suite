@@ -517,7 +517,6 @@ def create_listing(serializer_instance, validated_data):
 
             if new_value_image is None:
                 raise errors.InvalidInput('Error while saving, can not find image by id')
-
             if image_key == 'small_icon':
                 listing.small_icon = new_value_image
             elif image_key == 'large_icon':
@@ -641,6 +640,7 @@ def update_listing(serializer_instance, instance, validated_data):
     if validated_data['is_featured'] != instance.is_featured:
         if user.highest_role() not in ['APPS_MALL_STEWARD', 'ORG_STEWARD']:
             raise errors.PermissionDenied('Only stewards can change is_featured setting of a listing')
+
         change_details.append({'old_value': model_access.bool_to_string(instance.is_featured),
                 'new_value': model_access.bool_to_string(validated_data['is_featured']), 'field_name': 'is_featured'})
         instance.is_featured = validated_data['is_featured']

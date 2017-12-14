@@ -5,6 +5,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 from ozpcenter import models
 import ozpcenter.api.listing.model_access as listing_model_access
@@ -19,8 +20,6 @@ class CategoryApiTest(APITestCase):
         setUp is invoked before each test method
         """
         self.maxDiff = None
-        self.expected_error = {'detail': 'You do not have permission to perform this action.',
-                               'error': True}
 
     @classmethod
     def setUpTestData(cls):
@@ -76,7 +75,7 @@ class CategoryApiTest(APITestCase):
         data = {'title': 'new category', 'description': 'category description'}
         response = unittest_request_helper(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, self.expected_error)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_create_category(self): test different user groups access control
 
@@ -95,7 +94,7 @@ class CategoryApiTest(APITestCase):
         data = {'title': 'updated category', 'description': 'updated description'}
         response = unittest_request_helper(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, self.expected_error)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_update_category(self): test different user groups access control
 
@@ -141,7 +140,7 @@ class CategoryApiTest(APITestCase):
         url = '/api/category/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, self.expected_error)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     def test_delete_category_with_existing_listings(self):
         author = generic_model_access.get_profile('wsmith')

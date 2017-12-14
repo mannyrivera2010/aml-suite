@@ -272,3 +272,77 @@ class ListingESSearchApiTest(APITestCase):
     #     self.assertEqual(len(titles), 1)
     #     for listing_map in response.data['results']:
     #         self.assertEqual(validate_listing_map_keys(listing_map), [])
+
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_create(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/?tag=demo_tag'
+        response = unittest_request_helper(self, url, 'POST', username='wsmith', status_code=501)
+
+        self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+        self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
+        self.assertEqual(response.data['detail'].lower(), 'http verb not supported')
+
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_destroy(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/1/?tag=demo_tag'
+        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=501)
+
+        self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+        self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
+        self.assertEqual(response.data['detail'].lower(), 'http verb not supported')
+
+    # Just for testing, test method_not_allowed
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_destroy_method_not_allowed(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/?tag=demo_tag'
+        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=405)
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.data['error_code'].lower(), 'method_not_allowed')
+
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_partial_update(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/1/?tag=demo_tag'
+        # response = unittest_request_helper(self, url, 'PATCH', username='wsmith', status_code=501)
+        response = unittest_request_helper(self, url, 'PATCH', username='wsmith', status_code=501)
+
+        self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+        self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
+        self.assertEqual(response.data['detail'].lower(), 'http verb not supported')
+
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_update(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/1/?tag=demo_tag'
+        response = unittest_request_helper(self, url, 'PUT', username='wsmith', status_code=501)
+
+        self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+        self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
+        self.assertEqual(response.data['detail'].lower(), 'http verb not supported')
+
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_retrieve(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/1/?tag=demo_tag'
+        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=501)
+
+        self.assertNotEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+        self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
+        self.assertEqual(response.data['detail'].lower(), 'http verb not supported')

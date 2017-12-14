@@ -173,6 +173,7 @@ def check_notification_permission(profile_instance, action, notification_type):
 
     if user_action not in profile_permission_list:
         raise errors.PermissionDenied('Profile does not have [{}] permissions'.format(user_action))
+
     return True
 
 

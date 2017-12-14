@@ -10,6 +10,7 @@ from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import validate_listing_map_keys
 from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 
 
 @override_settings(ES_ENABLED=False)
@@ -88,7 +89,7 @@ class ListingReviewApiTest(APITestCase):
         url = '/api/listing/{0!s}/review/'.format(bread_basket_id)
         data = {'rate': 4, 'text': 'rutherford test review'}
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.not_found())['error_code'])
 
     def test_create_review_no_text(self):
         # test_create_review_no_text
@@ -178,7 +179,7 @@ class ListingReviewApiTest(APITestCase):
         user = generic_model_access.get_profile('jones').user
         self.client.force_authenticate(user=user)
         response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied("Cannot update another user's review"))
 
         # ... unless that user is an org steward or apps mall steward
         user = generic_model_access.get_profile('julia').user

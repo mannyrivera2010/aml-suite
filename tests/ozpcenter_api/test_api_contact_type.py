@@ -4,6 +4,7 @@ Tests for ContactType endpoints
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from tests.ozpcenter.helper import unittest_request_helper
 from ozpcenter.scripts import sample_data_generator as data_gen
 
@@ -15,8 +16,7 @@ class ContactTypeApiTest(APITestCase):
         """
         setUp is invoked before each test method
         """
-        self.expected_error = {'detail': 'You do not have permission to perform this action.',
-                               'error': True}
+        pass
 
     @classmethod
     def setUpTestData(cls):
@@ -54,7 +54,7 @@ class ContactTypeApiTest(APITestCase):
         data = {'name': 'New Contact Type'}
         response = unittest_request_helper(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, self.expected_error)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_create_contact_type(self): test different user groups access control
 
@@ -73,7 +73,7 @@ class ContactTypeApiTest(APITestCase):
         data = {'name': 'Updated Type', 'required': True}
         response = unittest_request_helper(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, self.expected_error)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_update_contact_type(self): test different user groups access control
 
@@ -85,6 +85,6 @@ class ContactTypeApiTest(APITestCase):
         url = '/api/contact_type/1/'
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
 
-        self.assertEqual(response.data, self.expected_error)
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     # TODO def test_delete_contact_type(self): test different user groups access control
