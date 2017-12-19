@@ -705,7 +705,7 @@ class ListingViewSet(viewsets.ModelViewSet):
         # org = self.request.query_params.get('org', None)
         orgs = self.request.query_params.getlist('org', False)
         enabled = self.request.query_params.get('enabled', None)
-        ordering = self.request.query_params.getlist('ordering', None)
+        ordering = self.request.query_params.getlist('ordering', ['-edited_date'])
         owners_id = self.request.query_params.get('owners_id', None)
         if enabled:
             enabled = enabled.lower()
