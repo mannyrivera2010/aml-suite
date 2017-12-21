@@ -186,6 +186,9 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
             if peer.get('folder_name'):
                 temp_peer['folder_name'] = peer.get('folder_name')
 
+            if peer.get('deleted_folder'):
+                temp_peer['deleted_folder'] = peer.get('deleted_folder')
+
             target_username = temp_peer.get('user', {}).get('username')
 
             if not target_username:
