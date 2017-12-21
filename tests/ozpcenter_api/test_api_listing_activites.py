@@ -38,7 +38,6 @@ class ListingActivitiesApiTest(APITestCase):
             'title': 'mr jones app',
             'security_marking': 'UNCLASSIFIED'
         }
-
         response = unittest_request_helper(self, url, 'POST', data=data, username='jones', status_code=201)
         app_id = response.data['id']
         data = response.data

@@ -14,6 +14,7 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import ListingFile
 from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from tests.ozpcenter.helper import _edit_listing
 from ozpcenter.api.listing import model_access_es
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
@@ -307,7 +308,7 @@ class ListingESSearchApiTest(APITestCase):
         response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=405)
 
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-        self.assertEqual(response.data['error_code'].lower(), 'method_not_allowed')
+        self.assertEqual(response.data, ExceptionUnitTestHelper.method_not_allowed('Method "DELETE" not allowed.'))
 
     @override_settings(ES_ENABLED=True)
     def test_essearch_partial_update(self):

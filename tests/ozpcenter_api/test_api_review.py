@@ -89,7 +89,7 @@ class ListingReviewApiTest(APITestCase):
         url = '/api/listing/{0!s}/review/'.format(bread_basket_id)
         data = {'rate': 4, 'text': 'rutherford test review'}
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.not_found())['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.not_found('Object Not found.'))
 
     def test_create_review_no_text(self):
         # test_create_review_no_text
