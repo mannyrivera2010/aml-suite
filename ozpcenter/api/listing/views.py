@@ -697,7 +697,8 @@ class ListingViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ListingSerializer
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('title', 'id', 'owners__display_name', 'agency__title', 'agency__short_name',)
-    ordering_fields = ('title', 'id', 'agency__title', 'agency__short_name', 'is_enabled', 'is_featured', 'edited_date', 'security_marking', 'is_private', 'approval_status')
+    ordering_fields = ('title', 'id', 'agency__title', 'agency__short_name', 'is_enabled', 'is_featured',
+        'edited_date', 'security_marking', 'is_private', 'approval_status', 'avg_rate', 'total_votes')
     ordering = ('is_deleted', '-edited_date')
 
     def get_queryset(self):
@@ -705,7 +706,7 @@ class ListingViewSet(viewsets.ModelViewSet):
         # org = self.request.query_params.get('org', None)
         orgs = self.request.query_params.getlist('org', False)
         enabled = self.request.query_params.get('enabled', None)
-        ordering = self.request.query_params.getlist('ordering', ['-edited_date'])
+        ordering = self.request.query_params.get('ordering', None)
         owners_id = self.request.query_params.get('owners_id', None)
         if enabled:
             enabled = enabled.lower()
@@ -713,6 +714,11 @@ class ListingViewSet(viewsets.ModelViewSet):
                 enabled = True
             else:
                 enabled = False
+        if ordering:
+            ordering = [s.strip() for s in ordering.split(',')]
+        else:
+            # always default to last modified for consistency
+            ordering = ['-edited_date']
 
         listings = model_access.get_listings(self.request.user.username)
         if owners_id:
