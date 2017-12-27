@@ -4,6 +4,7 @@ from ozp import version
 
 PKG = "ozp_backend"
 REQUIREMENT_FILE = "requirements.txt"
+# TODO: REQUIREMENT_FILE = requirements.prod.txt ?
 
 install_requires = [requirement.strip() for requirement in open(REQUIREMENT_FILE, "rt").readlines()]
 
