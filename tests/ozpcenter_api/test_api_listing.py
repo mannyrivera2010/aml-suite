@@ -1053,3 +1053,52 @@ class ListingApiTest(APITestCase):
         response = self.client.get(url, format='json')
         self.assertEqual(response.data['feedback'], 0)
         self.assertEqual(response.data['feedback_score'], 0)
+
+    def test_listing_ordering(self):
+        """
+        betafish user
+        """
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
+
+        # Last Modified
+        url = '/api/listing/?ordering=-edited_date'
+        response = self.client.get(url, format='json')
+        results = [x for x in response.data if hasattr(x, 'edited_date')]
+        sorted_results = sorted(results, key=lambda x: x['edited_date'], reverse=True)
+        self.assertEqual(results, sorted_results)
+
+        # Newest
+        url = '/api/listing/?ordering=-approved_date'
+        response = self.client.get(url, format='json')
+        results = [x for x in response.data if hasattr(x, 'approved_date')]
+        sorted_results = sorted(results, key=lambda x: x['approved_date'], reverse=True)
+        self.assertEqual(results, sorted_results)
+
+        # Title: A to Z
+        url = '/api/listing/?ordering=title'
+        response = self.client.get(url, format='json')
+        results = [x for x in response.data if hasattr(x, 'title')]
+        sorted_results = sorted(results, key=lambda x: x['title'])
+        self.assertEqual(results, sorted_results)
+
+        # Title: Z to A
+        url = '/api/listing/?ordering=-title'
+        response = self.client.get(url, format='json')
+        results = [x for x in response.data if hasattr(x, 'title')]
+        sorted_results = sorted(results, key=lambda x: x['title'], reverse=True)
+        self.assertEqual(results, sorted_results)
+
+        # Rating: High to Low
+        url = '/api/listing/?ordering=avg_rate,total_votes'
+        response = self.client.get(url, format='json')
+        results = [x for x in response.data if hasattr(x, 'avg_rate') and hasattr(x, 'total_votes')]
+        sorted_results = sorted(results, key=lambda x: (x['avg_rate'], x['total_votes']))
+        self.assertEqual(results, sorted_results)
+
+        # Rating: Low to High
+        url = '/api/listing/?ordering=-avg_rate,-total_votes'
+        response = self.client.get(url, format='json')
+        results = [x for x in response.data if hasattr(x, 'avg_rate') and hasattr(x, 'total_votes')]
+        sorted_results = sorted(results, key=lambda x: (x['avg_rate'], x['total_votes']), reverse=True)
+        self.assertEqual(results, sorted_results)
