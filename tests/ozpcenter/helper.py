@@ -142,6 +142,23 @@ class ExceptionUnitTestHelper(object):
                 'error_code': 'throttled'}
 
 
+def _delete_bookmark_folder(test_case_instance, username, folder_id, status_code=201):
+    user = generic_model_access.get_profile(username).user
+    test_case_instance.client.force_authenticate(user=user)
+    url = '/api/self/library/{0!s}/delete_folder/'.format(folder_id)
+    response = test_case_instance.client.delete(url, format='json')
+
+    if response:
+        if status_code == 204:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        elif status_code == 400:
+            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        else:
+            raise Exception('status code is not supported')
+
+    return response
+
+
 def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
     user = generic_model_access.get_profile(username).user
     test_case_instance.client.force_authenticate(user=user)

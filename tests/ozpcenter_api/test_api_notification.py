@@ -18,6 +18,7 @@ from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import _edit_listing
 from tests.ozpcenter.helper import _create_bookmark
 from tests.ozpcenter.helper import _import_bookmarks
+from tests.ozpcenter.helper import _delete_bookmark_folder
 
 
 @override_settings(ES_ENABLED=False)
@@ -705,6 +706,215 @@ class NotificationApiTest(APITestCase):
             before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(ids_list, before_notification_ids, 'Comparing Notifications for {}'.format(username))
+
+    def test_create_restore_bookmark_notification_integration(self):
+        # Library for users
+        user_library = {'bigbrother': ['Tornado-Weather',
+                                       'Lightning-Weather',
+                                       'Snow-Weather',
+                                       'Wolf Finder-Animals',
+                                       'Killer Whale-Animals',
+                                       'Lion Finder-Animals',
+                                       'Monkey Finder-Animals',
+                                       'Parrotlet-Animals',
+                                       'White Horse-Animals',
+                                       'Electric Guitar-Instruments',
+                                       'Acoustic Guitar-Instruments',
+                                       'Sound Mixer-Instruments',
+                                       'Electric Piano-Instruments',
+                                       'Piano-Instruments',
+                                       'Violin-Instruments',
+                                       'Bread Basket-None',
+                                       'Informational Book-None',
+                                       'Stop sign-None',
+                                       'Chain boat navigation-None',
+                                       'Gallery of Maps-None',
+                                       'Chart Course-None']
+                       }
+
+        # Compare Notifications for users
+        usernames_list = {'bigbrother': ['listing-WolfFinderupdatenextweek',
+                                        'listing-WolfFinderupdatenextweek',
+                                        'listing-WhiteHorseupdatenextweek',
+                                        'listing-Violinupdatenextweek',
+                                        'listing-Tornadoupdatenextweek',
+                                        'listing-Stopsignupdatenextweek',
+                                        'listing-SoundMixerupdatenextweek',
+                                        'listing-Snowupdatenextweek',
+                                        'listing-Pianoupdatenextweek',
+                                        'listing-Parrotletupdatenextweek',
+                                        'listing-MonkeyFinderupdatenextweek',
+                                        'listing-LionFinderupdatenextweek',
+                                        'listing-Lightningupdatenextweek',
+                                        'listing-KillerWhaleupdatenextweek',
+                                        'listing-KillerWhaleupdatenextweek',
+                                        'listing-InformationalBookupdatenextweek',
+                                        'listing-GalleryofMapsupdatenextweek',
+                                        'listing-ElectricPianoupdatenextweek',
+                                        'listing-ElectricGuitarupdatenextweek',
+                                        'listing-ChartCourseupdatenextweek',
+                                        'listing-ChartCourseupdatenextweek',
+                                        'listing-Chainboatnavigationupdatenextweek',
+                                        'listing-BreadBasketupdatenextweek',
+                                        'listing-BreadBasketupdatenextweek',
+                                        'listing-AcousticGuitarupdatenextweek',
+                                        'listing-Auserhasratedlisting<b>WolfFinder</b>4stars',
+                                        'listing-Auserhasratedlisting<b>WolfFinder</b>5stars',
+                                        'listing-Auserhasratedlisting<b>WhiteHorse</b>4stars',
+                                        'listing-Auserhasratedlisting<b>Tornado</b>1star',
+                                        'listing-Auserhasratedlisting<b>Tornado</b>1star',
+                                        'listing-Auserhasratedlisting<b>Tornado</b>1star',
+                                        'listing-Auserhasratedlisting<b>SailboatRacing</b>3stars',
+                                        'listing-Auserhasratedlisting<b>NetworkSwitch</b>4stars',
+                                        'listing-Auserhasratedlisting<b>MonkeyFinder</b>1star',
+                                        'listing-Auserhasratedlisting<b>MonkeyFinder</b>1star',
+                                        'listing-Auserhasratedlisting<b>LionFinder</b>1star',
+                                        'listing-Auserhasratedlisting<b>KillerWhale</b>3stars',
+                                        'listing-Auserhasratedlisting<b>KillerWhale</b>4stars',
+                                        'listing-Auserhasratedlisting<b>JarofFlies</b>3stars',
+                                        'listing-Auserhasratedlisting<b>InformationalBook</b>5stars',
+                                        'listing-Auserhasratedlisting<b>HouseStark</b>4stars',
+                                        'listing-Auserhasratedlisting<b>HouseStark</b>1star',
+                                        'listing-Auserhasratedlisting<b>HouseLannister</b>1star',
+                                        'listing-Auserhasratedlisting<b>Greatwhiteshark</b>3stars',
+                                        'listing-Auserhasratedlisting<b>Greatwhiteshark</b>5stars',
+                                        'listing-Auserhasratedlisting<b>AcousticGuitar</b>5stars',
+                                        'listing-Auserhasratedlisting<b>AcousticGuitar</b>1star',
+                                        'listing-Auserhasratedlisting<b>AcousticGuitar</b>3stars',
+                                        'system-Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
+                                        'system-Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z']}
+
+        usernames_list_main = usernames_list
+        usernames_list_actual = {}
+        for username, ids_list in usernames_list.items():
+            user = generic_model_access.get_profile(username).user
+            self.client.force_authenticate(user=user)
+
+            url = '/api/self/notification/'
+            response = self.client.get(url, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
+            usernames_list_actual[username] = before_notification_ids
+
+        for username, ids_list in usernames_list.items():
+            before_notification_ids = usernames_list_actual[username]
+            self.assertEqual(ids_list, before_notification_ids, 'Checking for {}'.format(username))
+
+        self._compare_library(user_library)
+
+        # Create Bookmark Notification
+        bookmark_notification_ids = []
+        bookmark_notification_ids_raw = []
+
+        for i in range(3):
+            user = generic_model_access.get_profile('bigbrother').user
+            self.client.force_authenticate(user=user)
+
+            now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
+            data = {'expires_date': str(now),
+                    'message': 'restore folder Instruments',
+                    'peer': {
+                        'user': {
+                          'username': 'bigbrother',
+                        },
+                        'folder_name': 'Instruments',
+                        'deleted_folder': True
+                }}
+
+            url = '/api/notification/'
+            response = self.client.post(url, data, format='json')
+
+            peer_data = {'user': {'username': 'bigbrother'}, 'folder_name': 'Instruments', 'deleted_folder': True}  # '_bookmark_listing_ids': [3, 4]}
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(response.data['message'], 'restore folder Instruments')
+            self.assertEqual(response.data['notification_type'], 'restore_bookmark')
+            self.assertEqual(response.data['agency'], None)
+            self.assertEqual(response.data['listing'], None)
+            self.assertEqual(response.data['peer'], peer_data)
+            self.assertTrue('expires_date' in data)
+
+            bookmark_notification_ids.append('{}-{}'.format(response.data['notification_type'], ''.join(response.data['message'].split())))
+            bookmark_notification_ids_raw.append(response.data['id'])
+
+            # Compare Notifications for users
+            usernames_list = copy.deepcopy(usernames_list_main)
+            usernames_list['bigbrother'] = bookmark_notification_ids[::-1] + usernames_list_main['bigbrother']
+
+            usernames_list_actual = {}
+            for username, ids_list in usernames_list.items():
+                user = generic_model_access.get_profile(username).user
+                self.client.force_authenticate(user=user)
+
+                url = '/api/self/notification/'
+                response = self.client.get(url, format='json')
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+                before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
+                usernames_list_actual[username] = before_notification_ids
+
+            for username, ids_list in usernames_list.items():
+                before_notification_ids = usernames_list_actual[username]
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(ids_list, before_notification_ids, 'Checking for {}'.format(username))
+
+        bookmark_notification1_id = bookmark_notification_ids_raw[0]
+
+        # Delete Bookmark Folder
+        _delete_bookmark_folder(self, 'bigbrother', 18, status_code=204)
+
+        # Compare Library for users
+        user_library = {'bigbrother': ['Tornado-Weather',
+                                     'Lightning-Weather',
+                                     'Snow-Weather',
+                                     'Wolf Finder-Animals',
+                                     'Killer Whale-Animals',
+                                     'Lion Finder-Animals',
+                                     'Monkey Finder-Animals',
+                                     'Parrotlet-Animals',
+                                     'White Horse-Animals',
+                                     'Bread Basket-None',
+                                     'Informational Book-None',
+                                     'Stop sign-None',
+                                     'Chain boat navigation-None',
+                                     'Gallery of Maps-None',
+                                     'Chart Course-None']}
+
+        self._compare_library(user_library)
+
+        # Import Bookmarks
+        _import_bookmarks(self, 'bigbrother', bookmark_notification1_id, status_code=201)
+
+        user_library = {'bigbrother': ['Tornado-Weather',
+                                       'Lightning-Weather',
+                                       'Snow-Weather',
+                                       'Wolf Finder-Animals',
+                                       'Killer Whale-Animals',
+                                       'Lion Finder-Animals',
+                                       'Monkey Finder-Animals',
+                                       'Parrotlet-Animals',
+                                       'White Horse-Animals',
+                                       'Electric Guitar-Instruments',
+                                       'Acoustic Guitar-Instruments',
+                                       'Sound Mixer-Instruments',
+                                       'Electric Piano-Instruments',
+                                       'Piano-Instruments',
+                                       'Violin-Instruments',
+                                       'Bread Basket-None',
+                                       'Informational Book-None',
+                                       'Stop sign-None',
+                                       'Chain boat navigation-None',
+                                       'Gallery of Maps-None',
+                                       'Chart Course-None']
+                       }
+
+        self._compare_library(user_library)
+
+        # Compare Notifications for users
+        usernames_list = copy.deepcopy(usernames_list_main)
+        usernames_list['bigbrother'] = bookmark_notification_ids[::-1] + usernames_list_main['bigbrother']
+
+        self._compare_user_notification(usernames_list)
 
     def test_create_peer_bookmark_notification_integration(self):
         """
