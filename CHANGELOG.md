@@ -1,5 +1,13 @@
 
-### 1.0.91 (None)  
+### 1.0.92 (None)  
+
+#### Refactor  
+* **dependency**:  simplify dependencies ([25834e82](https://github.com/aml-development/ozp-backend/commit/25834e825c998fcd8c71b752002f1e1c6c3a390b))    
+
+#### Merge Pull Requests  
+* Merge pull request #388 from aml-development/dep ([5183722a](https://github.com/aml-development/ozp-backend/commit/5183722a6b98c8471e2d69f2af75b7b9bb640de9))           
+
+### 1.0.91 (2017-12-14)  
 
 #### Refactor  
 * **errors**:  Make Errors Consistent ([021d1924](https://github.com/aml-development/ozp-backend/commit/021d19244b1480699116827e5755656d9e85c937))   
