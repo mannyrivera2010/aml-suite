@@ -712,7 +712,7 @@ class NotificationApiTest(APITestCase):
         test_create_restore_bookmark_notification_integration
 
         Setup initial bookmark / folders for bigbrother
-        Create notification that folder Instruments has been deleted_folder
+        Create notification that folder Instruments has been deleted
         Delete Instruments folder
         Restore Instruments folder
         """
