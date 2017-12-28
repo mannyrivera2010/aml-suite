@@ -698,7 +698,8 @@ class ListingViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('title', 'id', 'owners__display_name', 'agency__title', 'agency__short_name',)
     ordering_fields = ('id', 'agency__title', 'agency__short_name', 'is_enabled', 'is_featured',
-        'edited_date', 'security_marking', 'is_private', 'approval_status', 'avg_rate', 'total_votes')
+        'edited_date', 'security_marking', 'is_private', 'approval_status', 'approved_date',
+        'avg_rate', 'total_votes')
     case_insensitive_ordering_fields = ('title',)
     ordering = ('is_deleted', '-edited_date')
 
