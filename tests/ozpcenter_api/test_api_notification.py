@@ -708,7 +708,15 @@ class NotificationApiTest(APITestCase):
             self.assertEqual(ids_list, before_notification_ids, 'Comparing Notifications for {}'.format(username))
 
     def test_create_restore_bookmark_notification_integration(self):
-        # Library for users
+        """
+        test_create_restore_bookmark_notification_integration
+
+        Setup initial bookmark / folders for bigbrother
+        Create notification that folder Instruments has been deleted_folder
+        Delete Instruments folder
+        Restore Instruments folder
+        """
+        # Library for user
         user_library = {'bigbrother': ['Tornado-Weather',
                                        'Lightning-Weather',
                                        'Snow-Weather',
@@ -732,7 +740,7 @@ class NotificationApiTest(APITestCase):
                                        'Chart Course-None']
                        }
 
-        # Compare Notifications for users
+        # Compare Notifications for user
         usernames_list = {'bigbrother': ['listing-WolfFinderupdatenextweek',
                                         'listing-WolfFinderupdatenextweek',
                                         'listing-WhiteHorseupdatenextweek',
@@ -860,7 +868,7 @@ class NotificationApiTest(APITestCase):
 
         bookmark_notification1_id = bookmark_notification_ids_raw[0]
 
-        # Delete Bookmark Folder
+        # Delete Bookmark Folder - 18 is the folder Instruments
         _delete_bookmark_folder(self, 'bigbrother', 18, status_code=204)
 
         # Compare Library for users
