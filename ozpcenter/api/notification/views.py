@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from ozpcenter import errors
 from ozpcenter import permissions
 import ozpcenter.api.notification.model_access as model_access
+import ozpcenter.api.listing.model_access as model_access_listing
 import ozpcenter.api.notification.serializers as serializers
 
 
@@ -178,21 +179,26 @@ class PendingNotificationView(generics.ListCreateAPIView):
     Summary:
         Delete a Pending Notification Entry
     """
-
-    permission_classes = (permissions.IsOrgSteward,)
     serializer_class = serializers.NotificationSerializer
+    permission_classes = (permissions.IsUser,)
 
     def get_queryset(self):
         queryset = model_access.get_all_pending_notifications()
-
+        profile = self.request.user.profile
         listing_id = self.request.query_params.get('listing', None)
         if listing_id is not None:
-            queryset = queryset.filter(notification_type='listing', entity_id=listing_id)
-
-        return queryset
+            listing = model_access_listing.get_listing_by_id(username=self.request.user.username, id=self.request.query_params.get('listing', None))
+            if (profile in listing.owners.all()) or (profile.highest_role() in ['ORG_STEWARD', 'APPS_MALL_STEWARD']):
+                queryset = queryset.filter(notification_type='listing', entity_id=listing_id)
+                return queryset
+        if profile.highest_role() in ['ORG_STEWARD', 'APPS_MALL_STEWARD']:
+            return queryset
+        return None
 
     def list(self, request):
         queryset = self.get_queryset()
+        if queryset is None:
+            return Response({'detail': 'Permission Denied'}, status=status.HTTP_403_FORBIDDEN)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = serializers.NotificationSerializer(page,
@@ -210,27 +216,33 @@ class ExpiredNotificationView(generics.ListCreateAPIView):
     URIs
     ======
 
-    GET /api/notification/
+    GET /api/notification/expired
         Summary:
             Get a list of all Expired Notification entries
         Response:
             200 - Successful operation - [NotificationSerializer]
     """
-
-    permission_classes = (permissions.IsOrgSteward,)
     serializer_class = serializers.NotificationSerializer
+    permission_classes = (permissions.IsUser,)
 
     def get_queryset(self):
         queryset = model_access.get_all_expired_notifications()
-
+        profile = self.request.user.profile
         listing_id = self.request.query_params.get('listing', None)
         if listing_id is not None:
-            queryset = queryset.filter(notification_type='listing', entity_id=listing_id)
+            listing = model_access_listing.get_listing_by_id(username=self.request.user.username, id=self.request.query_params.get('listing', None))
+            if (profile in listing.owners.all()) or (profile.highest_role() in ['ORG_STEWARD', 'APPS_MALL_STEWARD']):
+                queryset = queryset.filter(notification_type='listing', entity_id=listing_id)
+                return queryset
 
-        return queryset
+        if profile.highest_role() in ['ORG_STEWARD', 'APPS_MALL_STEWARD']:
+            return queryset
+        return None
 
     def list(self, request):
         queryset = self.get_queryset()
+        if queryset is None:
+            return Response({'detail': 'Permission Denied'}, status=status.HTTP_403_FORBIDDEN)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = serializers.NotificationSerializer(page,

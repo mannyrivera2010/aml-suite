@@ -238,6 +238,22 @@ class NotificationApiTest(APITestCase):
             test_time = datetime.datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=pytz.utc)
             self.assertTrue(test_time > now)
 
+    def test_all_pending_notifications_listing_filter_user_authorized(self):
+        url = '/api/notifications/pending/?listing=160'  # ID 160 belongs to Stroke play
+        response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
+
+        notification_list = self._format_notification_response(response)
+        notification_expires_date_list = [entry['expires_date'] for entry in response.data]
+
+        expected = ['160-listing-Auserhasratedlisting<b>Strokeplay</b>3stars']
+
+        self.assertEqual(expected, notification_list)
+
+        now = datetime.datetime.now(pytz.utc)
+        for i in notification_expires_date_list:
+            test_time = datetime.datetime.strptime(i, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=pytz.utc)
+            self.assertTrue(test_time > now)
+
     def test_all_pending_notifications_listing_filter_user_unauthorized(self):
         url = '/api/notifications/pending/?listing=1'
         unittest_request_helper(self, url, 'GET', username='jones', status_code=403)
@@ -279,6 +295,28 @@ class NotificationApiTest(APITestCase):
             test_time = datetime.datetime.strptime(i,
                 "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=pytz.utc)
             self.assertTrue(test_time < now)
+
+    def test_all_expired_notifications_listing_filter_user_authorized(self):
+        now = datetime.datetime.now() - datetime.timedelta(days=7)
+        data = {'expires_date': str(now),
+                'message': 'a simple listing test',
+                'listing': {
+            'id': 160
+            }}
+        url = '/api/notification/'
+
+        user = generic_model_access.get_profile('jones').user
+        self.client.force_authenticate(user=user)
+        self.client.post(url, data, format='json')
+
+        url = '/api/notifications/expired/?listing=160'  # ID 160 belongs to Stroke play
+        response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
+
+        notification_list = self._format_notification_response(response)
+
+        expected = ['160-listing-asimplelistingtest']
+
+        self.assertEqual(expected, notification_list)
 
     def test_all_expired_notifications_listing_filter_user_unauthorized(self):
         url = '/api/notifications/expired/?listing=1'
