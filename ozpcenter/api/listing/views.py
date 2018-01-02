@@ -697,7 +697,10 @@ class ListingViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ListingSerializer
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('title', 'id', 'owners__display_name', 'agency__title', 'agency__short_name',)
-    ordering_fields = ('title', 'id', 'agency__title', 'agency__short_name', 'is_enabled', 'is_featured', 'edited_date', 'security_marking', 'is_private', 'approval_status')
+    ordering_fields = ('id', 'agency__title', 'agency__short_name', 'is_enabled', 'is_featured',
+        'edited_date', 'security_marking', 'is_private', 'approval_status', 'approved_date',
+        'avg_rate', 'total_votes')
+    case_insensitive_ordering_fields = ('title',)
     ordering = ('is_deleted', '-edited_date')
 
     def get_queryset(self):
@@ -705,7 +708,7 @@ class ListingViewSet(viewsets.ModelViewSet):
         # org = self.request.query_params.get('org', None)
         orgs = self.request.query_params.getlist('org', False)
         enabled = self.request.query_params.get('enabled', None)
-        ordering = self.request.query_params.getlist('ordering', None)
+        ordering = self.request.query_params.get('ordering', None)
         owners_id = self.request.query_params.get('owners_id', None)
         if enabled:
             enabled = enabled.lower()
@@ -713,6 +716,11 @@ class ListingViewSet(viewsets.ModelViewSet):
                 enabled = True
             else:
                 enabled = False
+        if ordering:
+            ordering = [s.strip() for s in ordering.split(',')]
+        else:
+            # always default to last modified for consistency
+            ordering = ['-edited_date']
 
         listings = model_access.get_listings(self.request.user.username)
         if owners_id:
@@ -733,6 +741,19 @@ class ListingViewSet(viewsets.ModelViewSet):
                 orderby = '-min'
             listings = listings.annotate(min=Min(Lower('owners__display_name'))).order_by(orderby)
             self.ordering = None
+
+        # Django REST filters are canse sensitive by default, so we handle case_insensitive fields
+        # manually.  May want to abstract this functionality in an OrderingFilter sub-class
+        case_insensitive_ordering = [s for s in ordering if s in self.case_insensitive_ordering_fields or
+                                    s.startswith('-') and s[1:] in self.case_insensitive_ordering_fields]
+        if ordering is not None and case_insensitive_ordering:
+            for field in case_insensitive_ordering:
+                if field.startswith('-'):
+                    listings = listings.order_by(Lower(field[1:])).reverse()
+                else:
+                    listings = listings.order_by(Lower(field))
+            self.ordering = None
+
         return listings
 
     def list(self, request):
