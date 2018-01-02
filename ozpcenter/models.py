@@ -1595,6 +1595,7 @@ class Notification(models.Model):
     LISTING = 'listing'  # Listing Notifications
     PEER = 'peer'  # Peer to Peer Notifications
     PEER_BOOKMARK = 'peer_bookmark'  # PEER.BOOKMARK - Peer to Peer Bookmark Notifications
+    RESTORE_BOOKMARK = 'restore_bookmark'  # RESTORE.BOOKMARK - Self to Self Bookmark Restore
     SUBSCRIPTION = 'subscription'  # SUBSCRIPTION - Tag/Category Subscriptions
 
     NOTIFICATION_TYPE_CHOICES = (
@@ -1604,6 +1605,7 @@ class Notification(models.Model):
         (LISTING, 'listing'),
         (PEER, 'peer'),
         (PEER_BOOKMARK, 'peer_bookmark'),
+        (RESTORE_BOOKMARK, 'restore_bookmark'),
         (SUBSCRIPTION, 'subscription'),
     )
     notification_type = models.CharField(default=SYSTEM, max_length=24, choices=NOTIFICATION_TYPE_CHOICES)  # db_index=True)
@@ -1670,7 +1672,8 @@ class Notification(models.Model):
                 'username': str
             },
             '_bookmark_listing_ids': list[int],
-            'folder_name': str
+            'folder_name': str,
+            'deleted_folder': bool
         }
 
         Args:
@@ -1695,6 +1698,8 @@ class Notification(models.Model):
                 if entry_key in value:
                     temp[entry_key] = value[entry_key]
 
+            if 'deleted_folder' in value:
+                temp['deleted_folder'] = True
             self._peer = json.dumps(temp)
         else:
             return None

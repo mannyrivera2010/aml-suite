@@ -44,6 +44,7 @@ def get_all_notifications():
     * System Notifications
     * Peer Notifications
     * Peer.Bookmark Notifications
+    * Restore.Bookmark Notifications
 
     Returns:
         django.db.models.query.QuerySet(Notification): List of all notifications
@@ -66,6 +67,7 @@ def get_all_pending_notifications(for_user=False):
          * Agency Notifications
          * Peer Notifications
          * Peer.Bookmark Notifications
+         * Restore.Bookmark Notifications
 
     Returns:
         django.db.models.query.QuerySet(Notification): List of system-wide pending notifications
@@ -91,6 +93,7 @@ def get_all_expired_notifications():
     * System Notifications
     * Peer Notifications
     * Peer.Bookmark Notifications
+    * Restore.Bookmark Notifications
 
     Returns:
         django.db.models.query.QuerySet(Notification): List of system-wide pending notifications
@@ -209,7 +212,9 @@ def create_notification(author_username=None,
     elif peer is not None:
         notification_instance = notifications.PeerNotification()
         try:
-            if peer and 'folder_name' in peer:
+            if peer and 'deleted_folder' in peer:
+                notification_instance = notifications.RestoreBookmarkNotification()
+            elif peer and 'folder_name' in peer:
                 notification_instance = notifications.PeerBookmarkNotification()
         except ValueError:
             # Ignore Value Errors

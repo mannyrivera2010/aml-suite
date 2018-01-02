@@ -233,8 +233,8 @@ def import_bookmarks(current_username, peer_bookmark_notification_id):
 
     notification_entry_type = notification_entry.notification_type
 
-    if not notification_entry_type == models.Notification.PEER_BOOKMARK:
-        errors.append('Notification Entry should be \'peer_bookmark\' but it is \'{0}\''.format(notification_entry_type))
+    if not notification_entry_type == models.Notification.PEER_BOOKMARK and not notification_entry_type == models.Notification.RESTORE_BOOKMARK:
+        errors.append('Notification Entry should be \'peer_bookmark\' or \'restore_bookmark\' but it is \'{0}\''.format(notification_entry_type))
         return errors, None
 
     peer_data = notification_entry.peer

@@ -93,6 +93,7 @@ permission_dict = {
         'delete_peer_notification',
 
         'add_peer_bookmark_notification',
+        'add_restore_bookmark_notification',
         'change_peer_bookmark_notification',
         'delete_peer_bookmark_notification',
 
@@ -118,6 +119,7 @@ permission_dict = {
         'delete_peer_notification',
 
         'add_peer_bookmark_notification',
+        'add_restore_bookmark_notification',
         'change_peer_bookmark_notification',
         'delete_peer_bookmark_notification',
 
@@ -135,6 +137,7 @@ permission_dict = {
         'delete_peer_notification',
 
         'add_peer_bookmark_notification',
+        'add_restore_bookmark_notification',
         'change_peer_bookmark_notification',
         'delete_peer_bookmark_notification',
 
@@ -439,6 +442,37 @@ class PeerBookmarkNotification(NotificationBase):
 
     def get_notification_db_type(self):
         return Notification.PEER_BOOKMARK
+
+    def get_notification_db_subtype(self):
+        return None
+
+    def get_group_target(self):
+        return Notification.USER
+
+    def get_target_list(self):
+        entities_id = [entity.id for entity in [self.entity]]
+        return Profile.objects.filter(id__in=entities_id).all()
+
+
+class RestoreBookmarkNotification(NotificationBase):
+    """
+    AMLNG-700 - RestoreBookmarkFolder
+        As a user, I would like the ability to be able to recover a deleted folder full of bookmarked listings with an undo delete function.
+    Targets: User Given Target
+    Permission Constraint:  Must be owner of folder
+
+    Test Case:
+        Logged on as jones
+        Delete a folder
+        Restore folder from Notifications
+        RESULTS: Restore folder button is present and readds the folder to HuD screen.
+    """
+
+    def modify_notification_before_save(self, notification_object):
+        notification_object.peer = self.metadata
+
+    def get_notification_db_type(self):
+        return Notification.RESTORE_BOOKMARK
 
     def get_notification_db_subtype(self):
         return None

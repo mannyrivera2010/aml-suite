@@ -97,7 +97,11 @@ def run():
             current_notification.notification_type = 'peer_bookmark'
             current_notification.group_target = 'user'
 
-        if current_notification_notification_type == 'PEER' or current_notification_notification_type == 'PEER.BOOKMARK':
+        elif current_notification_notification_type == 'RESTORE.BOOKMARK':
+            current_notification.notification_type = 'restore_bookmark'
+            current_notification.group_target = 'user'
+
+        if current_notification_notification_type == 'PEER' or current_notification_notification_type == 'PEER.BOOKMARK' or current_notification_notification_type == 'RESTORE.BOOKMARK':
             entity_id = None
             try:
                 json_obj = json.loads(current_notification._peer)
