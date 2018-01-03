@@ -1,11 +1,43 @@
 
-### 1.0.92 (None)  
+### 1.0.93 (None) 
+
+#### Fixes  
+* **approved_date**:  sort ([44f5b66f](https://github.com/aml-development/ozp-backend/commit/44f5b66f8b72e710cf30d7ea2c8ee74ee6f504e1))    
+
+#### Refactor  
+* **notificationapi**:  refactor notification get APIs ([c48d6c16](https://github.com/aml-development/ozp-backend/commit/c48d6c160b49b83886a5f274e7ba7f443d8e6c16))    
+
+#### Merge Pull Requests  
+* Merge pull request #392 from aml-development/Refactor_notification_API ([c30408e5](https://github.com/aml-development/ozp-backend/commit/c30408e5a02dd8b0cf75ab33a52e69f10dfd489d))
+* Merge pull request #389 from aml-development/undo_delete_folder ([eb715379](https://github.com/aml-development/ozp-backend/commit/eb715379d6f8a061c4b9ccb0c9e1f69cf96faba1))
+* Merge pull request #390 from aml-development/listing_default_sort ([909b7271](https://github.com/aml-development/ozp-backend/commit/909b7271e078afdbebdd3ab537898c600eafe7a5))    
+
+#### Documentation  
+* **requirements**:  add requirements doc ([c609acb8](https://github.com/aml-development/ozp-backend/commit/c609acb81b78d3d4173cf9ccc7c928e66f64265d))      
+
+#### Test  
+* **notification**:  Add test case for undo delete bookmarks notification (WIP) ([f410a97d](https://github.com/aml-development/ozp-backend/commit/f410a97d73ce4b26de7b1b139c23a94e745389af))     
+
+#### Changes  
+* update comments for unit test ([a6169d5a](https://github.com/aml-development/ozp-backend/commit/a6169d5aaec0309fd13f78e278e7d6ca8f6b3d48))
+* update comments for unit test ([a7119991](https://github.com/aml-development/ozp-backend/commit/a711999157df327071bc18e6ee990d9ed4d71ed0))
+* adding unit tests for listing result ordering ([356db107](https://github.com/aml-development/ozp-backend/commit/356db10710d3329a89de1f1575fd93673e782a06))
+* enable case-insensitive sorting on title ([01e65281](https://github.com/aml-development/ozp-backend/commit/01e652814f223f0019bf774adaede0fca13c047f))     
+
+### 1.0.92 (2017-12-27) 
+
+#### Fixes  
+* **listing api**:  update ordering parsing to allow multi-field ordering ([61118f07](https://github.com/aml-development/ozp-backend/commit/61118f07421a1053449be07ba10c65161e8e1ade))    
 
 #### Refactor  
 * **dependency**:  simplify dependencies ([25834e82](https://github.com/aml-development/ozp-backend/commit/25834e825c998fcd8c71b752002f1e1c6c3a390b))    
 
 #### Merge Pull Requests  
-* Merge pull request #388 from aml-development/dep ([5183722a](https://github.com/aml-development/ozp-backend/commit/5183722a6b98c8471e2d69f2af75b7b9bb640de9))           
+* Merge pull request #388 from aml-development/dep ([5183722a](https://github.com/aml-development/ozp-backend/commit/5183722a6b98c8471e2d69f2af75b7b9bb640de9))         
+
+#### Changes  
+* Adding the ability to restore a deleted bookmark folder. ([23711ff5](https://github.com/aml-development/ozp-backend/commit/23711ff5b362ffcd6b0999fc99a635a6f02f1b6f))    
+* **listing management**:  listings sort by last modified first by default ([42ada8a5](https://github.com/aml-development/ozp-backend/commit/42ada8a5b77d05ca3caece027b882ad2e14c0289))     
 
 ### 1.0.91 (2017-12-14)  
 
