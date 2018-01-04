@@ -10,7 +10,7 @@ from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
 import ozpcenter.api.listing.model_access as model_access
 from tests.ozpcenter.helper import validate_listing_map_keys
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 
 
 @override_settings(ES_ENABLED=False)

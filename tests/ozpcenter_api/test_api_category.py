@@ -4,7 +4,7 @@ Tests for category endpoints
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 from ozpcenter import models
@@ -30,7 +30,7 @@ class CategoryApiTest(APITestCase):
 
     def test_get_categories_list(self):
         url = '/api/category/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = ['{}.{}'.format(i['title'], i['description']) for i in response.data]
         expected_results = ['Accessories.Accessories Description',
@@ -53,7 +53,7 @@ class CategoryApiTest(APITestCase):
 
     def test_get_category(self):
         url = '/api/category/1/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         title = response.data['title']
         description = response.data['description']
@@ -63,7 +63,7 @@ class CategoryApiTest(APITestCase):
     def test_create_category_apps_mall_steward(self):
         url = '/api/category/'
         data = {'title': 'new category', 'description': 'category description'}
-        response = unittest_request_helper(self, url, 'POST', data=data, username='bigbrother', status_code=201)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
         title = response.data['title']
         description = response.data['description']
@@ -73,7 +73,7 @@ class CategoryApiTest(APITestCase):
     def test_create_category_org_steward(self):
         url = '/api/category/'
         data = {'title': 'new category', 'description': 'category description'}
-        response = unittest_request_helper(self, url, 'POST', data=data, username='wsmith', status_code=403)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
         self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
@@ -82,7 +82,7 @@ class CategoryApiTest(APITestCase):
     def test_update_category_apps_mall_steward(self):
         url = '/api/category/1/'
         data = {'title': 'updated category', 'description': 'updated description'}
-        response = unittest_request_helper(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
+        response = APITestHelper.request(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
 
         title = response.data['title']
         description = response.data['description']
@@ -92,7 +92,7 @@ class CategoryApiTest(APITestCase):
     def test_update_category_org_steward(self):
         url = '/api/category/1/'
         data = {'title': 'updated category', 'description': 'updated description'}
-        response = unittest_request_helper(self, url, 'PUT', data=data, username='wsmith', status_code=403)
+        response = APITestHelper.request(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
         self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
@@ -101,7 +101,7 @@ class CategoryApiTest(APITestCase):
     def test_category_ordering(self):
         url = '/api/category/'
         data = {'title': 'AAA new category', 'description': 'category description'}
-        response = unittest_request_helper(self, url, 'POST', data=data, username='bigbrother', status_code=201)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
         title = response.data['title']
         description = response.data['description']
@@ -110,7 +110,7 @@ class CategoryApiTest(APITestCase):
 
         # GET request
         url = '/api/category/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = ['{}.{}'.format(i['title'], i['description']) for i in response.data]
         expected_results = ['AAA new category.category description',
@@ -134,11 +134,11 @@ class CategoryApiTest(APITestCase):
 
     def test_delete_category_apps_mall_steward(self):
         url = '/api/category/1/'
-        unittest_request_helper(self, url, 'DELETE', username='bigbrother', status_code=204)
+        APITestHelper.request(self, url, 'DELETE', username='bigbrother', status_code=204)
 
     def test_delete_category_org_steward(self):
         url = '/api/category/1/'
-        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
+        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=403)
 
         self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
@@ -153,6 +153,6 @@ class CategoryApiTest(APITestCase):
 
         # Air Mail Categories: Communication(4) & Productivity(12)
         url = '/api/category/4/'
-        response = unittest_request_helper(self, url, 'DELETE', username='bigbrother', status_code=403)
+        response = APITestHelper.request(self, url, 'DELETE', username='bigbrother', status_code=403)
 
     # TODO def test_delete_category(self): test different user groups access control

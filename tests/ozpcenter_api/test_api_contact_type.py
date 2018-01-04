@@ -5,7 +5,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 
 
@@ -27,7 +27,7 @@ class ContactTypeApiTest(APITestCase):
 
     def test_get_contact_type_list(self):
         url = '/api/contact_type/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         names = ['{}.{}'.format(i['name'], i['required']) for i in response.data]
         names_expected = ['Civilian.False', 'Government.False', 'Military.False']
@@ -36,7 +36,7 @@ class ContactTypeApiTest(APITestCase):
 
     def test_get_contact_type(self):
         url = '/api/contact_type/1/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         name = response.data['name']
         self.assertEqual(name, 'Civilian')
@@ -44,7 +44,7 @@ class ContactTypeApiTest(APITestCase):
     def test_create_contact_type_apps_mall_steward(self):
         url = '/api/contact_type/'
         data = {'name': 'New Contact Type'}
-        response = unittest_request_helper(self, url, 'POST', data=data, username='bigbrother', status_code=201)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
         name = response.data['name']
         self.assertEqual(name, 'New Contact Type')
@@ -52,7 +52,7 @@ class ContactTypeApiTest(APITestCase):
     def test_create_contact_type_org_steward(self):
         url = '/api/contact_type/'
         data = {'name': 'New Contact Type'}
-        response = unittest_request_helper(self, url, 'POST', data=data, username='wsmith', status_code=403)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
         self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
@@ -61,7 +61,7 @@ class ContactTypeApiTest(APITestCase):
     def test_update_contact_type_apps_mall_steward(self):
         url = '/api/contact_type/1/'
         data = {'name': 'Updated Type', 'required': True}
-        response = unittest_request_helper(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
+        response = APITestHelper.request(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
 
         name = response.data['name']
         required = response.data['required']
@@ -71,7 +71,7 @@ class ContactTypeApiTest(APITestCase):
     def test_update_contact_type_org_steward(self):
         url = '/api/contact_type/1/'
         data = {'name': 'Updated Type', 'required': True}
-        response = unittest_request_helper(self, url, 'PUT', data=data, username='wsmith', status_code=403)
+        response = APITestHelper.request(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
         self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
@@ -79,11 +79,11 @@ class ContactTypeApiTest(APITestCase):
 
     def test_delete_contact_type_apps_mall_steward(self):
         url = '/api/contact_type/1/'
-        unittest_request_helper(self, url, 'DELETE', username='bigbrother', status_code=204)
+        APITestHelper.request(self, url, 'DELETE', username='bigbrother', status_code=204)
 
     def test_delete_contact_type_org_steward(self):
         url = '/api/contact_type/1/'
-        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
+        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=403)
 
         self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 

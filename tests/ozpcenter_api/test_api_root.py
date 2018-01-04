@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 
 
 @override_settings(ES_ENABLED=False)
@@ -27,5 +27,5 @@ class RootApiTest(APITestCase):
 
     def test_get_version(self):
         url = '/api/version/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         self.assertIsNotNone(response.data)

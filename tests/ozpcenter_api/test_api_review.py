@@ -9,7 +9,7 @@ from ozpcenter import model_access as generic_model_access
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import validate_listing_map_keys
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 
 
@@ -32,13 +32,13 @@ class ListingReviewApiTest(APITestCase):
     def test_get_reviews(self):
         air_mail_id = models.Listing.objects.get(title='Air Mail').id
         url = '/api/listing/{0!s}/review/'.format(air_mail_id)
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         self.assertEqual(4, len(response.data))
 
     def test_get_single_review(self):
         air_mail_id = models.Listing.objects.get(title='Air Mail').id
         url = '/api/listing/{0!s}/review/4/'.format(air_mail_id)  # 4/5/6/7
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         self.assertTrue('rate' in response.data)
         self.assertTrue('text' in response.data)
@@ -189,7 +189,7 @@ class ListingReviewApiTest(APITestCase):
 
         # Check listing history
         url = '/api/listing/{0!s}/'.format(air_mail_id)
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         data = response.data
 
         self.assertEqual(validate_listing_map_keys(data), [])

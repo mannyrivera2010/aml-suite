@@ -9,7 +9,7 @@ from unittest import skip
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 
 
 @override_settings(ES_ENABLED=False)
@@ -24,13 +24,13 @@ class ListingReviewApiTest(APITestCase):
 
     def test_get_all_review_for_listing(self):
         url = '/api/listing/1/review/'
-        response = unittest_request_helper(self, url, 'GET', username='bigbrother', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
 
         self.assertEqual(len(response.data), 3)
 
     def test_get_listing_review_by_id(self):
         url = '/api/listing/1/review/3/'
-        response = unittest_request_helper(self, url, 'GET', username='bigbrother', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
 
         expected_data = {
             "review_parent": None,
@@ -50,7 +50,7 @@ class ListingReviewApiTest(APITestCase):
             "rate": 5,
             "text": "This is a test review"
         }
-        response = unittest_request_helper(self, url, 'POST', username='bigbrother', data=data, status_code=201)
+        response = APITestHelper.request(self, url, 'POST', username='bigbrother', data=data, status_code=201)
 
     def test_create_listing_review_invalid_rate(self):
         url = '/api/listing/2/review/'
@@ -58,7 +58,7 @@ class ListingReviewApiTest(APITestCase):
             "rate": -1,
             "text": "This is a test review with a invalid rate"
         }
-        response = unittest_request_helper(self, url, 'POST', username='bigbrother', data=data, status_code=400)
+        response = APITestHelper.request(self, url, 'POST', username='bigbrother', data=data, status_code=400)
 
     def test_edit_listing_review(self):
         url = '/api/listing/1/review/3/'
@@ -66,7 +66,7 @@ class ListingReviewApiTest(APITestCase):
             "rate": 5,
             "text": "This is the updated review text"
         }
-        response = unittest_request_helper(self, url, 'PUT', username='syme', data=data, status_code=200)
+        response = APITestHelper.request(self, url, 'PUT', username='syme', data=data, status_code=200)
 
         expected_data = {
             "review_parent": None,
@@ -88,14 +88,14 @@ class ListingReviewApiTest(APITestCase):
             "rate": 5,
             "text": ""
         }
-        response = unittest_request_helper(self, url, 'PUT', username='syme', data=data, status_code=400)
+        response = APITestHelper.request(self, url, 'PUT', username='syme', data=data, status_code=400)
 
     def test_edit_listing_review_no_rate(self):
         url = '/api/listing/1/review/3/'
         data = {
             "text": "This is the updated review text"
         }
-        response = unittest_request_helper(self, url, 'PUT', username='syme', data=data, status_code=400)
+        response = APITestHelper.request(self, url, 'PUT', username='syme', data=data, status_code=400)
 
     def test_edit_different_user_listing_review(self):
         # Trying to edit 'syme' review as user, jones
@@ -104,8 +104,8 @@ class ListingReviewApiTest(APITestCase):
             "rate": 5,
             "text": "This is the updated review text"
         }
-        response = unittest_request_helper(self, url, 'PUT', username='jones', data=data, status_code=403)
+        response = APITestHelper.request(self, url, 'PUT', username='jones', data=data, status_code=403)
 
     def test_delete_listing_review(self):
         url = '/api/listing/1/review/3/'
-        response = unittest_request_helper(self, url, 'DELETE', username='bigbrother', status_code=204)
+        response = APITestHelper.request(self, url, 'DELETE', username='bigbrother', status_code=204)

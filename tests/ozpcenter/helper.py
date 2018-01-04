@@ -142,149 +142,152 @@ class ExceptionUnitTestHelper(object):
                 'error_code': 'throttled'}
 
 
-def _delete_bookmark_folder(test_case_instance, username, folder_id, status_code=201):
-    user = generic_model_access.get_profile(username).user
-    test_case_instance.client.force_authenticate(user=user)
-    url = '/api/self/library/{0!s}/delete_folder/'.format(folder_id)
-    response = test_case_instance.client.delete(url, format='json')
+class APITestHelper(object):
 
-    if response:
-        if status_code == 204:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        elif status_code == 400:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        else:
-            raise Exception('status code is not supported')
-
-    return response
-
-
-def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
-    user = generic_model_access.get_profile(username).user
-    test_case_instance.client.force_authenticate(user=user)
-    url = '/api/self/library/import_bookmarks/'
-    data = {'bookmark_notification_id': bookmark_notification_id}
-    response = test_case_instance.client.post(url, data, format='json')
-
-    if response:
-        if status_code == 201:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        elif status_code == 400:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        else:
-            raise Exception('status code is not supported')
-
-    return response
-
-
-def _edit_listing(test_case_instance, id, input_data, default_user='bigbrother'):
-    """
-    Helper Method to modify a listing
-
-    Args:
-        test_case_instance
-        id
-        input_data
-        default_user(optional)
-
-    Return:
-        response
-    """
-    user = generic_model_access.get_profile(default_user).user
-    test_case_instance.client.force_authenticate(user=user)
-    url = '/api/listing/{0!s}/'.format(id)
-    # GET Listing
-    data = test_case_instance.client.get(url, format='json').data
-
-    for current_key in input_data:
-        if current_key in data:
-            data[current_key] = input_data[current_key]
-
-    # PUT the Modification
-    response = test_case_instance.client.put(url, data, format='json')
-    test_case_instance.assertEqual(response.status_code, status.HTTP_200_OK)
-    return response
-
-
-def _create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
-    """
-    Create Bookmark Helper Function
-
-    Args:
-        test_case_instance
-        username
-        listing_id
-        folder_name(optional)
-        status_code
-
-    Returns:
-        response
-    """
-    user = generic_model_access.get_profile(username).user
-    test_case_instance.client.force_authenticate(user=user)
-
-    data = {'listing': {'id': listing_id}, 'folder': folder_name}
-    url = '/api/self/library/'
-    response = test_case_instance.client.post(url, data, format='json')
-
-    if response:
-        if status_code == 201:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        elif status_code == 400:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        else:
-            raise Exception('status code is not supported')
-
-    return response
-
-
-def unittest_request_helper(test_case_instance, url, method, data=None, username='bigbrother', status_code=200, validator=None):
-    user = generic_model_access.get_profile(username).user
-    test_case_instance.client.force_authenticate(user=user)
-
-    response = None
-
-    if method.upper() == 'GET':
-        response = test_case_instance.client.get(url, format='json')
-    elif method.upper() == 'POST':
-        response = test_case_instance.client.post(url, data, format='json')
-    elif method.upper() == 'PUT':
-        response = test_case_instance.client.put(url, data, format='json')
-    elif method.upper() == 'DELETE':
+    @staticmethod
+    def _delete_bookmark_folder(test_case_instance, username, folder_id, status_code=201):
+        user = generic_model_access.get_profile(username).user
+        test_case_instance.client.force_authenticate(user=user)
+        url = '/api/self/library/{0!s}/delete_folder/'.format(folder_id)
         response = test_case_instance.client.delete(url, format='json')
-    elif method.upper() == 'PATCH':
-        response = test_case_instance.client.patch(url, format='json')
-    else:
-        raise Exception('method is not supported')
 
-    if response:
-        if status_code == 200:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_200_OK)
-        elif status_code == 201:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        elif status_code == 204:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        elif status_code == 400:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        elif status_code == 403:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        elif status_code == 404:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        elif status_code == 405:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-        elif status_code == 501:
-            test_case_instance.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+        if response:
+            if status_code == 204:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            elif status_code == 400:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            else:
+                raise Exception('status code is not supported')
+
+        return response
+
+    @staticmethod
+    def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
+        user = generic_model_access.get_profile(username).user
+        test_case_instance.client.force_authenticate(user=user)
+        url = '/api/self/library/import_bookmarks/'
+        data = {'bookmark_notification_id': bookmark_notification_id}
+        response = test_case_instance.client.post(url, data, format='json')
+
+        if response:
+            if status_code == 201:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            elif status_code == 400:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            else:
+                raise Exception('status code is not supported')
+
+        return response
+
+    @staticmethod
+    def create_bookmark(test_case_instance, username, listing_id, folder_name=None, status_code=200):
+        """
+        Create Bookmark Helper Function
+
+        Args:
+            test_case_instance
+            username
+            listing_id
+            folder_name(optional)
+            status_code
+
+        Returns:
+            response
+        """
+        user = generic_model_access.get_profile(username).user
+        test_case_instance.client.force_authenticate(user=user)
+
+        data = {'listing': {'id': listing_id}, 'folder': folder_name}
+        url = '/api/self/library/'
+        response = test_case_instance.client.post(url, data, format='json')
+
+        if response:
+            if status_code == 201:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            elif status_code == 400:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            else:
+                raise Exception('status code is not supported')
+
+        return response
+
+    @staticmethod
+    def edit_listing(test_case_instance, id, input_data, default_user='bigbrother'):
+        """
+        Helper Method to modify a listing
+
+        Args:
+            test_case_instance
+            id
+            input_data
+            default_user(optional)
+
+        Return:
+            response
+        """
+        user = generic_model_access.get_profile(default_user).user
+        test_case_instance.client.force_authenticate(user=user)
+        url = '/api/listing/{0!s}/'.format(id)
+        # GET Listing
+        data = test_case_instance.client.get(url, format='json').data
+
+        for current_key in input_data:
+            if current_key in data:
+                data[current_key] = input_data[current_key]
+
+        # PUT the Modification
+        response = test_case_instance.client.put(url, data, format='json')
+        test_case_instance.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response
+
+    @staticmethod
+    def request(test_case_instance, url, method, data=None, username='bigbrother', status_code=200, validator=None):
+        user = generic_model_access.get_profile(username).user
+        test_case_instance.client.force_authenticate(user=user)
+
+        response = None
+
+        if method.upper() == 'GET':
+            response = test_case_instance.client.get(url, format='json')
+        elif method.upper() == 'POST':
+            response = test_case_instance.client.post(url, data, format='json')
+        elif method.upper() == 'PUT':
+            response = test_case_instance.client.put(url, data, format='json')
+        elif method.upper() == 'DELETE':
+            response = test_case_instance.client.delete(url, format='json')
+        elif method.upper() == 'PATCH':
+            response = test_case_instance.client.patch(url, format='json')
         else:
-            raise Exception('status code is not supported')
+            raise Exception('method is not supported')
 
-    try:
-        if validator:
-            validator(response.data, test_case_instance=test_case_instance)
-    except Exception as err:
-        # print(response.data)
-        raise err
+        if response:
+            if status_code == 200:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_200_OK)
+            elif status_code == 201:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            elif status_code == 204:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+            elif status_code == 400:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            elif status_code == 403:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            elif status_code == 404:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+            elif status_code == 405:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+            elif status_code == 501:
+                test_case_instance.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
+            else:
+                raise Exception('status code is not supported')
 
-    return response
+        try:
+            if validator:
+                validator(response.data, test_case_instance=test_case_instance)
+        except Exception as err:
+            # print(response.data)
+            raise err
+
+        return response
 
 
 def validate_listing_map_keys_list(response_data, test_case_instance=None):

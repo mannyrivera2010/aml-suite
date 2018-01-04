@@ -13,7 +13,7 @@ from tests.ozpcenter.helper import ListingFile
 from tests.ozpcenter.helper import validate_listing_map_keys
 from tests.ozpcenter.helper import validate_listing_map_keys_list
 from tests.ozpcenter.helper import validate_listing_search_keys_list
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 
 
 @override_settings(ES_ENABLED=False)
@@ -34,7 +34,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_categories_single_with_space(self):
         url = '/api/listings/search/?category={}'.format('Health and Fitness')
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -46,7 +46,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_categories_multiple_with_space(self):
         url = '/api/listings/search/?category=Health and Fitness&category=Communication'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -59,7 +59,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_text(self):
         url = '/api/listings/search/?search=air mail'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         excepted_titles = ['Air Mail']
@@ -68,7 +68,7 @@ class ListingSearchApiTest(APITestCase):
     @skip("TODO See Below todo (rivera 20170818)")
     def test_search_text_partial(self):
         url = '/api/listings/search/?search=air ma'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         excepted_titles = ['Air Mail']
@@ -80,7 +80,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_type(self):
         url = '/api/listings/search/?type=Web Application'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -91,7 +91,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_tags(self):
         url = '/api/listings/search/?search=demo_tag'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = sorted([i['title'] for i in response.data])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -103,7 +103,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_tags_startwith(self):
         url = '/api/listings/search/?search=tag_'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         self.assertTrue('Air Mail' in titles)
@@ -111,7 +111,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_is_enable(self):
         url = '/api/listings/search/?search=demo_tag&type=Web Application'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles_ids = [[record.get('title'), record.get('id')] for record in response.data]
         titles = sorted([i[0] for i in titles_ids])
@@ -181,11 +181,11 @@ class ListingSearchApiTest(APITestCase):
 
             }
 
-        response = unittest_request_helper(self, url, 'PUT', username='bigbrother', data=data, status_code=200, validator=validate_listing_map_keys)
+        response = APITestHelper.request(self, url, 'PUT', username='bigbrother', data=data, status_code=200, validator=validate_listing_map_keys)
 
         # Check
         url = '/api/listings/search/?search=demo_tag&type=Web Application'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles_ids = [[record.get('title'), record.get('id')] for record in response.data]
         titles = sorted([i[0] for i in titles_ids])
@@ -198,7 +198,7 @@ class ListingSearchApiTest(APITestCase):
 
     def test_search_agency(self):
         url = '/api/listings/search/?agency=Minipax&agency=Miniluv'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
 
         titles = [i['title'] for i in response.data]
         self.assertTrue('Chatter Box' in titles)
@@ -211,12 +211,12 @@ class ListingSearchApiTest(APITestCase):
         """
         # TODO rivera-20171026: Titles not predictable, This will change every time
         # url = '/api/listings/search/'
-        # response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
+        # response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_map_keys_list)
         # all_titles = [i['title'] for i in response.data]
 
         for limit_number in [1, 5, 10]:
             url = '/api/listings/search/?limit={}'.format(limit_number)
-            response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_search_keys_list)
+            response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_search_keys_list)
             titles = [i['title'] for i in response.data['results']]
             self.assertEqual(len(titles), limit_number)
             # self.assertEqual(titles, all_titles[:limit_number])
@@ -228,6 +228,6 @@ class ListingSearchApiTest(APITestCase):
         # TODO rivera-20171026: Figure out how to make sure offset is working
         for limit_number in [1, 5, 10]:
             url = '/api/listings/search/?offset=1&limit={}'.format(limit_number)
-            response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_search_keys_list)
+            response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200, validator=validate_listing_search_keys_list)
             titles = [i['title'] for i in response.data['results']]
             self.assertEqual(len(titles), limit_number)
