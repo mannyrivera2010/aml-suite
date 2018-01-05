@@ -644,6 +644,7 @@ def update_listing(serializer_instance, instance, validated_data):
         change_details.append({'old_value': model_access.bool_to_string(instance.is_featured),
                 'new_value': model_access.bool_to_string(validated_data['is_featured']), 'field_name': 'is_featured'})
         instance.is_featured = validated_data['is_featured']
+        instance.featured_date = datetime.datetime.now(pytz.utc) if validated_data['is_featured'] else None
 
     s = validated_data['approval_status']
     if s and s != instance.approval_status:  # Check to see if approval_status has changed

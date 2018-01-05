@@ -819,6 +819,7 @@ def prepare_clean_listing_record(listing_serializer_record):
                       'what_is_new',
                       'iframe_compatible',
                       'edited_date',
+                      'featured_date',
                       'version_name',
                       'feedback_score',
                       'usage_requirements',

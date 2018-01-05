@@ -415,7 +415,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Valid Listing ID is required'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Valid Listing ID is required']}"))
 
     def test_create_listing_notification_app_mall_steward_invalid_id(self):
         now = datetime.datetime.now(pytz.utc)
@@ -429,7 +429,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Could not find listing'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Could not find listing']}"))
 
     def test_create_listing_agency_notification_app_mall_steward_invalid(self):
         now = datetime.datetime.now(pytz.utc)
@@ -437,14 +437,15 @@ class NotificationApiTest(APITestCase):
                 'message': 'a simple listing test',
                 'listing': {'id': 1},
                 'agency': {'id': 1}
-                }
+               }
 
         url = '/api/notification/'
 
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error("Notifications can only be one type. Input: ['listing', 'agency']"))['error_code'])
+
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error('{\'non_field_errors\': ["Notifications can only be one type. ''Input: [\'listing\', \'agency\']"]}'))
 
     def test_create_listing_notification_org_steward(self):
         now = datetime.datetime.now(pytz.utc)
@@ -478,7 +479,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Valid Listing ID is required'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Valid Listing ID is required']}"))
 
     def test_create_listing_notification_org_steward_invalid_id(self):
         now = datetime.datetime.now(pytz.utc)
@@ -492,7 +493,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('wsmith').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Could not find listing'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Could not find listing']}"))
 
     # TODO: test_create_listing_notification_org_steward_invalid (rivera 20160617)
     # TODO: test_create_listing_notification_user_unauthorized (rivera 20160617)
@@ -526,7 +527,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Valid Agency ID is required'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Valid Agency ID is required']}"))
 
     def test_create_agency_notification_app_mall_steward_invalid_id(self):
         now = datetime.datetime.now(pytz.utc)
@@ -539,7 +540,7 @@ class NotificationApiTest(APITestCase):
         user = generic_model_access.get_profile('bigbrother').user
         self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Could not find agency'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Could not find agency']}"))
 
     # TODO: test_create_agency_notification_org_steward (rivera 20160617)
     # TODO: test_create_agency_notification_org_steward_invalid (rivera 20160617)

@@ -8,10 +8,13 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
+
 import ozpcenter.api.listing.model_access as model_access
+
 from tests.ozpcenter.helper import validate_listing_map_keys
 from tests.ozpcenter.helper import unittest_request_helper
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
+from tests.ozpcenter.helper import _edit_listing
 
 
 @override_settings(ES_ENABLED=False)
@@ -239,7 +242,7 @@ class ListingApiTest(APITestCase):
         url = '/api/listing/1/'
         response = self.client.delete(url, format='json')
 
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Org Stewards and admins can delete listings'))
 
     def test_delete_listing_permission_denied_2nd_party(self):
         user = generic_model_access.get_profile('johnson').user
@@ -445,6 +448,7 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['approval_status'], models.Listing.APPROVED)
         self.assertEqual(response.data['is_enabled'], False)
         self.assertEqual(response.data['is_featured'], False)
+        self.assertIsNone(response.data['featured_date'])
         self.assertEqual(response.data['avg_rate'], 3.0)
         self.assertEqual(response.data['total_votes'], 3)
         self.assertEqual(response.data['total_rate5'], 1)
@@ -532,7 +536,7 @@ class ListingApiTest(APITestCase):
         response = self.client.put(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Permissions are invalid for current profile'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Permissions are invalid for current profile']}"))
 
     def test_update_listing_full_2nd_party_owner(self):
         user = generic_model_access.get_profile('julia').user
@@ -598,7 +602,7 @@ class ListingApiTest(APITestCase):
         response = self.client.put(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Permissions are invalid for current owner profile'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Permissions are invalid for current owner " "profile']}"))
 
     def test_z_create_update(self):
         user = generic_model_access.get_profile('julia').user
@@ -766,7 +770,8 @@ class ListingApiTest(APITestCase):
 
         url = '/api/listing/{0!s}/'.format(listing_id)
         response = self.client.put(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied('Only an APPS_MALL_STEWARD can mark a listing as APPROVED')['error_code']))
+
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only an APPS_MALL_STEWARD can mark a listing as APPROVED'))
 
         # double check that the status wasn't changed
         # TODO: listing doesn't exist?
@@ -1102,3 +1107,90 @@ class ListingApiTest(APITestCase):
         results = [x for x in response.data if hasattr(x, 'avg_rate') and hasattr(x, 'total_votes')]
         sorted_results = sorted(results, key=lambda x: (x['avg_rate'], x['total_votes']), reverse=True)
         self.assertEqual(results, sorted_results)
+
+    def test_feature_listing(self):
+        """
+        test_feature_listing
+        Supported query params: is_featured, featured_date
+        """
+        LISTING_ID = 11
+        USER_NAME = 'bigbrother'
+        request_profile = generic_model_access.get_profile(USER_NAME)
+        user = generic_model_access.get_profile(USER_NAME).user
+        self.client.force_authenticate(user=user)
+
+        # feature listing
+        _edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
+
+        url = '/api/listing/{0!s}/'.format(LISTING_ID)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(response.data['is_featured'], True)
+        self.assertIsNotNone(response.data['featured_date'])
+
+    def test_unfeature_listing(self):
+        """
+        test_unfeature_listing
+        Supported query params: is_featured, featured_date
+        """
+        LISTING_ID = 11
+        USER_NAME = 'bigbrother'
+        request_profile = generic_model_access.get_profile(USER_NAME)
+        user = generic_model_access.get_profile(USER_NAME).user
+        self.client.force_authenticate(user=user)
+
+        # Un-feature listing
+        _edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
+
+        url = '/api/listing/{0!s}/'.format(LISTING_ID)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(response.data['is_featured'], False)
+        self.assertIsNone(response.data['featured_date'])
+
+    def test_featured_listings_order(self):
+        """
+        test_featured_listings_order
+        Supported query params: is_featured, featured_date
+        """
+        LISTING_ID = 11
+        USER_NAME = 'bigbrother'
+        request_profile = generic_model_access.get_profile(USER_NAME)
+        user = generic_model_access.get_profile(USER_NAME).user
+        self.client.force_authenticate(user=user)
+
+        # Get the targeted listing's data. (The listing to be featured)
+        url = '/api/listing/{0!s}/'.format(LISTING_ID)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        target_listing_data = response.data
+        target_listing_id = target_listing_data['id']
+
+        # Un-feature target listing, if already featured (toggle)
+        if (target_listing_data['is_featured']):
+            _edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
+
+        # Get the 1st featured listing id
+        url = '/api/storefront/featured/'
+        self.client.force_authenticate(user=user)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        first_featured_listing_id = response.data['featured'][0]['id']
+
+        #  Check  - The target listing is not 1st in the featured list
+        self.assertNotEqual(first_featured_listing_id, target_listing_id)
+
+        # Feature the target listing
+        _edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
+
+        # Get the 1st featured listing id
+        url = '/api/storefront/featured/'
+        self.client.force_authenticate(user=user)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        first_featured_listing_id = response.data['featured'][0]['id']
+
+        # Check - target featured listing is now the 1st featured listing
+        self.assertEqual(first_featured_listing_id, target_listing_id)
