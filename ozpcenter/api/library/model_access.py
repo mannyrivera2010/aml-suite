@@ -93,6 +93,11 @@ def create_self_user_library_entry(username, listing_id, folder_name=None, posit
     owner = generic_model_access.get_profile(username)
     listing = listing_model_access.get_listing_by_id(username, listing_id)
 
+    library = get_self_application_library(username)
+
+    if library:
+        position = library.reverse()[0].position + 1
+
     if not listing or not owner:
         raise Exception('Listing or user not found')
 

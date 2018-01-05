@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import connection
 from django.db.models import Count
 from django.db.models.functions import Lower
+from django.db.models import F
 
 import msgpack
 
@@ -392,10 +393,10 @@ def get_storefront_featured(request_profile, pre_fetch=True):
             is_featured=True,
             approval_status=models.Listing.APPROVED,
             is_enabled=True,
-            is_deleted=False)
+            is_deleted=False).order_by(F('featured_date').desc(nulls_last=True))
 
     featured_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in featured_listings_raw]),
-                                      [pipes.ListingPostSecurityMarkingCheckPipe(username)]).to_list()
+                           [pipes.ListingPostSecurityMarkingCheckPipe(username)]).to_list()
     return featured_listings
 
 

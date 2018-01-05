@@ -1075,6 +1075,7 @@ class Listing(models.Model):
     # TODO: change this back after the migration
     # edited_date = models.DateTimeField(auto_now=True)
     edited_date = models.DateTimeField(default=utils.get_now_utc)
+    featured_date = models.DateTimeField(null=True, blank=True)
     agency = models.ForeignKey(Agency, related_name='listings')
     listing_type = models.ForeignKey('ListingType', related_name='listings',
                                      null=True, blank=True)

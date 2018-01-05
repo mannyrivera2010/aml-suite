@@ -1084,3 +1084,89 @@ class ListingApiTest(APITestCase):
         results = [x for x in response.data if hasattr(x, 'avg_rate') and hasattr(x, 'total_votes')]
         sorted_results = sorted(results, key=lambda x: (x['avg_rate'], x['total_votes']), reverse=True)
         self.assertEqual(results, sorted_results)
+
+    def test_feature_listing(self):
+        """
+        test_feature_listing
+        Supported query params: is_featured, featured_date
+        """
+        LISTING_ID = 11
+        USER_NAME = 'bigbrother'
+        request_profile = generic_model_access.get_profile(USER_NAME)
+        user = generic_model_access.get_profile(USER_NAME).user
+        self.client.force_authenticate(user=user)
+
+        # feature listing
+        APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
+
+        url = '/api/listing/{0!s}/'.format(LISTING_ID)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(response.data['is_featured'], True)
+        self.assertIsNotNone(response.data['featured_date'])
+
+    def test_unfeature_listing(self):
+        """
+        test_unfeature_listing
+        Supported query params: is_featured, featured_date
+        """
+        LISTING_ID = 11
+        USER_NAME = 'bigbrother'
+        request_profile = generic_model_access.get_profile(USER_NAME)
+        user = generic_model_access.get_profile(USER_NAME).user
+        self.client.force_authenticate(user=user)
+
+        # Un-feature listing
+        APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
+
+        url = '/api/listing/{0!s}/'.format(LISTING_ID)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(response.data['is_featured'], False)
+
+    def test_featured_listings_order(self):
+        """
+        test_featured_listings_order
+        Supported query params: is_featured, featured_date
+        """
+        LISTING_ID = 11
+        USER_NAME = 'bigbrother'
+        request_profile = generic_model_access.get_profile(USER_NAME)
+        user = generic_model_access.get_profile(USER_NAME).user
+        self.client.force_authenticate(user=user)
+
+        # Get the targeted listing's data. (The listing to be featured)
+        url = '/api/listing/{0!s}/'.format(LISTING_ID)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        target_listing_data = response.data
+        target_listing_id = target_listing_data['id']
+
+        # Un-feature target listing, if already featured (toggle)
+        if (target_listing_data['is_featured']):
+            APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
+
+        # Get the 1st featured listing id
+        url = '/api/storefront/featured/'
+        self.client.force_authenticate(user=user)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        first_featured_listing_id = response.data['featured'][0]['id']
+
+        #  Check  - The target listing is not 1st in the featured list
+        self.assertNotEqual(first_featured_listing_id, target_listing_id)
+
+        # Feature the target listing
+        APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
+
+        # Get the 1st featured listing id
+        url = '/api/storefront/featured/'
+        self.client.force_authenticate(user=user)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        first_featured_listing_id = response.data['featured'][0]['id']
+
+        # Check - target featured listing is now the 1st featured listing
+        self.assertEqual(first_featured_listing_id, target_listing_id)

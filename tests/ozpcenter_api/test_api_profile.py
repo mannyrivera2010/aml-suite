@@ -390,7 +390,7 @@ class ProfileApiTest(APITestCase):
         url = '/api/self/profile/'
         data = {'id': 5, 'center_tour_flag': 4}
         response = self.client.put(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('"4" is not a valid boolean.'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error('{\'center_tour_flag\': [\'"4" is not a valid boolean.\']}'))
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_self_for_apps_mall_steward_level_invalid_user(self, mock_request):
@@ -402,7 +402,7 @@ class ProfileApiTest(APITestCase):
         data = {'id': 5, 'center_tour_flag': False}
         self.client.login(username='invalid', password='invalid')
         response = self.client.put(url, data, format='json')
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.not_authenticated('Authentication credentials were not provided.'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.not_authenticated('Authentication credentials were not provided.'))
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_apps_mall_steward_level(self, mock_request):
@@ -429,7 +429,7 @@ class ProfileApiTest(APITestCase):
         data = {'display_name': 'Winston Smith', 'stewarded_organizations': False}
         response = self.client.put(url, data, format='json')
 
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.request_error('Expected a list of items but got type "bool".'))['error_code'])
+        self.assertEqual(response.data, ExceptionUnitTestHelper.request_error("{'stewarded_organizations': {'non_field_errors': ['Expected a " 'list of items but got type "bool".\']}}'))
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_update_stewarded_orgs_for_org_steward_level(self, mock_request):

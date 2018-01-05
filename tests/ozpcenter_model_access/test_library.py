@@ -69,6 +69,10 @@ class LibraryTest(TestCase):
         results = model_access.create_self_user_library_entry('bigbrother', 1, position=3)
         self.assertIsNotNone(results)
 
+        model_access.create_self_user_library_entry('bigbrother', 33)
+        results = model_access.get_self_application_library('bigbrother')
+        self.assertEquals(results.reverse()[0].listing.id, 33)
+
     def test_create_batch_library_entries(self):
         data = [
             {

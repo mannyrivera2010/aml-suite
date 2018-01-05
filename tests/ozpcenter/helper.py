@@ -311,7 +311,7 @@ def validate_listing_map_keys(listing_map, test_case_instance=None):
                                 'doc_urls', 'owners', 'categories', 'tags', 'contacts', 'intents',
                                 'small_icon', 'large_icon', 'banner_icon', 'large_banner_icon',
                                 'agency', 'last_activity', 'current_rejection', 'listing_type',
-                                'title', 'approved_date', 'edited_date', 'description', 'launch_url',
+                                'title', 'approved_date', 'edited_date', 'featured_date', 'description', 'launch_url',
                                 'version_name', 'unique_name', 'what_is_new', 'description_short',
                                 'usage_requirements', 'system_requirements', 'approval_status', 'is_enabled', 'is_featured',
                                 'is_deleted', 'avg_rate', 'total_votes', 'total_rate5', 'total_rate4',
@@ -367,7 +367,7 @@ class ListingFileClass(object):
                     keyword_key = keyword_key_split[0]
                     postfix = keyword_key_split[1]
 
-                # Check to see if keyword exist in lisiting
+                # Check to see if keyword exist in listing
                 if keyword_key in current_listing:
                     if postfix == 'in':
                         current_listing_keyword_value = current_listing[keyword_key]
