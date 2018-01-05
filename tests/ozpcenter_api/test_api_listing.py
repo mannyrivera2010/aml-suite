@@ -41,6 +41,18 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['is_bookmarked'], False)
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
+    def test_create_listing_minimal_bettafish(self):
+        # create a new listing with minimal data (title)
+        url = '/api/listing/'
+        title = 'bettafish app'
+        data = {'title': title, 'security_marking': 'UNCLASSIFIED'}
+
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
+
+        self.assertEqual(response.data['title'], title)
+        self.assertEqual(validate_listing_map_keys(response.data), [])
+        self.assertEqual(response.data['is_bookmarked'], False)
+
     def test_create_listing_no_title(self):
         # create a new listing with minimal data (title)
         url = '/api/listing/'

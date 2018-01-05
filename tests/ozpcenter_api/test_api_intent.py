@@ -40,8 +40,7 @@ class IntentApiTest(APITestCase):
         url = '/api/intent/1/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
-        action = response.data['action']
-        self.assertEqual(action, '/application/json/view')
+        self.assertEqual(response.data['action'], '/application/json/view')
 
     def test_create_intent(self):
         url = '/api/intent/'
@@ -54,15 +53,18 @@ class IntentApiTest(APITestCase):
 
     def test_update_intent(self):
         url = '/api/intent/1/'
-        data = {'action': '/application/json/viewtest',
-            'media_type': 'vnd.ozp-intent-v2+json.json', 'label': 'mylabel',
+        action = '/application/json/viewtest'
+        media_type = 'vnd.ozp-intent-v2+json.json'
+        label = 'mylabel'
+        data = {'action': action,
+            'media_type': media_type, 'label': label,
             'icon': {'id': 1, 'security_marking': 'UNCLASSIFIED'}}
 
         response = APITestHelper.request(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
 
-        self.assertEqual(response.data['action'], '/application/json/viewtest')
-        self.assertEqual(response.data['label'], 'mylabel')
-        self.assertEqual(response.data['media_type'], 'vnd.ozp-intent-v2+json.json')
+        self.assertEqual(response.data['action'], action)
+        self.assertEqual(response.data['label'], label)
+        self.assertEqual(response.data['media_type'], media_type)
 
     def test_delete_intent(self):
         url = '/api/intent/1/'

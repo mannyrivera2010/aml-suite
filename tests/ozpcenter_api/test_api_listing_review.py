@@ -59,6 +59,7 @@ class ListingReviewApiTest(APITestCase):
             "text": "This is a test review with a invalid rate"
         }
         response = APITestHelper.request(self, url, 'POST', username='bigbrother', data=data, status_code=400)
+        # TODO: ExceptionUnitTestHelper
 
     def test_edit_listing_review(self):
         url = '/api/listing/1/review/3/'
@@ -89,6 +90,7 @@ class ListingReviewApiTest(APITestCase):
             "text": ""
         }
         response = APITestHelper.request(self, url, 'PUT', username='syme', data=data, status_code=400)
+        # TODO: ExceptionUnitTestHelper
 
     def test_edit_listing_review_no_rate(self):
         url = '/api/listing/1/review/3/'
@@ -96,6 +98,7 @@ class ListingReviewApiTest(APITestCase):
             "text": "This is the updated review text"
         }
         response = APITestHelper.request(self, url, 'PUT', username='syme', data=data, status_code=400)
+        # TODO: ExceptionUnitTestHelper
 
     def test_edit_different_user_listing_review(self):
         # Trying to edit 'syme' review as user, jones
@@ -105,6 +108,7 @@ class ListingReviewApiTest(APITestCase):
             "text": "This is the updated review text"
         }
         response = APITestHelper.request(self, url, 'PUT', username='jones', data=data, status_code=403)
+        # TODO: ExceptionUnitTestHelper
 
     def test_delete_listing_review(self):
         url = '/api/listing/1/review/3/'

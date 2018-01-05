@@ -108,7 +108,7 @@ class LibraryApiTest(APITestCase):
         url = '/api/self/library/?type=widget'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
-        self.assertEqual(0, len(response.data))
+        self.assertEqual([], response.data)
 
     def test_get_library_pk(self):
         url = '/api/self/library/2/'
@@ -120,12 +120,9 @@ class LibraryApiTest(APITestCase):
         self.assertIn('unique_name', response.data['listing'])
         self.assertIn('folder', response.data)
 
-    def test_update_library(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-
+    def test_library_update_all(self):
         url = '/api/self/library/'
-        response = self.client.get(url, format='json')
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         put_data = []
         position_count = 0
@@ -141,5 +138,5 @@ class LibraryApiTest(APITestCase):
             put_data.append(data)
 
         url = '/api/self/library/update_all/'
-        response = self.client.put(url, put_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = APITestHelper.request(self, url, 'PUT', data=put_data, username='wsmith', status_code=200)
+        self.assertIsNotNone(response)

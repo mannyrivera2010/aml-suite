@@ -29,67 +29,38 @@ class ListingFeedbackApiTest(APITestCase):
         """
         data_gen.run()
 
-    def test_create_listing_minimal(self):
-        # create a new listing with minimal data (title)
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-        url = '/api/listing/'
-        title = 'bettafish app'
-        data = {'title': title, 'security_marking': 'UNCLASSIFIED'}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['title'], title)
-        self.assertEqual(validate_listing_map_keys(response.data), [])
-        self.assertEqual(response.data['is_bookmarked'], False)
-
     def test_no_feedback_listing(self):
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
         url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=404)
+
         self.assertEqual(response.data['feedback'], 0)
 
     def test_positive_feedback_listing(self):
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
         # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=200)
         self.assertEqual(response.data['feedback'], 1)
 
         # Check with a different beta group user to see if feedback exists for said user
-        user = generic_model_access.get_profile('betaraybill').user
-        self.client.force_authenticate(user=user)
-
-        response = self.client.get(url, format='json')
+        response = APITestHelper.request(self, url, 'GET', username='betaraybill', status_code=404)
         self.assertEqual(response.data['feedback'], 0)
 
     def test_negative_feedback_listing(self):
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
         # Create a negative feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": -1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=200)
         self.assertEqual(response.data['feedback'], -1)
 
         # Check with a different beta group user to see if feedback exists for said user
-        user = generic_model_access.get_profile('betaraybill').user
-        self.client.force_authenticate(user=user)
-
-        response = self.client.get(url, format='json')
+        response = APITestHelper.request(self, url, 'GET', username='betaraybill', status_code=404)
         self.assertEqual(response.data['feedback'], 0)
 
     def test_two_user_positive_feedback_listing(self):
@@ -97,33 +68,25 @@ class ListingFeedbackApiTest(APITestCase):
         test_two_user_positive_feedback_listing
         bettafish user
         """
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
-        # Create a negative feedback
+        # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=200)
         self.assertEqual(response.data['feedback'], 1)
 
         """
         betaraybill user
         """
-        user = generic_model_access.get_profile('betaraybill').user
-        self.client.force_authenticate(user=user)
-
-        # Create a negative feedback
+        # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='betaraybill', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='betaraybill', status_code=200)
         self.assertEqual(response.data['feedback'], 1)
 
     def test_two_user_negative_feedback_listing(self):
@@ -131,33 +94,25 @@ class ListingFeedbackApiTest(APITestCase):
         test_two_user_negative_feedback_listing
         bettafish user
         """
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
         # Create a negative feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": -1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=200)
         self.assertEqual(response.data['feedback'], -1)
 
         """
         betaraybill user
         """
-        user = generic_model_access.get_profile('betaraybill').user
-        self.client.force_authenticate(user=user)
-
         # Create a negative feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": -1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='betaraybill', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='betaraybill', status_code=200)
         self.assertEqual(response.data['feedback'], -1)
 
     def test_two_user_diff_feedback_listing(self):
@@ -165,62 +120,48 @@ class ListingFeedbackApiTest(APITestCase):
         test_two_user_diff_feedback_listing
         bettafish user
         """
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
-        # Create a negative feedback
+        # Create a position feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=200)
         self.assertEqual(response.data['feedback'], 1)
 
         """
         betaraybill user
         """
-        user = generic_model_access.get_profile('betaraybill').user
-        self.client.force_authenticate(user=user)
-
         # Create a negative feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": -1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='betaraybill', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='betaraybill', status_code=200)
         self.assertEqual(response.data['feedback'], -1)
 
     def test_delete_listing_feedback(self):
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
-        # Create a positive feedback
+        # Create a position feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
 
-        url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        # Check to see if created
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=200)
         self.assertEqual(response.data['feedback'], 1)
 
+        # DELETE
         url = '/api/listing/1/feedback/1/'
-        response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        APITestHelper.request(self, url, 'DELETE', username='bettafish', status_code=204)
 
+        # VERIFY
         url = '/api/listing/1/feedback/'
-        response = self.client.get(url, format='json')
+        response = APITestHelper.request(self, url, 'GET', username='bettafish', status_code=404)
+
         self.assertEqual(response.data['feedback'], 0)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_listing_non_existing_feedback(self):
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
         url = '/api/listing/1/feedback/1/'
-        response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = APITestHelper.request(self, url, 'DELETE', username='bettafish', status_code=404)
+        # TODO ExceptionUnitTestHelper

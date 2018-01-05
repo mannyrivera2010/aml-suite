@@ -33,7 +33,6 @@ class ListingActivitiesApiTest(APITestCase):
         action_log = []
         # CREATED
         url = '/api/listing/'
-
         data = {
             'title': 'mr jones app',
             'security_marking': 'UNCLASSIFIED'
@@ -129,19 +128,15 @@ class ListingActivitiesApiTest(APITestCase):
         Make sure org stewards of one org can't access activity for private
         listings of another org.
         """
-        expected_titles = ['Air Mail', 'Bread Basket', 'Chart Course',
-            'Chatter Box', 'Clipboard']
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/activity/'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        expected_titles = ['Air Mail', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard']
 
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        url = '/api/listings/activity/'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Ensure that Standard Users can not access /api/listing/activity
+        APITestHelper.request(self, url, 'GET', username='jones', status_code=403)
+
+        # Ensure that ORG_STEWARDS can access endpoint
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+
         titles = [i['listing']['title'] for i in response.data]
         counter = 0
         for i in expected_titles:
@@ -149,13 +144,10 @@ class ListingActivitiesApiTest(APITestCase):
             counter += 1
         self.assertEqual(counter, len(expected_titles))
 
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        url = '/api/listings/activity/'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Ensure that APP_MALL_STEWARD access endpoint
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+
         titles = [i['listing']['title'] for i in response.data]
-        titles = list(set(titles))
         counter = 0
         for i in expected_titles:
             # Bread Basket is a private app, and bigbrother is not in that
@@ -169,13 +161,10 @@ class ListingActivitiesApiTest(APITestCase):
         """
         Returns activity for listings owned by current user
         """
-        expected_titles = ['Bread Basket', 'Chatter Box']
-
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/self/listings/activity/'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected_titles = ['Bread Basket', 'Chatter Box']
+        response = APITestHelper.request(self, url, 'GET', username='julia', status_code=200)
+
         titles = [i['listing']['title'] for i in response.data]
         counter = 0
         for i in expected_titles:
@@ -184,11 +173,9 @@ class ListingActivitiesApiTest(APITestCase):
         self.assertEqual(counter, len(expected_titles))
 
     def test_get_listing_activities_offset_limit(self):
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
         url = '/api/listings/activity/?offset=0&limit=24'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+
         data = response.data
         self.assertTrue('count' in data)
         self.assertTrue('previous' in data)
@@ -199,13 +186,10 @@ class ListingActivitiesApiTest(APITestCase):
         self.assertTrue(len(data.get('results')) >= 1)
 
     def test_get_self_listing_activities_offset_limit(self):
-        user = generic_model_access.get_profile('aaronson').user
-        self.client.force_authenticate(user=user)
         url = '/api/self/listings/activity/?offset=0&limit=24'
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.data
+        response = APITestHelper.request(self, url, 'GET', username='aaronson', status_code=200)
 
+        data = response.data
         self.assertTrue('count' in data)
         self.assertTrue('previous' in data)
         self.assertTrue('next' in data)

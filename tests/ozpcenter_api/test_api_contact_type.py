@@ -38,16 +38,14 @@ class ContactTypeApiTest(APITestCase):
         url = '/api/contact_type/1/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
-        name = response.data['name']
-        self.assertEqual(name, 'Civilian')
+        self.assertEqual(response.data['name'], 'Civilian')
 
     def test_create_contact_type_apps_mall_steward(self):
         url = '/api/contact_type/'
         data = {'name': 'New Contact Type'}
         response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
-        name = response.data['name']
-        self.assertEqual(name, 'New Contact Type')
+        self.assertEqual(response.data['name'], 'New Contact Type')
 
     def test_create_contact_type_org_steward(self):
         url = '/api/contact_type/'
@@ -63,10 +61,8 @@ class ContactTypeApiTest(APITestCase):
         data = {'name': 'Updated Type', 'required': True}
         response = APITestHelper.request(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
 
-        name = response.data['name']
-        required = response.data['required']
-        self.assertEqual(name, 'Updated Type')
-        self.assertEqual(required, True)
+        self.assertEqual(response.data['name'], 'Updated Type')
+        self.assertEqual(response.data['required'], True)
 
     def test_update_contact_type_org_steward(self):
         url = '/api/contact_type/1/'

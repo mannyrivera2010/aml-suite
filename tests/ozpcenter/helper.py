@@ -241,22 +241,24 @@ class APITestHelper(object):
         return response
 
     @staticmethod
-    def request(test_case_instance, url, method, data=None, username='bigbrother', status_code=200, validator=None):
+    def request(test_case_instance, url, method, data=None, username='bigbrother', status_code=200, validator=None, format_str=None):
         user = generic_model_access.get_profile(username).user
         test_case_instance.client.force_authenticate(user=user)
+
+        format_str = format_str or 'json'
 
         response = None
 
         if method.upper() == 'GET':
-            response = test_case_instance.client.get(url, format='json')
+            response = test_case_instance.client.get(url, format=format_str)
         elif method.upper() == 'POST':
-            response = test_case_instance.client.post(url, data, format='json')
+            response = test_case_instance.client.post(url, data, format=format_str)
         elif method.upper() == 'PUT':
-            response = test_case_instance.client.put(url, data, format='json')
+            response = test_case_instance.client.put(url, data, format=format_str)
         elif method.upper() == 'DELETE':
-            response = test_case_instance.client.delete(url, format='json')
+            response = test_case_instance.client.delete(url, format=format_str)
         elif method.upper() == 'PATCH':
-            response = test_case_instance.client.patch(url, format='json')
+            response = test_case_instance.client.patch(url, format=format_str)
         else:
             raise Exception('method is not supported')
 

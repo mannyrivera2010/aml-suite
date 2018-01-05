@@ -47,40 +47,33 @@ class AgencyApiTest(APITestCase):
         url = '/api/agency/1/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
-        title = response.data['title']
-        short_name = response.data['short_name']
-        self.assertEqual(title, 'Ministry of Truth')
-        self.assertEqual(short_name, 'Minitrue')
+        self.assertEqual(response.data['title'], 'Ministry of Truth')
+        self.assertEqual(response.data['short_name'], 'Minitrue')
 
     def test_create_agency_apps_mall_steward(self):
         url = '/api/agency/'
         data = {'title': 'new agency', 'short_name': 'orgname'}
-
         response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
-        title = response.data['title']
-        short_name = response.data['short_name']
-        self.assertEqual(title, 'new agency')
-        self.assertEqual(short_name, 'orgname')
+        self.assertEqual(response.data['title'], 'new agency')
+        self.assertEqual(response.data['short_name'], 'orgname')
 
     def test_create_agency_org_steward(self):
         url = '/api/agency/'
         data = {'title': 'new agency', 'short_name': 'orgname'}
         response = APITestHelper.request(self, url, 'POST', data=data, username='wsmith', status_code=403)
-        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
+
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
 
     # TODO def test_create_agency(self): test different user groups access control
 
     def test_update_agency_apps_mall_steward(self):
         url = '/api/agency/1/'
         data = {'title': 'updated agency', 'short_name': 'uporg'}
-
         response = APITestHelper.request(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
 
-        title = response.data['title']
-        short_name = response.data['short_name']
-        self.assertEqual(title, data['title'])
-        self.assertEqual(short_name, data['short_name'])
+        self.assertEqual(response.data['title'], data['title'])
+        self.assertEqual(response.data['short_name'], data['short_name'])
 
     def test_update_agency_org_steward(self):
         url = '/api/agency/1/'

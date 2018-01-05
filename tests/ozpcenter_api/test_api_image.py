@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import APITestHelper
+from tests.ozpcenter.helper import ExceptionUnitTestHelper
 
 
 @override_settings(ES_ENABLED=False)
@@ -27,9 +28,6 @@ class ImageApiTest(APITestCase):
         data_gen.run()
 
     def test_post_image(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-
         url = '/api/image/'
         data = {
             'security_marking': 'UNCLASSIFIED',
@@ -37,16 +35,12 @@ class ImageApiTest(APITestCase):
             'file_extension': 'png',
             'image': open('ozpcenter/scripts/test_images/android.png', mode='rb')
         }
-        response = self.client.post(url, data, format='multipart')
+        response = APITestHelper.request(self, url, 'POST', data=data, username='wsmith', status_code=201, format_str='multipart')
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue('id' in response.data)
         self.assertTrue('security_marking' in response.data)
 
     def test_post_image_pki_user(self):
-        user = generic_model_access.get_profile('pmurt').user
-        self.client.force_authenticate(user=user)
-
         url = '/api/image/'
         data = {
             'security_marking': 'UNCLASSIFIED',
@@ -54,9 +48,10 @@ class ImageApiTest(APITestCase):
             'file_extension': 'png',
             'image': open('ozpcenter/scripts/test_images/android.png', mode='rb')
         }
-        response = self.client.post(url, data, format='multipart')
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='pmurt', status_code=400, format_str='multipart')
+        # TODO: Make below assertion work
+        # self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Security marking too high for current user'))
 
     def test_get_all_images(self):
         url = '/api/image/'
@@ -75,6 +70,7 @@ class ImageApiTest(APITestCase):
     def test_get_image_by_id(self):
         url = '/api/image/9001/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=404)
+        self.assertEqual(response.data, ExceptionUnitTestHelper.not_found())
 
     def test_delete_image(self):
         url = '/api/image/1/'
