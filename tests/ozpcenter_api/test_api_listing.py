@@ -8,13 +8,10 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter import models
 from ozpcenter.scripts import sample_data_generator as data_gen
-
 import ozpcenter.api.listing.model_access as model_access
-
 from tests.ozpcenter.helper import validate_listing_map_keys
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
-from tests.ozpcenter.helper import _edit_listing
 
 
 @override_settings(ES_ENABLED=False)
@@ -35,25 +32,34 @@ class ListingApiTest(APITestCase):
 
     def test_create_listing_minimal(self):
         # create a new listing with minimal data (title)
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/'
         title = 'julias app'
         data = {'title': title, 'security_marking': 'UNCLASSIFIED'}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='julia', status_code=201)
+
+        self.assertEqual(response.data['title'], title)
+        self.assertEqual(response.data['is_bookmarked'], False)
+        self.assertEqual(validate_listing_map_keys(response.data), [])
+
+    def test_create_listing_minimal_bettafish(self):
+        # create a new listing with minimal data (title)
+        url = '/api/listing/'
+        title = 'bettafish app'
+        data = {'title': title, 'security_marking': 'UNCLASSIFIED'}
+
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bettafish', status_code=201)
+
         self.assertEqual(response.data['title'], title)
         self.assertEqual(validate_listing_map_keys(response.data), [])
         self.assertEqual(response.data['is_bookmarked'], False)
 
     def test_create_listing_no_title(self):
         # create a new listing with minimal data (title)
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/'
         data = {'description': 'text here'}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = APITestHelper.request(self, url, 'POST', data=data, username='julia', status_code=400)
+        self.assertIsNotNone(response.data)
 
     # TODO: we have some strange inter-test dependency here. if  this test
     # doesn't run last (or after some other unknown test), it segfaults. Naming
@@ -61,8 +67,6 @@ class ListingApiTest(APITestCase):
     # the tests with the --reverse flag (but then you'd need to change this test
     # name to remove the _z)
     def test_z_create_listing_full(self):
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/'
         title = 'julias app'
         data = {
@@ -119,50 +123,32 @@ class ListingApiTest(APITestCase):
             ]
 
         }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        # title
+        response = APITestHelper.request(self, url, 'POST', data=data, username='julia', status_code=201)
+
         self.assertEqual(response.data['title'], title)
-        # description
         self.assertEqual(response.data['description'], 'description of app')
-        # launch_url
-        self.assertEqual(response.data['launch_url'],
-            'http://www.google.com/launch')
-        # version_name
+        self.assertEqual(response.data['launch_url'], 'http://www.google.com/launch')
         self.assertEqual(response.data['version_name'], '1.0.0')
-        # unique_name
         self.assertEqual(response.data['unique_name'], 'org.apps.julia-one')
-        # what_is_new
         self.assertEqual(response.data['what_is_new'], 'nothing is new')
-        # description_short
-        self.assertEqual(response.data['description_short'],
-            'a shorter description')
-        # usage_requirements
+        self.assertEqual(response.data['description_short'], 'a shorter description')
         self.assertEqual(response.data['usage_requirements'], 'None')
-        # system_requirements
         self.assertEqual(response.data['system_requirements'], 'None')
-        # is_private
         self.assertEqual(response.data['is_private'], True)
-        # contacts
-        self.assertEqual(len(response.data['contacts']), 2)
-        names = []
-        for c in response.data['contacts']:
-            names.append(c['name'])
+
+        names = [contact['name'] for contact in response.data['contacts']]
+        self.assertEqual(len(names), 2)
         self.assertTrue('me' in names)
         self.assertTrue('you' in names)
-        # security_marking
+
         self.assertEqual(response.data['security_marking'], 'UNCLASSIFIED')
-        # listing_type
         self.assertEqual(response.data['listing_type']['title'], 'Web Application')
-        # icons
         self.assertEqual(response.data['small_icon']['id'], 1)
         self.assertEqual(response.data['large_icon']['id'], 2)
         self.assertEqual(response.data['banner_icon']['id'], 3)
         self.assertEqual(response.data['large_banner_icon']['id'], 4)
-        # categories
-        categories = []
-        for c in response.data['categories']:
-            categories.append(c['title'])
+
+        categories = [category['title'] for category in response.data['categories']]
         self.assertTrue('Business' in categories)
         self.assertTrue('Education' in categories)
         # owners
@@ -204,8 +190,7 @@ class ListingApiTest(APITestCase):
 
         # fields that should come back with default values
         self.assertEqual(response.data['approved_date'], None)
-        self.assertEqual(response.data['approval_status'],
-            models.Listing.IN_PROGRESS)
+        self.assertEqual(response.data['approval_status'], models.Listing.IN_PROGRESS)
         self.assertEqual(response.data['is_enabled'], True)
         self.assertEqual(response.data['is_featured'], False)
         self.assertEqual(response.data['avg_rate'], 0.0)
@@ -219,37 +204,33 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['iframe_compatible'], True)
         self.assertEqual(response.data['required_listings'], None)
         self.assertTrue(response.data['edited_date'])
-        self.assertEqual(validate_listing_map_keys(response.data), [])
         self.assertEqual(response.data['is_bookmarked'], False)
+        self.assertEqual(validate_listing_map_keys(response.data), [])
 
     def test_delete_listing(self):
         url = '/api/listing/1/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         self.assertFalse(response.data.get('is_deleted'))
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
         url = '/api/listing/1/'
-        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=204)
+        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=204)
 
         url = '/api/listing/1/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         self.assertTrue(response.data.get('is_deleted'))
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
     def test_delete_listing_permission_denied(self):
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/1/'
-        response = self.client.delete(url, format='json')
+        response = APITestHelper.request(self, url, 'DELETE', username='jones', status_code=403)
 
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Org Stewards and admins can delete listings'))
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     def test_delete_listing_permission_denied_2nd_party(self):
-        user = generic_model_access.get_profile('johnson').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/1/'
-        response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = APITestHelper.request(self, url, 'DELETE', username='johnson', status_code=403)
+
         self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Current profile does not have delete permissions'))
 
     def test_update_listing_partial(self):
@@ -261,10 +242,6 @@ class ListingApiTest(APITestCase):
         instance.small_icon.id raised an exception. The same problem could exist
         on any property that isn't a simple data type
         """
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
-        url = '/api/listing/1/'
-
         listing = models.Listing.objects.get(id=1)
         listing.small_icon = None
         listing.large_icon = None
@@ -274,15 +251,17 @@ class ListingApiTest(APITestCase):
         listing.save()
 
         # now make another change to the listing
-        data = self.client.get(url, format='json').data
+        url = '/api/listing/1/'
+        data = APITestHelper.request(self, url, 'GET', username='julia', status_code=200).data
+
         data['small_icon'] = {'id': 1}
         data['large_icon'] = {'id': 2}
         data['banner_icon'] = {'id': 3}
         data['large_banner_icon'] = {'id': 4}
         data['listing_type'] = {'title': 'Web Application'}
         # and another update
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = APITestHelper.request(self, url, 'PUT', data=data, username='julia', status_code=200)
+
         self.assertTrue(response.data['edited_date'])
         self.assertEqual(response.data['small_icon']['id'], 1)
         self.assertEqual(response.data['large_icon']['id'], 2)
@@ -292,8 +271,6 @@ class ListingApiTest(APITestCase):
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
     def test_update_listing_full(self):
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/1/'
         title = 'julias app 2'
         data = {
@@ -353,9 +330,11 @@ class ListingApiTest(APITestCase):
 
         }
         # for checking Activity status later on
+        user = generic_model_access.get_profile('julia').user
+        self.client.force_authenticate(user=user)
         old_listing_data = self.client.get(url, format='json').data
-        response = self.client.put(url, data, format='json')
 
+        response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # title
         self.assertEqual(response.data['title'], data['title'])
@@ -448,7 +427,6 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['approval_status'], models.Listing.APPROVED)
         self.assertEqual(response.data['is_enabled'], False)
         self.assertEqual(response.data['is_featured'], False)
-        self.assertIsNone(response.data['featured_date'])
         self.assertEqual(response.data['avg_rate'], 3.0)
         self.assertEqual(response.data['total_votes'], 3)
         self.assertEqual(response.data['total_rate5'], 1)
@@ -536,11 +514,9 @@ class ListingApiTest(APITestCase):
         response = self.client.put(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Permissions are invalid for current profile']}"))
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Permissions are invalid for current profile'))['error_code'])
 
     def test_update_listing_full_2nd_party_owner(self):
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/1/'
         title = 'julias app 2'
         data = {
@@ -599,14 +575,15 @@ class ListingApiTest(APITestCase):
             ]
 
         }
-        response = self.client.put(url, data, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Permissions are invalid for current owner " "profile']}"))
-
-    def test_z_create_update(self):
         user = generic_model_access.get_profile('julia').user
         self.client.force_authenticate(user=user)
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.validation_error('Permissions are invalid for current owner profile'))['error_code'])
+
+    def test_z_create_update(self):
         url = '/api/listing/'
         data = {
           "title": "test",
@@ -660,8 +637,11 @@ class ListingApiTest(APITestCase):
           "required_listings": None
         }
 
+        user = generic_model_access.get_profile('julia').user
+        self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         self.assertEqual(response.data['approval_status'], 'IN_PROGRESS')
         self.assertEqual(validate_listing_map_keys(response.data), [])
         listing_id = response.data['id']
@@ -750,17 +730,18 @@ class ListingApiTest(APITestCase):
 
     def test_update_listing_approval_status_deny_user(self):
         # a standard user cannot update the approval_status
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/'
-
         data = {
             "title": 'mr jones app',
             "approval_status": "APPROVED",
             "security_marking": "UNCLASSIFIED"
         }
+
+        user = generic_model_access.get_profile('jones').user
+        self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         self.assertEqual(response.data['approval_status'], 'IN_PROGRESS')
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
@@ -770,8 +751,7 @@ class ListingApiTest(APITestCase):
 
         url = '/api/listing/{0!s}/'.format(listing_id)
         response = self.client.put(url, data, format='json')
-
-        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only an APPS_MALL_STEWARD can mark a listing as APPROVED'))
+        self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied('Only an APPS_MALL_STEWARD can mark a listing as APPROVED')['error_code']))
 
         # double check that the status wasn't changed
         # TODO: listing doesn't exist?
@@ -784,11 +764,13 @@ class ListingApiTest(APITestCase):
         test_get_listings_with_query_params
         Supported query params: org (agency title), approval_status, enabled
         """
+        url = '/api/listing/?approval_status=APPROVED&org=Ministry of Truth&enabled=true'
+
         user = generic_model_access.get_profile('julia').user
         self.client.force_authenticate(user=user)
-        url = '/api/listing/?approval_status=APPROVED&org=Ministry of Truth&enabled=true'
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         self.assertTrue(len(response.data) > 5)
         # TODO: more tests
 
@@ -796,9 +778,10 @@ class ListingApiTest(APITestCase):
         """
         test_get_listings_with_query_params
         """
+        url = '/api/listing/?approval_status=APPROVED&org=Ministry of Truth&enabled=true&owners_id=4'
+
         user = generic_model_access.get_profile('julia').user
         self.client.force_authenticate(user=user)
-        url = '/api/listing/?approval_status=APPROVED&org=Ministry of Truth&enabled=true&owners_id=4'
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -812,11 +795,13 @@ class ListingApiTest(APITestCase):
         test_counts_in_listings
         Supported query params: org (agency title), approval_status, enabled
         """
+        url = '/api/listing/'
+
         user = generic_model_access.get_profile('julia').user
         self.client.force_authenticate(user=user)
-        url = '/api/listing/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.data
         last_item = data[-1]
 
@@ -847,27 +832,30 @@ class ListingApiTest(APITestCase):
     # TODO: test_counts_in_listings - 2ndparty
 
     def test_create_listing_with_different_agency(self):
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/'
         data = {'title': 'test app', 'security_marking': 'UNCLASSIFIED',
                 'agency': {'title': 'Ministry of Plenty'}}
+
+        user = generic_model_access.get_profile('julia').user
+        self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_create_listing_with_invalid_agency(self):
-        user = generic_model_access.get_profile('julia').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/'
         data = {'title': 'test app', 'security_marking': 'UNCLASSIFIED',
             'agency': {'title': 'Ministry of NONE'}}
+
+        user = generic_model_access.get_profile('julia').user
+        self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_reject_listing_normal_user(self):
+        url = '/api/listing/1/rejection/'
+
         user = generic_model_access.get_profile('jones').user
         self.client.force_authenticate(user=user)
-        url = '/api/listing/1/rejection/'
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -876,10 +864,11 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_reject_listing_org_steward(self):
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
         url = '/api/listing/1/rejection/'
         data = {'description': 'because it\'s not good'}
+
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -900,12 +889,12 @@ class ListingApiTest(APITestCase):
         """
         betafish user
         """
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
         # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
+
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -931,12 +920,12 @@ class ListingApiTest(APITestCase):
         """
         betafish user
         """
-        user = generic_model_access.get_profile('bettafish').user
-        self.client.force_authenticate(user=user)
-
         # Create a positive feedback
         url = '/api/listing/1/feedback/'
         data = {"feedback": 1}
+
+        user = generic_model_access.get_profile('bettafish').user
+        self.client.force_authenticate(user=user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -1120,7 +1109,7 @@ class ListingApiTest(APITestCase):
         self.client.force_authenticate(user=user)
 
         # feature listing
-        _edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
+        APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
 
         url = '/api/listing/{0!s}/'.format(LISTING_ID)
         response = self.client.get(url, format='json')
@@ -1141,14 +1130,13 @@ class ListingApiTest(APITestCase):
         self.client.force_authenticate(user=user)
 
         # Un-feature listing
-        _edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
+        APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
 
         url = '/api/listing/{0!s}/'.format(LISTING_ID)
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(response.data['is_featured'], False)
-        self.assertIsNone(response.data['featured_date'])
 
     def test_featured_listings_order(self):
         """
@@ -1170,7 +1158,7 @@ class ListingApiTest(APITestCase):
 
         # Un-feature target listing, if already featured (toggle)
         if (target_listing_data['is_featured']):
-            _edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
+            APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': False}, USER_NAME)
 
         # Get the 1st featured listing id
         url = '/api/storefront/featured/'
@@ -1183,7 +1171,7 @@ class ListingApiTest(APITestCase):
         self.assertNotEqual(first_featured_listing_id, target_listing_id)
 
         # Feature the target listing
-        _edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
+        APITestHelper.edit_listing(self, LISTING_ID, {'is_featured': True}, USER_NAME)
 
         # Get the 1st featured listing id
         url = '/api/storefront/featured/'

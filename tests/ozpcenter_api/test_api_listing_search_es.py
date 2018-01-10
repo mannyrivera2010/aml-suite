@@ -13,9 +13,8 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import ListingFile
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
-from tests.ozpcenter.helper import _edit_listing
 from ozpcenter.api.listing import model_access_es
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 
@@ -59,7 +58,7 @@ class ListingESSearchApiTest(APITestCase):
 
         search_category = 'Health and Fitness'
         url = '/api/listings/essearch/?category={}'.format(search_category)
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = sorted([i['title'] for i in response.data['results']])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -77,7 +76,7 @@ class ListingESSearchApiTest(APITestCase):
         if self.es_failed:
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
         url = '/api/listings/essearch/?category=Health and Fitness&category=Communication'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = sorted([i['title'] for i in response.data['results']])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -135,7 +134,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/?type=Web Application'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = sorted([i['title'] for i in response.data['results']])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -150,7 +149,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/?search=demo_tag'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = sorted([i['title'] for i in response.data['results']])
         expected_listing = ['Air Mail', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
@@ -167,7 +166,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/?tag=demo_tag'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = sorted([i['title'] for i in response.data['results']])
         listings_from_file = ListingFile.filter_listings(is_enabled=True,
@@ -201,7 +200,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles_ids = [{'title': record.get('title'), 'id': record.get('id')} for record in response.data['results']]
         titles = sorted([i['title'] for i in titles_ids])
@@ -218,13 +217,13 @@ class ListingESSearchApiTest(APITestCase):
                         'is_enabled': False}
 
         # Disable one app
-        _edit_listing(self, id_to_disable, replace_dict, 'bigbrother')
+        APITestHelper.edit_listing(self, id_to_disable, replace_dict, 'bigbrother')
 
         elasticsearch_factory.wait_for_yellow_cluster_heath()
 
         # Check
         url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles_ids = [{'title': record.get('title'), 'id': record.get('id')} for record in response.data['results']]
         titles = sorted([i['title'] for i in titles_ids])
@@ -280,7 +279,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/?tag=demo_tag'
-        response = unittest_request_helper(self, url, 'POST', username='wsmith', status_code=501)
+        response = APITestHelper.request(self, url, 'POST', username='wsmith', status_code=501)
 
         self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
         self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
@@ -292,7 +291,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/1/?tag=demo_tag'
-        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=501)
+        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=501)
 
         self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
         self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
@@ -305,10 +304,10 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/?tag=demo_tag'
-        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=405)
+        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=405)
 
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-        self.assertEqual(response.data, ExceptionUnitTestHelper.method_not_allowed('Method "DELETE" not allowed.'))
+        self.assertEqual(response.data['error_code'].lower(), 'method_not_allowed')
 
     @override_settings(ES_ENABLED=True)
     def test_essearch_partial_update(self):
@@ -316,8 +315,8 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/1/?tag=demo_tag'
-        # response = unittest_request_helper(self, url, 'PATCH', username='wsmith', status_code=501)
-        response = unittest_request_helper(self, url, 'PATCH', username='wsmith', status_code=501)
+        # response = APITestHelper.request(self, url, 'PATCH', username='wsmith', status_code=501)
+        response = APITestHelper.request(self, url, 'PATCH', username='wsmith', status_code=501)
 
         self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
         self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
@@ -329,7 +328,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/1/?tag=demo_tag'
-        response = unittest_request_helper(self, url, 'PUT', username='wsmith', status_code=501)
+        response = APITestHelper.request(self, url, 'PUT', username='wsmith', status_code=501)
 
         self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
         self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
@@ -341,7 +340,7 @@ class ListingESSearchApiTest(APITestCase):
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
 
         url = '/api/listings/essearch/1/?tag=demo_tag'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=501)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=501)
 
         self.assertNotEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)

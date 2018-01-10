@@ -12,7 +12,7 @@ from ozpcenter import errors
 from tests.ozp import helper
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-from tests.ozpcenter.helper import unittest_request_helper
+from tests.ozpcenter.helper import APITestHelper
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 
 
@@ -77,7 +77,7 @@ class ProfileApiTest(APITestCase):
 
     def _all_listing_for_self_profile(self):
         url = '/api/profile/self/listing/'  # 2/7/18/26/27
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         titles = sorted([i['title'] for i in response.data])
         expected_listing = ['Air Mail', 'Applied Ethics Inc.', 'Bleach', 'Business Insurance Risk',
             'Business Management System', 'Chart Course', 'Clipboard', 'Desktop Virtualization',
@@ -97,7 +97,7 @@ class ProfileApiTest(APITestCase):
 
     def _one_listing_for_self_profile(self):
         url = '/api/profile/self/listing/2/'  # 2/7/18/26/27
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         data = response.data
         self.assertEqual(data['id'], 2)
 
@@ -120,7 +120,7 @@ class ProfileApiTest(APITestCase):
             charrington (minipax, miniluv, minitrue) - Charrington - 17
         """
         url = self._get_profile_url_for_username('wsmith', 'listing/')
-        response = unittest_request_helper(self, url, 'GET', username='charrington', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='charrington', status_code=200)
 
         titles = sorted([i['title'] for i in response.data])
         expected_listing = ['Air Mail', 'Applied Ethics Inc.', 'Bleach', 'Business Insurance Risk',
@@ -149,7 +149,7 @@ class ProfileApiTest(APITestCase):
             bigbrother (minipax) - Big Brother - 1
         """
         url = self._get_profile_url_for_username('wsmith', 'listing/')
-        response = unittest_request_helper(self, url, 'GET', username='bigbrother', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
 
         titles = sorted([i['title'] for i in response.data])
         expected_listing = ['Air Mail', 'Applied Ethics Inc.', 'Bleach', 'Business Insurance Risk',
@@ -174,7 +174,7 @@ class ProfileApiTest(APITestCase):
             jones (minitrue) - Jones - 9
         """
         url = self._get_profile_url_for_username('julia', 'listing/')
-        response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='jones', status_code=200)
 
         titles = sorted([i['title'] for i in response.data])
         expected_listing = ['Bread Basket', 'Chatter Box']
@@ -190,7 +190,7 @@ class ProfileApiTest(APITestCase):
         settings.OZP['USE_AUTH_SERVER'] = True
 
         url = '/api/profile/?username_starts_with=ws'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         usernames = sorted([i['user']['username'] for i in response.data])
         expected_usernames = ['wsmith']
         self.assertEqual(usernames, expected_usernames)
@@ -203,7 +203,7 @@ class ProfileApiTest(APITestCase):
         settings.OZP['USE_AUTH_SERVER'] = True
 
         url = '/api/profile/?username_starts_with=asdf'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         usernames = sorted([i['user']['username'] for i in response.data])
         expected_usernames = []
         self.assertEqual(usernames, expected_usernames)

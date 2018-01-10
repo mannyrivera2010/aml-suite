@@ -288,13 +288,16 @@ class NotificationBase(object):
 
 class SystemWideNotification(NotificationBase):
     """
-    AMLNG-395 - SystemWide
+    issue: AMLNG-395
+    notification_type: System Wide
+    description:
         As a user, I want to receive System-Wide Notifications
-    Targets: All Users
-    Permission Constraint: Only APP_MALL_STEWARDs can send notifications
-    Invoked: Directly
+    target: All Users
+    permission constraint: Only APP_MALL_STEWARDs can send notifications
+    invoked: Directly
+    test_case:
+        todo
     """
-
     def get_notification_db_type(self):
         return Notification.SYSTEM
 
@@ -302,21 +305,21 @@ class SystemWideNotification(NotificationBase):
         return None
 
     def get_target_list(self):
-        """
-        Get every profile
-        """
         return Profile.objects.all()
 
 
 class AgencyWideNotification(NotificationBase):
     """
-    AMLNG-398 - AgencyWide
+    issue: AMLNG-398
+    notification_type: Agency Wide
+    description:
         As a user, I want to receive Agency-Wide Notifications
-    Targets: All Users in an agency
-    Permission Constraint: Only APP_MALL_STEWARDs, ORG_STEWARDs can send notifications
-    Invoked: Directly
+    target: Get all profiles that belongs to an organization and get all stewards for that organization
+    permission constraint: Only APP_MALL_STEWARDs, ORG_STEWARDs can send notifications
+    invoked: Directly
+    test_case:
+        todo
     """
-
     def modify_notification_before_save(self, notification_object):
         notification_object.agency = self.entity
 
@@ -327,22 +330,22 @@ class AgencyWideNotification(NotificationBase):
         return None
 
     def get_target_list(self):
-        """
-        Get every profile that belongs to an organization and get all stewards for that organization
-        """
         return Profile.objects.filter(Q(organizations__in=[self.entity]) |
                                       Q(stewarded_organizations__in=[self.entity])).all()
 
 
 class AgencyWideBookmarkNotification(NotificationBase):
     """
-    AMLNG-398 - AgencyWide Bookmark
+    issue: AMLNG-398
+    notification_type: AgencyWide Bookmark
+    description:
         As a user, I want to receive Agency-Wide Notifications
-    Targets: All Users in an agency
-    Permission Constraint: Only APP_MALL_STEWARDs, ORG_STEWARDs can send notifications
-    Invoked: Directly
+    target: Get all profiles that belongs to an organization and get all stewards for that organization
+    permission constraint: Only APP_MALL_STEWARDs, ORG_STEWARDs can send notifications
+    invoked: Directly
+    test_case:
+        todo
     """
-
     def modify_notification_before_save(self, notification_object):
         notification_object.agency = self.entity
 
@@ -353,21 +356,22 @@ class AgencyWideBookmarkNotification(NotificationBase):
         return None
 
     def get_target_list(self):
-        """
-        Get every profile that belongs to an organization and get all stewards for that organization
-        """
         return Profile.objects.filter(Q(organizations__in=[self.entity]) |
                                       Q(stewarded_organizations__in=[self.entity])).all()
 
 
 class ListingNotification(NotificationBase):
     """
-    AMLNG-396 - Listing Notifications
-    Targets: All users that bookmarked listing
-    Permission Constraint: Only APP_MALL_STEWARDs and ORG_STEWARDs or owners of listing can send notifications
-    Invoked: Directly
+    issue: AMLNG-396
+    notification_type: Listing Notifications
+    description:
+        Send a notification to all the users that bookmark given listing
+    target: All users that bookmarked listing
+    permission constraint: Only APP_MALL_STEWARDs and ORG_STEWARDs or owners of listing can send notifications
+    invoked: Directly
+    test_case:
+        todo
     """
-
     def modify_notification_before_save(self, notification_object):
         notification_object.listing = self.entity
 
@@ -378,9 +382,6 @@ class ListingNotification(NotificationBase):
         return None
 
     def get_target_list(self):
-        """
-        Get every profile that has bookmarked that listing
-        """
         owner_id_list = ApplicationLibraryEntry.objects.filter(listing__in=[self.entity],
                                                                listing__isnull=False,
                                                                listing__approval_status=Listing.APPROVED,
@@ -400,12 +401,15 @@ class ListingNotification(NotificationBase):
 
 class PeerNotification(NotificationBase):
     """
-    Peer
+    issue: AMLNG-381
+    notification_type: Peer
+    description:
         As a user, I want to receive notification when someone send a message to me
-    Targets: User Given Target
-    Permission Constraint:
+    target: User Given Target
+    permission constraint: ?
+    test_case:
+        todo
     """
-
     def modify_notification_before_save(self, notification_object):
         notification_object.peer = self.metadata
 
@@ -425,18 +429,18 @@ class PeerNotification(NotificationBase):
 
 class PeerBookmarkNotification(NotificationBase):
     """
-    AMLNG-381 - PeerBookmark
+    issue: AMLNG-381
+    notification_type: PeerBookmark
+    description:
         As a user, I want to receive notification when someone shares a folder with me
-    Targets: User Given Target
-    Permission Constraint:  Must be owner of shared folder to send
-
-    Test Case:
+    target: User Given Target
+    permission constraint:  Must be owner of shared folder to send
+    test_case:
         Logged on as jones
         Shared a folder with aaronson
         Logged on as aaronson
         RESULTS: aaronson has a new notification added to the notification count.Add folder button is present and adds the shared folder to HuD screen.
     """
-
     def modify_notification_before_save(self, notification_object):
         notification_object.peer = self.metadata
 
@@ -456,18 +460,18 @@ class PeerBookmarkNotification(NotificationBase):
 
 class RestoreBookmarkNotification(NotificationBase):
     """
-    AMLNG-700 - RestoreBookmarkFolder
+    issue: AMLNG-700
+    notification_type: Restore Bookmark Folder
+    description:
         As a user, I would like the ability to be able to recover a deleted folder full of bookmarked listings with an undo delete function.
-    Targets: User Given Target
-    Permission Constraint:  Must be owner of folder
-
-    Test Case:
+    target: User Given Target
+    permission constraint:  Must be owner of folder
+    test_case:
         Logged on as jones
         Delete a folder
         Restore folder from Notifications
         RESULTS: Restore folder button is present and readds the folder to HuD screen.
     """
-
     def modify_notification_before_save(self, notification_object):
         notification_object.peer = self.metadata
 
@@ -487,12 +491,13 @@ class RestoreBookmarkNotification(NotificationBase):
 
 class ListingReviewNotification(NotificationBase):  # Not Verified
     """
-    AMLNG-377 - ListingReview
+    issue: AMLNG-377
+    notification_type: Listing Review
+    description:
         As an owner or CS, I want to receive notification of user rating and reviews
-    Targets: Users that ___
-    Invoked: In-directly
-
-    Test Case:
+    target: Users that ___
+    invoked: In-directly
+    test_case:
         Description - Verify the CS and listing owner receives a notification when the review is added or modified.
         *Pre-req*- Add aaronson as listing owner to Airmail.
         Log on as syme (minipax)
@@ -533,10 +538,11 @@ class ListingReviewNotification(NotificationBase):  # Not Verified
 
 class ListingOwnerNotification(NotificationBase):  # Not Verified
     """
-    AMLNG-??? - ListingOwner
-        As an user, I want to send a notification to the owners and org_steward for that listing's agency
-    Targets: owners and org_steward for that listing's agency
-    Invoked: Directly
+    issue: AMLNG-???
+    notification_type: Listing Owner
+    As an user, I want to send a notification to the owners and org_steward for that listing's agency
+    target: owners and org_steward for that listing's agency
+    invoked: Directly
     """
 
     def modify_notification_before_save(self, notification_object):
@@ -566,14 +572,15 @@ class ListingOwnerNotification(NotificationBase):  # Not Verified
 
 class ListingPrivateStatusNotification(NotificationBase):
     """
-    AMLNG-383 - ListingPrivateStatus
+    issue: AMLNG-383
+    notification_type: ListingPrivateStatus
+    description:
         As a owner, I want to notify users who have bookmarked my listing when the
         listing is changed from public to private and vice-versa
-    Permission Constraint: Only APP_MALL_STEWARDs and ORG_STEWARDs or owners of listing can
-    Targets: Users that bookmarked listing
-    Invoked: In-directly
-
-    Test Case:
+    permission constraint: Only APP_MALL_STEWARDs and ORG_STEWARDs or owners of listing can
+    target: Users that bookmarked listing
+    invoked: In-directly
+    test_case:
         Bookmarked an app listing in my own org
         Went to Bookmarked App Listing Quick View Modal | Send Notifications | Sent a notification
         RESULTS - I received the notification
@@ -612,19 +619,18 @@ class ListingPrivateStatusNotification(NotificationBase):
 
 class PendingDeletionRequestNotification(NotificationBase):  # Not Verified
     """
-    AMLNG-170 - PendingDeletionRequest
+    issue: AMLNG-170
+    notification_type: PendingDeletionRequest
+    description:
         As an Owner I want to receive notice of whether my deletion request has been approved or rejected
-    Targets: Users that ___
-    Invoked: In-directly
-
-    This event occurs when
+    target: Users that ___
+    invoked: In-directly
+    event_occurs:
         Listing DELETED - Steward approved deletion
             PENDING_DELETION --> DELETED
-
         User undeleted the listing - Steward rejects deletion
             PENDING_DELETION --> PENDING
-
-    Test Case:
+    test_case:
         Logged on as jones
         Set Test Notification Listing to Pend for Deletion state
         Logged on as minitrue Org Content Steward- julia
@@ -649,17 +655,17 @@ class PendingDeletionRequestNotification(NotificationBase):  # Not Verified
 
 class PendingDeletionCancellationNotification(NotificationBase):  # Not Verified
     """
-    AMLNG-173 - PendingDeletionCancellation
+    issue: AMLNG-173
+    notification_type: PendingDeletionCancellation
         As an cs I want a notification if an owner has cancelled an app
         that was pending deletion
-
-    This event occurs when
-        User undeleted the listing
-            PENDING_DELETION --> PENDING
-
-    Test Case:
+    event_occurs:
+        This event occurs when
+            User undeleted the listing
+                PENDING_DELETION --> PENDING
+    test_case:
         Set Test Notification Listing to Pend for Deletion Status
-        Logged on as jones ( owner of <Test Notification> Listing)
+        Logged on as jones (owner of <Test Notification> Listing)
         Undeleted the Test Notification Listing
         Logged on as Org Content Steward - julia
         RESULTS - Notificaiton launched = Listing Owner cancelled deletion of Test Notification Listing listing
@@ -682,18 +688,19 @@ class PendingDeletionCancellationNotification(NotificationBase):  # Not Verified
 
 class ListingSubmissionNotification(NotificationBase):
     """
-    AMLNG-376 - ListingSubmission
+    issue: AMLNG-376
+    notification_type: ListingSubmission
+    description:
         As a CS, I want to receive notification of Listings submitted for my organization
-    Targets: Listing Agency ORG_STEWARDs
-    Invoked: In-directly
+    target: Listing Agency ORG_STEWARDs
+    invoked: In-directly
+    event_occurs:
+        This event occurs when
+            User Submitted Listings
+                IN_PROGRESS --> PENDING
 
-    This event occurs when
-        User Submitted Listings
-            IN_PROGRESS --> PENDING
-
-    a = Listing.objects.last(); a.approval_status = Listing.IN_PROGRESS; a.save()
-
-    Test Case:
+        a = Listing.objects.last(); a.approval_status = Listing.IN_PROGRESS; a.save()
+    test_case:
         Logged into Apps Mall as jones ( minitrue)
         Submitted a new listing using org minitrue.
         Logged into Apps mall as CS - julia (minitrue)
@@ -720,10 +727,11 @@ class ListingSubmissionNotification(NotificationBase):
 
 class TagSubscriptionNotification(NotificationBase):  # Not Verified
     """
-    AMLNG-392 - TagSubscription
+    issue: AMLNG-392
+    notification_type: TagSubscription
         As a user, I want to receive notification when a Listing is added to a subscribed tag
-    Targets: Users that ___
-    Invoked: In-directly
+    target: Users that ___
+    invoked: In-directly
     """
 
     def modify_notification_before_save(self, notification_object):
@@ -748,16 +756,18 @@ class TagSubscriptionNotification(NotificationBase):  # Not Verified
 
 class CategorySubscriptionNotification(NotificationBase):  # Not Verified
     """
-    AMLNG-380 - CategorySubscription
+    issue: AMLNG-380
+    notification_type: CategorySubscription
+    description:
         As a user, I want to receive notification when a Listing is added to a subscribed category
-    Targets: Users that are subscribed to category
-    Invoked: In-directly
+    target: Users that are subscribed to category
+    invoked: In-directly
+    event_occurs:
         Should occur when a user submits a listing with a category and listing gets approved,
             it should send out notifications for users that have that category subscribed and has the Subscription Preference Flag to True
         Should occur when a published listing add new category,
             it should send out notifications for users that have that category subscribed and has the Subscription Preference Flag to True
-
-    Test Case:
+    test_case:
         Logged on as jones
         Subscribed to Finance
         Logged on as big brother
@@ -788,10 +798,29 @@ class CategorySubscriptionNotification(NotificationBase):  # Not Verified
 
 class StewardAppNotification(NotificationBase):
     """
-    AMLNG-745 - Listing Review Notification
-    Targets: All ORG_STEWARDS
-    Permission Constraint: Only APP_MALL_STEWARDs can send notifications
-    Invoked: Directly
+    issue: AMLNG-745
+    notification_type: Listing Review
+    description:
+        A process to notify and instruct content stewards to review and update, as needed, current listing information for all listing in their organization.
+        An admin has the ability to send out a notification to all Content Stewards, notifying them to review their org's Listings and make any necessary changes.
+        Content Steward updates Listing as needed via Create New Listing Form (the usual means of updating listings)
+        Content Steward and listing owner(s) are notified when listing has been updated and approve
+    target: All ORG_STEWARDS
+    permission constraint: Only APP_MALL_STEWARDs can send notifications
+    invoked: Directly
+    test_case:
+        As bigbrother,
+        Go to Center Settings (from the dropdown menu)
+        Go to the Notifications Tab
+        Select the 'Update Request' type
+        See that the Notification text is populated with a default message (you can change this message if you like)
+        Set expires on date
+        Press send
+        Login as david, julia, obrien and wsmith to make sure that they have received the message and that it has the link as detailed in acceptance criteria
+
+        bigbrother should not receive the notification
+        hodor should not receive the notification
+        jones should not receive the notification
     """
 
     def modify_notification_before_save(self, notification_object):
@@ -807,7 +836,6 @@ class StewardAppNotification(NotificationBase):
         return Notification.ORG_STEWARD
 
     def get_target_list(self):
-
         target_set = set()
         agencies = Agency.objects.all()
         for steward in Profile.objects.filter(stewarded_organizations__in=agencies, listing_notification_flag=True).all():

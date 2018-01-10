@@ -10,28 +10,21 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from tests.ozpcenter.helper import unittest_request_helper
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 
-from tests.ozpcenter.helper import _edit_listing
-from tests.ozpcenter.helper import _create_bookmark
-from tests.ozpcenter.helper import _import_bookmarks
-from tests.ozpcenter.helper import _delete_bookmark_folder
+from tests.ozpcenter.helper import APITestHelper
 
 
 @override_settings(ES_ENABLED=False)
 class NotificationApiTest(APITestCase):
 
     def setUp(self):
-        pass
         """
         setUp is invoked before each test method
         """
-        # self.expected_error = {'detail': 'Permission denied.',
-        #                       'error': True,
-        #                       'message': 'Only Stewards can delete notifications'}
+        pass
 
     @classmethod
     def setUpTestData(cls):
@@ -45,7 +38,7 @@ class NotificationApiTest(APITestCase):
 
     def test_get_self_notification(self):
         url = '/api/self/notification/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         for current_notification in response.data:
             valid_keys = ['id', 'created_date', 'expires_date', 'message', 'author',
@@ -63,7 +56,7 @@ class NotificationApiTest(APITestCase):
 
     def test_get_self_notification_ordering(self):
         url = '/api/self/notification/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         notification_list = self._format_notification_response(response)
 
@@ -119,21 +112,21 @@ class NotificationApiTest(APITestCase):
 
         # Get reversed order
         url = '/api/self/notification/?ordering=-notification__created_date'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         notification_list = self._format_notification_response(response)
         self.assertEqual(notification_list, expected_data)
 
         # Get ascending order
         url = '/api/self/notification/?ordering=notification__created_date'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         notification_list = self._format_notification_response(response)
         self.assertEqual(notification_list, list(reversed(expected_data)))
 
     def test_dismiss_self_notification(self):
         url = '/api/self/notification/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         mailbox_ids = []
         notification_ids = []
@@ -193,11 +186,11 @@ class NotificationApiTest(APITestCase):
 
         # now dismiss the first notification
         url = '{}{}/'.format(url, mailbox_ids[0])
-        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=204)
+        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=204)
 
         # now get our notifications again, make sure the one was removed
         url = '/api/self/notification/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         notification_ids = []
         for i in response.data:
@@ -207,7 +200,7 @@ class NotificationApiTest(APITestCase):
 
     def test_get_pending_notifications(self):
         url = '/api/notifications/pending/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         expires_at = [i['expires_date'] for i in response.data]
         self.assertTrue(len(expires_at) > 1)
@@ -218,11 +211,11 @@ class NotificationApiTest(APITestCase):
 
     def test_get_pending_notifications_user_unauthorized(self):
         url = '/api/notifications/pending/'
-        unittest_request_helper(self, url, 'GET', username='jones', status_code=403)
+        APITestHelper.request(self, url, 'GET', username='jones', status_code=403)
 
     def test_all_pending_notifications_listing_filter(self):
         url = '/api/notifications/pending/?listing=1'  # ID 1 belongs to AcousticGuitar
-        response = unittest_request_helper(self, url, 'GET', username='bigbrother', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
 
         notification_list = self._format_notification_response(response)
         notification_expires_date_list = [entry['expires_date'] for entry in response.data]
@@ -241,7 +234,7 @@ class NotificationApiTest(APITestCase):
 
     def test_all_pending_notifications_listing_filter_user_authorized(self):
         url = '/api/notifications/pending/?listing=160'  # ID 160 belongs to Stroke play
-        response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='jones', status_code=200)
 
         notification_list = self._format_notification_response(response)
         notification_expires_date_list = [entry['expires_date'] for entry in response.data]
@@ -257,12 +250,12 @@ class NotificationApiTest(APITestCase):
 
     def test_all_pending_notifications_listing_filter_user_unauthorized(self):
         url = '/api/notifications/pending/?listing=1'
-        unittest_request_helper(self, url, 'GET', username='jones', status_code=403)
+        APITestHelper.request(self, url, 'GET', username='jones', status_code=403)
         # TODO Check response
 
     def test_get_expired_notifications(self):
         url = '/api/notifications/expired/'
-        response = unittest_request_helper(self, url, 'GET', username='wsmith', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         expires_at = [i['expires_date'] for i in response.data]
         self.assertTrue(len(expires_at) > 1)
@@ -274,18 +267,14 @@ class NotificationApiTest(APITestCase):
 
     def test_get_expired_notifications_user_unauthorized(self):
         url = '/api/notifications/expired/'
-        unittest_request_helper(self, url, 'GET', username='jones', status_code=403)
+        APITestHelper.request(self, url, 'GET', username='jones', status_code=403)
         # TODO Check response
 
     # TODO should work when data script gets refactored (rivera 20160620)
     @skip("should work when data script gets refactored (rivera 20160620)")
     def test_all_expired_notifications_listing_filter(self):
         url = '/api/notifications/expired/?listing=1'
-
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
 
         ids = [i['id'] for i in response.data]
         expires_at = [i['expires_date'] for i in response.data]
@@ -298,6 +287,7 @@ class NotificationApiTest(APITestCase):
             self.assertTrue(test_time < now)
 
     def test_all_expired_notifications_listing_filter_user_authorized(self):
+        # Create new listing notification with listing id 160
         now = datetime.datetime.now() - datetime.timedelta(days=7)
         data = {'expires_date': str(now),
                 'message': 'a simple listing test',
@@ -305,23 +295,19 @@ class NotificationApiTest(APITestCase):
             'id': 160
             }}
         url = '/api/notification/'
+        response = APITestHelper.request(self, url, 'POST', data=data, username='jones', status_code=201)
 
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
-        self.client.post(url, data, format='json')
-
+        # Verify that listing was created and expired
         url = '/api/notifications/expired/?listing=160'  # ID 160 belongs to Stroke play
-        response = unittest_request_helper(self, url, 'GET', username='jones', status_code=200)
+        response = APITestHelper.request(self, url, 'GET', username='jones', status_code=200)
 
         notification_list = self._format_notification_response(response)
-
         expected = ['160-listing-asimplelistingtest']
-
         self.assertEqual(expected, notification_list)
 
     def test_all_expired_notifications_listing_filter_user_unauthorized(self):
         url = '/api/notifications/expired/?listing=1'
-        unittest_request_helper(self, url, 'GET', username='jones', status_code=403)
+        APITestHelper.request(self, url, 'GET', username='jones', status_code=403)
 
     # TODO: test_all_notifications_listing_filter (rivera 20160617)
 
@@ -329,13 +315,9 @@ class NotificationApiTest(APITestCase):
         data = {'expires_date': '2016-09-01T15:45:55.322421Z',
                 'message': 'a simple test'}
         url = '/api/notification/'
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        self.assertEqual(response.data['message'], 'a simple test')
+        self.assertEqual(response.data['message'], data['message'])
         self.assertEqual(response.data['notification_type'], 'system')
 
     def test_create_system_notification_unauthorized_user(self):
@@ -345,20 +327,14 @@ class NotificationApiTest(APITestCase):
                 'message': 'a simple test'}
         url = '/api/notification/'
 
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        APITestHelper.request(self, url, 'POST', data=data, username='jones', status_code=403)
 
     def test_update_system_notification(self):
         now = datetime.datetime.now(pytz.utc)
         data = {'expires_date': str(now)}
         url = '/api/notification/1/'
 
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        APITestHelper.request(self, url, 'PUT', data=data, username='wsmith', status_code=200)
         # TODO: Verify expires_date
 
     def test_update_system_notification_unauthorized_user(self):
@@ -366,10 +342,7 @@ class NotificationApiTest(APITestCase):
         data = {'expires_date': str(now)}
         url = '/api/notification/1/'
 
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        APITestHelper.request(self, url, 'PUT', data=data, username='jones', status_code=403)
 
     # TODO below test should work when permission gets refactored (rivera 20160620)
     @skip("should work permissions gets refactored (rivera 20160620)")
@@ -378,10 +351,7 @@ class NotificationApiTest(APITestCase):
         data = {'expires_date': str(now)}
         url = '/api/notification/1/'
 
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        APITestHelper.request(self, url, 'PUT', data=data, username='wsmith', status_code=403)
 
     def test_create_listing_notification_app_mall_steward(self):
         now = datetime.datetime.now(pytz.utc)
@@ -391,11 +361,7 @@ class NotificationApiTest(APITestCase):
             'id': 1
             }}
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
         self.assertEqual(response.data['message'], 'a simple listing test')
         self.assertEqual(response.data['notification_type'], 'listing')
@@ -403,33 +369,32 @@ class NotificationApiTest(APITestCase):
         self.assertEqual(response.data['agency'], None)
         self.assertTrue('expires_date' in data)
 
-    def test_create_listing_notification_app_mall_steward_invalid_format(self):
+    def test_create_listing_notification_invalid_format_all_groups(self):
         now = datetime.datetime.now(pytz.utc)
         data = {'expires_date': str(now),
                 'message': 'a simple listing test',
                 'listing': {'invalid': 1}
                 }
-
         url = '/api/notification/'
+        usernames = ['bigbrother', 'wsmith', 'jones']
 
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Valid Listing ID is required']}"))
+        for username in usernames:
+            response = APITestHelper.request(self, url, 'POST', data=data, username=username, status_code=400)
+            self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Valid Listing ID is required']}"))
 
-    def test_create_listing_notification_app_mall_steward_invalid_id(self):
+    def test_create_listing_notification_invalid_id_all_groups(self):
         now = datetime.datetime.now(pytz.utc)
         data = {'expires_date': str(now),
                 'message': 'a simple listing test',
                 'listing': {'id': -1}
                 }
-
         url = '/api/notification/'
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=400)
+        usernames = ['bigbrother', 'wsmith', 'jones']
 
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Could not find listing']}"))
+        for username in usernames:
+            response = APITestHelper.request(self, url, 'POST', data=data, username=username, status_code=400)
+            self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Could not find listing']}"))
 
     def test_create_listing_agency_notification_app_mall_steward_invalid(self):
         now = datetime.datetime.now(pytz.utc)
@@ -440,10 +405,7 @@ class NotificationApiTest(APITestCase):
                }
 
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=400)
 
         self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error('{\'non_field_errors\': ["Notifications can only be one type. ''Input: [\'listing\', \'agency\']"]}'))
 
@@ -455,11 +417,7 @@ class NotificationApiTest(APITestCase):
                 }
 
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='wsmith', status_code=201)
 
         self.assertEqual(response.data['message'], 'a simple listing test')
         self.assertEqual(response.data['notification_type'], 'listing')
@@ -467,48 +425,13 @@ class NotificationApiTest(APITestCase):
         self.assertEqual(response.data['agency'], None)
         self.assertTrue('expires_date' in data)
 
-    def test_create_listing_notification_org_steward_invalid_format(self):
-        now = datetime.datetime.now(pytz.utc)
-        data = {'expires_date': str(now),
-                'message': 'a simple listing test',
-                'listing': {'invalid': 1}
-                }
-
-        url = '/api/notification/'
-
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Valid Listing ID is required']}"))
-
-    def test_create_listing_notification_org_steward_invalid_id(self):
-        now = datetime.datetime.now(pytz.utc)
-        data = {'expires_date': str(now),
-                'message': 'a simple listing test',
-                'listing': {'id': -1}
-                }
-
-        url = '/api/notification/'
-
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Could not find listing']}"))
-
-    # TODO: test_create_listing_notification_org_steward_invalid (rivera 20160617)
-    # TODO: test_create_listing_notification_user_unauthorized (rivera 20160617)
-
     def test_create_agency_notification_app_mall_steward(self):
         now = datetime.datetime.now(pytz.utc)
         data = {'expires_date': str(now),
                 'message': 'A Simple Agency Test',
                 'agency': {'id': 1}}
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
         self.assertEqual(response.data['message'], 'A Simple Agency Test')
         self.assertEqual(response.data['notification_type'], 'agency')
@@ -523,10 +446,8 @@ class NotificationApiTest(APITestCase):
                 'agency': {'invalid': 1}
                 }
         url = '/api/notification/'
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=400)
 
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
         self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Valid Agency ID is required']}"))
 
     def test_create_agency_notification_app_mall_steward_invalid_id(self):
@@ -536,10 +457,8 @@ class NotificationApiTest(APITestCase):
                 'agency': {'id': -1}
                 }
         url = '/api/notification/'
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=400)
 
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
         self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'non_field_errors': ['Could not find agency']}"))
 
     # TODO: test_create_agency_notification_org_steward (rivera 20160617)
@@ -557,11 +476,7 @@ class NotificationApiTest(APITestCase):
                 }
 
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
         self.assertEqual(response.data['message'], 'A Simple Peer to Peer Notification')
         self.assertEqual(response.data['notification_type'], 'peer')
@@ -578,11 +493,7 @@ class NotificationApiTest(APITestCase):
                 }
 
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
         self.assertEqual(response.data['message'], "Please review your agency's apps and make sure their information is up to date")
         self.assertEqual(response.data['notification_type'], 'system')
@@ -601,11 +512,7 @@ class NotificationApiTest(APITestCase):
                 }
 
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('wsmith').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        APITestHelper.request(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
     def test_create_review_request_notification_unauthorized_user(self):
         now = datetime.datetime.now(pytz.utc)
@@ -615,16 +522,10 @@ class NotificationApiTest(APITestCase):
                 }
 
         url = '/api/notification/'
-
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        APITestHelper.request(self, url, 'POST', data=data, username='jones', status_code=403)
 
     @skip("should work when data script gets refactored (rivera 20160620)")
     def test_create_peer_bookmark_notification_app_mall_steward(self):
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
 
         now = datetime.datetime.now(pytz.utc)
         data = {"expires_date": str(now),
@@ -636,9 +537,8 @@ class NotificationApiTest(APITestCase):
                     "folder_name": "folder"}
                 }
         url = '/api/notification/'
-        response = self.client.post(url, data, format='json')
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['message'], 'A Simple Peer to Peer Notification')
         self.assertEqual(response.data['notification_type'], 'peer_bookmark')
         self.assertEqual(response.data['agency'], None)
@@ -646,8 +546,10 @@ class NotificationApiTest(APITestCase):
         self.assertTrue('expires_date' in data)
 
     def test_create_review_notification(self):
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
+        # Check notifications for new review notification
+        url = '/api/self/notification/'
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+        notification_count = len(response.data)
 
         # Review for Lamprey listing owned by bigbrother
         review_data = {
@@ -656,27 +558,19 @@ class NotificationApiTest(APITestCase):
             "text": "This is a review for the listing"
         }
         url = '/api/listing/91/review/'
-        response = self.client.post(url, review_data, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=review_data, username='jones', status_code=201)
 
         # Check notifications for new review notification
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-
         url = '/api/self/notification/'
-        response = self.client.get(url, format='json')
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), notification_count + 1)
         self.assertEqual(response.data[0]['entity_id'], review_data['listing'])
         self.assertEqual(response.data[0]['author']['user']['username'], 'jones')
         self.assertEqual(response.data[0]['listing']['title'], 'Lamprey')
         self.assertEqual(response.data[0]['message'], 'A user has rated listing <b>Lamprey</b> 5 stars')
 
     def test_create_review_response(self):
-        user = generic_model_access.get_profile('jones').user
-        self.client.force_authenticate(user=user)
-
         # Review for Lamprey listing owned by bigbrother
         review_data = {
             "listing": 91,
@@ -684,9 +578,7 @@ class NotificationApiTest(APITestCase):
             "text": "This is a review for the listing"
         }
         url = '/api/listing/91/review/'
-        response = self.client.post(url, review_data, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = APITestHelper.request(self, url, 'POST', data=review_data, username='jones', status_code=201)
 
         # Create response to the review created
         review_response_data = {
@@ -696,18 +588,12 @@ class NotificationApiTest(APITestCase):
             "review_parent": response.data['id']
         }
         url = '/api/listing/91/review/'
-        response = self.client.post(url, review_response_data, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        APITestHelper.request(self, url, 'POST', data=review_response_data, username='jones', status_code=201)
 
         # Verify no notifications has been created for creating a review response
-        user = generic_model_access.get_profile('bigbrother').user
-        self.client.force_authenticate(user=user)
-
         url = '/api/self/notification/'
-        response = self.client.get(url, format='json')
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['entity_id'], review_data['listing'])
         self.assertEqual(response.data[0]['author']['user']['username'], 'jones')
         self.assertEqual(response.data[0]['listing']['title'], 'Lamprey')
@@ -719,13 +605,10 @@ class NotificationApiTest(APITestCase):
     def _compare_library(self, usernames_list):
         usernames_list_actual = {}
         for username, ids_list in usernames_list.items():
-            user = generic_model_access.get_profile(username).user
-            self.client.force_authenticate(user=user)
-
             url = '/api/self/library/'
-            response = self.client.get(url, format='json')
+            response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
+
             before_notification_ids = ['{}-{}'.format(entry['listing']['title'], entry['folder']) for entry in response.data]
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
             usernames_list_actual[username] = before_notification_ids
 
         for username, ids_list in usernames_list.items():
@@ -736,14 +619,10 @@ class NotificationApiTest(APITestCase):
         usernames_list = notification_user_list
 
         for username, ids_list in usernames_list.items():
-            user = generic_model_access.get_profile(username).user
-            self.client.force_authenticate(user=user)
-
             url = '/api/self/notification/'
-            response = self.client.get(url, format='json')
+            response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
 
             before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(ids_list, before_notification_ids, 'Comparing Notifications for {}'.format(username))
 
     def test_create_restore_bookmark_notification_integration(self):
@@ -780,7 +659,7 @@ class NotificationApiTest(APITestCase):
                        }
 
         # Compare Notifications for user
-        usernames_list = {'bigbrother': ['listing-WolfFinderupdatenextweek',
+        user_notifications_list = {'bigbrother': ['listing-WolfFinderupdatenextweek',
                                         'listing-WolfFinderupdatenextweek',
                                         'listing-WhiteHorseupdatenextweek',
                                         'listing-Violinupdatenextweek',
@@ -831,20 +710,16 @@ class NotificationApiTest(APITestCase):
                                         'system-Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
                                         'system-Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z']}
 
-        usernames_list_main = usernames_list
+        usernames_list_main = user_notifications_list
         usernames_list_actual = {}
-        for username, ids_list in usernames_list.items():
-            user = generic_model_access.get_profile(username).user
-            self.client.force_authenticate(user=user)
-
+        for username, ids_list in user_notifications_list.items():
             url = '/api/self/notification/'
-            response = self.client.get(url, format='json')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
 
             before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
             usernames_list_actual[username] = before_notification_ids
 
-        for username, ids_list in usernames_list.items():
+        for username, ids_list in user_notifications_list.items():
             before_notification_ids = usernames_list_actual[username]
             self.assertEqual(ids_list, before_notification_ids, 'Checking for {}'.format(username))
 
@@ -855,9 +730,6 @@ class NotificationApiTest(APITestCase):
         bookmark_notification_ids_raw = []
 
         for i in range(3):
-            user = generic_model_access.get_profile('bigbrother').user
-            self.client.force_authenticate(user=user)
-
             now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
             data = {'expires_date': str(now),
                     'message': 'restore folder Instruments',
@@ -870,14 +742,13 @@ class NotificationApiTest(APITestCase):
                 }}
 
             url = '/api/notification/'
-            response = self.client.post(url, data, format='json')
+            response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
-            peer_data = {'user': {'username': 'bigbrother'}, 'folder_name': 'Instruments', 'deleted_folder': True}  # '_bookmark_listing_ids': [3, 4]}
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             self.assertEqual(response.data['message'], 'restore folder Instruments')
             self.assertEqual(response.data['notification_type'], 'restore_bookmark')
             self.assertEqual(response.data['agency'], None)
             self.assertEqual(response.data['listing'], None)
+            peer_data = {'user': {'username': 'bigbrother'}, 'folder_name': 'Instruments', 'deleted_folder': True}  # '_bookmark_listing_ids': [3, 4]}
             self.assertEqual(response.data['peer'], peer_data)
             self.assertTrue('expires_date' in data)
 
@@ -885,22 +756,18 @@ class NotificationApiTest(APITestCase):
             bookmark_notification_ids_raw.append(response.data['id'])
 
             # Compare Notifications for users
-            usernames_list = copy.deepcopy(usernames_list_main)
-            usernames_list['bigbrother'] = bookmark_notification_ids[::-1] + usernames_list_main['bigbrother']
+            user_notifications_list = copy.deepcopy(usernames_list_main)
+            user_notifications_list['bigbrother'] = bookmark_notification_ids[::-1] + usernames_list_main['bigbrother']
 
             usernames_list_actual = {}
-            for username, ids_list in usernames_list.items():
-                user = generic_model_access.get_profile(username).user
-                self.client.force_authenticate(user=user)
-
+            for username, ids_list in user_notifications_list.items():
                 url = '/api/self/notification/'
-                response = self.client.get(url, format='json')
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
 
                 before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
                 usernames_list_actual[username] = before_notification_ids
 
-            for username, ids_list in usernames_list.items():
+            for username, ids_list in user_notifications_list.items():
                 before_notification_ids = usernames_list_actual[username]
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 self.assertEqual(ids_list, before_notification_ids, 'Checking for {}'.format(username))
@@ -908,7 +775,7 @@ class NotificationApiTest(APITestCase):
         bookmark_notification1_id = bookmark_notification_ids_raw[0]
 
         # Delete Bookmark Folder - 18 is the folder Instruments
-        _delete_bookmark_folder(self, 'bigbrother', 18, status_code=204)
+        APITestHelper._delete_bookmark_folder(self, 'bigbrother', 18, status_code=204)
 
         # Compare Library for users
         user_library = {'bigbrother': ['Tornado-Weather',
@@ -930,38 +797,23 @@ class NotificationApiTest(APITestCase):
         self._compare_library(user_library)
 
         # Import Bookmarks
-        _import_bookmarks(self, 'bigbrother', bookmark_notification1_id, status_code=201)
+        APITestHelper._import_bookmarks(self, 'bigbrother', bookmark_notification1_id, status_code=201)
 
-        user_library = {'bigbrother': ['Tornado-Weather',
-                                       'Lightning-Weather',
-                                       'Snow-Weather',
-                                       'Wolf Finder-Animals',
-                                       'Killer Whale-Animals',
-                                       'Lion Finder-Animals',
-                                       'Monkey Finder-Animals',
-                                       'Parrotlet-Animals',
-                                       'White Horse-Animals',
-                                       'Electric Guitar-Instruments',
-                                       'Acoustic Guitar-Instruments',
-                                       'Sound Mixer-Instruments',
-                                       'Electric Piano-Instruments',
-                                       'Piano-Instruments',
-                                       'Violin-Instruments',
-                                       'Bread Basket-None',
-                                       'Informational Book-None',
-                                       'Stop sign-None',
-                                       'Chain boat navigation-None',
-                                       'Gallery of Maps-None',
-                                       'Chart Course-None']
-                       }
+        imported_bookmarks = ['Electric Guitar-Instruments',
+                              'Acoustic Guitar-Instruments',
+                              'Sound Mixer-Instruments',
+                              'Electric Piano-Instruments',
+                              'Piano-Instruments',
+                              'Violin-Instruments']
+        user_library['bigbrother'] = user_library['bigbrother'] + imported_bookmarks
 
         self._compare_library(user_library)
 
         # Compare Notifications for users
-        usernames_list = copy.deepcopy(usernames_list_main)
-        usernames_list['bigbrother'] = bookmark_notification_ids[::-1] + usernames_list_main['bigbrother']
+        user_notifications_list = copy.deepcopy(usernames_list_main)
+        user_notifications_list['bigbrother'] = bookmark_notification_ids[::-1] + usernames_list_main['bigbrother']
 
-        self._compare_user_notification(usernames_list)
+        self._compare_user_notification(user_notifications_list)
 
     def test_create_peer_bookmark_notification_integration(self):
         """
@@ -1009,20 +861,8 @@ class NotificationApiTest(APITestCase):
                                    'Azeroth-planets',
                                    'Saturn-planets']}
 
-        # Create Bookmark
-        response = _create_bookmark(self, 'wsmith', 3, folder_name='foldername1', status_code=201)
-        self.assertEqual(response.data['listing']['id'], 3)
-        user_library['wsmith'].append('{}-{}'.format(response.data['listing']['title'], response.data['folder']))
-        self._compare_library(user_library)
-
-        # Create Bookmark
-        response = _create_bookmark(self, 'wsmith', 4, folder_name='foldername1', status_code=201)
-        self.assertEqual(response.data['listing']['id'], 4)
-        user_library['wsmith'].append('{}-{}'.format(response.data['listing']['title'], response.data['folder']))
-        self._compare_library(user_library)
-
         # Compare Notifications for users
-        usernames_list = {'bigbrother': ['listing-WolfFinderupdatenextweek',
+        user_notifications_list = {'bigbrother': ['listing-WolfFinderupdatenextweek',
                                         'listing-WolfFinderupdatenextweek',
                                         'listing-WhiteHorseupdatenextweek',
                                         'listing-Violinupdatenextweek',
@@ -1220,28 +1060,31 @@ class NotificationApiTest(APITestCase):
                                      'listing-Auserhasratedlisting<b>AirMail</b>5stars',
                                      'system-Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
                                      'system-Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z']}
+        # Create Bookmarks for folder 'foldername1'
+        to_bookmark_listing_ids = [3, 4]
+        for bookmark_listing_id in to_bookmark_listing_ids:
+            response = APITestHelper.create_bookmark(self, 'wsmith', bookmark_listing_id, folder_name='foldername1', status_code=201)
+            self.assertEqual(response.data['listing']['id'], bookmark_listing_id)
+            user_library['wsmith'].append('{}-{}'.format(response.data['listing']['title'], response.data['folder']))
+            self._compare_library(user_library)
 
-        usernames_list_main = usernames_list
+        usernames_list_main = user_notifications_list
         usernames_list_actual = {}
-        for username, ids_list in usernames_list.items():
-            user = generic_model_access.get_profile(username).user
-            self.client.force_authenticate(user=user)
-
+        for username, ids_list in user_notifications_list.items():
             url = '/api/self/notification/'
-            response = self.client.get(url, format='json')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
 
             before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
             usernames_list_actual[username] = before_notification_ids
 
-        for username, ids_list in usernames_list.items():
+        for username, ids_list in user_notifications_list.items():
             before_notification_ids = usernames_list_actual[username]
             self.assertEqual(ids_list, before_notification_ids, 'Checking for {}'.format(username))
 
         self._compare_library(user_library)
 
         # Create Bookmark
-        response = _create_bookmark(self, 'bigbrother', 4, folder_name='foldername2', status_code=201)
+        response = APITestHelper.create_bookmark(self, 'bigbrother', 4, folder_name='foldername2', status_code=201)
         self.assertEqual(response.data['listing']['id'], 4)
         user_library['bigbrother'].append('{}-{}'.format(response.data['listing']['title'], response.data['folder']))
         self._compare_library(user_library)
@@ -1251,9 +1094,6 @@ class NotificationApiTest(APITestCase):
         bookmark_notification_ids_raw = []
 
         for i in range(3):
-            user = generic_model_access.get_profile('wsmith').user
-            self.client.force_authenticate(user=user)
-
             now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
             data = {'expires_date': str(now),
                     'message': 'A Simple Peer to Peer Notification',
@@ -1265,10 +1105,13 @@ class NotificationApiTest(APITestCase):
                 }}
 
             url = '/api/notification/'
+
+            user = generic_model_access.get_profile('wsmith').user
+            self.client.force_authenticate(user=user)
             response = self.client.post(url, data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
             peer_data = {'user': {'username': 'julia'}, 'folder_name': 'foldername1'}  # '_bookmark_listing_ids': [3, 4]}
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             self.assertEqual(response.data['message'], 'A Simple Peer to Peer Notification')
             self.assertEqual(response.data['notification_type'], 'peer_bookmark')
             self.assertEqual(response.data['agency'], None)
@@ -1280,22 +1123,18 @@ class NotificationApiTest(APITestCase):
             bookmark_notification_ids_raw.append(response.data['id'])
 
             # Compare Notifications for users
-            usernames_list = copy.deepcopy(usernames_list_main)
-            usernames_list['julia'] = bookmark_notification_ids[::-1] + usernames_list_main['julia']
+            user_notifications_list = copy.deepcopy(usernames_list_main)
+            user_notifications_list['julia'] = bookmark_notification_ids[::-1] + usernames_list_main['julia']
 
             usernames_list_actual = {}
-            for username, ids_list in usernames_list.items():
-                user = generic_model_access.get_profile(username).user
-                self.client.force_authenticate(user=user)
-
+            for username, ids_list in user_notifications_list.items():
                 url = '/api/self/notification/'
-                response = self.client.get(url, format='json')
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
 
                 before_notification_ids = ['{}-{}'.format(entry.get('notification_type'), ''.join(entry.get('message').split())) for entry in response.data]
                 usernames_list_actual[username] = before_notification_ids
 
-            for username, ids_list in usernames_list.items():
+            for username, ids_list in user_notifications_list.items():
                 before_notification_ids = usernames_list_actual[username]
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 self.assertEqual(ids_list, before_notification_ids, 'Checking for {}'.format(username))
@@ -1303,10 +1142,10 @@ class NotificationApiTest(APITestCase):
         bookmark_notification1_id = bookmark_notification_ids_raw[0]
 
         # Import Bookmarks
-        _import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
+        APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
 
         # Compare Library for users
-        usernames_list = {'wsmith': ['Air Mail-old',
+        user_library_data = {'wsmith': ['Air Mail-old',
                                      'Albatron Technology-foldername1',
                                      'Aliens-foldername1',
                                      'Bread Basket-old',
@@ -1343,28 +1182,28 @@ class NotificationApiTest(APITestCase):
                                          'Gallery of Maps-None',
                                          'Chart Course-None']}
 
-        self._compare_library(usernames_list)
+        self._compare_library(user_library_data)
 
         # Compare Notifications for users
-        usernames_list = copy.deepcopy(usernames_list_main)
-        usernames_list['julia'] = bookmark_notification_ids[::-1] + usernames_list_main['julia']
+        notifications_user_data = copy.deepcopy(usernames_list_main)
+        notifications_user_data['julia'] = bookmark_notification_ids[::-1] + usernames_list_main['julia']
 
-        self._compare_user_notification(usernames_list)
+        self._compare_user_notification(notifications_user_data)
 
     def test_delete_system_notification_apps_mall_steward(self):
         url = '/api/notification/1/'
-        unittest_request_helper(self, url, 'DELETE', username='bigbrother', status_code=204)
+        APITestHelper.request(self, url, 'DELETE', username='bigbrother', status_code=204)
 
     # TODO below test should work when permission gets refactored (rivera 20160620)
     @skip("should work when permission gets refactored (rivera 20160620)")
     def test_delete_system_notification_org_steward(self):
         url = '/api/notification/1/'
-        response = unittest_request_helper(self, url, 'DELETE', username='wsmith', status_code=403)
+        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=403)
         self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied())
 
     def test_delete_system_notification_user_unauthorized(self):
         url = '/api/notification/1/'
-        response = unittest_request_helper(self, url, 'DELETE', username='jones', status_code=403)
+        response = APITestHelper.request(self, url, 'DELETE', username='jones', status_code=403)
         self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Stewards can delete notifications'))
 
     # TODO: Unittest for below
