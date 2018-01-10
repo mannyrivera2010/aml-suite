@@ -1,5 +1,25 @@
 
-### 1.0.93 (None) 
+### 1.0.94 (None)
+
+#### Feature  
+* **coverage**:  Increase coverage includes storefront feature listing sort ([c95c33f4](https://github.com/aml-development/ozp-backend/commit/c95c33f4ee4ec587d6c56bb86a4fcbc1084aafb7))    
+
+#### Fixes  
+* **listing**:  Fix migration file ([fb7ce0c7](https://github.com/aml-development/ozp-backend/commit/fb7ce0c78584a106b5579df8de2e82f1470000ce))    
+* **library**:  Add Order to Library Creation ([a18a07d7](https://github.com/aml-development/ozp-backend/commit/a18a07d760d2c3cd02f17a8ccee7b9c77dcf9834))    
+
+#### Refactor 
+* **test**
+  *  refactor tests ([29d49b84](https://github.com/aml-development/ozp-backend/commit/29d49b84765f90c6c671a4c62355f2d74b2aaedf))
+  *  refactor to use helper ([7214a514](https://github.com/aml-development/ozp-backend/commit/7214a5149f8986f5d7277fde761282a8f10a9f1d))     
+
+#### Merge Pull Requests  
+* Merge pull request #394 from aml-development/refactor_test_20180104 ([6ad674dd](https://github.com/aml-development/ozp-backend/commit/6ad674dd7c1bc781a28dd03c5b933f57ca3a62ec))
+* Merge branch 'master' into refactor_test_20180104 ([3fd819e7](https://github.com/aml-development/ozp-backend/commit/3fd819e7678f9e1dee43dd4316a4c5aba1685b0b))
+* Merge pull request #391 from aml-development/incr_coverage ([7cfd5c30](https://github.com/aml-development/ozp-backend/commit/7cfd5c30ebf7939d04b3cd989d42436304830520))
+* Merge pull request #393 from aml-development/Library_entry_reorder ([04f94bba](https://github.com/aml-development/ozp-backend/commit/04f94bba490d01d5f02b9872bdbd81d5be671d54))           
+
+### 1.0.93 (2018-01-03) 
 
 #### Fixes  
 * **approved_date**:  sort ([44f5b66f](https://github.com/aml-development/ozp-backend/commit/44f5b66f8b72e710cf30d7ea2c8ee74ee6f504e1))    
