@@ -764,7 +764,7 @@ class ListingApiTest(APITestCase):
         test_get_listings_with_query_params
         Supported query params: org (agency title), approval_status, enabled
         """
-        url = '/api/listing/?approval_status=APPROVED&org=Ministry of Truth&enabled=true'
+        url = '/api/listing/?approval_status=APPROVED&org=Minitrue&enabled=true'
 
         user = generic_model_access.get_profile('julia').user
         self.client.force_authenticate(user=user)
@@ -778,7 +778,7 @@ class ListingApiTest(APITestCase):
         """
         test_get_listings_with_query_params
         """
-        url = '/api/listing/?approval_status=APPROVED&org=Ministry of Truth&enabled=true&owners_id=4'
+        url = '/api/listing/?approval_status=APPROVED&org=Minitrue&enabled=true&owners_id=4'
 
         user = generic_model_access.get_profile('julia').user
         self.client.force_authenticate(user=user)
