@@ -35,9 +35,18 @@ CREATE_HTTP_GIT_CLONE(){
   else
     RELEASE_SHELL_SCRIPT=$build_shell_file
   fi
-
-  REPLACE_NODE_VERSION
   echo "-REPO [$REPO_NAME] CLONED-"
+
+  echo "HTTP_GIT_CLONE_STRING: $HTTP_GIT_CLONE_STRING"
+  echo "REPO_PATH: $REPO_PATH"
+  echo "RELEASE_SHELL_SCRIPT: $RELEASE_SHELL_SCRIPT"
+}
+
+FETCH_GIT_TAGS(){
+  echo "EXECUTE: (cd $REPO_PATH && git fetch --tags --progress $HTTP_GIT_CLONE_STRING +refs/tags/release/*:refs/remotes/origin/tags/release/*)"
+  # (cd $REPO_PATH && git fetch --tags --progress $HTTP_GIT_CLONE_STRING +refs/heads/*:refs/remotes/origin/*)
+  (cd $REPO_PATH && git fetch --tags $HTTP_GIT_CLONE_STRING +refs/heads/*:refs/remotes/origin/*)
+  (cd $REPO_PATH && git fetch --tags $HTTP_GIT_CLONE_STRING +refs/tags/release/*:refs/remotes/origin/tags/release/*)
 }
 
 PREPARE_PATHS(){
@@ -55,19 +64,52 @@ PREPARE_PATHS(){
   echo '---------------'
 }
 
+GIT_CHECKOUT_TAG(){
+  TAG_REFNAME=$(cd $REPO_PATH && git for-each-ref refs/tags/release --sort=-taggerdate --format='%(refname)' --count=1)
+  TAG_REFNAME_SED=`echo $TAG_REFNAME | sed -e 's/refs\///g'`
+  echo "TAG_REFNAME: $TAG_REFNAME"
+  echo "TAG_REFNAME_SED: $TAG_REFNAME_SED"
+
+  # Package_release.sh debug variables
+  BRANCH_NAME=`echo ${TAG_REFNAME_SED}| sed 's,/,_,g'`
+  BRANCH_VERSION=`echo ${BRANCH_NAME}| sed 's/tags_release_\([0-9]*\.[0-9]*\.[0-9]*\)/\1/'`
+
+  echo "BRANCH_NAME: $BRANCH_NAME"
+  echo "BRANCH_VERSION: $BRANCH_VERSION"
+
+  # checkout and create new flag
+  # git branch <branch_name> <TAG>
+  (cd $REPO_PATH && git checkout -b $BRANCH_NAME $TAG_REFNAME_SED)
+
+  echo "LOG MESSAGE:$(cd $REPO_PATH && git log -1 --pretty=%B)"
+
+  HEAD_ABBREV_REF=$(cd $REPO_PATH && git rev-parse --abbrev-ref HEAD)
+  echo "HEAD_ABBREV_REF: $HEAD_ABBREV_REF"
+
+  echo "EXECUTE: (cd $REPO_PATH && sh $RELEASE_SHELL_SCRIPT)"
+}
+
+BUILD_RELEASE_TAR(){
+  REPLACE_NODE_VERSION
+  (cd $REPO_PATH && sh $RELEASE_SHELL_SCRIPT)
+  (cd $repo && mv *.tar* $DIST_PATH)
+}
+
 ## declare an array variable of repos
 declare -a repos=(
-  # "ozp-backend"
-  # "ozp-react-commons"
-  # "ozp-center"
+  "ozp-backend"
+  "ozp-react-commons"
+  "ozp-center"
   "ozp-hud"
-  # "ozp-demo"
-  # "ozp-help"
-  # "ozp-webtop"
-  # "ozp-iwc"
+  "ozp-demo"
+  "ozp-help"
+  "ozp-webtop"
+  "ozp-iwc"
 )
 
+# declare variable to set paths
 SET_PATHS
+# Create WORKSPACE and distribution folders
 PREPARE_PATHS
 
 echo '== Cloning Repo in WORKSPACE =='
@@ -75,39 +117,14 @@ cd $WORKSPACE_PATH
 
 for repo in "${repos[@]}"
 do
-  echo '====STARTING==='
+  echo "====STARTING $repo==="
   CREATE_HTTP_GIT_CLONE $repo
+  FETCH_GIT_TAGS
+  GIT_CHECKOUT_TAG
 
-  echo "HTTP_GIT_CLONE_STRING: $HTTP_GIT_CLONE_STRING"
-  echo "REPO_PATH: $REPO_PATH"
-  echo "RELEASE_SHELL_SCRIPT: $RELEASE_SHELL_SCRIPT"
-
-  echo "EXECUTE: (cd $REPO_PATH && git fetch --tags --progress $HTTP_GIT_CLONE_STRING +refs/tags/release/*:refs/remotes/origin/tags/release/*)"
-  (cd $REPO_PATH && git fetch --tags --progress $HTTP_GIT_CLONE_STRING +refs/tags/release/*:refs/remotes/origin/tags/release/*)
-
-  echo "EXECUTE: (cd $REPO_PATH && sh $RELEASE_SHELL_SCRIPT)"
-  # (cd $REPO_PATH && sh $RELEASE_SHELL_SCRIPT)
-  #
-  # (cd $repo && git fetch --tags --progress $HTTP_GIT_CLONE_STRING +refs/tags/release/*:refs/remotes/origin/tags/release/*)
-  # tag_to_checkout=`(cd $repo && git describe --tags)`
-  #
-  # echo "tag_to_checkout: $tag_to_checkout"
-  #
-  # (cd $repo && git checkout -f $tag_to_checkout)
-  #
-  # tag_checkout_temp=$(echo "$tag_to_checkout" | sed -e "s/\//_/g")
-  #
-  # echo "branch_name_temp: $tag_checkout_temp"
-  # (cd $repo && git checkout -b $tag_checkout_temp)
-  #
-  # export BRANCH_NAME=$tag_checkout_temp
-  #
-
-  # (cd $repo && mv *.tar* $DIST_PATH)
-
+  BUILD_RELEASE_TAR
   echo '====FINISHED==='
 done
-
 
 # bundle-front-end-master
 echo 'Done'
