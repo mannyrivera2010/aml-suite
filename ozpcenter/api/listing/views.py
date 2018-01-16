@@ -728,7 +728,7 @@ class ListingViewSet(viewsets.ModelViewSet):
         if approval_status:
             listings = listings.filter(approval_status=approval_status)
         if orgs:
-            listings = listings.filter(agency__title__in=orgs)
+            listings = listings.filter(agency__short_name__in=orgs)
         if enabled is not None:
             listings = listings.filter(is_enabled=enabled)
         # have to handle this case manually because the ordering includes an app multiple times
