@@ -14,9 +14,15 @@ SET_PATHS(){
   echo "DIST_PATH: $DIST_PATH"
 }
 
+INSTALL_NODE_VERSION(){
+  nvm install 0.12.7
+  nvm install 5.3.0
+}
+
 REPLACE_NODE_VERSION(){
+  # TODO: in NODE_LINE_2, include, nvm install
   NODE_LINE_1='source \/usr\/local\/node_versions\/set_node_version.sh'
-  NODE_LINE_2='\/usr\/lib\/node_modules\/nvm use'
+  NODE_LINE_2='\. ~\/\.nvm\/nvm\.sh; nvm use'
   sed -i -- "s/$NODE_LINE_1/$NODE_LINE_2/g" $REPO_PATH/jenkins/*
 }
 
@@ -112,6 +118,9 @@ SET_PATHS
 # Create WORKSPACE and distribution folders
 PREPARE_PATHS
 
+# Install Node (0.12.7, 5.3.0)
+INSTALL_NODE_VERSION
+
 echo '== Cloning Repo in WORKSPACE =='
 cd $WORKSPACE_PATH
 
@@ -125,6 +134,12 @@ do
   BUILD_RELEASE_TAR
   echo '====FINISHED==='
 done
+
+DATE=`date '+%Y_%m_%d_%H_%M_%S'`
+tar cvf distribution/dist_bundle_$DATE.tar distribution/*.tar.gz
+
+echo '== distribution tar files =='
+ll -h distribution/
 
 # bundle-front-end-master
 echo 'Done'
