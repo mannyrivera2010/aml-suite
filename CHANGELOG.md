@@ -1,5 +1,14 @@
 
-### 1.0.94 (None)
+### 1.0.95 (None) 
+
+#### Fixes  
+* **release**:  fix release.py requirements.txt issue ([35e0c641](https://github.com/aml-development/ozp-backend/commit/35e0c6415576a126006c01b71c98892ddaa44c9d))    
+* **listing api**:  use org short name instead of title for listing filter ([aedf2e70](https://github.com/aml-development/ozp-backend/commit/aedf2e70758977887dfb01b8c5b43274a523470d))     
+
+#### Merge Pull Requests  
+* Merge pull request #395 from aml-development/org_listing_shortname ([6586850e](https://github.com/aml-development/ozp-backend/commit/6586850e4ba6719c3f01faf69a3aab7064bd5ac9))           
+
+### 1.0.94 (2018-01-10)
 
 #### Feature  
 * **coverage**:  Increase coverage includes storefront feature listing sort ([c95c33f4](https://github.com/aml-development/ozp-backend/commit/c95c33f4ee4ec587d6c56bb86a4fcbc1084aafb7))    
