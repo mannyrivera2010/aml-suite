@@ -15,6 +15,7 @@ SET_PATHS(){
 }
 
 INSTALL_NODE_VERSION(){
+  \. ~/.nvm/nvm.sh
   nvm install 0.12.7
   nvm install 5.3.0
 }
