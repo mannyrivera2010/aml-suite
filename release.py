@@ -69,6 +69,7 @@ def create_release_dir():
     """
     os.mkdir("release")
     shutil.copytree("wheelhouse", "release/wheelhouse")
+    shutil.copytree("docs", "release/docs")
     shutil.copytree("ozp", "release/ozp")
     shutil.copytree("ozpcenter", "release/ozpcenter")
     shutil.copytree("ozpiwc", "release/ozpiwc")
@@ -76,8 +77,9 @@ def create_release_dir():
     shutil.copytree("plugins", "release/plugins")
     shutil.copy("manage.py", "release")
     shutil.copy("README.md", "release")
-    shutil.copy("requirements.txt", "release")
+    shutil.copy("requirements.prod.txt", "release/requirements.txt")
     shutil.copy("Makefile", "release")
+    shutil.copy("CHANGELOG.md", "release")
 
 
 def run():
