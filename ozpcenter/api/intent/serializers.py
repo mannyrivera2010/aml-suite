@@ -29,3 +29,15 @@ class IntentSerializer(serializers.ModelSerializer):
         else:
             data['icon'] = None
         return data
+
+
+class ListingIntentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Intent
+        # TODO: is action the right thing?
+        fields = ('action',)
+
+        extra_kwargs = {
+            'action': {'validators': []}
+        }

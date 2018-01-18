@@ -9,12 +9,16 @@ from ozpcenter import models
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
-def get_all_images(username):
+def get_all_images():
     """
-    Get all the images a user has access to
+    Get all the images
+
+    IMPORTANT: To filtering based on security_marking
+
+    Returns
+        image objects (metadata), not actual images
     """
-    # image objects (metadata), not actual images
-    return models.Image.objects.for_user(username).all()
+    return models.Image.objects.all()
 
 
 def get_all_image_types():

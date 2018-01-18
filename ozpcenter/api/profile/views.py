@@ -303,8 +303,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     Summary:
         Delete a Group by ID
     """
-
-    permission_classes = (permissions.IsUser,)
+    permission_classes = (permissions.IsOrgStewardOrReadOnly,)
     queryset = model_access.get_all_groups()
     serializer_class = serializers.GroupSerializer
 

@@ -19,6 +19,19 @@ class AgencySerializer(serializers.ModelSerializer):
         fields = ('title', 'short_name', 'id')
 
 
+class CreateAgencySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Agency
+        depth = 2
+        fields = ('title', 'short_name')
+
+        extra_kwargs = {
+            'title': {'validators': []},
+            'short_name': {'validators': []}
+        }
+
+
 class MinimalAgencySerializer(serializers.ModelSerializer):
 
     class Meta:

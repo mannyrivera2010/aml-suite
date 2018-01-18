@@ -28,9 +28,10 @@ class ListingTest(TestCase):
         """
         data_gen.run()
 
-    def test_get_listings_for_user(self):
-        listings = model_access.get_listings('wsmith')
-        self.assertEqual(len(listings), 187)
+    # Deprecated: For user, do post filter using pipes
+    # def test_get_listings_for_user(self):
+    #     listings = model_access.get_listings('wsmith')
+    #     self.assertEqual(len(listings), 187)
 
     def test_get_all_listings(self):
         all_listings_titles = [i.title for i in models.Listing.objects.all()]
@@ -46,7 +47,6 @@ class ListingTest(TestCase):
             'limit': 24
         }
         listings = model_access.filter_listings(username, filter_params)  # flake8: noqa TODO: Is Necessary? - Variable not being used in method
-
         #  TODO: Finish Unit Test
 
     def test_get_reviews(self):

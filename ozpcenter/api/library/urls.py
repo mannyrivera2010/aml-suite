@@ -10,8 +10,7 @@ import ozpcenter.api.library.views as views
 router = routers.DefaultRouter()
 
 router.register(r'library', views.LibraryViewSet)
-router.register(r'self/library', views.UserLibraryViewSet,
-    base_name='applicationlibraryentry')
+router.register(r'self/library', views.UserLibraryViewSet, base_name='applicationlibraryentry')
 
 # Wire up our API using automatic URL routing.
 urlpatterns = [

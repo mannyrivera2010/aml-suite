@@ -9,7 +9,7 @@ import ozpcenter.api.image.model_access as model_access
 
 
 @override_settings(ES_ENABLED=False)
-class AgencyTest(TestCase):
+class ImageTest(TestCase):
 
     def setUp(self):
         """
@@ -25,7 +25,7 @@ class AgencyTest(TestCase):
         data_gen.run()
 
     def test_get_all_images_by_username(self):
-        images = model_access.get_all_images('bigbrother')
+        images = model_access.get_all_images()
         self.assertIsNotNone(images)
 
     def test_get_image_by_id_err(self):
