@@ -9,14 +9,15 @@ from django.contrib import auth
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
+from ozpcenter.pubsub import dispatcher
 from ozpcenter import constants
-from ozpcenter import models
 from ozpcenter import errors
-from plugins import plugin_manager
-from plugins.plugin_manager import system_has_access_control
+from ozpcenter import models
 from plugins.plugin_manager import system_anonymize_identifiable_data
-import ozpcenter.api.agency.serializers as agency_serializers
+from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
 import ozpcenter.api.agency.model_access as agency_model_access
+import ozpcenter.api.agency.serializers as agency_serializers
 import ozpcenter.api.category.model_access as category_model_access
 import ozpcenter.api.category.serializers as category_serializers
 import ozpcenter.api.contact_type.model_access as contact_type_model_access
@@ -28,34 +29,9 @@ import ozpcenter.api.intent.serializers as intent_serializers
 import ozpcenter.api.listing.model_access as model_access
 import ozpcenter.api.profile.serializers as profile_serializers
 import ozpcenter.model_access as generic_model_access
-from ozpcenter.pubsub import dispatcher
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
-
-
-class ContactSerializer(serializers.ModelSerializer):
-    contact_type = contact_type_serializers.ListingContactTypeSerializer()
-
-    class Meta:
-        model = models.Contact
-        fields = '__all__'
-
-    def to_representation(self, data):
-        access_control_instance = plugin_manager.get_system_access_control_plugin()
-        ret = super(ContactSerializer, self).to_representation(data)
-
-        # Used to anonymize usernames
-        anonymize_identifiable_data = system_anonymize_identifiable_data(self.context['request'].user.username)
-
-        if anonymize_identifiable_data:
-            ret['secure_phone'] = access_control_instance.anonymize_value('secure_phone')
-            ret['unsecure_phone'] = access_control_instance.anonymize_value('unsecure_phone')
-            ret['secure_phone'] = access_control_instance.anonymize_value('secure_phone')
-            ret['name'] = access_control_instance.anonymize_value('name')
-            ret['organization'] = access_control_instance.anonymize_value('organization')
-            ret['email'] = access_control_instance.anonymize_value('email')
-        return ret
 
 
 class ListingTypeSerializer(serializers.ModelSerializer):
@@ -818,7 +794,7 @@ class ListingSerializer(serializers.ModelSerializer):
     owners = CreateListingProfileSerializer(required=False, many=True)
     categories = category_serializers.ListingCategorySerializer(many=True, required=False)
     tags = TagSerializer(many=True, required=False)
-    contacts = ContactSerializer(many=True, required=False)
+    contacts = contact_type_serializers.ContactSerializer(many=True, required=False)
     intents = intent_serializers.IntentSerializer(many=True, required=False)
     small_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
     large_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
