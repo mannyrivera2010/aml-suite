@@ -28,59 +28,10 @@ import ozpcenter.api.listing.model_access_es as model_access_es
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
-class ContactViewSet(viewsets.ModelViewSet):
-    """
-    ModelViewSet for getting all contacts for a given listing
-
-    Access Control
-    ===============
-    - All users can view
-
-    URIs
-    ======
-    GET /api/contact
-    Summary:
-        Get a list of all system-wide Contact entries
-    Response:
-        200 - Successful operation - [ContactSerializer]
-
-    POST /api/contact/
-    Summary:
-        Add a Contact
-    Request:
-        data: ContactSerializer Schema
-    Response:
-        200 - Successful operation - ContactSerializer
-
-    GET /api/contact/{pk}
-    Summary:
-        Find a Contact Entry by ID
-    Response:
-        200 - Successful operation - ContactSerializer
-
-    PUT /api/contact/{pk}
-    Summary:
-        Update a Contact Entry by ID
-
-    PATCH /api/contact/{pk}
-    Summary:
-        Update (Partial) a Contact Entry by ID
-
-    DELETE /api/contact/{pk}
-    Summary:
-        Delete a Contact Entry by ID
-    """
-
-    permission_classes = (permissions.IsUser,)
-    queryset = model_access.get_all_contacts()
-    serializer_class = serializers.ContactSerializer
-
-
 class DocUrlViewSet(viewsets.ModelViewSet):
     """
     TODO: Remove?
     """
-
     permission_classes = (permissions.IsUser,)
     queryset = model_access.get_all_doc_urls()
     serializer_class = serializers.DocUrlSerializer

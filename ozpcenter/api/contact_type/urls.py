@@ -10,6 +10,7 @@ import ozpcenter.api.contact_type.views as views
 router = routers.DefaultRouter()
 
 router.register(r'contact_type', views.ContactTypeViewSet)
+router.register(r'contact', views.ContactViewSet)
 
 # Wire up our API using automatic URL routing.
 urlpatterns = [

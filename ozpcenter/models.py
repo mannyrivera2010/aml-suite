@@ -145,6 +145,18 @@ class AccessControlImageManager(models.Manager):
         return queryset
 
     def for_user(self, username):
+        """
+        This method causes:
+        sqlite3.OperationalError: too many SQL variables
+        To fix this error, post filtering in memory needs to happen
+
+        Example Code:
+            serializer = serializers.ImageSerializer(queryset, many=True, context={'request': request})
+            serializer_iterator = recommend_utils.ListIterator(serializer.data)
+            pipeline_list = [pipes.ListingDictPostSecurityMarkingCheckPipe(request.user.username)]
+
+            recommended_listings = pipeline.Pipeline(serializer_iterator, pipeline_list).to_list()
+        """
         objects = super(AccessControlImageManager, self).get_queryset()
 
         # filter out listings by user's access level

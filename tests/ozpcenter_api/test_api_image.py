@@ -50,8 +50,7 @@ class ImageApiTest(APITestCase):
         }
 
         response = APITestHelper.request(self, url, 'POST', data=data, username='pmurt', status_code=400, format_str='multipart')
-        # TODO: Make below assertion work
-        # self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Security marking too high for current user'))
+        self.assertEqual(response.data, ExceptionUnitTestHelper.validation_error("{'security_marking': ['Security marking too high for current user']}"))
 
     def test_get_all_images(self):
         url = '/api/image/'
@@ -59,12 +58,15 @@ class ImageApiTest(APITestCase):
 
         self.assertIsNotNone(response.data)
 
-    # TODO: This will cause too many sql variables error with PKI users. Fix code on backend
-    # def test_get_all_images_pki_user(self):
-    #     url = '/api/image/'
-    #     response = APITestHelper.request(self, url, 'GET', username='pmurt', status_code=400)
+    def test_get_all_images_pki_user(self):
+        url = '/api/image/'
+        response = APITestHelper.request(self, url, 'GET', username='pmurt', status_code=200)
+        self.assertEqual(response.data, [])
 
-    #     self.assertIsNotNone(response.data)
+    def test_get_images_pki_user(self):
+        url = '/api/image/2/'
+        response = APITestHelper.request(self, url, 'GET', username='pmurt', status_code=403)
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Security marking too high for current user'))
 
     # TODO: Fix the retrieve in image views. It always finds nothing when searching by ID
     def test_get_image_by_id(self):
@@ -75,3 +77,8 @@ class ImageApiTest(APITestCase):
     def test_delete_image(self):
         url = '/api/image/1/'
         APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=204)
+
+    def test_delete_image_pki(self):
+        url = '/api/image/2/'
+        response = APITestHelper.request(self, url, 'DELETE', username='pmurt', status_code=403)
+        self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Security marking too high for current user'))

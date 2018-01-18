@@ -298,6 +298,7 @@ class SystemWideNotification(NotificationBase):
     test_case:
         todo
     """
+
     def get_notification_db_type(self):
         return Notification.SYSTEM
 
@@ -320,6 +321,7 @@ class AgencyWideNotification(NotificationBase):
     test_case:
         todo
     """
+
     def modify_notification_before_save(self, notification_object):
         notification_object.agency = self.entity
 
@@ -346,6 +348,7 @@ class AgencyWideBookmarkNotification(NotificationBase):
     test_case:
         todo
     """
+
     def modify_notification_before_save(self, notification_object):
         notification_object.agency = self.entity
 
@@ -372,6 +375,7 @@ class ListingNotification(NotificationBase):
     test_case:
         todo
     """
+
     def modify_notification_before_save(self, notification_object):
         notification_object.listing = self.entity
 
@@ -410,6 +414,7 @@ class PeerNotification(NotificationBase):
     test_case:
         todo
     """
+
     def modify_notification_before_save(self, notification_object):
         notification_object.peer = self.metadata
 
@@ -441,6 +446,7 @@ class PeerBookmarkNotification(NotificationBase):
         Logged on as aaronson
         RESULTS: aaronson has a new notification added to the notification count.Add folder button is present and adds the shared folder to HuD screen.
     """
+
     def modify_notification_before_save(self, notification_object):
         notification_object.peer = self.metadata
 
@@ -472,6 +478,7 @@ class RestoreBookmarkNotification(NotificationBase):
         Restore folder from Notifications
         RESULTS: Restore folder button is present and readds the folder to HuD screen.
     """
+
     def modify_notification_before_save(self, notification_object):
         notification_object.peer = self.metadata
 

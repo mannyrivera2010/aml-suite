@@ -16,3 +16,14 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
         fields = '__all__'
+
+
+class ListingCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Category
+        fields = ('title', 'description')
+
+        extra_kwargs = {
+            'title': {'validators': []}
+        }

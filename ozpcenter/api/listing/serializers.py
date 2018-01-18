@@ -9,124 +9,29 @@ from django.contrib import auth
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
+from ozpcenter.pubsub import dispatcher
 from ozpcenter import constants
-from ozpcenter import models
 from ozpcenter import errors
-from plugins import plugin_manager
-from plugins.plugin_manager import system_has_access_control
+from ozpcenter import models
 from plugins.plugin_manager import system_anonymize_identifiable_data
+from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
 import ozpcenter.api.agency.model_access as agency_model_access
+import ozpcenter.api.agency.serializers as agency_serializers
 import ozpcenter.api.category.model_access as category_model_access
+import ozpcenter.api.category.serializers as category_serializers
 import ozpcenter.api.contact_type.model_access as contact_type_model_access
+import ozpcenter.api.contact_type.serializers as contact_type_serializers
 import ozpcenter.api.image.model_access as image_model_access
+import ozpcenter.api.image.serializers as image_serializers
 import ozpcenter.api.intent.model_access as intent_model_access
+import ozpcenter.api.intent.serializers as intent_serializers
 import ozpcenter.api.listing.model_access as model_access
 import ozpcenter.api.profile.serializers as profile_serializers
 import ozpcenter.model_access as generic_model_access
-from ozpcenter.pubsub import dispatcher
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
-
-
-class AgencySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Agency
-        depth = 2
-        fields = ('title', 'short_name')
-
-        extra_kwargs = {
-            'title': {'validators': []},
-            'short_name': {'validators': []}
-        }
-
-# TODO: Remove this Serializer, import from api.image.serializers
-
-
-class ImageSerializer(serializers.HyperlinkedModelSerializer):
-
-    class Meta:
-        model = models.Image
-        fields = ('url', 'id', 'security_marking')
-
-        extra_kwargs = {
-            'security_marking': {'validators': []},
-            "id": {
-                "read_only": False,
-                "required": False,
-            }
-        }
-
-    def validate_security_marking(self, value):
-        # don't allow user to select a security marking that is above
-        # their own access level
-        profile = generic_model_access.get_profile(
-            self.context['request'].user.username)
-
-        if value:
-            if not system_has_access_control(profile.user.username, value):
-                raise serializers.ValidationError(
-                    'Security marking too high for current user')
-        else:
-            raise serializers.ValidationError('Security marking is required')
-
-        return value
-
-    def to_representation(self, image):
-        ret = super(ImageSerializer, self).to_representation(image)
-        # # ATo get Presigned URLS # We Don't want to do this
-        # from ozp.storage import media_storage
-        # image_path = str(image.id) + '_' + image.image_type.name + '.' + image.file_extension
-        # ret['url'] = media_storage.url(image_path)
-        return ret
-
-
-class ContactTypeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.ContactType
-        fields = ('name',)
-
-        extra_kwargs = {
-            'name': {'validators': []}
-        }
-
-    def to_representation(self, data):
-        access_control_instance = plugin_manager.get_system_access_control_plugin()
-        ret = super(ContactTypeSerializer, self).to_representation(data)
-
-        # Used to anonymize usernames
-        anonymize_identifiable_data = system_anonymize_identifiable_data(self.context['request'].user.username)
-
-        if anonymize_identifiable_data:
-            ret['name'] = access_control_instance.anonymize_value('contact_type_name')
-
-        return ret
-
-
-class ContactSerializer(serializers.ModelSerializer):
-    contact_type = ContactTypeSerializer()
-
-    class Meta:
-        model = models.Contact
-        fields = '__all__'
-
-    def to_representation(self, data):
-        access_control_instance = plugin_manager.get_system_access_control_plugin()
-        ret = super(ContactSerializer, self).to_representation(data)
-
-        # Used to anonymize usernames
-        anonymize_identifiable_data = system_anonymize_identifiable_data(self.context['request'].user.username)
-
-        if anonymize_identifiable_data:
-            ret['secure_phone'] = access_control_instance.anonymize_value('secure_phone')
-            ret['unsecure_phone'] = access_control_instance.anonymize_value('unsecure_phone')
-            ret['secure_phone'] = access_control_instance.anonymize_value('secure_phone')
-            ret['name'] = access_control_instance.anonymize_value('name')
-            ret['organization'] = access_control_instance.anonymize_value('organization')
-            ret['email'] = access_control_instance.anonymize_value('email')
-        return ret
 
 
 class ListingTypeSerializer(serializers.ModelSerializer):
@@ -148,8 +53,8 @@ class DocUrlSerializer(serializers.ModelSerializer):
 
 
 class ScreenshotSerializer(serializers.ModelSerializer):
-    small_image = ImageSerializer()
-    large_image = ImageSerializer()
+    small_image = image_serializers.ImageSerializer()
+    large_image = image_serializers.ImageSerializer()
 
     class Meta:
         model = models.Screenshot
@@ -179,7 +84,7 @@ class ChangeDetailSerializer(serializers.ModelSerializer):
 
 
 class ShortListingSerializer(serializers.HyperlinkedModelSerializer):
-    agency = AgencySerializer(required=False)
+    agency = agency_serializers.CreateAgencySerializer(required=False)
 
     class Meta:
         model = models.Listing
@@ -203,29 +108,6 @@ class RejectionListingActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ListingActivity
         fields = ('action', 'activity_date', 'description', 'author')
-
-
-class IntentSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Intent
-        # TODO: is action the right thing?
-        fields = ('action',)
-
-        extra_kwargs = {
-            'action': {'validators': []}
-        }
-
-
-class CategorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Category
-        fields = ('title', 'description')
-
-        extra_kwargs = {
-            'title': {'validators': []}
-        }
 
 
 class CreateListingUserSerializer(serializers.ModelSerializer):
@@ -895,55 +777,6 @@ def update_listing(serializer_instance, instance, validated_data):
     return instance
 
 
-class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
-    agency = AgencySerializer(required=False)
-    large_banner_icon = ImageSerializer(required=False, allow_null=True)
-    banner_icon = ImageSerializer(required=False, allow_null=True)
-
-    class Meta:
-        model = models.Listing
-        fields = ('id',
-                  'title',
-                  'agency',
-                  'avg_rate',
-                  'total_reviews',
-                  'feedback_score',
-                  'is_private',
-                  'is_bookmarked',
-                  'feedback',
-                  'description_short',
-                  'security_marking',
-                  'usage_requirements',
-                  'system_requirements',
-                  'launch_url',
-                  'large_banner_icon',
-                  'banner_icon',
-                  'unique_name',
-                  'is_enabled')
-
-    def _is_bookmarked(self, request_user, request_listing):
-        # TODO: put in listing model_access.py call from there > creative name for method
-        bookmarks = models.ApplicationLibraryEntry.objects.filter(listing=request_listing, owner=request_user)
-        return len(bookmarks) >= 1
-
-    def _feedback(self, request_user, request_listing):
-        # TODO: put in listing model_access.py call from there > creative name for method
-        recommendation = models.RecommendationFeedback.objects.for_user(request_user).filter(target_profile=request_user, target_listing=request_listing).first()
-
-        if recommendation is None:
-            return 0
-
-        return recommendation.feedback
-
-    def to_representation(self, data):
-        ret = super(StorefrontListingSerializer, self).to_representation(data)
-        request_user = generic_model_access.get_profile(self.context['request'].user)  # TODO: Get the profile from view request instead of getting it from db again
-
-        ret['feedback'] = self._feedback(request_user, data)
-        ret['is_bookmarked'] = self._is_bookmarked(request_user, data)
-        return ret
-
-
 class CertIssuesField(serializers.ReadOnlyField):
     """
     Read Only Field
@@ -959,15 +792,15 @@ class ListingSerializer(serializers.ModelSerializer):
     screenshots = ScreenshotSerializer(many=True, required=False)
     doc_urls = DocUrlSerializer(many=True, required=False)
     owners = CreateListingProfileSerializer(required=False, many=True)
-    categories = CategorySerializer(many=True, required=False)
+    categories = category_serializers.ListingCategorySerializer(many=True, required=False)
     tags = TagSerializer(many=True, required=False)
-    contacts = ContactSerializer(many=True, required=False)
-    intents = IntentSerializer(many=True, required=False)
-    small_icon = ImageSerializer(required=False, allow_null=True)
-    large_icon = ImageSerializer(required=False, allow_null=True)
-    banner_icon = ImageSerializer(required=False, allow_null=True)
-    large_banner_icon = ImageSerializer(required=False, allow_null=True)
-    agency = AgencySerializer(required=False)
+    contacts = contact_type_serializers.ContactSerializer(many=True, required=False)
+    intents = intent_serializers.IntentSerializer(many=True, required=False)
+    small_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
+    large_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
+    banner_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
+    large_banner_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
+    agency = agency_serializers.CreateAgencySerializer(required=False)
     last_activity = ListingActivitySerializer(required=False, read_only=True)
     current_rejection = RejectionListingActivitySerializer(required=False, read_only=True)
     listing_type = ListingTypeSerializer(required=False, allow_null=True)

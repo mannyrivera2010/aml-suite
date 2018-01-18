@@ -9,6 +9,16 @@ from ozpcenter import models
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
 
+def get_all_contacts():
+    """
+    Get all contacts
+
+    Return:
+        [Contact]: List of Contact Objects
+    """
+    return models.Contact.objects.all()
+
+
 def get_all_contact_types():
     """
     Get all contact types

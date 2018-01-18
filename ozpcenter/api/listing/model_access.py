@@ -52,13 +52,13 @@ import logging
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
-from ozpcenter import models
+from ozpcenter.pubsub import dispatcher
 from ozpcenter import constants
 from ozpcenter import errors
+from ozpcenter import models
 from ozpcenter import utils
-import ozpcenter.model_access as generic_model_access
 from plugins.plugin_manager import system_anonymize_identifiable_data
-from ozpcenter.pubsub import dispatcher
+import ozpcenter.model_access as generic_model_access
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -82,16 +82,6 @@ def get_doc_urls_for_listing(listing):
         [Screenshot]: List of DocUrls Objects
     """
     return models.DocUrl.objects.filter(listing=listing)
-
-
-def get_all_contacts():
-    """
-    Get all contacts
-
-    Return:
-        [Contact]: List of Contact Objects
-    """
-    return models.Contact.objects.all()
 
 
 def get_screenshots_for_listing(listing):
@@ -181,20 +171,18 @@ def filter_listings(username, filter_params):
         * list of agencies (OR logic)
         * list of listing types (OR logic)
 
+    # TODO: this is OR logic not AND
+
     Too many variations to cache
     """
     objects = models.Listing.objects.for_user(username).filter(
         approval_status=models.Listing.APPROVED).filter(is_enabled=True)
     if 'categories' in filter_params:
-        # TODO: this is OR logic not AND
-        objects = objects.filter(
-            categories__title__in=filter_params['categories'])
+        objects = objects.filter(categories__title__in=filter_params['categories'])
     if 'agencies' in filter_params:
-        objects = objects.filter(
-            agency__short_name__in=filter_params['agencies'])
+        objects = objects.filter(agency__short_name__in=filter_params['agencies'])
     if 'listing_types' in filter_params:
-        objects = objects.filter(
-            listing_type__title__in=filter_params['listing_types'])
+        objects = objects.filter(listing_type__title__in=filter_params['listing_types'])
 
     objects = objects.order_by('is_deleted', '-avg_rate', '-total_reviews')
     return objects
