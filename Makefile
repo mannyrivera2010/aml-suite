@@ -55,13 +55,27 @@ run_psql:
 run_psql_es:
 	MAIN_DATABASE=psql ES_ENABLED=True python manage.py runserver localhost:8001
 
-rung:
+run_gunicorn:
 	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
-rung_es:
+run_gunicorn_secure:
+	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
+		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
+		--keyfile ~/git/dev-tools/certs/server_nopass.key \
+		--certfile ~/git/dev-tools/certs/server_nopass.crt \
+		--ca-certs ~/git/dev-tools/certs/ca_root.pem
+
+run_gunicorn_secure_ansible:
+	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
+		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
+		--keyfile ~/git/ozp-ansible/roles/ssl_certs/files/server.key \
+		--certfile ~/git/ozp-ansible/roles/ssl_certs/files/server.crt \
+		--ca-certs ~/git/ozp-ansible/roles/ssl_certs/files/rootCA.pem
+
+run_gunicorn_es:
 	ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
-rung_psql_es:
+run_gunicorn_psql_es:
 	MAIN_DATABASE=psql ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
 codecheck:
