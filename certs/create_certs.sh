@@ -30,18 +30,20 @@ CREATE_SERVER_CERT(){
   # We're self signing our own server cert here.  This is a no-no in production.
   # TODO: Serial 00 B8 FB C1 B7 85 33 54 28
   openssl x509 -req -days 365 -in $SERVER_REQUEST -passin file:$CA_PASSWORD_FILE -CA $CA_SIGNED_CERT -CAkey $CA_KEY -set_serial 01 -out $SERVER_SIGNED_CERT
+  rm $SERVER_REQUEST
 }
 
 CREATE_CLIENT_CERT(){
-  # We're self signing our own server cert here.  This is a no-no in production.
-  openssl x509 -req -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
-
   # Create the Client Key and CSR
-  openssl genrsa -des3 -out client.key 1024
-  openssl req -new -key client.key -out client.csr
+  openssl genrsa -des3 -passout file:$SERVER_PASSWORD_FILE -out $CURRENT_USER_FILENAME.key 2048
+  openssl req -new -passin file:$SERVER_PASSWORD_FILE -key $CURRENT_USER_FILENAME.key -subj "$CURRENT_USER_SUBJ" -out $CURRENT_USER_FILENAME.csr
 
-  # Sign the client certificate with our CA cert.  Unlike signing our own server cert, this is what we want to do.
-  openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+  # We're self signing our own server cert here.  This is a no-no in production.
+  # TODO: Serial 00 B8 FB C1 B7 85 33 54 28
+  openssl x509 -req -days 365 -in $CURRENT_USER_FILENAME.csr -passin file:$CA_PASSWORD_FILE -CA $CA_SIGNED_CERT -CAkey $CA_KEY -set_serial 01 -out $CURRENT_USER_FILENAME.crt
+  rm $CURRENT_USER_FILENAME.csr
+
+  openssl x509 -in $CURRENT_USER_FILENAME.crt -out $CURRENT_USER_FILENAME.pem -outform PEM
 }
 
 CREATE_CA_ROOT_CERT
@@ -49,13 +51,23 @@ CREATE_SERVER_CERT
 
 ## declare an array variable of users
 declare -a users=(
-  "wsmith,Winston Smith wsmith,Minitrue"
+  "wsmith;Winston Smith wsmith;Minitrue"
 )
 
 for user in "${users[@]}"
 do
   echo "====STARTING $user==="
-  # CREATE_CLIENT_CERT $user
+  CURRENT_USER_FILENAME=`echo $user | cut -d ";" -f 1`
+  CURRENT_USER_COMMON_NAME=`echo $user | cut -d ";" -f 2`
+  CURRENT_USER_ORG=`echo $user | cut -d ";" -f 3`
+  CURRENT_USER_SUBJ="/C=US/ST=MD/L=Baltimore/O=$CURRENT_USER_ORG/OU=Domain Control/CN=$CURRENT_USER_COMMON_NAME/emailAddress=$CURRENT_USER_FILENAME@aml.com"
+
+  echo $CURRENT_USER_FILENAME
+  echo $CURRENT_USER_COMMON_NAME
+  echo $CURRENT_USER_ORG
+
+
+  CREATE_CLIENT_CERT
   # TODO: Finish
   echo '====FINISHED==='
 done
