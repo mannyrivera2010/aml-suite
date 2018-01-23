@@ -13,6 +13,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from ozpcenter.utils import str_to_bool
 from ozpcenter import permissions
 import ozpcenter.api.storefront.model_access as model_access
 import ozpcenter.api.storefront.serializers as serializers
@@ -49,48 +50,23 @@ class StorefrontViewSet(viewsets.ViewSet):
     """
     permission_classes = (permissions.IsUser,)
 
-    def _add_recommended_scores(self, serialized_data, extra_data):
-        # extra_data = {'recommended_entry_data': {'Baseline': {'ms_took': 1204.51953125, 'weight': 1.0, 'recommendations': [
-        #     [11, 8.5], [112, 8.0], [85, 7.0], [86, 7.0], [87, 7.0], [88, 7.0], [89, 7.0], [90, 7.0], [62, 6.0],
-        #     [81, 6.0], [21, 5.5], [1, 5.0], [111, 5.0], [113, 5.0], [114, 5.0], [64, 4.0], [66, 4.0], [68, 4.0],
-        #     [70, 4.0], [72, 4.0]]}}}
-        # TO
-        # {listing_id#1 : {friendly_name#1: {'raw_score': score#1, 'weight': weight#1}
-        #                  friendly_name#2: {'raw_score': score#1, 'weight': weight#1}},
-        # listing_id#2 : {friendly_name#1: {'raw_score': score#1, 'weight': weight#1},
-        #                  friendly_name#2: {'raw_score': score#1, 'weight': weight#1}}
-        # }
-        # Insert into each serialized listing into serialized_data
-        if 'recommended_entry_data' in extra_data:
-            recommended_entry_data = extra_data['recommended_entry_data']
+    def _add_recommended_scores(self, serialized_data, extra_data, debug_recommendations):
+        """
+        Add Scores to recommendations
+        """
+        if 'recommender_profile_result_set' in extra_data:
+            recommender_profile_result_set = extra_data['recommender_profile_result_set']
+            listing_recommend_data = recommender_profile_result_set.listing_recommend_data
 
-            listing_recommend_data = {}
-
-            for friendly_name in recommended_entry_data:
-                current_weight = recommended_entry_data[friendly_name]['weight']
-                recommendations = recommended_entry_data[friendly_name]['recommendations']
-
-                for current_recommendations in recommendations:
-                    current_listing = current_recommendations
-                    current_score = recommendations[current_listing]
-
-                    if current_listing in listing_recommend_data:
-                        listing_recommend_data[current_listing][friendly_name] = {'raw_score': current_score, 'weight': current_weight}
-                    else:
-                        listing_recommend_data[current_listing] = {}
-                        listing_recommend_data[current_listing][friendly_name] = {'raw_score': current_score, 'weight': current_weight}
-
+            # Add scores to recommended entries
             recommendation_serialized_list = []
-
             for serialized_listing in serialized_data['recommended']:
-                serialized_listing_id = serialized_listing['id']
-
-                serialized_listing['_score'] = listing_recommend_data[serialized_listing_id]
-                serialized_listing['_score']['_sort_score'] = round(extra_data['sorted_recommendations_combined_dict'][serialized_listing_id], 3)
-
+                serialized_listing['_score'] = listing_recommend_data[serialized_listing['id']]
                 recommendation_serialized_list.append(serialized_listing)
-
             serialized_data['recommended'] = recommendation_serialized_list
+
+            if debug_recommendations:
+                serialized_data['recommended_debug'] = recommender_profile_result_set.debug_dict()
 
     def list(self, request):
         """
@@ -98,18 +74,22 @@ class StorefrontViewSet(viewsets.ViewSet):
         ---
         serializer: ozpcenter.api.storefront.serializers.StorefrontSerializer
         """
+        debug_recommendations = str_to_bool(request.query_params.get('debug_recommendations', False))
+
         data, extra_data = model_access.get_storefront(request, True)
         serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data
-        self._add_recommended_scores(serialized_data, extra_data)
+        self._add_recommended_scores(serialized_data, extra_data, debug_recommendations)
 
         return Response(serialized_data)
 
     def retrieve(self, request, pk=None):
+        debug_recommendations = str_to_bool(request.query_params.get('debug_recommendations', False))
+
         data, extra_data = model_access.get_storefront(request, True, pk)
         serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data
-        self._add_recommended_scores(serialized_data, extra_data)
+        self._add_recommended_scores(serialized_data, extra_data, debug_recommendations)
         return Response(serialized_data)
