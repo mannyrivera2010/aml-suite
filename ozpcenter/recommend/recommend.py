@@ -37,6 +37,8 @@ from django.db import transaction
 from django.conf import settings
 
 from ozpcenter import models
+from ozpcenter.pipe import pipes
+from ozpcenter.pipe import pipeline
 from ozpcenter.recommend import recommend_utils
 from ozpcenter.recommend import recommend_es
 from ozpcenter.recommend.graph_factory import GraphFactory
@@ -84,46 +86,206 @@ class RecommenderProfileResultSet(object):
 
     def __init__(self, profile_id):
         """
-        profile_id:
+        Usage:
+            from ozpcenter.api.storefront.model_access import RecommenderProfileResultSet;RecommenderProfileResultSet.from_profile_instance(Profile.objects.first()).process()
+
         Data:
-        {
-            recommender_friendly_name#1:{
-                recommendations:{
-                    listing_id#1: score#1,
-                    listing_id#2: score#2
+            profile_id: integer
+            recommender_result_set:
+            {
+                recommender_friendly_name#1:{
+                    recommendations:{
+                        listing_id#1: score#1,
+                        listing_id#2: score#2
+                    }
+                    weight: 1.0,
+                    ms_took: 3000
+                },
+                recommender_friendly_name#2:{
+                    recommendations:{
+                        listing_id#1: score#1,
+                        listing_id#2: score#2,
+                        listing_id#3: score#3,
+                    }
+                    weight: 1.0
+                    ms_took: 5050
                 }
-                weight: 1.0,
-                ms_took: 3000
-            },
-            recommender_friendly_name#2:{
-                recommendations:{
-                    listing_id#1: score#1,
-                    listing_id#2: score#2,
-                    listing_id#3: score#3,
-                }
-                weight: 1.0
-                ms_took: 5050
             }
-        }
         """
+        self.profile_instance = None
         self.profile_id = profile_id
         self.recommender_result_set = {}
 
     @staticmethod
-    def from_profile_instance(profile_instance):
+    def from_profile_instance(profile_instance, randomize_recommended=True):
+        """
+        Factory Method to create a RecommenderProfileResultSet from the database
+        """
         # Get Recommended Listings for owner
         target_profile_recommended_entry = models.RecommendationsEntry.objects.filter(target_profile=profile_instance).first()
 
         recommender_profile_result_set = RecommenderProfileResultSet(profile_instance.id)
 
-        recommended_entry_data = {}
         if target_profile_recommended_entry:
             recommendation_data = target_profile_recommended_entry.recommendation_data
             if recommendation_data:
+                # Deserialize msgpack object into python object
                 recommended_entry_data = msgpack.unpackb(recommendation_data, encoding='utf-8')
                 recommender_profile_result_set.recommender_result_set = recommended_entry_data
+                recommender_profile_result_set.profile_instance = profile_instance
+                recommender_profile_result_set.randomize_recommended = randomize_recommended
 
         return recommender_profile_result_set
+
+    def _combine_recommendations(self):
+        """
+        responsible of combining different recommendation algorthims into one dictionary
+
+        recommendation_combined_dict:
+        {
+            listing_id#1: average of scores between different algorthims,
+            listing_id#2: average of scores between different algorthims
+        }
+        """
+        recommendation_combined_dict = {}
+
+        for recommender_friendly_name in self.recommender_result_set:
+            recommender_name_data = self.recommender_result_set[recommender_friendly_name]
+            recommender_name_weight = recommender_name_data['weight']
+            recommender_name_recommendations = recommender_name_data['recommendations']
+
+            for recommendation_listing_key in recommender_name_recommendations:
+                current_listing_id = recommendation_listing_key
+                current_listing_score = recommender_name_recommendations[current_listing_id]
+
+                if current_listing_id in recommendation_combined_dict:
+                    recommendation_combined_dict[current_listing_id] = recommendation_combined_dict[current_listing_id] + (current_listing_score * recommender_name_weight)
+                else:
+                    recommendation_combined_dict[current_listing_id] = current_listing_score * recommender_name_weight
+
+        self.recommendation_combined_dict = recommendation_combined_dict
+
+    def _sort_combined_recommendations(self):
+        """
+        Sort combined recommendations
+        """
+        # sorted_recommendations_combined_list = [[11, 8.5], [112, 8.0], [85, 7.0], [86, 7.0], [87, 7.0],
+        #    [88, 7.0], [89, 7.0], [90, 7.0], [81, 6.0], [62, 6.0],
+        #    [21, 5.5], [1, 5.0], [113, 5.0], [111, 5.0], [114, 5.0], [64, 4.0], [66, 4.0], [68, 4.0], [70, 4.0], [72, 4.0]]
+        self.sorted_recommendations_combined_list = recommend_utils.get_top_n_score(self.recommendation_combined_dict, 40)
+        self.sorted_recommendation_listing_ids = [entry[0] for entry in self.sorted_recommendations_combined_list]
+        self.sorted_recommendations_combined_dict = {item[0]: item[1] for item in self.sorted_recommendations_combined_list}
+
+    def _filter_listings(self):
+        """
+        Filter Listings out
+        """
+        self.filter_dict = {}
+        # Retrieve negative feedback and remove from recommendation list
+        self.filter_dict['negative_feedback'] = []
+
+        recommendation_feedback_query = models.RecommendationFeedback.objects.filter(target_profile=self.profile_instance, feedback=-1)
+        for recommendation_feedback in recommendation_feedback_query:
+            self.filter_dict['negative_feedback'].append(recommendation_feedback.target_listing)
+
+        # Retrieve Profile Bookmarks and remove bookmarked from recommendation list
+        self.filter_dict['bookmarked_apps'] = []
+        profile_username = self.profile_instance.user.username
+        application_library_entry_query = (models.ApplicationLibraryEntry.objects
+                                                 .for_user_organization_minus_security_markings(profile_username, True))
+
+        for listing_entry in application_library_entry_query:
+            self.filter_dict['bookmarked_apps'].append(listing_entry.listing.id)
+
+        # Unique Listing Ids
+        listing_id_set = set()
+
+        for filter_name in self.filter_dict:
+            for sub_listing_id in self.filter_dict[filter_name]:
+                listing_id_set.add(sub_listing_id)
+
+        self.filter_listing_ids = list(listing_id_set)
+
+    def _get_listing_queryset(self):
+        """
+        Get new recommendation listing objects list minus filtered listing
+        """
+        profile_username = self.profile_instance.user.username
+        self.recommended_listings_queryset = (models.Listing.objects
+                                              .for_user_organization_minus_security_markings(profile_username)
+                                              .filter(pk__in=self.sorted_recommendation_listing_ids,
+                                                      approval_status=models.Listing.APPROVED,
+                                                      is_enabled=True,
+                                                      is_deleted=False)
+                                         .exclude(id__in=self.filter_listing_ids)
+                                         .all())
+
+    def _fix_recommendation_order(self):
+        # Fix Order of Recommendations based of score
+        listing_id_object_mapper = {}
+        for listing_object in self.recommended_listings_queryset:
+            listing_id_object_mapper[listing_object.id] = listing_object
+
+        self.recommended_listings_raw = []
+        for listing_id in self.sorted_recommendation_listing_ids:
+            if listing_id in listing_id_object_mapper:
+                self.recommended_listings_raw.append(listing_id_object_mapper[listing_id])
+
+    def _get_recommended_listings(self):
+        profile_username = self.profile_instance.user.username
+
+        # Post security_marking check - lazy loading
+        pipeline_list = [pipes.ListingPostSecurityMarkingCheckPipe(profile_username), pipes.LimitPipe(10)]
+
+        if self.randomize_recommended:
+            pipeline_list.insert(0, pipes.JitterPipe())
+
+        recommended_listings_iterator = recommend_utils.ListIterator(self.recommended_listings_raw)
+        self.recommended_listings = pipeline.Pipeline(recommended_listings_iterator, pipeline_list).to_list()
+        self.recommended_listings_ids = [listing.id for listing in self.recommended_listings]
+
+    def process(self):
+        self._combine_recommendations()
+        self._sort_combined_recommendations()
+        self._filter_listings()
+        self._get_listing_queryset()
+        self._fix_recommendation_order()
+        self._get_recommended_listings()
+        self._get_score_mapper_dict()
+
+    def _get_score_mapper_dict(self):
+        """
+        Score mapper dictionary
+
+        {listing_id#1 :
+            {
+            friendly_name#1: {'raw_score': score#1, 'weight': weight#1}
+            friendly_name#2: {'raw_score': score#1, 'weight': weight#1}
+            "_sort_score": 21.2,
+            }, ...
+        }
+        """
+        listing_recommend_data = {}
+
+        for friendly_name in self.recommender_result_set:
+            current_weight = self.recommender_result_set[friendly_name]['weight']
+            recommendations = self.recommender_result_set[friendly_name]['recommendations']
+
+            for current_listing in recommendations:
+                current_score = recommendations[current_listing]
+
+                if current_listing in listing_recommend_data:
+                    listing_recommend_data[current_listing][friendly_name] = {'raw_score': current_score, 'weight': current_weight}
+                else:
+                    listing_recommend_data[current_listing] = {}
+                    listing_recommend_data[current_listing][friendly_name] = {'raw_score': current_score, 'weight': current_weight}
+
+        for current_listing in listing_recommend_data:
+            if current_listing in self.sorted_recommendations_combined_dict:
+                # TODO: Why is above if statement needed
+                listing_recommend_data[current_listing]['_sort_score'] = round(self.sorted_recommendations_combined_dict[current_listing], 3)
+
+        self.listing_recommend_data = listing_recommend_data
 
     def merge(self, recommender_friendly_name, recommendation_weight, current_recommendations, recommendations_time):
         """
@@ -142,6 +304,16 @@ class RecommenderProfileResultSet(object):
                 'weight': recommendation_weight,
                 'ms_took': recommendations_time
             }
+
+    def debug_dict(self):
+        return {
+            "1. recommender_result_set": self.recommender_result_set,
+            "2. recommendation_combined_dict": self.recommendation_combined_dict,
+            "3. sorted_recommendations_combined_list": self.sorted_recommendations_combined_list,
+            "4. filter_dict": self.filter_dict,
+            "5. filter_listing_id": self.filter_listing_ids,
+            "6. recommended_listings_ids": self.recommended_listings_ids
+        }
 
     def __repr__(self):
         return str(self.recommender_result_set)

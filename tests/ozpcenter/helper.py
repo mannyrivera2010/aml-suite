@@ -14,6 +14,25 @@ TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 
 
+def shorthand_dict(input_object, key=''):
+    is_base_boolean = isinstance(input_object, (int, str, float))
+    is_dict_boolean = isinstance(input_object, dict)
+    is_list_boolean = isinstance(input_object, list)
+    has_key = True if key else False
+
+    if is_list_boolean and not has_key:
+        return [shorthand_dict(ob) for ob in input_object]
+    elif is_list_boolean and has_key:
+        return '[{}]'.format(','.join([shorthand_dict(ob) for ob in input_object]))
+    elif is_dict_boolean:
+        output = []
+        sorted_key = sorted(input_object.keys())
+        output = ['{}:{}'.format(key, shorthand_dict(input_object[key], key)) for key in sorted_key]
+        return '({})'.format(','.join(output))
+    elif is_base_boolean:
+        return '{}'.format(input_object)
+
+
 def patch_environ(new_environ=None, clear_orig=False):
     """
     https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/34333710#34333710

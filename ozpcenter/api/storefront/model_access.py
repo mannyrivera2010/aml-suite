@@ -12,6 +12,7 @@ from django.db.models import F
 import msgpack
 
 # import ozpcenter.api.listing.serializers as listing_serializers
+from ozpcenter.utils import str_to_bool
 from ozpcenter import models
 from ozpcenter.pipe import pipes
 from ozpcenter.pipe import pipeline
@@ -218,36 +219,6 @@ logger = logging.getLogger('ozp-center.' + str(__name__))
 #             output_list.append(listing_values)
 #
 #     return output_list
-
-
-def get_recommendation_listing_ids(profile_instance):
-    recommender_profile_result_set = RecommenderProfileResultSet.from_profile_instance(profile_instance)
-    recommended_entry_data = recommender_profile_result_set.recommender_result_set
-
-    recommendation_combined_dict = {'profile': {}}
-
-    for recommender_friendly_name in recommended_entry_data:
-        recommender_name_data = recommended_entry_data[recommender_friendly_name]
-        recommender_name_weight = recommender_name_data['weight']
-        recommender_name_recommendations = recommender_name_data['recommendations']
-
-        for recommendation_listing_key in recommender_name_recommendations:
-
-            current_listing_id = recommendation_listing_key
-            current_listing_score = recommender_name_recommendations[current_listing_id]
-
-            if current_listing_id in recommendation_combined_dict['profile']:
-                recommendation_combined_dict['profile'][current_listing_id] = recommendation_combined_dict['profile'][current_listing_id] + (current_listing_score * recommender_name_weight)
-            else:
-                recommendation_combined_dict['profile'][current_listing_id] = current_listing_score * recommender_name_weight
-
-    sorted_recommendations_combined_dict = recommend_utils.get_top_n_score(recommendation_combined_dict['profile'], 40)
-    # sorted_recommendations_combined_dict = [[11, 8.5], [112, 8.0], [85, 7.0], [86, 7.0], [87, 7.0],
-    #    [88, 7.0], [89, 7.0], [90, 7.0], [81, 6.0], [62, 6.0],
-    #    [21, 5.5], [1, 5.0], [113, 5.0], [111, 5.0], [114, 5.0], [64, 4.0], [66, 4.0], [68, 4.0], [70, 4.0], [72, 4.0]]
-    return sorted_recommendations_combined_dict, recommended_entry_data
-
-
 # def get_storefront_new(username, request):
 #     """
 #     Returns data for /storefront api invocation including:
@@ -323,7 +294,7 @@ def get_recommendation_listing_ids(profile_instance):
 #     return data, extra_data
 
 
-def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recommended=True):
+def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recommended=True, ):
     """
     Get Recommended Listings for storefront
 
@@ -333,52 +304,12 @@ def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recomm
     listing_ids_list = [1,5,6,7]
     request_profile = Profile.objects.first()
     """
-    username = request_profile.user.username
+    recommender_profile_result_set = RecommenderProfileResultSet.from_profile_instance(request_profile, randomize_recommended)
+    recommender_profile_result_set.process()
+    recommended_listings = recommender_profile_result_set.recommended_listings
 
     extra_data = {}
-
-    # Retrieve List of Recommended Apps for profile:
-    sorted_recommendations_combined_list, recommended_entry_data = get_recommendation_listing_ids(request_profile)
-    listing_ids_list = [entry[0] for entry in sorted_recommendations_combined_list]
-
-    extra_data['recommended_entry_data'] = recommended_entry_data
-    extra_data['sorted_recommendations_combined_dict'] = {item[0]: item[1] for item in sorted_recommendations_combined_list}
-
-    # Retrieve negative feedback and remove from recommendation list
-    negative_feedback_listing_ids = models.RecommendationFeedback.objects.filter(target_profile=request_profile, feedback=-1).values('target_listing')
-    # Retrieve Profile Bookmarks and remove bookmarked from recommendation list
-    bookmarked_apps_list = models.ApplicationLibraryEntry.objects.for_user_organization_minus_security_markings(request_profile.user.username, True).values('listing')
-
-    # Send new recommendation list minus bookmarked apps to User Interface
-    recommended_listings_queryset = (models.Listing.objects
-                                           .for_user_organization_minus_security_markings(request_profile.user.username)
-                                           .filter(pk__in=listing_ids_list,
-                                                   approval_status=models.Listing.APPROVED,
-                                                   is_enabled=True,
-                                                   is_deleted=False)
-                                     .exclude(id__in=negative_feedback_listing_ids)
-                                     .exclude(id__in=bookmarked_apps_list)
-                                     .all())
-    # Fix Order of Recommendations
-    id_recommended_object_mapper = {}
-    for recommendation_entry in recommended_listings_queryset:
-        id_recommended_object_mapper[recommendation_entry.id] = recommendation_entry
-
-    recommended_listings_raw = []
-    for listing_id in listing_ids_list:
-        if listing_id in id_recommended_object_mapper:
-            recommended_listings_raw.append(id_recommended_object_mapper[listing_id])
-
-    # Post security_marking check - lazy loading
-
-    pipeline_list = [pipes.ListingPostSecurityMarkingCheckPipe(username), pipes.LimitPipe(10)]
-
-    if randomize_recommended:
-        pipeline_list.insert(0, pipes.JitterPipe())
-
-    recommended_listings = pipeline.Pipeline(recommend_utils.ListIterator([recommendations_listing for recommendations_listing in recommended_listings_raw]),
-                                      pipeline_list).to_list()
-
+    extra_data['recommender_profile_result_set'] = recommender_profile_result_set
     return recommended_listings, extra_data
 
 
@@ -436,9 +367,6 @@ def get_storefront_most_popular(request_profile, pre_fetch=True):
     return most_popular_listings
 
 
-from ozpcenter.utils import str_to_bool
-
-
 def get_storefront(request, pre_fetch=False, section=None):
     """
     Returns data for /storefront api invocation including:
@@ -473,7 +401,9 @@ def get_storefront(request, pre_fetch=False, section=None):
         extra_data = {}
 
         if section == 'all' or section == 'recommended':
-            recommended_listings, extra_data = get_storefront_recommended(request_profile, pre_fetch, randomize_recommended)
+            recommended_listings, extra_data = get_storefront_recommended(request_profile,
+                                                                          pre_fetch,
+                                                                          randomize_recommended)
             data['recommended'] = recommended_listings
         else:
             data['recommended'] = []
