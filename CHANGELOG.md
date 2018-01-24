@@ -1,5 +1,22 @@
 
-### 1.0.95 (None) 
+### 1.0.96 (None)
+
+#### Feature  
+* **recommend**:  add api recommendation debug dictionary ([4ed6db8b](https://github.com/aml-development/ozp-backend/commit/4ed6db8b3340116c1810bab5ab098bc911df91b4))    
+
+#### Fixes  
+* **image**:  fixed sql too many variables ([d6193dc4](https://github.com/aml-development/ozp-backend/commit/d6193dc4dc3922d7f66ca6af1349d4616a1ab992))    
+
+#### Refactor  
+* **recommend**:  refactor recommendation tests ([f8212b72](https://github.com/aml-development/ozp-backend/commit/f8212b72c42895e982e468b17a4ea25f2b6b32e0))    
+* **makefile**:  add ssl to gunicorn ([e17ee413](https://github.com/aml-development/ozp-backend/commit/e17ee4132fb37239506864d0352e2fa87adbb681))    
+* **general**:  refactor code ([095307b6](https://github.com/aml-development/ozp-backend/commit/095307b672a914615094dc8694d1af9fc38ecdbe))    
+
+#### Merge Pull Requests  
+* Merge pull request #397 from aml-development/recommend_20180123 ([f9b6832a](https://github.com/aml-development/ozp-backend/commit/f9b6832ade26b30232f123421866466857e07634))
+* Merge pull request #396 from aml-development/refactor_20180118 ([13ce5bda](https://github.com/aml-development/ozp-backend/commit/13ce5bda9beaf281475a379043d4a05a4f436889))           
+
+### 1.0.95 (2018-01-17) 
 
 #### Fixes  
 * **release**:  fix release.py requirements.txt issue ([35e0c641](https://github.com/aml-development/ozp-backend/commit/35e0c6415576a126006c01b71c98892ddaa44c9d))    
