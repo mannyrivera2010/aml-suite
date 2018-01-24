@@ -231,13 +231,13 @@ class RecommenderProfileResultSet(object):
             if listing_id in listing_id_object_mapper:
                 self.recommended_listings_raw.append(listing_id_object_mapper[listing_id])
 
-    def _get_recommended_listings(self, randomize_recommended=True):
+    def _get_recommended_listings(self):
         profile_username = self.profile_instance.user.username
 
         # Post security_marking check - lazy loading
         pipeline_list = [pipes.ListingPostSecurityMarkingCheckPipe(profile_username), pipes.LimitPipe(10)]
 
-        if randomize_recommended:
+        if self.randomize_recommended:
             pipeline_list.insert(0, pipes.JitterPipe())
 
         recommended_listings_iterator = recommend_utils.ListIterator(self.recommended_listings_raw)
