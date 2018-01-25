@@ -1,24 +1,15 @@
 # This is a make file to help with the commands
-root:
-	# '==Commands=='
-	# 'dev - make new development environment'
-	# --Running--
-	# 'run - run development environment'
-	# 'run_es - run development environment with Elasticsearch'
-	# 'runp - run development environment in multithreaded mode'
-	# 'runp_es - run development environment with Elasticsearch  in multithreaded mode'
-	# 'install_git_hooks - Install Git Hooks to run code checker'
-	# 'shell - Enter into interactive shell'
+## Help documentatin à la https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' ./Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-# tail -f /var/log/postgresql/postgresql-9.3-main.log
-
-clean:
+clean: ## Clean Directory
 	rm -f db.sqlite3
 	rm -rf static/
 	rm -rf media/
 	rm -f ozp.log
 
-create_static:
+create_static:  ## Collect static files
 	mkdir -p static
 	python manage.py collectstatic --noinput
 	mkdir -p media
@@ -26,72 +17,72 @@ create_static:
 pre:
 	export DJANGO_SETTINGS_MODULE=ozp.settings
 
-test: clean pre create_static
+test: clean pre create_static  ## Run all tests
 	TEST_MODE=True pytest
 
-ptest: clean pre create_static
+test_parallel: clean pre create_static  ## Run all test in parallel (increase speed of unit tests)
 	echo Number of cores: `nproc`
 	TEST_MODE=True pytest -n `nproc` --dist=loadscope
 
-ptest_psql: clean pre create_static
+test_parallel_psql: clean pre create_static  ## Run all test in parallel (increase speed of unit tests) using postgres
 	echo Number of cores: `nproc`
 	MAIN_DATABASE=psql TEST_MODE=True pytest -n `nproc` --dist=loadscope
 
-softtest: pre
+test_soft: pre  ## Run all tests (without clean)
 	TEST_MODE=True pytest
 
-install_git_hooks:
+install_git_hooks:  ## Install Git Hooks
 	cp .hooks/pre-commit .git/hooks/
 
-run:
+run:  ## Run the server locally using sqlite
 	MAIN_DATABASE=sqlite python manage.py runserver localhost:8001
 
-run_es:
+run_es:  ## Run the server locally using sqlite and elasticsearch
 	ES_ENABLED=True python manage.py runserver localhost:8001
 
-run_psql:
+run_psql:  ## Run the server locally using postgres
 	MAIN_DATABASE=psql python manage.py runserver localhost:8001
 
-run_psql_es:
+run_psql_es:  ## Run the server locally using postgres and elasticsearch
 	MAIN_DATABASE=psql ES_ENABLED=True python manage.py runserver localhost:8001
 
-run_gunicorn:
+run_gunicorn:   ## Run server using gunicorn
 	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
-run_gunicorn_secure:
+run_gunicorn_secure:   ## Run server using gunicorn on HTTPS (preq: clone dev-tools repo)
 	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
 		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
 		--keyfile ~/git/dev-tools/certs/server_nopass.key \
 		--certfile ~/git/dev-tools/certs/server_nopass.crt \
 		--ca-certs ~/git/dev-tools/certs/ca_root.pem
 
-run_gunicorn_secure_ansible:
+run_gunicorn_secure_ansible:     ## Run server using gunicorn on HTTPS (preq: clone ozp-ansible repo)
 	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
 		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
 		--keyfile ~/git/ozp-ansible/roles/ssl_certs/files/server.key \
 		--certfile ~/git/ozp-ansible/roles/ssl_certs/files/server.crt \
 		--ca-certs ~/git/ozp-ansible/roles/ssl_certs/files/rootCA.pem
 
-run_gunicorn_es:
+run_gunicorn_es:  ## Run server using gunicorn using sqlite and elasticsearch
 	ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
-run_gunicorn_psql_es:
+run_gunicorn_psql_es:  ## Run server using gunicorn using postgres and elasticsearch
 	MAIN_DATABASE=psql ES_ENABLED=True gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid
 
-codecheck:
+codecheck: ## Run pycodestyle python linter on the code
 	pycodestyle ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
 
-autopep:
+autopep:  ## Run tool to fix python code
 	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
 	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
 
-autopepdiff:
+autopepdiff:  ## Print out linter diff
 	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
 
-reindex_es:
+reindex_es:  # Reindex the data into Elasticsearch
 	ES_ENABLED=TRUE python manage.py runscript reindex_es
 
-recommend:
+recommend:  ## Run Recommendations algorthims
 	python manage.py runscript recommend
 
 recommend_es:
@@ -126,7 +117,7 @@ pgsql_restore:
 	psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;' -U postgres --host=localhost
 	psql --username=ozp_user --host=localhost ozp < ozpcenter/scripts/test_data/dump_pgsql.sql
 
-dev: clean pre create_static install_git_hooks sqlite_migrate
+dev: clean pre create_static install_git_hooks sqlite_migrate  ## Set up development server with sample data
 	MAIN_DATABASE=sqlite python manage.py runscript sample_data_generator
 
 dev_fast: clean pre create_static install_git_hooks
@@ -136,7 +127,7 @@ dev_es: clean pre create_static install_git_hooks sqlite_migrate
 	MAIN_DATABASE=sqlite ES_ENABLED=FALSE python manage.py runscript sample_data_generator
 	ES_ENABLED=TRUE python manage.py runscript reindex_es
 
-dev_psql: clean pre create_static install_git_hooks
+dev_psql: clean pre create_static install_git_hooks  ## Set up development server with sample data on postgres
 	MAIN_DATABASE=psql python manage.py makemigrations ozpcenter
 	MAIN_DATABASE=psql python manage.py makemigrations ozpiwc
 	MAIN_DATABASE=psql TEST_MODE=True python manage.py migrate
@@ -149,19 +140,19 @@ dev_psql: clean pre create_static install_git_hooks
 email:
 	python manage.py runscript notification_email
 
-shell:
+shell:  ## Launch python shell using sqlite
 	python manage.py shell_plus --print-sql
 
-shell_psql:
+shell_psql:  ## Launch python shell using postgres
 	MAIN_DATABASE='psql' python manage.py shell_plus  --print-sql
 
-create_virtualenv:
+create_virtualenv:  ## Create Python Environment
 	virtualenv env
 
-pyenv: create_virtualenv
+pyenv: create_virtualenv  ## Create Python Environment and install dependencies
 	(source env/bin/activate &&  pip install -r requirements.txt)
 
-pyenv_wheel: create_virtualenv
+pyenv_wheel: create_virtualenv  ## Create Python Environment and install dependencies using wheelhouse
 	(source env/bin/activate &&  pip install --no-index --find-links=wheelhouse -r requirements.txt)
 
 upgrade_requirements:
