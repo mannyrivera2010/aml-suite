@@ -35,7 +35,6 @@ router.register(r'listingtype', views.ListingTypeViewSet)
 router.register(r'screenshot', views.ScreenshotViewSet)
 router.register(r'tag', views.TagViewSet)
 
-# Wire up our API using automatic URL routing.
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(nested_router.urls)),
