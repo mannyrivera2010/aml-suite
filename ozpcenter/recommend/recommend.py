@@ -130,7 +130,7 @@ class RecommenderProfileResultSet(object):
             recommendation_data = target_profile_recommended_entry.recommendation_data
             if recommendation_data:
                 # Deserialize msgpack object into python object
-                recommended_entry_data = msgpack.unpackb(recommendation_data, encoding='utf-8')
+                recommended_entry_data = msgpack.unpackb(bytearray(recommendation_data), encoding='utf-8')
                 recommender_profile_result_set.recommender_result_set = recommended_entry_data
                 recommender_profile_result_set.profile_instance = profile_instance
                 recommender_profile_result_set.randomize_recommended = randomize_recommended
