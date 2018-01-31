@@ -1,5 +1,16 @@
 
-### 1.0.96 (None)
+### 1.0.97 (None)
+
+#### Feature  
+* **makefile**:  self-documenting MakeFile ([08b16881](https://github.com/aml-development/ozp-backend/commit/08b16881c1c857ceb8ab974d5a9ee55699bf865a))    
+
+#### Fixes  
+* **msgpack**:  fix postgres issue when MSGPACK_PUREPYTHON ([301b8a28](https://github.com/aml-development/ozp-backend/commit/301b8a286c6e6a4f77a3c13c8deb13ccf8211f9f))     
+
+#### Merge Pull Requests  
+* Merge pull request #398 from aml-development/recommender_fix_20180130 ([1860a1db](https://github.com/aml-development/ozp-backend/commit/1860a1db5742937dbb8e56a7e2a53d47ca5546d6))           
+
+### 1.0.96 (2018-01-24)
 
 #### Feature  
 * **recommend**:  add api recommendation debug dictionary ([4ed6db8b](https://github.com/aml-development/ozp-backend/commit/4ed6db8b3340116c1810bab5ab098bc911df91b4))    
