@@ -1212,20 +1212,6 @@ class Listing(models.Model):
         super(Listing, self).save(*args, **kwargs)
         current_listing_id = self.pk
 
-        if settings.ES_ENABLED is True:
-            serializer = ReadOnlyListingSerializer(self)
-            record = serializer.data  # TODO Find a faster way to serialize data, makes test take a long time to complete
-
-            elasticsearch_util.update_es_listing(current_listing_id, record, is_new)
-
-
-class ReadOnlyListingSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Listing
-        depth = 2
-        fields = '__all__'
-
 
 @receiver(post_save, sender=Listing)
 def post_save_listing(sender, instance, created, **kwargs):
