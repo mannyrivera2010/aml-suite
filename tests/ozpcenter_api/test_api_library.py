@@ -3,6 +3,9 @@ Tests for library endpoints (listings in a user's library)
 
 TODO: Figure out better way to test
 """
+import datetime
+import pytz
+
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -140,3 +143,124 @@ class LibraryApiTest(APITestCase):
         url = '/api/self/library/update_all/'
         response = APITestHelper.request(self, url, 'PUT', data=put_data, username='wsmith', status_code=200)
         self.assertIsNotNone(response)
+
+    def _compare_library(self, usernames_list):
+        usernames_list_actual = {}
+        for username, ids_list in usernames_list.items():
+            url = '/api/self/library/'
+            response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
+            before_notification_ids = ['{}-{}'.format(entry['listing']['title'], entry['folder']) for entry in response.data]
+            usernames_list_actual[username] = before_notification_ids
+
+        for username, ids_list in usernames_list.items():
+            before_notification_ids = usernames_list_actual[username]
+            self.assertEqual(sorted(ids_list), sorted(before_notification_ids), 'Checking for {}'.format(username))
+
+    def test_import_bookmarks(self):
+
+        # Create notification to share Weater foler from Bigbrother to Julia
+        now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
+        data = {'expires_date': str(now),
+                'message': 'A Simple Peer to Peer Notification',
+                'peer': {
+                    'user': {
+                      'username': 'julia',
+                    },
+                    'folder_name': 'Weather'
+            }}
+
+        url = '/api/notification/'
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        bookmark_notification1_id = response.data['id']
+
+        # Import Bookmarks
+        results = APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
+
+        # Compare Library for users
+        user_library_data = {'julia': ['Tornado-Weather',
+                                       'Lightning-Weather',
+                                       'Snow-Weather']}
+
+        self._compare_library(user_library_data)
+
+        # Modify Bigbrother's library to add another listing to the weather library
+        url_lib = '/api/self/library/'
+        response = APITestHelper.request(self, url_lib, 'GET', username='bigbrother', status_code=200)
+
+        put_data = []
+        position_count = 0
+
+        for i in response.data:
+            if i['id'] is 12:
+                data = {'id': i['id'],
+                        'folder': "Weather",
+                        'listing': {'id': i['listing']['id']},
+                        'position': position_count
+                        }
+                put_data.append(data)
+            else:
+                data = {'id': i['id'],
+                        'folder': i['folder'],
+                        'listing': {'id': i['listing']['id']},
+                        'position': position_count
+                        }
+                put_data.append(data)
+
+        url_update = '/api/self/library/update_all/'
+        response = APITestHelper.request(self, url_update, 'PUT', data=put_data, username='bigbrother', status_code=200)
+        self.assertIsNotNone(response)
+
+        # Recreate the notification to send to Julia to share the folder
+        now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
+        data = {'expires_date': str(now),
+                'message': 'A Simple Peer to Peer Notification',
+                'peer': {
+                    'user': {
+                      'username': 'julia',
+                    },
+                    'folder_name': 'Weather'
+            }}
+
+        url = '/api/notification/'
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        bookmark_notification1_id = response.data['id']
+
+        # Import Bookmarks
+        results = APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
+
+        # Compare Library for users
+        user_library_data = {'bigbrother': ['Tornado-Weather',
+                                       'Lightning-Weather',
+                                       'Snow-Weather',
+                                       'Wolf Finder-Animals',
+                                       'Killer Whale-Animals',
+                                       'Lion Finder-Animals',
+                                       'Monkey Finder-Animals',
+                                       'Parrotlet-Animals',
+                                       'White Horse-Animals',
+                                       'Electric Guitar-Instruments',
+                                       'Acoustic Guitar-Instruments',
+                                       'Sound Mixer-Instruments',
+                                       'Electric Piano-Instruments',
+                                       'Piano-Instruments',
+                                       'Violin-Instruments',
+                                       'Bread Basket-Weather',
+                                       'Informational Book-None',
+                                       'Stop sign-None',
+                                       'Chain boat navigation-None',
+                                       'Gallery of Maps-None',
+                                       'Chart Course-None'],
+                             'julia': ['Tornado-Weather',
+                                       'Lightning-Weather',
+                                       'Snow-Weather',
+                                       'Bread Basket-Weather']}
+
+        self._compare_library(user_library_data)
