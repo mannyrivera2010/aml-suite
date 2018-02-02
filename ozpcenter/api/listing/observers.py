@@ -227,6 +227,7 @@ class ListingObserver(Observer):
                         'screenshots',
                         'security_marking',
                         'is_featured',
+                        'owners',
                         'contacts']
 
         changes = []
