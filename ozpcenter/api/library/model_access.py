@@ -259,6 +259,10 @@ def import_bookmarks(current_username, peer_bookmark_notification_id):
 
     # TODO Validate Folder Name
 
+    for entry in models.ApplicationLibraryEntry.objects.for_user(current_username):
+        if entry.folder == peer_folder_name:
+            peer_bookmark_list = [x for x in peer_bookmark_list if x != entry.listing.id]
+
     if errors:
         return errors, None
 
