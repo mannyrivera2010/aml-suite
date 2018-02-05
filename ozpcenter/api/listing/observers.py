@@ -5,13 +5,26 @@ import logging
 import datetime
 import pytz
 
+from rest_framework import serializers
+
+
+from django.conf import settings
 from ozpcenter import models
 from ozpcenter.pubsub import Observer
 from ozpcenter.models import Notification
 import ozpcenter.api.notification.model_access as notification_model_access
+from ozpcenter.api.listing import elasticsearch_util
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
+
+
+class ReadOnlyListingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Listing
+        depth = 2
+        fields = '__all__'
 
 
 class ListingObserver(Observer):
@@ -250,6 +263,12 @@ class ListingObserver(Observer):
                                                           message=message,
                                                           listing=listing,
                                                           group_target=Notification.USER)
+
+        if settings.ES_ENABLED is True:
+            serializer = ReadOnlyListingSerializer(listing)
+            record = serializer.data  # TODO Find a faster way to serialize data, makes test take a long time to complete
+
+            elasticsearch_util.update_es_listing(record['id'], record, None)
 
     def listing_review_created(self, listing=None, profile=None, rating=None, text=None):
         """

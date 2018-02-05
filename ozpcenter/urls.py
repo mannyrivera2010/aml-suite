@@ -1,12 +1,10 @@
 """
 URLs for all resources - will be placed under /api route by the project level
-urls.py
 """
 from django.conf.urls import url, include
 
 from ozpcenter import views
 
-# Wire up our API using automatic URL routing.
 urlpatterns = [
     url(r'', include('ozpcenter.api.agency.urls')),
     url(r'', include('ozpcenter.api.category.urls')),
