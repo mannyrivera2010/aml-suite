@@ -1206,8 +1206,89 @@ class NotificationApiTest(APITestCase):
         response = APITestHelper.request(self, url, 'DELETE', username='jones', status_code=403)
         self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Only Stewards can delete notifications'))
 
-    # TODO: Unittest for below
     # AMLNG-378 - As a user, I want to receive notification about changes on Listings I've bookmarked
+    def test_receive_notification_bookmarked_listing_changes(self):
+        # Have wsmith bookmark the listing
+        response = APITestHelper.create_bookmark(self, 'wsmith', 1, folder_name='', status_code=201)
+
+        # Make changes to the listing
+        url = '/api/listing/1/'
+        title = 'julias app 2'
+        data = {
+            "title": title,
+            "description": "description of app",
+            "launch_url": "http://www.google.com/launch",
+            "version_name": "2.1.8",
+            "unique_name": "org.apps.julia-one",
+            "what_is_new": "nothing is new",
+            "description_short": "a shorter description",
+            "usage_requirements": "Many new things",
+            "system_requirements": "Good System",
+            "is_private": "true",
+            "is_enabled": "false",
+            "is_featured": "false",
+            "feedback_score": 0,
+            "contacts": [
+                {"email": "a@a.com", "secure_phone": "111-222-3434",
+                    "unsecure_phone": "444-555-4545", "name": "me",
+                    "contact_type": {"name": "Government"}
+                },
+                {"email": "b@b.com", "secure_phone": "222-222-3333",
+                    "unsecure_phone": "555-555-5555", "name": "you",
+                    "contact_type": {"name": "Military"}
+                }
+            ],
+            "security_marking": "SECRET",
+            "listing_type": {"title": "Widget"},
+            "small_icon": {"id": 1},
+            "large_icon": {"id": 2},
+            "banner_icon": {"id": 3},
+            "large_banner_icon": {"id": 4},
+            "categories": [
+                {"title": "Business"},
+                {"title": "Education"}
+            ],
+            "owners": [
+                {"user": {"username": "wsmith"}},
+                {"user": {"username": "julia"}}
+            ],
+            "agency": {"title": "Ministry of Love", "short_name": "Miniluv"},
+            "tags": [
+                {"name": "demo"},
+                {"name": "map"}
+            ],
+            "intents": [
+                {"action": "/application/json/view"},
+                {"action": "/application/json/edit"}
+            ],
+            "doc_urls": [
+                {"name": "wiki", "url": "http://www.google.com/wiki2"},
+                {"name": "guide", "url": "http://www.google.com/guide2"}
+            ],
+            "screenshots": [
+                {"small_image": {"id": 1}, "large_image": {"id": 2}, "description": "Test Description"},
+                {"small_image": {"id": 3}, "large_image": {"id": 4}, "description": "Test Description"}
+            ]
+        }
+
+        # for checking Activity status later on
+        user = generic_model_access.get_profile('julia').user
+        self.client.force_authenticate(user=user)
+        old_listing_data = self.client.get(url, format='json').data
+
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # get wsmith's notifications
+        url = '/api/self/notification/'
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+        notification_list = self._format_notification_response(response)
+
+        # Check if notification contains correct changes
+        expected_data = '1-listing-The<b>juliasapp2</b>listingwasupdated.Thefollowingfieldshavechanged:Title,Description,DescriptionShort,LaunchUrl,VersionName,UsageRequirements,SystemRequirements,UniqueName,WhatIsNew,ListingType,Intents,Agency'
+        self.assertEqual(notification_list[0], expected_data)
+
+    # TODO: Unittest for below
     # AMLNG-377 - As an owner or ORG CS, I want to receive notification of user rating and reviews
     # AMLNG-376 - As a ORG CS, I want to receive notification of Listings submitted for my organization
     # AMLNG-173 - As Org Content Steward, I want notification if an owner has cancelled an app that was pending deletion
