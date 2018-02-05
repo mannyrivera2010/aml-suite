@@ -443,6 +443,60 @@ class ListingActivityViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+class ListingPendingDeletionViewSet(viewsets.ModelViewSet):
+    """
+    ModelViewSet for getting all Listing Pending Deletions
+
+    Access Control
+    ===============
+    - All users can view
+
+    URIs
+    ======
+    POST /api/listing/{pk}/pendingdeletion
+    Summary:
+        Add a ListingPendingDeletion
+    Request:
+        data: ListingPendingDeletionSerializer Schema
+    Response:
+        200 - Successful operation - ListingActivitySerializer
+
+    GET /api/listing/{pk}/pendingdeletion
+    Summary:
+        Find a ListingPendingDeletion Entry by ID
+    Response:
+        200 - Successful operation - ListingActivitySerializer
+    """
+
+    permission_classes = (permissions.IsUser,)
+    serializer_class = serializers.ListingActivitySerializer
+
+    def get_queryset(self):
+        queryset = model_access.get_pending_deletion_listings(
+            self.request.user.username)
+        return queryset
+
+    def list(self, request, listing_pk=None):
+        queryset = self.get_queryset().filter(listing__id=listing_pk)
+        serializer = serializers.ListingActivitySerializer(queryset,
+            context={'request': request}, many=True)
+        return Response(serializer.data)
+
+    def create(self, request, listing_pk=None):
+        try:
+            user = generic_model_access.get_profile(request.user.username)
+            listing = model_access.get_listing_by_id(request.user.username,
+                listing_pk)
+            pending_description = request.data['description']
+            listing = model_access.pending_delete_listing(user, listing,
+                pending_description)
+            return Response(data={"listing": {"id": listing.id}},
+                status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error('Exception: {}'.format(e), extra={'request': request})
+            raise errors.RequestException('Error rejecting listing')
+
+
 class ListingRejectionViewSet(viewsets.ModelViewSet):
     """
     ModelViewSet for getting all Listing Rejections
