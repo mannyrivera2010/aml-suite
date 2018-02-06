@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from ozpcenter.errors import PermissionDenied
 from ozpcenter import permissions
+
 import ozpcenter.api.category.model_access as model_access
 import ozpcenter.api.category.serializers as serializers
 from ozpcenter.models import Listing
@@ -82,3 +83,21 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class BulkCategoryListingViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsUser,)
+    serializer_class = serializers.CategoryListingSerializer
+
+    # def get_queryset(self):
+    #     return
+
+    def get_queryset(self):
+        return
+
+    def list(self, request, category_pk=None):
+        queryset = model_access.get_listing_by_category_id(category_pk)
+        print(queryset)
+        serializer = serializers.CategoryListingSerializer(queryset, context={'request': request}, many=True)
+
+        return Response(serializer.data)

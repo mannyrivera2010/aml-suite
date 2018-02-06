@@ -40,3 +40,12 @@ def get_category_by_id(input_id, reraise=False):
         if reraise:
             raise err
         return None
+
+
+def get_listing_by_category_id(category_id):
+    """
+    Get listings by category_id
+    """
+    # TODO, GET listing based on the role
+    # Logic
+    return models.Listing.objects.filter(categories=category_id)

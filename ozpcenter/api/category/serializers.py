@@ -5,6 +5,7 @@ import logging
 
 from rest_framework import serializers
 
+import ozpcenter.api.agency.serializers as agency_serializers
 from ozpcenter import models
 
 
@@ -27,3 +28,12 @@ class ListingCategorySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'title': {'validators': []}
         }
+
+
+class CategoryListingSerializer(serializers.HyperlinkedModelSerializer):
+    agency = agency_serializers.CreateAgencySerializer(required=False)
+    categories = ListingCategorySerializer(many=True, required=False)
+
+    class Meta:
+        model = models.Listing
+        fields = ('unique_name', 'title', 'id', 'agency', 'categories')
