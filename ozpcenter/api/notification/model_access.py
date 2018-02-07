@@ -181,12 +181,16 @@ def create_notification(author_username=None,
         notification_instance = notifications.ListingOwnerNotification()
         notification_instance.set_sender_and_entity(author_username, listing)
 
-    elif notification_type == 'PendingDeletionRequestNotification':
-        notification_instance = notifications.PendingDeletionRequestNotification()
+    elif notification_type == 'PendingDeletionToOwnerNotification':
+        notification_instance = notifications.PendingDeletionToOwnerNotification()
         notification_instance.set_sender_and_entity(author_username, listing)
 
-    elif notification_type == 'PendingDeletionCancellationNotification':
-        notification_instance = notifications.PendingDeletionCancellationNotification()
+    elif notification_type == 'PendingDeletionToStewardNotification':
+        notification_instance = notifications.PendingDeletionToStewardNotification()
+        notification_instance.set_sender_and_entity(author_username, listing)
+
+    elif notification_type == 'PendingDeletionApprovedNotification':
+        notification_instance = notifications.PendingDeletionApprovedNotification()
         notification_instance.set_sender_and_entity(author_username, listing)
 
     elif notification_type == 'CategorySubscriptionNotification':

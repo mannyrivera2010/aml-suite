@@ -31,9 +31,11 @@ Notification +------+--> Listing
                 |   |
                 |   +--> ListingPrivateStatus
                 |   |
-                |   +--> PendingDeletionRequest
+                |   +--> PendingDeletionToOwner
                 |   |
-                |   +--> PendingDeletionCancellation
+                |   +--> PendingDeletionToSteward
+                |   |
+                |   +--> PendingDeletionApproved
                 |   |
                 |   +--> ListingSubmission
                 |
@@ -624,12 +626,12 @@ class ListingPrivateStatusNotification(NotificationBase):
         return False
 
 
-class PendingDeletionRequestNotification(NotificationBase):  # Not Verified
+class PendingDeletionToOwnerNotification(NotificationBase):  # Not Verified
     """
     issue: AMLNG-170
-    notification_type: PendingDeletionRequest
+    notification_type: PendingDeletionToOwner
     description:
-        As an Owner I want to receive notice of whether my deletion request has been approved or rejected
+        As an Owner I want to receive notice of whether my deletion request has been rejected
     target: Users that ___
     invoked: In-directly
     event_occurs:
@@ -653,25 +655,29 @@ class PendingDeletionRequestNotification(NotificationBase):  # Not Verified
         return Notification.LISTING
 
     def get_notification_db_subtype(self):
-        return Notification.PENDING_DELETION_REQUEST
+        return Notification.PENDING_DELETION_TO_OWNER
 
     def get_target_list(self):
         current_listing = self.entity
         return current_listing.owners.filter(listing_notification_flag=True).all().distinct()
 
 
-class PendingDeletionCancellationNotification(NotificationBase):  # Not Verified
+class PendingDeletionToStewardNotification(NotificationBase):  # Not Verified
     """
-    issue: AMLNG-173
-    notification_type: PendingDeletionCancellation
+    issue: AMLNG-173, AMLOS-490
+    notification_type: PendingDeletionToSteward
         As an cs I want a notification if an owner has cancelled an app
         that was pending deletion
+        as a cs, I want a notification if an owner pends a listing for deletion
     event_occurs:
         This event occurs when
             User undeleted the listing
                 PENDING_DELETION --> PENDING
+            User pends a listing for deletion
+                ANY --> PENDING_DELETION
     test_case:
         Set Test Notification Listing to Pend for Deletion Status
+        RESULTS - Notificaiton launched = Listing Owner has requested the deletion of Test Notification Listing listing
         Logged on as jones (owner of <Test Notification> Listing)
         Undeleted the Test Notification Listing
         Logged on as Org Content Steward - julia
@@ -685,12 +691,63 @@ class PendingDeletionCancellationNotification(NotificationBase):  # Not Verified
         return Notification.LISTING
 
     def get_notification_db_subtype(self):
-        return Notification.PENDING_DELETION_CANCELLATION
+        return Notification.PENDING_DELETION_TO_STEWARD
 
     def get_target_list(self):
         current_listing = self.entity
         current_listing_agency_id = current_listing.agency.id
-        return Profile.objects.filter(stewarded_organizations__in=[current_listing_agency_id], listing_notification_flag=True).all().distinct()
+        target_set = set()
+
+        for steward in Profile.objects.filter(stewarded_organizations__in=[current_listing_agency_id], listing_notification_flag=True).all():
+            target_set.add(steward)
+
+        for admin in Profile.objects.filter(user__groups__name='APPS_MALL_STEWARD', listing_notification_flag=True).all():
+            target_set.add(admin)
+
+        return list(target_set)
+
+
+class PendingDeletionApprovedNotification(NotificationBase):
+    """
+    notification_type: PendingDeletionApproved
+        As a listing owner I want a notification if a steward has approved the deletion of the listing
+    event_occurs:
+        This event occurs when
+            Steward approves listing
+                PENDING_DELETION --> DELETED
+    test_case:
+        Set Test Notification Listing to Pend for Deletion Status
+        RESULTS - Notificaiton launched = Listing Owner has requested the deletion of Test Notification Listing listing
+        Logged on as Org Content Steward - julia
+        Approve the deletion requested
+        Logged on as owner - jones
+        RESULTS - Notificaiton launched = Listing Owner cancelled deletion of Test Notification Listing listing
+    """
+
+    def modify_notification_before_save(self, notification_object):
+        notification_object.listing = self.entity
+
+    def get_notification_db_type(self):
+        return Notification.LISTING
+
+    def get_notification_db_subtype(self):
+        return Notification.PENDING_DELETION_APPROVED
+
+    def get_target_list(self):
+        current_listing = self.entity
+        current_listing_agency_id = current_listing.agency.id
+        target_set = set()
+
+        for steward in Profile.objects.filter(stewarded_organizations__in=[current_listing_agency_id], listing_notification_flag=True).all():
+            target_set.add(steward)
+
+        for admin in Profile.objects.filter(user__groups__name='APPS_MALL_STEWARD', listing_notification_flag=True).all():
+            target_set.add(admin)
+
+        for owner in current_listing.owners.filter(listing_notification_flag=True).all().distinct():
+            target_set.add(owner)
+
+        return list(target_set)
 
 
 class ListingSubmissionNotification(NotificationBase):
