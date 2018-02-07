@@ -1,11 +1,31 @@
 
-### 1.0.97 (None)
+### 1.0.98 (None) 
+
+#### Fixes  
+* **notification**:  listing modification notification ([03b6f9e9](https://github.com/aml-development/ozp-backend/commit/03b6f9e9cd744070785505fd03270dcf5be13ea9))    
+* **library**:  fix for import_bookmarks ([36f6c7d8](https://github.com/aml-development/ozp-backend/commit/36f6c7d826fd76186ab0cb5f9b5889913f626568))    
+
+#### Refactor  
+* **url**:  refactor urls.py ([5a533a65](https://github.com/aml-development/ozp-backend/commit/5a533a658d45e3943326161899db7ab4eede7c1f))    
+
+#### Merge Pull Requests  
+* Merge pull request #401 from aml-development/es_20180131 ([73cf42de](https://github.com/aml-development/ozp-backend/commit/73cf42de30eb64a3a8c7725b0aa7412570b845a8))
+* Merge pull request #403 from aml-development/notificaiton_listing_change ([5040c51e](https://github.com/aml-development/ozp-backend/commit/5040c51e383c67b20ab1252a652d8118720a2c83))
+* Merge pull request #402 from aml-development/share_folder_duplication_fix ([3b21e258](https://github.com/aml-development/ozp-backend/commit/3b21e25802ef5ef9fff8890b397eefdf318397ca))      
+
+#### Performance  
+* **update_listing**:  performance test ([66e4202a](https://github.com/aml-development/ozp-backend/commit/66e4202a49a22a890f892135bc2a1d36b9d1b284))        
+
+### 1.0.97 (2018-01-31)
 
 #### Feature  
 * **makefile**:  self-documenting MakeFile ([08b16881](https://github.com/aml-development/ozp-backend/commit/08b16881c1c857ceb8ab974d5a9ee55699bf865a))    
 
 #### Fixes  
-* **msgpack**:  fix postgres issue when MSGPACK_PUREPYTHON ([301b8a28](https://github.com/aml-development/ozp-backend/commit/301b8a286c6e6a4f77a3c13c8deb13ccf8211f9f))     
+* **msgpack**:  fix postgres issue when MSGPACK_PUREPYTHON ([301b8a28](https://github.com/aml-development/ozp-backend/commit/301b8a286c6e6a4f77a3c13c8deb13ccf8211f9f))    
+
+#### Refactor  
+* **es**:  listing change ([bbf4ea9f](https://github.com/aml-development/ozp-backend/commit/bbf4ea9fe3e59e08b734942708f657c1c8b8e192))    
 
 #### Merge Pull Requests  
 * Merge pull request #398 from aml-development/recommender_fix_20180130 ([1860a1db](https://github.com/aml-development/ozp-backend/commit/1860a1db5742937dbb8e56a7e2a53d47ca5546d6))           
