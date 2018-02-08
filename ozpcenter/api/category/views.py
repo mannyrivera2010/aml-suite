@@ -89,14 +89,12 @@ class BulkCategoryListingViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsUser,)
     serializer_class = serializers.CategoryListingSerializer
 
-    # def get_queryset(self):
-    #     return
-
     def get_queryset(self):
         return
 
-    def list(self, request, category_pk=None):
-        queryset = model_access.get_listing_by_category_id(category_pk)
+    def list(self, request, category_pk=None, reraise=False):
+        username = request.user.username
+        queryset = model_access.get_listing_by_category_id(username, category_pk, reraise)
         print(queryset)
         serializer = serializers.CategoryListingSerializer(queryset, context={'request': request}, many=True)
 
