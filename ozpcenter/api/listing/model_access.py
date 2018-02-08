@@ -355,6 +355,18 @@ def get_rejection_listings(username):
     return activities
 
 
+def get_pending_deletion_listings(username):
+    """
+    Get Pending Deletion Listings for a user
+
+    Args:
+        username (str): username for user
+    """
+    activities = models.ListingActivity.objects.for_user(username).filter(
+        action=models.ListingActivity.PENDING_DELETION)
+    return activities
+
+
 def _add_listing_activity(author, listing, action, change_details=None,
                           description=None):
     """
@@ -455,7 +467,7 @@ def submit_listing(author, listing):
     return listing
 
 
-def pending_delete_listing(author, listing):
+def pending_delete_listing(author, listing, pending_description):
     """
     Submit a listing for Deletion
 
@@ -467,8 +479,10 @@ def pending_delete_listing(author, listing):
         listing
     """
     # TODO: check that all required fields are set
-    listing = _add_listing_activity(author, listing, models.ListingActivity.PENDING_DELETION)
+    print(pending_description)
+    listing = _add_listing_activity(author, listing, models.ListingActivity.PENDING_DELETION, description=pending_description)
     listing.approval_status = models.Listing.PENDING_DELETION
+    listing.is_enabled = False
     listing.edited_date = utils.get_now_utc()
     listing.save()
     return listing

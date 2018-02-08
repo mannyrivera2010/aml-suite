@@ -145,6 +145,22 @@ class ListingTest(TestCase):
         approved_org_activity = listing_activities[0]
         self.assertEqual(approved_org_activity.author.user.username, username)
 
+    def test_pending_delete_listing(self):
+        steward = generic_model_access.get_profile('wsmith')
+        username = steward.user.username
+        air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
+
+        description = 'this app needs to be deleted'
+        model_access.pending_delete_listing(steward, air_mail, description)
+
+        air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
+        self.assertEqual(air_mail.last_activity.action, models.ListingActivity.PENDING_DELETION)
+
+        listing_activities = air_mail.listing_activities.filter(action=models.ListingActivity.PENDING_DELETION)
+        rejected_activity = listing_activities[0]
+        self.assertEqual(rejected_activity.author.user.username, username)
+        self.assertEqual(rejected_activity.description, description)
+
     def test_reject_listing(self):
         steward = generic_model_access.get_profile('wsmith')
         username = steward.user.username

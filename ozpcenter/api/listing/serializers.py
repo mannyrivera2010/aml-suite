@@ -538,7 +538,9 @@ def update_listing(serializer_instance, instance, validated_data):
         if s == models.Listing.PENDING:
             model_access.submit_listing(user, instance)
         if s == models.Listing.PENDING_DELETION:
-            model_access.pending_delete_listing(user, instance)
+            # pending deletion should be handled through ListingPendingDeletionViewSet
+            # keeping this here for now for backwards compatibility
+            model_access.pending_delete_listing(user, instance, 'Unknown reason')
         if s == models.Listing.APPROVED_ORG:
             model_access.approve_listing_by_org_steward(user, instance)
         if s == models.Listing.APPROVED:
