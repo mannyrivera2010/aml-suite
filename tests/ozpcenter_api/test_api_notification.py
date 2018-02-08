@@ -1288,9 +1288,79 @@ class NotificationApiTest(APITestCase):
         expected_data = '1-listing-The<b>juliasapp2</b>listingwasupdated.Thefollowingfieldshavechanged:Title,Description,DescriptionShort,LaunchUrl,VersionName,UsageRequirements,SystemRequirements,UniqueName,WhatIsNew,ListingType,Intents,Agency'
         self.assertEqual(notification_list[0], expected_data)
 
+    # AMLNG-173 - As Org Content Steward, I want notification if an owner has cancelled an app that was pending deletion
+    # AMLOS-490 - "Pend for deletion" request should launch notification to org steward.
+    def test_receive_notification_pending_delete_changes(self):
+        # Change agency of 1 to minitrue and owner of 122 and 123 to jones
+        APITestHelper.edit_listing(self, 122, {"agency": {"short_name": "Minitrue", "title": "Ministry of Truth"}}, 'bigbrother')
+        APITestHelper.edit_listing(self, 122, {"owners": [{"user": {"username": "jones"}}]}, 'bigbrother')
+        APITestHelper.edit_listing(self, 123, {"agency": {"short_name": "Minitrue", "title": "Ministry of Truth"}}, 'bigbrother')
+        APITestHelper.edit_listing(self, 123, {"owners": [{"user": {"username": "jones"}}]}, 'bigbrother')
+
+        # PENDING_DELETION will send notificaiton to julia and big brother
+        # Jones Pending will send message to julia and bigbrother
+        APITestHelper.edit_listing(self, 122, {'approval_status': "PENDING_DELETION"}, 'jones')
+        APITestHelper.edit_listing(self, 122, {'approval_status': "PENDING"}, 'jones')
+
+        # Bigbrother and julia pending will send message to Jones
+        APITestHelper.edit_listing(self, 122, {'approval_status': "PENDING_DELETION"}, 'jones')
+        APITestHelper.edit_listing(self, 122, {'approval_status': "PENDING"}, 'bigbrother')
+        APITestHelper.edit_listing(self, 122, {'approval_status': "PENDING_DELETION"}, 'jones')
+        APITestHelper.edit_listing(self, 122, {'approval_status': "PENDING"}, 'julia')
+
+        # Deleting will send message to Jones, bigbrother, and julia, independent of who deletes it.
+        APITestHelper.edit_listing(self, 122, {'approval_status': "PENDING_DELETION"}, 'jones')
+        url = '/api/listing/122/'
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+        response = self.client.delete(url, format='json')
+
+        APITestHelper.edit_listing(self, 123, {'approval_status': "PENDING_DELETION"}, 'jones')
+        url = '/api/listing/123/'
+        user = generic_model_access.get_profile('julia').user
+        self.client.force_authenticate(user=user)
+        response = self.client.delete(url, format='json')
+
+        # test jones' notifications
+        url = '/api/self/notification/'
+        response = APITestHelper.request(self, url, 'GET', username='jones', status_code=200)
+        notification_list = self._format_notification_response(response)
+        expected_data = ['123-listing-The<b>Pencil</b>listingwasapprovedfordeletionbyanOrganizationSteward',
+            '122-listing-The<b>Parrotlet</b>listingwasapprovedfordeletionbyanOrganizationSteward',
+            '122-listing-The<b>Parrotlet</b>listingwasundeletedbyanOrganizationSteward',
+            '122-listing-The<b>Parrotlet</b>listingwasundeletedbyanOrganizationSteward']
+        self.assertEqual(notification_list[:4], expected_data)
+
+        # test julia's notifications
+        url = '/api/self/notification/'
+        response = APITestHelper.request(self, url, 'GET', username='julia', status_code=200)
+        notification_list = self._format_notification_response(response)
+        expected_data = ['123-listing-The<b>Pencil</b>listingwasapprovedfordeletionbyanOrganizationSteward',
+            '123-listing-The<b>Pencil</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-The<b>Parrotlet</b>listingwasapprovedfordeletionbyanOrganizationSteward',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-AListingOwnercancelledthedeletionofthe<b>Parrotlet</b>listing.Thislistingisnowawaitingorganizationalapproval',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner']
+        self.assertEqual(notification_list[:8], expected_data)
+
+        # test bigbrother's notifications
+        url = '/api/self/notification/'
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+        notification_list = self._format_notification_response(response)
+        expected_data = ['123-listing-The<b>Pencil</b>listingwasapprovedfordeletionbyanOrganizationSteward',
+            '123-listing-The<b>Pencil</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-The<b>Parrotlet</b>listingwasapprovedfordeletionbyanOrganizationSteward',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner',
+            '122-listing-AListingOwnercancelledthedeletionofthe<b>Parrotlet</b>listing.Thislistingisnowawaitingorganizationalapproval',
+            '122-listing-The<b>Parrotlet</b>listingwassubmittedfordeletionbyitsowner']
+        self.assertEqual(notification_list[:8], expected_data)
+
     # TODO: Unittest for below
     # AMLNG-377 - As an owner or ORG CS, I want to receive notification of user rating and reviews
     # AMLNG-376 - As a ORG CS, I want to receive notification of Listings submitted for my organization
-    # AMLNG-173 - As Org Content Steward, I want notification if an owner has cancelled an app that was pending deletion
     # AMLNG-170 - As an Owner I want to receive notice of whether my deletion request has been approved or rejected
     # AMLNG-461 - As Developer, I want to refactor code to make it modular and easier way to add Notification Types
