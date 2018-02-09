@@ -157,9 +157,9 @@ class ListingTest(TestCase):
         self.assertEqual(air_mail.last_activity.action, models.ListingActivity.PENDING_DELETION)
 
         listing_activities = air_mail.listing_activities.filter(action=models.ListingActivity.PENDING_DELETION)
-        rejected_activity = listing_activities[0]
-        self.assertEqual(rejected_activity.author.user.username, username)
-        self.assertEqual(rejected_activity.description, description)
+        pending_delete_activity = listing_activities[0]
+        self.assertEqual(pending_delete_activity.author.user.username, username)
+        self.assertEqual(pending_delete_activity.description, description)
 
     def test_reject_listing(self):
         steward = generic_model_access.get_profile('wsmith')
@@ -235,14 +235,23 @@ class ListingTest(TestCase):
     def test_delete_listing(self):
         username = 'wsmith'
         air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
-        model_access.delete_listing(username, air_mail)
+        description = 'this app has been deleted'
+
+        model_access.delete_listing(username, air_mail, description)
         self.assertEqual(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
         self.assertTrue(models.Listing.objects.for_user(username).filter(title='Air Mail').first().is_deleted)
+
+        listing_activities = air_mail.listing_activities.filter(action=models.ListingActivity.DELETED)
+        deleted_activity = listing_activities[0]
+        self.assertEqual(deleted_activity.author.user.username, username)
+        self.assertEqual(deleted_activity.description, description)
 
     def test_delete_listing_no_permission(self):
         username = 'jones'
         air_mail = models.Listing.objects.for_user(username).get(title='Air Mail')
-        self.assertRaises(errors.PermissionDenied, model_access.delete_listing, username, air_mail)
+        description = 'this app has been deleted'
+
+        self.assertRaises(errors.PermissionDenied, model_access.delete_listing, username, air_mail, description)
         self.assertEqual(1, models.Listing.objects.for_user(username).filter(title='Air Mail').count())
 
     def test_doc_urls_to_string_dict(self):

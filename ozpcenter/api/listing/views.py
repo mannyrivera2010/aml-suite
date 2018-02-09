@@ -487,14 +487,16 @@ class ListingPendingDeletionViewSet(viewsets.ModelViewSet):
             user = generic_model_access.get_profile(request.user.username)
             listing = model_access.get_listing_by_id(request.user.username,
                 listing_pk)
-            pending_description = request.data['description']
-            listing = model_access.pending_delete_listing(user, listing,
-                pending_description)
+            description = request.data['description'] if 'description' in request.data else None
+            if not description:
+                raise errors.InvalidInput('Description is required when pending a listing for deletion')
+
+            listing = model_access.pending_delete_listing(user, listing, description)
             return Response(data={"listing": {"id": listing.id}},
                 status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error('Exception: {}'.format(e), extra={'request': request})
-            raise errors.RequestException('Error rejecting listing')
+            raise errors.RequestException('Error pending listing for deletion')
 
 
 class ListingRejectionViewSet(viewsets.ModelViewSet):
@@ -888,7 +890,11 @@ class ListingViewSet(viewsets.ModelViewSet):
         """
         queryset = self.get_queryset()
         listing = get_object_or_404(queryset, pk=pk)
-        model_access.delete_listing(request.user.username, listing)
+        description = request.data['description'] if 'description' in request.data else None
+        if not description:
+            raise errors.InvalidInput('Description is required when deleting a listing')
+
+        model_access.delete_listing(request.user.username, listing, description)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def update(self, request, pk=None):

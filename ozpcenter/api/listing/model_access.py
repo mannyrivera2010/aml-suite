@@ -479,12 +479,20 @@ def pending_delete_listing(author, listing, pending_description):
         listing
     """
     # TODO: check that all required fields are set
-    print(pending_description)
-    listing = _add_listing_activity(author, listing, models.ListingActivity.PENDING_DELETION, description=pending_description)
+    old_approval_status = listing.approval_status
+    listing = _add_listing_activity(author, listing, models.ListingActivity.PENDING_DELETION,
+                                    description=pending_description)
     listing.approval_status = models.Listing.PENDING_DELETION
     listing.is_enabled = False
     listing.edited_date = utils.get_now_utc()
     listing.save()
+
+    dispatcher.publish('listing_approval_status_changed',
+                       listing=listing,
+                       profile=author,
+                       old_approval_status=old_approval_status,
+                       new_approval_status=listing.approval_status)
+
     return listing
 
 
@@ -769,7 +777,7 @@ def delete_listing_review(username, review):
     return listing
 
 
-def delete_listing(username, listing):
+def delete_listing(username, listing, delete_description):
     """
     TODO: need a way to keep track of this listing as being deleted.
 
@@ -793,7 +801,8 @@ def delete_listing(username, listing):
     if listing.is_deleted:
         raise errors.PermissionDenied('The listing has already been deleted')
     old_approval_status = listing.approval_status
-    listing = _add_listing_activity(profile, listing, models.ListingActivity.DELETED)
+    listing = _add_listing_activity(profile, listing, models.ListingActivity.DELETED,
+                                    description=delete_description)
     listing.is_deleted = True
     listing.is_enabled = False
     listing.is_featured = False
