@@ -46,7 +46,7 @@ def get_category_by_id(input_id, reraise=False):
         return None
 
 
-def get_listing_by_category_id(username, category_id, reraise=False):
+def get_listing_by_category_id(profile, category_id, reraise=False):
     """
     Get listings by category_id
 
@@ -55,52 +55,27 @@ def get_listing_by_category_id(username, category_id, reraise=False):
         category_id
         reraise(bool)
     """
-    # TODO, GET listing based on the role
-    # Logic
-    # ensure apps steward sees all listings or
-    # org steward only sees her organizations listings or
-    # user only sees her listings
-    #
-
-    profile = generic_model_access.get_profile(username)
-    print(profile, profile.highest_role(), category_id)
-
     try:
-        user = generic_model_access.get_profile(username)
-
-        if profile.highest_role() == 'APPS_MALL_STEWARD':
+        profile_highest_role = profile.highest_role()
+        if profile_highest_role == 'APPS_MALL_STEWARD':
             # Get all listings that contain this category
-            print('In condition: APPS_MALL_STEWARD')
             queryset = models.Listing.objects.filter(categories=category_id)
-            print(queryset.query)
             return queryset
-        elif profile.highest_role() == 'ORG_STEWARD':
-            # Get listings where the user is an Org_Steward   TODO: Check query
-            print('In condition: ORG_STEWARD')
-
-            user_orgs = user.stewarded_organizations.all()
-            # returns  <QuerySet [Ministry of Truth, Ministry of Love]>
-
-            user_orgs = [i.title for i in user_orgs]
-            # returns ['Ministry of Truth', 'Ministry of Love']
-
-            user_agency_ids = [agency.id for agency in models.Agency.objects.filter(title__in=user_orgs)]
-            # returns [ 1,3]
+        elif profile_highest_role == 'ORG_STEWARD':
+            user_orgs = profile.stewarded_organizations.all()
 
             queryset = (models.Listing
                         .objects
                         .filter(categories=category_id)
-                        .filter(agency__in=user_agency_ids))
-            print(queryset.query)
+                        .filter(agency__in=user_orgs))
+
             return queryset
         else:
             # Get listings where the user is an owner
-            print('In condition: Owner')
             queryset = (models.Listing
                         .objects
                         .filter(categories=category_id,
-                                listing__owners__user__username__exact=username))
-            print(queryset.query)
+                                owners=profile))
             return queryset
 
     except ObjectDoesNotExist as err:

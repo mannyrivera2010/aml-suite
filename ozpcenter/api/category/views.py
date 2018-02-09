@@ -14,6 +14,7 @@ from ozpcenter import permissions
 import ozpcenter.api.category.model_access as model_access
 import ozpcenter.api.category.serializers as serializers
 from ozpcenter.models import Listing
+from ozpcenter import errors
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -92,10 +93,70 @@ class BulkCategoryListingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return
 
-    def list(self, request, category_pk=None, reraise=False):
-        username = request.user.username
-        queryset = model_access.get_listing_by_category_id(username, category_pk, reraise)
-        print(queryset)
+    def list(self, request, category_pk=None):
+        """
+        Get a list of listings for that category
+        """
+        queryset = model_access.get_listing_by_category_id(request.user.profile, category_pk)
         serializer = serializers.CategoryListingSerializer(queryset, context={'request': request}, many=True)
 
         return Response(serializer.data)
+
+    def create(self, request, category_pk=None):
+        """
+        Bulk Update (Post)
+
+        [
+            {
+                "id": 7,
+                "categories": [
+                    {
+                        "title": "Business",
+                    },
+                    {
+                        "title": "Finance",
+                    }
+                ]
+            },
+            {
+                "id": 65,
+                "categories": [
+                    {
+                        "title": "Finance",
+                    }
+                ]
+            }
+        ]
+        """
+        serializer = serializers.CreateCategoryListingSerializer(data=request.data, context={'request': request}, many=True)
+
+        if not serializer.is_valid():
+            raise errors.ValidationException('{0}'.format(serializer.errors))
+
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def retrieve(self, request, category_pk=None, pk=None):
+        """
+        This method is not supported
+        """
+        raise errors.NotImplemented('HTTP Verb Not Supported')
+
+    def update(self, request, category_pk=None, pk=None):
+        """
+        This method is not supported
+        """
+        raise errors.NotImplemented('HTTP Verb Not Supported')
+
+    def partial_update(self, request, category_pk=None, pk=None):
+        """
+        This method is not supported
+        """
+        raise errors.NotImplemented('HTTP Verb Not Supported')
+
+    def destroy(self, request, category_pk=None, pk=None):
+        """
+        This method is not supported
+        """
+        raise errors.NotImplemented('HTTP Verb Not Supported')
