@@ -51,7 +51,7 @@ def get_listing_by_category_id(profile, category_id, reraise=False):
     Get listings by category_id
 
     Args:
-        username(str)
+        profile
         category_id
         reraise(bool)
     """
@@ -69,7 +69,6 @@ def get_listing_by_category_id(profile, category_id, reraise=False):
                         .filter(categories=category_id)
                         .filter(agency__in=user_orgs))
 
-            return queryset
         else:
             # Get listings where the user is an owner
             queryset = (models.Listing

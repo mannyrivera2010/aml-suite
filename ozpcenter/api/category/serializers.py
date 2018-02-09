@@ -163,6 +163,4 @@ class CreateCategoryListingSerializer(serializers.HyperlinkedModelSerializer):
             print(category_object)
             listing_object.categories.add(category_object)
 
-        print('-' * 20)
-
         return validated_data['listing']

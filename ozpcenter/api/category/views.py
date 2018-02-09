@@ -104,7 +104,7 @@ class BulkCategoryListingViewSet(viewsets.ModelViewSet):
 
     def create(self, request, category_pk=None):
         """
-        Bulk Update (Post)
+        ModelViewSet for Bulk Update (Post)
 
         [
             {
