@@ -852,8 +852,9 @@ class Profile(models.Model):
     # email_notification_flag: True = Send Emails out for notification
     email_notification_flag = models.BooleanField(default=True)
     # listing_notification_flag will disable/enable:
-    #   ListingSubmissionNotification, PendingDeletionCancellationNotification, PendingDeletionRequestNotification,
-    #  ListingPrivateStatusNotification, ListingReviewNotification, ListingNotification, Listing Change
+    #   ListingSubmissionNotification, PendingDeletionToStewardNotification, PendingDeletionToOwnerNotification,
+    #  ListingPrivateStatusNotification, ListingReviewNotification, ListingNotification, Listing Change,
+    #  PendingDeletionApprovedNotification
     listing_notification_flag = models.BooleanField(default=True)
     # subscription_notification_flag  will disable/enable:
     #    TagSubscriptionNotification, CategorySubscriptionNotification
@@ -1613,8 +1614,9 @@ class Notification(models.Model):
     LISTING_NEW = 'listing_new'
     LISTING_REVIEW = 'listing_review'  # When a review is left on a listing
     LISTING_PRIVATE_STATUS = 'listing_private_status'  # When a listing is changed to private
-    PENDING_DELETION_REQUEST = 'pending_deletion_request'  # When a steward approves an app deletion request
-    PENDING_DELETION_CANCELLATION = 'pending_deletion_cancellation'  # When a steward rejects an app deletion request
+    PENDING_DELETION_TO_OWNER = 'pending_deletion_to_owner'  # When a steward rejects an app deletion request
+    PENDING_DELETION_TO_STEWARD = 'pending_deletion_to_steward'  # When an owner submits or cancels an app deletion request
+    PENDING_DELETION_APPROVED = 'pending_deletion_approved'  # When a steward approves an app deletion request
     REVIEW_REQUEST = 'review_request'  # When an APP_STEWARD notifies ORG_STEWARDS to review their apps and makes sure they are up to date
     SUBSCRIPTION_CATEGORY = 'subscription_category'  # When there is a new app in a subscribed category
     SUBSCRIPTION_TAG = 'subscription_tag'  # When there is a new app in a subscribed tag
@@ -1623,8 +1625,9 @@ class Notification(models.Model):
         (LISTING_NEW, 'listing_new'),
         (LISTING_REVIEW, 'listing_review'),
         (LISTING_PRIVATE_STATUS, 'listing_private_status'),
-        (PENDING_DELETION_REQUEST, 'pending_deletion_request'),
-        (PENDING_DELETION_CANCELLATION, 'pending_deletion_cancellation'),
+        (PENDING_DELETION_TO_OWNER, 'pending_deletion__to_owner'),
+        (PENDING_DELETION_TO_STEWARD, 'pending_deletion_to_steward'),
+        (PENDING_DELETION_APPROVED, 'pending_deletion_approved'),
         (REVIEW_REQUEST, 'review_request'),
         (SUBSCRIPTION_CATEGORY, 'subscription_category'),
         (SUBSCRIPTION_TAG, 'subscription_tag')

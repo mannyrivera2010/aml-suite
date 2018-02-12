@@ -76,6 +76,7 @@ class ListingObserver(Observer):
 
         AMLNG-170 - As an Owner I want to receive notice of whether my deletion request has been approved or rejected
         AMLNG-173 - As an Admin I want notification if an owner has cancelled an app that was pending deletion
+        AMLOS-490 - As an Org Steward or Admin, I want to receive a notification when a listing is submitted to pending deletion
 
         AMLNG-380 - As a user, I want to receive notification when a Listing is added to a subscribed category
         AMLNG-392 - As a user, I want to receive notification when a Listing is added to a subscribed tag
@@ -108,15 +109,24 @@ class ListingObserver(Observer):
 
         # AMLNG-173 - PendingDeletionCancellation
         if profile in listing.owners.all():  # Check to see if current profile is owner of listing
-            if (old_approval_status == models.Listing.PENDING_DELETION and
-                    new_approval_status == models.Listing.PENDING):
-                message = 'A Listing Owner cancelled the deletion of the <b>{}</b> listing'.format(listing.title)
+            if (new_approval_status == models.Listing.PENDING_DELETION):
+                message = 'The <b>{}</b> listing was submitted for deletion by its owner'.format(listing.title)
                 notification_model_access.create_notification(author_username=username,
                                                               expires_date=now_plus_month,
                                                               message=message,
                                                               listing=listing,
                                                               group_target=Notification.ORG_STEWARD,
-                                                              notification_type='PendingDeletionCancellationNotification')
+                                                              notification_type='PendingDeletionToStewardNotification')
+
+            if (old_approval_status == models.Listing.PENDING_DELETION and
+                    new_approval_status == models.Listing.PENDING):
+                message = 'A Listing Owner cancelled the deletion of the <b>{}</b> listing. This listing is now awaiting organizational approval'.format(listing.title)
+                notification_model_access.create_notification(author_username=username,
+                                                              expires_date=now_plus_month,
+                                                              message=message,
+                                                              listing=listing,
+                                                              group_target=Notification.ORG_STEWARD,
+                                                              notification_type='PendingDeletionToStewardNotification')
 
         # AMLNG-170 - PendingDeletionRequest
         elif profile.highest_role() in ['APPS_MALL_STEWARD', 'ORG_STEWARD']:
@@ -129,7 +139,7 @@ class ListingObserver(Observer):
                                                               message=message,
                                                               listing=listing,
                                                               group_target=Notification.USER,
-                                                              notification_type='PendingDeletionRequestNotification')
+                                                              notification_type='PendingDeletionApprovedNotification')
 
             if (old_approval_status == models.Listing.PENDING_DELETION and
                     new_approval_status == models.Listing.PENDING):
@@ -140,7 +150,7 @@ class ListingObserver(Observer):
                                                               message=message,
                                                               listing=listing,
                                                               group_target=Notification.USER,
-                                                              notification_type='PendingDeletionRequestNotification')
+                                                              notification_type='PendingDeletionToOwnerNotification')
 
             if (old_approval_status == models.Listing.PENDING_DELETION and
                     new_approval_status == models.Listing.REJECTED):
@@ -151,7 +161,7 @@ class ListingObserver(Observer):
                                                               message=message,
                                                               listing=listing,
                                                               group_target=Notification.USER,
-                                                              notification_type='PendingDeletionRequestNotification')
+                                                              notification_type='PendingDeletionToOwnerNotification')
 
     def listing_categories_changed(self, listing=None, profile=None, old_categories=None, new_categories=None):
         """
