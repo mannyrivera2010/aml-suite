@@ -186,7 +186,7 @@ class RecommenderProfileResultSet(object):
 
         recommendation_feedback_query = models.RecommendationFeedback.objects.filter(target_profile=self.profile_instance, feedback=-1)
         for recommendation_feedback in recommendation_feedback_query:
-            self.filter_dict['negative_feedback'].append(recommendation_feedback.target_listing)
+            self.filter_dict['negative_feedback'].append(recommendation_feedback.target_listing.id)
 
         # Retrieve Profile Bookmarks and remove bookmarked from recommendation list
         self.filter_dict['bookmarked_apps'] = []
