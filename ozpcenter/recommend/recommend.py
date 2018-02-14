@@ -121,19 +121,38 @@ class RecommenderProfileResultSet(object):
         """
         Factory Method to create a RecommenderProfileResultSet from the database
         """
+        recommender_profile_result_set = RecommenderProfileResultSet(profile_instance.id)
+        recommender_profile_result_set.profile_instance = profile_instance
+        recommender_profile_result_set.randomize_recommended = randomize_recommended
+
         # Get Recommended Listings for owner
         target_profile_recommended_entry = models.RecommendationsEntry.objects.filter(target_profile=profile_instance).first()
-
-        recommender_profile_result_set = RecommenderProfileResultSet(profile_instance.id)
 
         if target_profile_recommended_entry:
             recommendation_data = target_profile_recommended_entry.recommendation_data
             if recommendation_data:
                 # Deserialize msgpack object into python object
                 recommended_entry_data = msgpack.unpackb(bytearray(recommendation_data), encoding='utf-8')
+
+                # Convert old format into new for backwards-compatibility
+                if isinstance(recommended_entry_data, dict):
+                    old_format = False
+                    for current_recommender_friendly_name in recommended_entry_data:
+                        current_recommender_friendly_name_value = recommended_entry_data[current_recommender_friendly_name]
+                        if isinstance(current_recommender_friendly_name_value, dict) and 'recommendations' in current_recommender_friendly_name_value:
+                            current_recommendations = current_recommender_friendly_name_value['recommendations']
+                            if isinstance(current_recommendations, list):
+                                replace_dict = {}
+                                old_format = True
+                                for current_recommendation_tuple in current_recommendations:
+                                    if isinstance(current_recommendation_tuple, list) and len(current_recommendation_tuple) == 2:
+                                        replace_dict[current_recommendation_tuple[0]] = current_recommendation_tuple[1]
+                                current_recommender_friendly_name_value['recommendations'] = replace_dict
+
+                    if old_format:
+                        logger.warn('User [{}][{}] has old format for RecommendationsEntry data'.format(profile_instance, profile_instance.id))
+
                 recommender_profile_result_set.recommender_result_set = recommended_entry_data
-                recommender_profile_result_set.profile_instance = profile_instance
-                recommender_profile_result_set.randomize_recommended = randomize_recommended
 
         return recommender_profile_result_set
 
@@ -669,6 +688,8 @@ class RecommenderDirectory(object):
         # Get all profiles in recommender_result_set
         profile_id_list = list(set([profile_id for profile_id in recommender_result_set]))
 
+        logger.info('Generated Recommendations for the following profile ids:{}'.format(sorted(profile_id_list)))
+
         profile_query = models.Profile.objects.filter(id__in=profile_id_list)
         profile_dict = {profile.id: profile for profile in profile_query}
         listing_dict = {listing.id: listing for listing in models.Listing.objects.all()}
@@ -685,7 +706,7 @@ class RecommenderDirectory(object):
                 batch_list.append({'target_profile': profile,
                                    'recommendation_data': msgpack.packb(recommender_result_set[profile_id].recommender_result_set)})
 
-                if len(batch_list) >= 1000:
+                if len(batch_list) >= 500:
                     bulk_recommendations_saver(batch_list)
                     batch_list = []
 
