@@ -69,3 +69,7 @@ crashlytics-build.properties
 fabric.properties
 
 /site/
+
+# Notebooks
+.ipynb_checkpoints/
+*.ipynb_stats
