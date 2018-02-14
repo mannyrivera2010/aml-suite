@@ -1,7 +1,44 @@
 
-### 1.0.98 (None) 
+### 1.0.99 (None)
+
+#### Feature  
+* **category**:  Added Unit tests for GET and POST #534 ([bd32ded7](https://github.com/aml-development/ozp-backend/commit/bd32ded7fb8b1ea0ef79af49cac7e079e1e98856))    
+* **listing**:  require feedback when deleting a listing ([44e15cb7](https://github.com/aml-development/ozp-backend/commit/44e15cb76043593a57c4db1d992ac3ffe4265826))    
+* **bulk update**:  Adds Post Endpoint ([2f70e161](https://github.com/aml-development/ozp-backend/commit/2f70e1619956a9f8124890be29ddc11b5f646f96))    
+* **bulk_category**:  add put api enpoint ([8aec6a0a](https://github.com/aml-development/ozp-backend/commit/8aec6a0a0b08eb2672f08f441cda33eb7ffe3a24))    
+* **endpoint**:  Added GET category listing by role #534 ([55c60f8d](https://github.com/aml-development/ozp-backend/commit/55c60f8d8a007a856db5aceaab17412c63d30e18))    
 
 #### Fixes  
+* **recommender**:  negative response bug ([696b076c](https://github.com/aml-development/ozp-backend/commit/696b076cdbc649763a2014b65692a8528c7abc66))    
+* **notifications**:  pend for delete notifications ([ff276f9b](https://github.com/aml-development/ozp-backend/commit/ff276f9b884636a7fcd373b9c498d2b0b77d04be))    
+
+#### Refactor 
+* **makefile**
+  *  simply makefile ([990891c9](https://github.com/aml-development/ozp-backend/commit/990891c95303ef75bfa35e6a28189b881f77485c))
+  *  refactor makefile ([91ad18ee](https://github.com/aml-development/ozp-backend/commit/91ad18ee22d5abf383ba7431d852d1c4dc505d61))     
+* **recommend**:  backwards comaptibility ([09935eea](https://github.com/aml-development/ozp-backend/commit/09935eea274709938aaf517448af8249760dbf60))    
+
+#### Merge Pull Requests  
+* Merge pull request #413 from aml-development/fix_unit_tests ([1b3c757f](https://github.com/aml-development/ozp-backend/commit/1b3c757f8180d2af07543acb65fb25940490e7c2))
+* Merge pull request #409 from aml-development/20180206_bulk_category ([3340517a](https://github.com/aml-development/ozp-backend/commit/3340517a4092369f5e4f8f8c78e07a3478b93fdb))
+* Merge pull request #408 from aml-development/delete_listing_feedback ([650fc7f6](https://github.com/aml-development/ozp-backend/commit/650fc7f63f1afc3455841c1b65ad881a3be62e08))
+* Merge pull request #412 from aml-development/debugging_with_notebooks ([2df1a73c](https://github.com/aml-development/ozp-backend/commit/2df1a73c86cc44fd032132a9031d5c2c750d50da))
+* Merge pull request #411 from aml-development/20180813_recommender ([c1891d92](https://github.com/aml-development/ozp-backend/commit/c1891d928fbdc9c1d2c325793017f33c351aad7e))
+* Merge pull request #407 from aml-development/pending_deletion_notification_updates ([20f891b2](https://github.com/aml-development/ozp-backend/commit/20f891b2d419b6c5cb17f78b17788e0fd626d430))
+* Merge pull request #405 from aml-development/pending_deletion_feedback ([429316d8](https://github.com/aml-development/ozp-backend/commit/429316d8b1fc7092c50591dd62cfba35b34bba0f))         
+
+#### Changes  
+* making unit tests pass based on previous changes ([d6b22acd](https://github.com/aml-development/ozp-backend/commit/d6b22acdc2b0f9caac7f9b520f1cfce43ae214a1))    
+* **notification**:  migration file ([573b2aff](https://github.com/aml-development/ozp-backend/commit/573b2affd5474399ddef396c11f92a0e84b45ff1))     
+
+### 1.0.98 (2018-02-07)
+
+#### Feature  
+* **bulk_category**:  add get api for bulk category ([aefa63e0](https://github.com/aml-development/ozp-backend/commit/aefa63e01dbe99bbd4bddc2e758b2b802e34f08c))    
+* **listing**:  require feedback when pending a listing for deletion ([1d5647c1](https://github.com/aml-development/ozp-backend/commit/1d5647c1263b24317de71ba305d8c235aa5dbb3a))    
+
+#### Fixes  
+* **notifications**:  pend for delete notifications ([b96eb491](https://github.com/aml-development/ozp-backend/commit/b96eb491e5702ef37c7331a38f9aa9274db43ba8))    
 * **notification**:  listing modification notification ([03b6f9e9](https://github.com/aml-development/ozp-backend/commit/03b6f9e9cd744070785505fd03270dcf5be13ea9))    
 * **library**:  fix for import_bookmarks ([36f6c7d8](https://github.com/aml-development/ozp-backend/commit/36f6c7d826fd76186ab0cb5f9b5889913f626568))    
 
@@ -14,7 +51,10 @@
 * Merge pull request #402 from aml-development/share_folder_duplication_fix ([3b21e258](https://github.com/aml-development/ozp-backend/commit/3b21e25802ef5ef9fff8890b397eefdf318397ca))      
 
 #### Performance  
-* **update_listing**:  performance test ([66e4202a](https://github.com/aml-development/ozp-backend/commit/66e4202a49a22a890f892135bc2a1d36b9d1b284))        
+* **update_listing**:  performance test ([66e4202a](https://github.com/aml-development/ozp-backend/commit/66e4202a49a22a890f892135bc2a1d36b9d1b284))      
+
+#### Changes  
+* side branch devoted to displaying the ability of jupyter notebooks to debug and profile code ([91b78492](https://github.com/aml-development/ozp-backend/commit/91b784921828bd9dd471652ea022fafbee4159e9))     
 
 ### 1.0.97 (2018-01-31)
 
