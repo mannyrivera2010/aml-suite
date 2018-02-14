@@ -214,7 +214,8 @@ class ListingApiTest(APITestCase):
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
         url = '/api/listing/1/'
-        response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=204)
+        data = {'description': 'deleting listing'}
+        response = APITestHelper.request(self, url, 'DELETE', data=data, username='wsmith', status_code=204)
 
         url = '/api/listing/1/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
@@ -223,13 +224,15 @@ class ListingApiTest(APITestCase):
 
     def test_delete_listing_permission_denied(self):
         url = '/api/listing/1/'
-        response = APITestHelper.request(self, url, 'DELETE', username='jones', status_code=403)
+        data = {'description': 'deleting listing'}
+        response = APITestHelper.request(self, url, 'DELETE', data=data, username='jones', status_code=403)
 
         self.assertEqual(response.data['error_code'], (ExceptionUnitTestHelper.permission_denied())['error_code'])
 
     def test_delete_listing_permission_denied_2nd_party(self):
         url = '/api/listing/1/'
-        response = APITestHelper.request(self, url, 'DELETE', username='johnson', status_code=403)
+        data = {'description': 'deleting listing'}
+        response = APITestHelper.request(self, url, 'DELETE', data=data, username='johnson', status_code=403)
 
         self.assertEqual(response.data, ExceptionUnitTestHelper.permission_denied('Current profile does not have delete permissions'))
 

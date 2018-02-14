@@ -275,7 +275,7 @@ class APITestHelper(object):
         elif method.upper() == 'PUT':
             response = test_case_instance.client.put(url, data, format=format_str)
         elif method.upper() == 'DELETE':
-            response = test_case_instance.client.delete(url, format=format_str)
+            response = test_case_instance.client.delete(url, data, format=format_str)
         elif method.upper() == 'PATCH':
             response = test_case_instance.client.patch(url, format=format_str)
         else:
