@@ -62,15 +62,16 @@ def get_listing_by_category_id(profile, category_id, reraise=False):
             queryset = models.Listing.objects.filter(categories=category_id)
             return queryset
         elif profile_highest_role == 'ORG_STEWARD':
+            # Get listings associated with Org Steward's agency(organization) that contain this category
             user_orgs = profile.stewarded_organizations.all()
 
             queryset = (models.Listing
                         .objects
-                        .filter(categories=category_id)
-                        .filter(agency__in=user_orgs))
+                        .filter(categories__in=category_id, agency__in=user_orgs))
+            return queryset
 
         else:
-            # Get listings where the user is an owner
+            # Get listings where the user is an owner that contain this category
             queryset = (models.Listing
                         .objects
                         .filter(categories=category_id,

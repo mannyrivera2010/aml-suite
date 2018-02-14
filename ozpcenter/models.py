@@ -1021,7 +1021,6 @@ class AccessControlListingManager(models.Manager):
 
     def get_queryset(self):
         queryset = super(AccessControlListingManager, self).get_queryset()
-        return queryset
         return self.apply_select_related(queryset)
 
     def for_user(self, username):
