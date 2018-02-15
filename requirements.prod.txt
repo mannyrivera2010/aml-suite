@@ -21,3 +21,6 @@ gunicorn==19.7.1
 
 PyYAML==3.12
 msgpack-python==0.4.8
+
+celery==4.1.0
+amqp==2.2.2

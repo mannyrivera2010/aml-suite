@@ -17,6 +17,8 @@ coverage==4.4.2
 # Deployment
 wheel==0.30.0
 
+watchdog==0.8.3
+
 # Notebooks
 bleach==2.1.2
 decorator==4.2.1

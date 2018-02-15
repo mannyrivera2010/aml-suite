@@ -164,6 +164,23 @@ LOGGING = {
     },
 }
 
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html#configuration
+# 'redis://localhost:6379/'
+# 'amqp://guest:password@localhost:5672/'
+CELERY_BROKER_URL = 'redis://localhost:6379/11'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/12'
+# 'rpc://'
+# 'elasticsearch://example.com:9200/index_name/doc_type'  # encoding issue
+# 'redis://localhost:6379/0'  # hangs
+# CELERY_RESULT_PERSISTENT = True
+
+# http://docs.celeryproject.org/en/latest/userguide/calling.html#calling-serializers
+CELERY_TASK_SERIALIZER = 'json'  # 'msgpack'
+CELERY_RESULT_SERIALIZER = 'json'  # 'msgpack'
+CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
+# CELERY_timezone = 'Europe/Oslo'
+# CELERY_enable_utc = True
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -299,7 +316,11 @@ ES_AUTH_USERNAME = os.getenv('ES_AUTH_USERNAME', 'user')
 ES_AUTH_PASSWORD = os.getenv('ES_AUTH_PASSWORD', 'password')
 
 # Email Settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# 'django.core.mail.backends.console.EmailBackend'
+# 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_FILE_PATH = 'test_email_msg' # change this to a proper location
+
 EMAIL_PORT = 1025
 # EMAIL_HOST localhost
 # EMAIL_HOST_PASSWORD
