@@ -7,7 +7,7 @@ from django.template import Template
 from django.conf import settings
 
 from ozpcenter import models
-
+from ozpcenter.utils import millis
 
 logger = get_task_logger(__name__)
 
@@ -40,23 +40,33 @@ def create_email(self, profile_id):
     Args:
         profile_id: integer
     """
-    # TODO: profile_id to profile_id_list
     results = {'error': False}
-
-    if not str(profile_id).isdigit():
-        results['message'] = 'Profile id is not integer'
-        results['error'] = True
-        return results
-
+    start_time = millis()
     try:
+        # TODO: profile_id to profile_id_list
+        if not str(profile_id).isdigit():
+            results['message'] = 'Profile id is not integer'
+            results['error'] = True
+            results['time'] = millis() - start_time
+            return results
+
         # Check track of all the emails to send
         email_batch_list = []
 
         # Validate to make sure user exists and has email notifications flag enabled
         current_profile = models.Profile.objects.filter(id=profile_id, email_notification_flag=True).first()
         if not current_profile:
-            results['message'] = 'Error Finding Profile'
+            results['message'] = 'Error Finding Profile [id: {}]'.format(profile_id)
             results['error'] = True
+            results['time'] = millis() - start_time
+            return results
+
+        profile_email = current_profile.user.email
+
+        if not profile_email:
+            results['message'] = 'Error Finding Profile Email [id: {}]'.format(profile_id)
+            results['error'] = True
+            results['time'] = millis() - start_time
             return results
 
         # Retrieve All the Notifications for 'current_profile' that are not emailed yet
@@ -65,7 +75,7 @@ def create_email(self, profile_id):
 
         if notifications_mailbox_non_email_count >= 1:
             # Construct messages
-            current_email = create_email_object(current_profile.user.email, notifications_mailbox_non_email_count)
+            current_email = create_email_object(profile_email, notifications_mailbox_non_email_count)
 
             email_batch_list.append(current_email)
 
@@ -94,4 +104,6 @@ def create_email(self, profile_id):
     except Exception as err:
         results['message'] = str(err)
         results['error'] = True
+        results['time'] = millis() - start_time
+    results['time'] = millis() - start_time
     return results

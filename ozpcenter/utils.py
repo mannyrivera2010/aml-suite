@@ -5,10 +5,18 @@ import datetime
 import pytz
 import re
 import os
+import time
 
 # Reference - Code not used
 # from django.template import Context
 # from django.template import Template
+
+
+def millis():
+    """
+    Get millis seconds
+    """
+    return int(round(time.time() * 1000))
 
 
 def str_to_bool(user_input):

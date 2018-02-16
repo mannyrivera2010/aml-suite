@@ -133,8 +133,10 @@ sqlite_restore:
 pgsql_dump: dev_psql
 	pg_dump --username=ozp_user --host=localhost ozp > ozpcenter/scripts/test_data/dump_pgsql.sql
 
-pgsql_restore:
+pgsql_create_user:
 	if [ `psql -tA -c "SELECT 1 AS result FROM pg_database WHERE datname='ozp'" -U postgres --host=localhost` == '1' ] ; then psql -c 'DROP DATABASE ozp;' -U postgres --host=localhost ; fi
 	psql -c 'CREATE DATABASE ozp;' -U postgres --host=localhost
 	psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;' -U postgres --host=localhost
+
+pgsql_restore: pgsql_create_user
 	psql --username=ozp_user --host=localhost ozp < ozpcenter/scripts/test_data/dump_pgsql.sql

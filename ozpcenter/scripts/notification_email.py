@@ -29,13 +29,15 @@ from django.template import Context
 from django.template import Template
 
 from django.conf import settings
-
+from ozpcenter.utils import millis
 
 # from django.core.exceptions import ObjectDoesNotExist
 from ozpcenter import models
 
 
 def run():
+    start_time = millis()
+
     connection = mail.get_connection()
     # Manually open the connection
     connection.open()
@@ -100,3 +102,5 @@ def run():
     # The connection was already open so send_messages() doesn't close it.
     # We need to manually close the connection.
     connection.close()
+
+    print('Email Notification sync tasks took {}'.format(millis() - start_time))
