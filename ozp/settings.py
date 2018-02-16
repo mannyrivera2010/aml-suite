@@ -167,12 +167,20 @@ LOGGING = {
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#configuration
 # 'redis://localhost:6379/'
 # 'amqp://guest:password@localhost:5672/'
-CELERY_BROKER_URL = 'redis://localhost:6379/11'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/12'
+CELERY_BROKER_URL = 'memory://localhost/'
+CELERY_RESULT_BACKEND = 'cache'
+CELERY_CACHE_BACKEND = 'memory'
+CELERY_ALWAYS_EAGER = True
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+CELERY_BROKER_BACKEND = 'memory'
+# CHANGE THIS SETTING
+# CELERY_BROKER_URL = 'redis://localhost:6379/11'  # USE this while developing
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/12'   # USE this while developing
 # 'rpc://'
 # 'elasticsearch://example.com:9200/index_name/doc_type'  # encoding issue
 # 'redis://localhost:6379/0'  # hangs
 # CELERY_RESULT_PERSISTENT = True
+
 
 # http://docs.celeryproject.org/en/latest/userguide/calling.html#calling-serializers
 CELERY_TASK_SERIALIZER = 'json'  # 'msgpack'
@@ -185,13 +193,9 @@ CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 REST_FRAMEWORK = {
@@ -316,7 +320,7 @@ ES_AUTH_USERNAME = os.getenv('ES_AUTH_USERNAME', 'user')
 ES_AUTH_PASSWORD = os.getenv('ES_AUTH_PASSWORD', 'password')
 
 # Email Settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # 'django.core.mail.backends.console.EmailBackend'
 # 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_FILE_PATH = 'test_email_msg' # change this to a proper location

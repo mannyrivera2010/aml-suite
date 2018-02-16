@@ -32,7 +32,7 @@ from ozpcenter import tasks
 from ozpcenter.models import Profile
 from ozpcenter.utils import millis
 
-CHUNK_SIZE = 10
+CHUNK_SIZE = 3
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
@@ -55,23 +55,23 @@ def on_raw_message(body):
     results = body.get('result', [])
 
     for result in results:
-        task_times.append(result.get('time'))
         if result.get('error'):
             logger.error('{} - {} [{}]'.format(event_task_id, result.get('message'), result.get('time')))
         else:
             logger.info('{} - {} [{}]'.format(event_task_id, result.get('message'), result.get('time')))
+            if result.get('time'):
+                task_times.append(result.get('time'))
 
 
 def run():
     """
-
     Send Emails for notifications entry point
     """
     start_time = millis()
     profile_list = Profile.objects.values_list('id').all()
     create_email_task = tasks.create_email.chunks(profile_list, CHUNK_SIZE)
     group_results = create_email_task.apply_async()
-    print('time1: {}'.format(millis() - start_time))
+
     logger.info('Email Notification Group Results: {}'.format(group_results))
     group_results.get(on_message=on_raw_message)
     logger.info('Email Notification Aync tasks took {}'.format(millis() - start_time))
