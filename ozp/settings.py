@@ -165,22 +165,20 @@ LOGGING = {
 }
 
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#configuration
-# 'redis://localhost:6379/'
-# 'amqp://guest:password@localhost:5672/'
-CELERY_BROKER_URL = 'memory://localhost/'
-CELERY_RESULT_BACKEND = 'cache'
-CELERY_CACHE_BACKEND = 'memory'
-CELERY_ALWAYS_EAGER = True
-CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
-CELERY_BROKER_BACKEND = 'memory'
-# CHANGE THIS SETTING
-# CELERY_BROKER_URL = 'redis://localhost:6379/11'  # USE this while developing
-# CELERY_RESULT_BACKEND = 'redis://localhost:6379/12'   # USE this while developing
-# 'rpc://'
-# 'elasticsearch://example.com:9200/index_name/doc_type'  # encoding issue
-# 'redis://localhost:6379/0'  # hangs
-# CELERY_RESULT_PERSISTENT = True
 
+# print('Currently using in-memory celery, please switch to different broker')
+# CELERY_BROKER_URL = 'memory://localhost/'
+# CELERY_RESULT_BACKEND = 'cache'
+# CELERY_CACHE_BACKEND = 'memory'
+# CELERY_ALWAYS_EAGER = True
+# CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+# CELERY_BROKER_BACKEND = 'memory'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/11'
+# CELERY_BROKER_URL = 'amqp://guest:password@localhost:5672/'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/12'
+# CELERY_RESULT_BACKEND = 'rpc://'
+# CELERY_RESULT_BACKEND= 'elasticsearch://example.com:9200/index_name/doc_type'  # encoding issue
 
 # http://docs.celeryproject.org/en/latest/userguide/calling.html#calling-serializers
 CELERY_TASK_SERIALIZER = 'json'  # 'msgpack'
