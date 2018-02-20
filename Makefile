@@ -47,6 +47,14 @@ install_git_hooks:  ## Install Git Hooks
 run:  ## Run the server locally
 	$(use_database) $(use_elasticsearch_str) $(use_runserver_str)
 
+celery_worker:  ## Run the celery worker
+	# env/lib/python3.4/site-packages/watchdog/observers/__init__.py
+	# Change if platform.is_linux(): try: from .polling import PollingObserver as Observer
+	watchmedo auto-restart --directory . --patterns='*.py' --recursive --interval=5 -- celery worker -l info -A ozp
+
+kill_celery_worker:
+	ps aux | grep "celery worker" | grep "Ss" | awk '{print $$2}' | xargs -I {} echo "{}" | xargs kill
+
 run_gunicorn_secure:   ## Run server using gunicorn on HTTPS (preq: clone dev-tools repo)
 	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
 		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
@@ -77,7 +85,7 @@ reindex_es:  use_es  ## Reindex the data into Elasticsearch
 recommend:  ## Run Recommendations algorthims
 	$(use_database) $(use_elasticsearch_str) $(use_runscript_str) recommend
 
-db_migrate:
+db_migrate:  ## Db migrate
 	$(use_database) python manage.py makemigrations ozpcenter
 	$(use_database) python manage.py makemigrations ozpiwc
 	$(use_database) TEST_MODE=True python manage.py migrate
@@ -89,8 +97,11 @@ dev: clean pre create_static install_git_hooks db_migrate  ## Set up development
 dev_fast: clean pre create_static install_git_hooks
 	FAST_MODE=True $(use_database) $(use_runscript_str) sample_data_generator
 
-email:
+email:  ## Notification email server
 	$(use_runscript_str) notification_email
+
+run_debug_email_server:  ## Run Debug Email Server
+	python -m smtpd -n -d -c DebuggingServer localhost:1025
 
 shell:  ## Launch python shell using sqlite
 	$(use_database) python manage.py shell_plus --print-sql
@@ -107,11 +118,11 @@ pyenv: create_virtualenv  ## Create Python Environment and install dependencies
 pyenv_wheel: create_virtualenv  ## Create Python Environment and install dependencies using wheelhouse
 	(source env/bin/activate &&  pip install --no-index --find-links=wheelhouse -r requirements.txt)
 
-upgrade_requirements:
+upgrade_requirements:  ## upgrade requirements
 	pip freeze | cut -d = -f 1 | xargs -n 1 pip install --upgrade
 
-freeze_requirements:
-	pip freeze > requirements.txt
+freeze_requirements:  ## freeze requirements
+	pip freeze > requirements.freeze.txt
 
 sqlite_dump: dev
 	sqlite3 db.sqlite3 .dump > ozpcenter/scripts/test_data/dump_sqlite3.sql
@@ -122,8 +133,10 @@ sqlite_restore:
 pgsql_dump: dev_psql
 	pg_dump --username=ozp_user --host=localhost ozp > ozpcenter/scripts/test_data/dump_pgsql.sql
 
-pgsql_restore:
+pgsql_create_user:
 	if [ `psql -tA -c "SELECT 1 AS result FROM pg_database WHERE datname='ozp'" -U postgres --host=localhost` == '1' ] ; then psql -c 'DROP DATABASE ozp;' -U postgres --host=localhost ; fi
 	psql -c 'CREATE DATABASE ozp;' -U postgres --host=localhost
 	psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;' -U postgres --host=localhost
+
+pgsql_restore: pgsql_create_user
 	psql --username=ozp_user --host=localhost ozp < ozpcenter/scripts/test_data/dump_pgsql.sql
