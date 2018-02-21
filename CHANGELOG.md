@@ -1,5 +1,22 @@
 
-### 1.0.99 (None)
+### 1.0.100 (None)
+
+#### Feature 
+* **celery**
+  *  make celery memory based ([e7ead3b7](https://github.com/aml-development/ozp-backend/commit/e7ead3b77e2c5925bf05475ffd5dd824a0c3e9b6))
+  *  notification email async script ([06f5ab72](https://github.com/aml-development/ozp-backend/commit/06f5ab72f0a6565cf74d6d29acc31a1a073e6267))
+  *  initial celery code ([4ec1112b](https://github.com/aml-development/ozp-backend/commit/4ec1112b997921cce403ab2b0b1715cdb41d6968))     
+* **category_description**:  increase category description length ([3e764b26](https://github.com/aml-development/ozp-backend/commit/3e764b26fc303e01fab1b3747e609ddbfc5bee17))    
+
+#### Fixes  
+* **migration**:  add category migration ([5b19b1e2](https://github.com/aml-development/ozp-backend/commit/5b19b1e2470d697a44bf6f358a1d294e172b5249))    
+* **settings**:  fix setting celery ([31246c09](https://github.com/aml-development/ozp-backend/commit/31246c092b972babe6cbc61ae33cc80dee29c20f))     
+
+#### Merge Pull Requests  
+* Merge pull request #416 from aml-development/20180220_celery ([1e00a24b](https://github.com/aml-development/ozp-backend/commit/1e00a24b5ec40c5038a19f7ba00417c969b59bfb))
+* Merge pull request #414 from aml-development/category_length_increase ([82ce5d5b](https://github.com/aml-development/ozp-backend/commit/82ce5d5be2ac45d91ffed67875ee8b21bd42b916))           
+
+### 1.0.99 (2018-02-14)
 
 #### Feature  
 * **category**:  Added Unit tests for GET and POST #534 ([bd32ded7](https://github.com/aml-development/ozp-backend/commit/bd32ded7fb8b1ea0ef79af49cac7e079e1e98856))    
