@@ -5,6 +5,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from tests.ozpcenter.helper import APITestHelper
+from tests.ozpcenter.util import shorthand_dict
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 
@@ -28,35 +29,36 @@ class AgencyApiTest(APITestCase):
     def test_get_agencies_list(self):
         url = '/api/agency/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
 
-        titles = ['{}.{}'.format(i['short_name'], i['title']) for i in response.data]
+        expected_results = [
+         '(short_name:Miniluv,title:Ministry of Love)',
+         '(short_name:Minipax,title:Ministry of Peace)',
+         '(short_name:Miniplen,title:Ministry of Plenty)',
+         '(short_name:Minitrue,title:Ministry of Truth)',
+         '(short_name:Test,title:Test)',
+         '(short_name:Test 1,title:Test 1)',
+         '(short_name:Test2,title:Test 2)',
+         '(short_name:Test 3,title:Test 3)',
+         '(short_name:Test 4,title:Test 4)']
 
-        expected_results = ['Miniluv.Ministry of Love',
-                            'Minipax.Ministry of Peace',
-                            'Miniplen.Ministry of Plenty',
-                            'Minitrue.Ministry of Truth',
-                            'Test.Test',
-                            'Test 1.Test 1',
-                            'Test2.Test 2',
-                            'Test 3.Test 3',
-                            'Test 4.Test 4']
-
-        self.assertEqual(titles, expected_results)
+        self.assertEqual(shorten_data, expected_results)
 
     def test_get_agency(self):
         url = '/api/agency/1/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
 
-        self.assertEqual(response.data['title'], 'Ministry of Truth')
-        self.assertEqual(response.data['short_name'], 'Minitrue')
+        expected_results = '(short_name:Minitrue,title:Ministry of Truth)'
+        self.assertEqual(shorten_data, expected_results)
 
     def test_create_agency_apps_mall_steward(self):
         url = '/api/agency/'
         data = {'title': 'new agency', 'short_name': 'orgname'}
         response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
 
-        self.assertEqual(response.data['title'], 'new agency')
-        self.assertEqual(response.data['short_name'], 'orgname')
+        self.assertEqual(shorten_data, '(short_name:orgname,title:new agency)')
 
     def test_create_agency_org_steward(self):
         url = '/api/agency/'

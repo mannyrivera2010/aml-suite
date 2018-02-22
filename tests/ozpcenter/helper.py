@@ -14,25 +14,6 @@ TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 
 
-def shorthand_dict(input_object, key=''):
-    is_base_boolean = isinstance(input_object, (int, str, float))
-    is_dict_boolean = isinstance(input_object, dict)
-    is_list_boolean = isinstance(input_object, list)
-    has_key = True if key else False
-
-    if is_list_boolean and not has_key:
-        return [shorthand_dict(ob) for ob in input_object]
-    elif is_list_boolean and has_key:
-        return '[{}]'.format(','.join([shorthand_dict(ob) for ob in input_object]))
-    elif is_dict_boolean:
-        output = []
-        sorted_key = sorted(input_object.keys())
-        output = ['{}:{}'.format(key, shorthand_dict(input_object[key], key)) for key in sorted_key]
-        return '({})'.format(','.join(output))
-    elif is_base_boolean:
-        return '{}'.format(input_object)
-
-
 def patch_environ(new_environ=None, clear_orig=False):
     """
     https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/34333710#34333710
@@ -165,9 +146,10 @@ class APITestHelper(object):
 
     @staticmethod
     def _delete_bookmark_folder(test_case_instance, username, folder_id, status_code=201):
+        url = '/api/self/library/{0!s}/delete_folder/'.format(folder_id)
+
         user = generic_model_access.get_profile(username).user
         test_case_instance.client.force_authenticate(user=user)
-        url = '/api/self/library/{0!s}/delete_folder/'.format(folder_id)
         response = test_case_instance.client.delete(url, format='json')
 
         if response:
@@ -182,10 +164,11 @@ class APITestHelper(object):
 
     @staticmethod
     def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
-        user = generic_model_access.get_profile(username).user
-        test_case_instance.client.force_authenticate(user=user)
         url = '/api/self/library/import_bookmarks/'
         data = {'bookmark_notification_id': bookmark_notification_id}
+
+        user = generic_model_access.get_profile(username).user
+        test_case_instance.client.force_authenticate(user=user)
         response = test_case_instance.client.post(url, data, format='json')
 
         if response:
@@ -213,11 +196,11 @@ class APITestHelper(object):
         Returns:
             response
         """
+        url = '/api/self/library/'
+        data = {'listing': {'id': listing_id}, 'folder': folder_name}
+
         user = generic_model_access.get_profile(username).user
         test_case_instance.client.force_authenticate(user=user)
-
-        data = {'listing': {'id': listing_id}, 'folder': folder_name}
-        url = '/api/self/library/'
         response = test_case_instance.client.post(url, data, format='json')
 
         if response:
@@ -244,10 +227,10 @@ class APITestHelper(object):
         Return:
             response
         """
+        url = '/api/listing/{0!s}/'.format(id)
+
         user = generic_model_access.get_profile(default_user).user
         test_case_instance.client.force_authenticate(user=user)
-        url = '/api/listing/{0!s}/'.format(id)
-        # GET Listing
         data = test_case_instance.client.get(url, format='json').data
 
         for current_key in input_data:

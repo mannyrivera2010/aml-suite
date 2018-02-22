@@ -5,7 +5,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from tests.ozpcenter.helper import APITestHelper
-from tests.ozpcenter.helper import shorthand_dict
+from tests.ozpcenter.util import shorthand_dict
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 from ozpcenter import models
@@ -20,23 +20,23 @@ class CategoryApiTest(APITestCase):
         """
         setUp is invoked before each test method
         """
-        self.maxDiff = None
-        self.expected_categories = ['Accessories.Accessories Description',
-                            'Books and Reference.Things made of paper',
-                            'Business.For making money',
-                            'Communication.Moving info between people and things',
-                            'Education.Educational in nature',
-                            'Entertainment.For fun',
-                            'Finance.For managing money',
-                            'Health and Fitness.Be healthy, be fit',
-                            'Media and Video.Videos and media stuff',
-                            'Music and Audio.Using your ears',
-                            "News.What's happening where",
-                            'Productivity.Do more in less time',
-                            'Shopping.For spending your money',
-                            'Sports.Score more points than your opponent',
-                            'Tools.Tools and Utilities',
-                            'Weather.Get the temperature']
+        self.expected_categories = [
+            '(description:Accessories Description,title:Accessories)',
+            '(description:Things made of paper,title:Books and Reference)',
+            '(description:For making money,title:Business)',
+            '(description:Moving info between people and things,title:Communication)',
+            '(description:Educational in nature,title:Education)',
+            '(description:For fun,title:Entertainment)',
+            '(description:For managing money,title:Finance)',
+            '(description:Be healthy, be fit,title:Health and Fitness)',
+            '(description:Videos and media stuff,title:Media and Video)',
+            '(description:Using your ears,title:Music and Audio)',
+            "(description:What's happening where,title:News)",
+            '(description:Do more in less time,title:Productivity)',
+            '(description:For spending your money,title:Shopping)',
+            '(description:Score more points than your opponent,title:Sports)',
+            '(description:Tools and Utilities,title:Tools)',
+            '(description:Get the temperature,title:Weather)']
 
     @classmethod
     def setUpTestData(cls):
@@ -48,16 +48,16 @@ class CategoryApiTest(APITestCase):
     def test_get_categories_list(self):
         url = '/api/category/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-
-        titles = ['{}.{}'.format(i['title'], i['description']) for i in response.data]
-        self.assertListEqual(titles, self.expected_categories)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
+        self.assertListEqual(shorten_data, self.expected_categories)
 
     def test_get_category(self):
         url = '/api/category/1/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
 
-        self.assertEqual(response.data['title'], 'Accessories')
-        self.assertEqual(response.data['description'], 'Accessories Description')
+        expected_results = '(description:Accessories Description,title:Accessories)'
+        self.assertEqual(shorten_data, expected_results)
 
     def test_get_category_not_found(self):
         url = '/api/category/1000/'
@@ -68,9 +68,10 @@ class CategoryApiTest(APITestCase):
         url = '/api/category/'
         data = {'title': 'new category', 'description': 'category description'}
         response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
 
-        self.assertEqual(response.data['title'], 'new category')
-        self.assertEqual(response.data['description'], 'category description')
+        expected_results = '(description:category description,title:new category)'
+        self.assertEqual(shorten_data, expected_results)
 
     def test_create_category_org_steward(self):
         url = '/api/category/'
@@ -85,9 +86,10 @@ class CategoryApiTest(APITestCase):
         url = '/api/category/1/'
         data = {'title': 'updated category', 'description': 'updated description'}
         response = APITestHelper.request(self, url, 'PUT', data=data, username='bigbrother', status_code=200)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
 
-        self.assertEqual(response.data['title'], 'updated category')
-        self.assertEqual(response.data['description'], 'updated description')
+        expected_results = '(description:updated description,title:updated category)'
+        self.assertEqual(shorten_data, expected_results)
 
     def test_update_category_org_steward(self):
         url = '/api/category/1/'
@@ -103,18 +105,17 @@ class CategoryApiTest(APITestCase):
         url = '/api/category/'
         data = {'title': 'AAA new category', 'description': 'category description'}
         response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
 
-        self.assertEqual(response.data['title'], 'AAA new category')
-        self.assertEqual(response.data['description'], 'category description')
+        expected_results = '(description:category description,title:AAA new category)'
+        self.assertEqual(shorten_data, expected_results)
 
         # GET request
         url = '/api/category/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-
-        titles = ['{}.{}'.format(i['title'], i['description']) for i in response.data]
-        expected_results = ['AAA new category.category description'] + self.expected_categories
-
-        self.assertListEqual(titles, expected_results)
+        shorten_data = shorthand_dict(response.data, exclude_keys=['id'])
+        expected_results = ['(description:category description,title:AAA new category)'] + self.expected_categories
+        self.assertListEqual(shorten_data, expected_results)
 
     def test_delete_category_apps_mall_steward(self):
         url = '/api/category/1/'
