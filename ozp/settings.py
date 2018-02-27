@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import datetime
 
 from ozpcenter.utils import str_to_bool
 
@@ -200,6 +201,7 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'ozpcenter.errors.exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'ozpcenter.auth.pkiauth.PkiAuthentication'
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         ),
@@ -249,6 +251,9 @@ CACHES = {
     },
 }
 
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
 # django-cors-headers
 # TODO: lock this down in production
 CORS_ORIGIN_ALLOW_ALL = True
