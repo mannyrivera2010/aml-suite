@@ -201,8 +201,8 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'ozpcenter.errors.exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'ozpcenter.auth.pkiauth.PkiAuthentication'
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         ),
     # Use Django's standard `django.contrib.auth` permissions,

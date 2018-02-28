@@ -9,7 +9,7 @@ import ozpcenter.api.listing.model_access as model_access
 from ozpcenter import errors
 import ozpcenter.model_access as generic_model_access
 from ozpcenter import models
-from tests.ozpcenter.helper import ListingFile
+from tests.ozpcenter.data_util import ListingFile
 
 
 @override_settings(ES_ENABLED=False)

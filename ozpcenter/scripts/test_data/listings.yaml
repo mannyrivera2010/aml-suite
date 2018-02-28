@@ -48,6 +48,7 @@
   - {author: wsmith, rate: 1, text: I don't like the sound of acoustic guitars. I
       like electric guitars more}
   - {author: syme, rate: 5, text: I love the sound of acoustic guitars}
+  - {author: bigbrother, rate: 3, text: Review for syme loving acoustic guitars, review: True}
 - library_entries:
   - {folder: old, owner: wsmith, position: 0}
   - {folder: null, owner: hodor, position: 0}
