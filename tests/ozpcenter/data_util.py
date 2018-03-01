@@ -13,6 +13,7 @@ class FileQuery(object):
     """
     Query Object Compiler/ Pipeline
     """
+
     def __init__(self):
         self.pipeline = Pipeline()
 
@@ -42,6 +43,14 @@ class FileQuery(object):
         Enter into key
         """
         current_pipe = pipes.DictKeyPipe(key)
+        self.pipeline.add_pipe(current_pipe)
+        return self
+
+    def each_key(self, key):
+        """
+        Enter into key, emit each item in list
+        """
+        current_pipe = pipes.EachKeyPipe(key)
         self.pipeline.add_pipe(current_pipe)
         return self
 

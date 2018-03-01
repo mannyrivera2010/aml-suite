@@ -13,6 +13,13 @@ class DataUtilTest(TestCase):
         """
         pass
 
+    def test_file_query_load_yaml_profile(self):
+        query = data_util.FileQuery()
+        query = query.load_yaml_file('profile.yaml').key('display_name')
+        query_to_list = query.to_list()
+
+        self.assertEqual(22, len(query_to_list))
+
     def test_file_query_load_yaml(self):
         query = data_util.FileQuery()
         query = query.load_yaml_file()

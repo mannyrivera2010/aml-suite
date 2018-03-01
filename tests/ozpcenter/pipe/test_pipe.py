@@ -35,7 +35,7 @@ class PipeTest(TestCase):
         list_out = []
 
         try:
-            while current_pipe.has_next():
+            while True:
                 current_object = current_pipe.next()
                 list_out.append(current_object)
         except recommend_utils.FastNoSuchElementException:
@@ -90,3 +90,60 @@ class PipeTest(TestCase):
         list_out = self._iterate_pipe(len_pipe)
 
         self.assertEqual(list_out, [4, 2, 3, 4])
+
+    def test_pipe_each_key(self):
+        each_key_pipe = pipes.EachKeyPipe('testKey')
+
+        data = [
+            {
+                "testKey": []
+            },
+            {
+                "testKey": [4, 8, 5, 2]
+            },
+            {
+                "testKey": [1, 6, 7]
+            }
+        ]
+        each_key_pipe.set_starts(recommend_utils.ListIterator(data))
+
+        list_out = self._iterate_pipe(each_key_pipe)
+        self.assertEqual(list_out, [4, 8, 5, 2, 1, 6, 7])
+
+    def test_pipe_each_key_mixed(self):
+        each_key_pipe = pipes.EachKeyPipe('testKey')
+
+        data = [
+            {
+                "key2": [5, 7]
+            },
+            {
+                "key3": [4, 8, 5, 2]
+            },
+            {
+                "testKey": [1, 6, 7]
+            }
+        ]
+        each_key_pipe.set_starts(recommend_utils.ListIterator(data))
+
+        list_out = self._iterate_pipe(each_key_pipe)
+        self.assertEqual(list_out, [1, 6, 7])
+
+    def test_pipe_each_key_mixed_none(self):
+        each_key_pipe = pipes.EachKeyPipe('testKey')
+
+        data = [
+            {
+                "key2": [5, 7]
+            },
+            {
+                "testKey": [4, 8, 5, 2]
+            },
+            {
+                "testKey": None
+            }
+        ]
+        each_key_pipe.set_starts(recommend_utils.ListIterator(data))
+
+        list_out = self._iterate_pipe(each_key_pipe)
+        self.assertEqual(list_out, [4, 8, 5, 2])

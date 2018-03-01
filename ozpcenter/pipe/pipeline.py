@@ -61,11 +61,6 @@ class Pipeline(object):
         self.start_pipe = self.pipes[0]
         self.end_pipe = self.pipes[-1]
 
-        print('pipeline_size: {}'.format(pipeline_size))
-        print('start_pipe: {}'.format(self.start_pipe))
-        print('end_pipe: {}'.format(self.end_pipe))
-        print(self.pipes)
-
         for i in list(range(1, pipeline_size)):
             self.pipes[i].set_starts(self.pipes[i - 1])
 

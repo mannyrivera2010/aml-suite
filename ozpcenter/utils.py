@@ -91,6 +91,20 @@ def get_now_utc():
 #     return template.render(template_context)
 
 
+def shorthand_nested(input_object, key='', prefix_key=''):
+    """
+    {'title':'app1', 'category':[{'title':'weather'},{'title':'utils'}]}
+    TO
+    {'title':['app1'],
+     'category[].title':
+
+    """
+    is_base_boolean = isinstance(input_object, (int, str, float))
+    is_dict_boolean = isinstance(input_object, dict)
+    is_list_boolean = isinstance(input_object, list)
+    has_key = True if key else False
+
+
 def shorthand_types(input_object):
     """
     {'title':'app1', 'category':[{'title':'weather'},{'title':'utils'}]}
@@ -102,9 +116,9 @@ def shorthand_types(input_object):
             'type': 'string'
         },
         'category':{
-            'type': 'list'
+            'type': 'list',
             'items':[
-                {'type': 'dict'
+                {'type': 'dict',
                  'props':{
                     'title':{'type':'string'}
                  }
