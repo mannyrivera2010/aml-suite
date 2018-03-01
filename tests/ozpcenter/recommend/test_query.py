@@ -37,11 +37,11 @@ class GraphQueryTest(TestCase):
 
     def test_graph_query_builder(self):
         query = self.graph.query().V()
-        self.assertEqual(str(query), '[GraphVertexPipe()]')
+        self.assertEqual(str(query), '[DictKeyValueIterator(3), GraphVertexPipe()]')
 
     def test_graph_query_builder_chain(self):
         query = self.graph.query().V().to_dict()
-        self.assertEqual(str(query), '[GraphVertexPipe(), ElementPropertiesPipe(internal:False)]')
+        self.assertEqual(str(query), '[DictKeyValueIterator(3), GraphVertexPipe(), ElementPropertiesPipe(internal:False)]')
 
     def test_graph_query_V_dict(self):
         query = self.graph.query().V().to_dict()

@@ -13,8 +13,8 @@ from rest_framework.test import APITestCase
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
 from tests.ozpcenter.helper import APITestHelper
-from tests.ozpcenter.util import shorthand_types
-from tests.ozpcenter.util import shorthand_dict
+from ozpcenter.utils import shorthand_types
+from ozpcenter.utils import shorthand_dict
 
 
 @override_settings(ES_ENABLED=False)

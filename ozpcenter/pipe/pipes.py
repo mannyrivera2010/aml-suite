@@ -461,7 +461,7 @@ class ElementPropertiesPipe(Pipe):
 
 class ElementHasPipe(Pipe):
     """
-    Filter Pipe
+    ElementHasPipe Pipe
     """
 
     def __init__(self, label, key=None, predicate='EQUALS', value=None):
@@ -473,3 +473,22 @@ class ElementHasPipe(Pipe):
         """
         current_vertex = self.starts.next()
         return current_vertex
+
+
+class DictKeyPipe(Pipe):
+    """
+    DictKeyPipe Pipe
+    """
+
+    def __init__(self, key):
+        super().__init__()
+        self.key = key
+
+    def process_next_start(self):
+        """
+        DictKeyPipe
+        """
+        current_dict = self.starts.next()
+
+        if self.key in current_dict:
+            return current_dict[self.key]

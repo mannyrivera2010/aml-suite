@@ -96,6 +96,9 @@ class DictKeyValueIterator(GenericIterator):
     def remove(self):
         raise UnsupportedOperationException()
 
+    def __str__(self):
+        return 'DictKeyValueIterator({})'.format(self.max_count)
+
 
 class ListIterator(GenericIterator):
 
@@ -125,7 +128,7 @@ class ListIterator(GenericIterator):
         raise UnsupportedOperationException()
 
     def __str__(self):
-        return 'ListIterator({})'.format(self.input_list)
+        return 'ListIterator({})'.format(self.max_count)
 
 
 class EmptyIterator(GenericIterator):

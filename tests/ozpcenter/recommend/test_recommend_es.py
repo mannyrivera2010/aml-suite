@@ -10,9 +10,8 @@ from rest_framework.test import APITestCase
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-from tests.ozpcenter.data_util import ListingFile
 from tests.ozpcenter.helper import APITestHelper
-from tests.ozpcenter.util import shorthand_dict
+from ozpcenter.utils import shorthand_dict
 from ozpcenter.api.listing import model_access_es
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 from ozpcenter.recommend.recommend import RecommenderDirectory

@@ -5,7 +5,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from tests.ozpcenter.helper import APITestHelper
-from tests.ozpcenter.util import shorthand_dict
+from ozpcenter.utils import shorthand_dict
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 

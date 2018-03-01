@@ -1,8 +1,70 @@
 import os
 import yaml
 
+from ozpcenter.pipe import pipes
+from ozpcenter.pipe.pipeline import Pipeline
+from ozpcenter.recommend import recommend_utils
+
 TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', 'ozpcenter', 'scripts'))
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
+
+
+class FileQuery(object):
+    """
+    Query Object Compiler/ Pipeline
+    """
+    def __init__(self):
+        self.pipeline = Pipeline()
+
+    def load_yaml_file(self, listing_file_name=None):
+        listing_file_path = os.path.join(TEST_DATA_PATH, listing_file_name or 'listings.yaml')
+        listings_data = []
+        with open(listing_file_path, 'r') as stream:
+            try:
+                listings_data = yaml.load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+                raise
+
+        self.pipeline.add_pipe(recommend_utils.ListIterator(listings_data))
+        return self
+
+    def len(self):
+        """
+        len number Elements
+        """
+        current_pipe = pipes.LenPipe()
+        self.pipeline.add_pipe(current_pipe)
+        return self
+
+    def key(self, key):
+        """
+        Enter into key
+        """
+        current_pipe = pipes.DictKeyPipe(key)
+        self.pipeline.add_pipe(current_pipe)
+        return self
+
+    def next(self):
+        """
+        Give next item in list
+        """
+        return self.pipeline.next()
+
+    def to_list(self):
+        """
+        Give results in a list of objects
+        """
+        return self.pipeline.to_list()
+
+    def count(self):
+        """
+        Give results in a list of objects
+        """
+        return self.pipeline.count()
+
+    def __str__(self):
+        return str(self.pipeline)
 
 
 class ListingFileClass(object):
