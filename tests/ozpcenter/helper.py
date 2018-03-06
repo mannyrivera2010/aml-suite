@@ -14,25 +14,6 @@ TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 
 
-def shorthand_dict(input_object, key=''):
-    is_base_boolean = isinstance(input_object, (int, str, float))
-    is_dict_boolean = isinstance(input_object, dict)
-    is_list_boolean = isinstance(input_object, list)
-    has_key = True if key else False
-
-    if is_list_boolean and not has_key:
-        return [shorthand_dict(ob) for ob in input_object]
-    elif is_list_boolean and has_key:
-        return '[{}]'.format(','.join([shorthand_dict(ob) for ob in input_object]))
-    elif is_dict_boolean:
-        output = []
-        sorted_key = sorted(input_object.keys())
-        output = ['{}:{}'.format(key, shorthand_dict(input_object[key], key)) for key in sorted_key]
-        return '({})'.format(','.join(output))
-    elif is_base_boolean:
-        return '{}'.format(input_object)
-
-
 def patch_environ(new_environ=None, clear_orig=False):
     """
     https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/34333710#34333710
@@ -165,9 +146,10 @@ class APITestHelper(object):
 
     @staticmethod
     def _delete_bookmark_folder(test_case_instance, username, folder_id, status_code=201):
+        url = '/api/self/library/{0!s}/delete_folder/'.format(folder_id)
+
         user = generic_model_access.get_profile(username).user
         test_case_instance.client.force_authenticate(user=user)
-        url = '/api/self/library/{0!s}/delete_folder/'.format(folder_id)
         response = test_case_instance.client.delete(url, format='json')
 
         if response:
@@ -182,10 +164,11 @@ class APITestHelper(object):
 
     @staticmethod
     def _import_bookmarks(test_case_instance, username, bookmark_notification_id, status_code=201):
-        user = generic_model_access.get_profile(username).user
-        test_case_instance.client.force_authenticate(user=user)
         url = '/api/self/library/import_bookmarks/'
         data = {'bookmark_notification_id': bookmark_notification_id}
+
+        user = generic_model_access.get_profile(username).user
+        test_case_instance.client.force_authenticate(user=user)
         response = test_case_instance.client.post(url, data, format='json')
 
         if response:
@@ -213,11 +196,11 @@ class APITestHelper(object):
         Returns:
             response
         """
+        url = '/api/self/library/'
+        data = {'listing': {'id': listing_id}, 'folder': folder_name}
+
         user = generic_model_access.get_profile(username).user
         test_case_instance.client.force_authenticate(user=user)
-
-        data = {'listing': {'id': listing_id}, 'folder': folder_name}
-        url = '/api/self/library/'
         response = test_case_instance.client.post(url, data, format='json')
 
         if response:
@@ -244,10 +227,10 @@ class APITestHelper(object):
         Return:
             response
         """
+        url = '/api/listing/{0!s}/'.format(id)
+
         user = generic_model_access.get_profile(default_user).user
         test_case_instance.client.force_authenticate(user=user)
-        url = '/api/listing/{0!s}/'.format(id)
-        # GET Listing
         data = test_case_instance.client.get(url, format='json').data
 
         for current_key in input_data:
@@ -349,110 +332,3 @@ def validate_listing_map_keys(listing_map, test_case_instance=None):
             invalid_key_list.append(current_key)
 
     return invalid_key_list
-
-
-class ListingFileClass(object):
-    """
-    Listing File
-
-    from tests.ozpcenter.helper import ListingFile; ListingFile.filter_listings(is_enabled=True,approval_status='S')
-    """
-
-    def __init__(self, listing_file_name=None):
-        self.listing_file_path = os.path.join(TEST_DATA_PATH, listing_file_name or 'listings.yaml')
-
-    def filter_listings(self, **kwargs):
-        """
-        filter_listings(hello='d',hel='da')
-        kwargs = {'hello': 'd', 'hel': 'da'}
-
-        kwargs order is not guaranteed
-
-        Does not take in account Private apps
-        """
-        listings_data = self.listing_records()
-
-        listing_entries = []
-        for current_listing_data in listings_data:
-            current_listing = current_listing_data['listing']
-            listing_activity = current_listing_data['listing_activity']
-
-            current_listing['approval_status'] = listing_activity[-1]['action']
-
-            accept_listing = True
-
-            for keyword_key, keyword_value in kwargs.items():
-                postfix = None
-                if '__' in keyword_key:
-                    keyword_key_split = keyword_key.split('__')
-                    keyword_key = keyword_key_split[0]
-                    postfix = keyword_key_split[1]
-
-                # Check to see if keyword exist in listing
-                if keyword_key in current_listing:
-                    if postfix == 'in':
-                        current_listing_keyword_value = current_listing[keyword_key]
-
-                        if type(current_listing_keyword_value) is list:
-                            # Case 1: When current_listing_keyword_value is a list
-                            current_listing_set = set(current_listing_keyword_value)
-                        else:
-                            # Case 1: When current_listing_keyword_value is a string/int, convert into list, then set
-                            current_listing_set = set([current_listing_keyword_value])
-
-                        keyword_key_set = set(keyword_value)
-
-                        if len(current_listing_set.intersection(keyword_key_set)) == 0:
-                            accept_listing = False
-                    else:
-                        if not current_listing[keyword_key] == keyword_value:
-                            accept_listing = False
-
-                else:
-                    raise Exception('Keyword {} is not in the listing'.format(keyword_key))
-
-            if accept_listing:
-                listing_entries.append(current_listing)
-
-        return listing_entries
-
-    def listing_records(self):
-        """
-        Extract Listing Records from listings.yaml
-        """
-        listings_data = None
-        with open(self.listing_file_path, 'r') as stream:
-            try:
-                listings_data = yaml.load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-                raise
-        return listings_data
-
-    def listings_titles(self):
-        """
-        Extract Listing's titles from listing.yaml file
-
-        Return a sorted list of titles
-        """
-        listings_data = self.listing_records()
-        return sorted([current_record['listing']['title'] for current_record in listings_data])
-
-    def listings_tags(self):
-        """
-        Extract Listing's tags from listing.yaml file
-
-        Return a sorted list of tags
-        """
-        listings_data = self.listing_records()
-
-        listing_tags = set()
-        for current_listing_data in listings_data:
-            current_listing = current_listing_data['listing']
-
-            for current_tag in current_listing['tags']:
-                listing_tags.add(current_tag)
-        return sorted(list(listing_tags))
-
-
-ListingFile = ListingFileClass()

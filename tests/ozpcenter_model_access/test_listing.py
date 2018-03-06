@@ -9,7 +9,7 @@ import ozpcenter.api.listing.model_access as model_access
 from ozpcenter import errors
 import ozpcenter.model_access as generic_model_access
 from ozpcenter import models
-from tests.ozpcenter.helper import ListingFile
+from tests.ozpcenter.data_util import FileQuery
 
 
 @override_settings(ES_ENABLED=False)
@@ -35,7 +35,13 @@ class ListingTest(TestCase):
 
     def test_get_all_listings(self):
         all_listings_titles = [i.title for i in models.Listing.objects.all()]
-        self.assertEqual(sorted(all_listings_titles), sorted(ListingFile.listings_titles()))
+        query_list = sorted(FileQuery()
+                            .load_yaml_file('listings.yaml')
+                            .key('listing')
+                            .key('title')
+                            .to_list())
+
+        self.assertEqual(sorted(all_listings_titles), query_list)
 
     def test_filter_listings(self):
         username = 'wsmith'
@@ -381,7 +387,13 @@ class ListingTest(TestCase):
         tags = models.Tag.objects.order_by('name').all()
         out = model_access.tags_to_string(tags, True)
 
-        self.assertEqual(out, str(ListingFile.listings_tags()))
+        query_list = sorted(set(FileQuery()
+                                .load_yaml_file('listings.yaml')
+                                .key('listing')
+                                .each_key('tags')
+                                .to_list()))
+
+        self.assertEqual(out, str(query_list))
 
     def test_owners_to_string_dict(self):
         owners = [

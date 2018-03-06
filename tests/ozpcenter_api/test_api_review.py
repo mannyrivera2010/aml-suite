@@ -37,7 +37,9 @@ class ListingReviewApiTest(APITestCase):
 
     def test_get_single_review(self):
         air_mail_id = models.Listing.objects.get(title='Air Mail').id
-        url = '/api/listing/{0!s}/review/4/'.format(air_mail_id)  # 4/5/6/7
+        review_ids = [review.id for review in models.Review.objects.filter(listing=air_mail_id).all()]
+
+        url = '/api/listing/{0!s}/review/{1!s}/'.format(air_mail_id, review_ids[0])  # 4/5/6/7
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         self.assertTrue('rate' in response.data)

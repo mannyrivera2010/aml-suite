@@ -22,7 +22,7 @@ class Query(object):
         """
         self.pipeline.add_pipe(pipes.GraphVertexPipe())
 
-        if self.pipeline.starts is None:
+        if not self.pipeline.starts:
             self.pipeline.set_starts(recommend_utils.DictKeyValueIterator(self.graph.vertices))
 
         return self
@@ -33,7 +33,7 @@ class Query(object):
         """
         self.pipeline.add_pipe(pipes.GraphVertexPipe())
 
-        if self.pipeline.starts is None:
+        if not self.pipeline.starts:
             out_list = []
 
             if self.graph.vertices.get(vertex_id):

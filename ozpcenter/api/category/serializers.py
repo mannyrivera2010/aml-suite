@@ -113,7 +113,7 @@ class CategoryListingSerializer(serializers.HyperlinkedModelSerializer):
         return data
 
     def create(self, validated_data):
-        print('Inside of create')
+        # print('Inside of create')
         # Listing
         return validated_data
 

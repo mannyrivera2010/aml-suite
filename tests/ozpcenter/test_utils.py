@@ -1,7 +1,10 @@
 """
 Utils tests
 """
+from collections import OrderedDict
+import json
 from unittest.mock import patch
+
 from django.test import override_settings
 from django.test import TestCase
 
@@ -18,6 +21,7 @@ class UtilsTest(TestCase):
         setUp is invoked before each test method
         """
         pass
+        self.max_diff = 0
 
     @classmethod
     def setUpTestData(cls):
@@ -54,6 +58,37 @@ class UtilsTest(TestCase):
     def test_find_between(self):
         result = utils.find_between('a*str-a', '*', '-')
         self.assertEqual(result, 'str')
+
+    def test_shorthand_types(self):
+        input_object = {'title': 'app1', 'category': [{'title': 'weather'}, {'title': 'utils'}]}
+        expected_results = {
+            'type': 'dict',
+            'props': {
+                'category': {
+                    'type': 'list',
+                    'items': [
+                        {'type': 'dict',
+                         'props': {
+                            'title': {
+                                'type': 'str'}
+                            }
+                        },
+                        {'type': 'dict',
+                         'props': {
+                           'title': {'type': 'str'}
+                             }
+                        }], 'len': 2},
+                'title': {'type': 'str'}
+                }
+            }
+        result = json.loads(json.dumps(utils.shorthand_types(input_object)))
+        self.assertEquals(result, expected_results)
+
+    def test_shorthand_dict(self):
+        input_object = {'title': 'app1', 'category': [{'title': 'weather'}, {'title': 'utils'}]}
+        expected_results = '(category:[(title:weather),(title:utils)],title:app1)'
+        result = utils.shorthand_dict(input_object)
+        self.assertEqual(result, expected_results)
 
     @patch_environ({'TEST_MODE': 'False'})
     @patch('builtins.input', lambda arg: 'y')

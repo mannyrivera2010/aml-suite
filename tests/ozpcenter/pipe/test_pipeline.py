@@ -118,7 +118,7 @@ class PipelineTest(TestCase):
                                            pipes.ElementIdPipe()])
 
         self.assertEqual(pipeline_test.to_list(), [1, 2])
-        self.assertEqual(str(pipeline_test), '[GraphVertexPipe(), ElementIdPipe()]')
+        self.assertEqual(str(pipeline_test), '[DictKeyValueIterator(2), GraphVertexPipe(), ElementIdPipe()]')
 
     def test_pipeline_graph_vertex_chain_dict_to_list(self):
         pipeline_test = pipeline.Pipeline(self.graph_test_2.get_vertices_iterator(),
@@ -130,7 +130,7 @@ class PipelineTest(TestCase):
             {'test_field': 12, 'time': 'now'}
         ]
         self.assertEqual(pipeline_test.to_list(), expected_output)
-        self.assertEqual(str(pipeline_test), '[GraphVertexPipe(), ElementPropertiesPipe(internal:False)]')
+        self.assertEqual(str(pipeline_test), '[DictKeyValueIterator(3), GraphVertexPipe(), ElementPropertiesPipe(internal:False)]')
 
     def test_pipeline_graph_vertex_chain_dict_to_list_internal(self):
         pipeline_test = pipeline.Pipeline(self.graph_test_2 .get_vertices_iterator(),
@@ -142,7 +142,7 @@ class PipelineTest(TestCase):
             {'_id': 3, '_label': 'test_label', 'test_field': 12, 'time': 'now'}
         ]
         self.assertEqual(pipeline_test.to_list(), expected_output)
-        self.assertEqual(str(pipeline_test), '[GraphVertexPipe(), ElementPropertiesPipe(internal:True)]')
+        self.assertEqual(str(pipeline_test), '[DictKeyValueIterator(3), GraphVertexPipe(), ElementPropertiesPipe(internal:True)]')
 
     def test_pipeline_get_starts(self):
         pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
@@ -150,7 +150,7 @@ class PipelineTest(TestCase):
                                            pipes.LimitPipe(5)])
         result = pipeline_test.get_starts()
 
-        self.assertEqual(str(result), 'ListIterator([1, 2, 3, 4, 5, 6, 7])')
+        self.assertEqual(str(result), 'ListIterator(7)')
 
     def test_pipeline_get_pipes(self):
         pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
@@ -158,15 +158,15 @@ class PipelineTest(TestCase):
                                            pipes.LimitPipe(5)])
         result = ', '.join([str(pipe) for pipe in pipeline_test.get_pipes()])
 
-        self.assertEqual(str(result), 'ExcludePipe(), LimitPipe(limit_number:5)')
+        self.assertEqual(str(result), 'ListIterator(7), ExcludePipe(), LimitPipe(limit_number:5)')
 
     def test_pipeline_size(self):
         pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),
                                           [pipes.ExcludePipe([1]),
                                            pipes.LimitPipe(5)])
-        result = pipeline_test.size()
 
-        self.assertEqual(result, 2)
+        self.assertEqual(pipeline_test.size(), 3)
+        self.assertEqual(pipeline_test.to_list(), [2, 3, 4, 5, 6])
 
     def test_pipeline_count(self):
         pipeline_test = pipeline.Pipeline(recommend_utils.ListIterator([1, 2, 3, 4, 5, 6, 7]),

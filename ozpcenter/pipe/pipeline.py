@@ -14,22 +14,25 @@ class Pipeline(object):
     A Pipeline is a linear composite of Pipes.
     """
 
-    def __init__(self, starts=None, pipes=[]):
+    def __init__(self, starts=None, pipes=None):
         """
         Initialize Pipeline
         """
+        self.pipes = pipes or []
+
+        self.starts = False
+
+        if starts:
+            self.starts = True
+            self.pipes.insert(0, starts)
+
+        self.as_map = {}
+
         self.start_pipe = None
         self.end_pipe = None
 
-        self.pipes = pipes or []
-        self.as_map = {}
-
         if self.pipes:
             self.set_pipes()
-
-        self.starts = None
-        if starts:
-            self.set_starts(starts)
 
     def set_starts(self, starts):
         """
@@ -38,16 +41,17 @@ class Pipeline(object):
         Args:
             Iterator of objects
         """
-        self.starts = starts
+        self.starts = True
+        self.pipes.insert(0, starts)
 
-        if self.start_pipe:
-            self.start_pipe.set_starts(starts)
+        if self.pipes:
+            self.set_pipes()
 
     def get_starts(self):
         """
         Get start iterable
         """
-        return self.starts
+        return self.start_pipe
 
     def set_pipes(self):
         """
@@ -107,7 +111,10 @@ class Pipeline(object):
         """
         This will iterate all the objects out of the pipeline.
         """
-        if self.starts is None:
+        # if self.starts is None:
+        #     raise Exception('No Start Iterator set')
+
+        if not self.pipes:
             raise Exception('No Start Iterator set')
 
         try:
@@ -121,7 +128,9 @@ class Pipeline(object):
         """
         Drains the pipeline into a list
         """
-        if self.starts is None:
+        # if self.starts is None:
+        #     raise Exception('No Start Iterator set')
+        if not self.pipes:
             raise Exception('No Start Iterator set')
 
         output = []
@@ -137,7 +146,10 @@ class Pipeline(object):
         """
         Count the number of objects in an pipeline
         """
-        if self.starts is None:
+        # if self.starts is None:
+        #     raise Exception('No Start Iterator set')
+
+        if not self.pipes:
             raise Exception('No Start Iterator set')
 
         count = 0

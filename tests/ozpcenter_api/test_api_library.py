@@ -12,8 +12,9 @@ from rest_framework.test import APITestCase
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-
 from tests.ozpcenter.helper import APITestHelper
+from ozpcenter.utils import shorthand_types
+from ozpcenter.utils import shorthand_dict
 
 
 @override_settings(ES_ENABLED=False)
@@ -61,7 +62,7 @@ class LibraryApiTest(APITestCase):
     def test_get_library_list(self):
         url = '/api/self/library/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-
+        # import json; print(json.dumps(shorthand_types(response.data), indent=2))
         self.assertEqual(10, len(response.data))
         self.assertIn('listing', response.data[0])
         self.assertIn('id', response.data[0]['listing'])

@@ -101,17 +101,35 @@ def create_listing_review_batch(listing, review_list, object_cache):
               "text": "This app is great - well designed and easy to use",
               "author": "charrington",
               "rate": 5
-            },..
+            },{
+              "text": "This app is great - well designed and easy to use",
+              "author": "bigbrother",
+              "rate": 5:,
+              "review":true
+            }
+
             ]
 
     """
     current_listing = listing
 
+    previous_review = None
+
     for review_entry in review_list:
         profile_obj = object_cache['Profile.{}'.format(review_entry['author'])]
         current_rating = review_entry['rate']
         current_text = review_entry['text']
-        listing_model_access.create_listing_review(profile_obj.user.username, current_listing, current_rating, text=current_text)
+        current_review_parent = None
+
+        current_review_parent_flag = review_entry.get('review', False)
+        if current_review_parent_flag:
+            current_review_parent = previous_review
+
+        previous_review = listing_model_access.create_listing_review(profile_obj.user.username,
+                            current_listing,
+                            current_rating,
+                            text=current_text,
+                            review_parent=current_review_parent)
 
 
 def create_library_entries(library_entries, object_cache):
