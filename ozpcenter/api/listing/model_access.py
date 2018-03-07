@@ -637,7 +637,7 @@ def delete_recommendation_feedback(target_listing, recommendation_feedback):
     recommendation_feedback.delete()
 
 
-def create_listing_review(username, listing, rating, text=None, review_parent=None):
+def create_listing_review(username, listing, rating, text=None, review_parent=None, create_day_delta=None):
     """
     Create a new review for a listing
 
@@ -645,6 +645,8 @@ def create_listing_review(username, listing, rating, text=None, review_parent=No
         username (str): author's username
         rating (int): rating, 1-5
         text (Optional(str)): review text
+        create_date_delta(Optional(int)): Create date in days delta
+            example: 0 = Now, -1 = Minus one day, 1 = plus one day
 
     Returns:
         {
@@ -656,8 +658,12 @@ def create_listing_review(username, listing, rating, text=None, review_parent=No
         }
     """
     author = generic_model_access.get_profile(username)
-
     review = models.Review(listing=listing, author=author, rate=rating, text=text, review_parent=review_parent)
+
+    if create_day_delta:
+        # created_date = models.DateTimeField(default=utils.get_now_utc)
+        review.created_date = utils.get_now_utc(days_delta=create_day_delta)
+
     review.save()
 
     # add this action to the log

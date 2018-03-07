@@ -69,13 +69,19 @@ def find_between(s, start, end):
     return (s.split(start))[1].split(end)[0]
 
 
-def get_now_utc():
+def get_now_utc(days_delta=None):
     """
     Return current datetime in UTC
 
     Format: YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]
     """
-    return datetime.datetime.now(pytz.utc)
+    now_date = datetime.datetime.now(pytz.utc)
+
+    if days_delta:
+        day_delta = datetime.timedelta(days=days_delta)
+        now_date = now_date + day_delta
+
+    return now_date
 
 # Reference - Code not used
 # def render_template_string(template_string, context_dict):

@@ -47,6 +47,18 @@ install_git_hooks:  ## Install Git Hooks
 run:  ## Run the server locally
 	$(use_database) $(use_elasticsearch_str) $(use_runserver_str)
 
+# my-app &
+# echo $my-app-pid
+run_all: ## Run server locally, celery_worker, Recommendations
+	(make run &) && (echo $$! > SERVER_PYTHON.pid)
+	(redis-server &) && (echo $$! > SERVER_REDIS.pid)
+
+kill_all:
+	# kill `cat SERVER_PYTHON.pid`
+	# kill `cat SERVER_REDIS.pid`
+	(ps aux | grep "redis-server" | grep "Sl" | awk '{print $$2}' | xargs -I {} echo "{}" | xargs kill) &
+	(ps aux | grep "manage.py runserver" | grep "Sl" | awk '{print $$2}' | xargs -I {} echo "{}" | xargs kill) &
+
 celery_worker:  ## Run the celery worker
 	# env/lib/python3.4/site-packages/watchdog/observers/__init__.py
 	# Change if platform.is_linux(): try: from .polling import PollingObserver as Observer
