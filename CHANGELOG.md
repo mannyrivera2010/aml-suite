@@ -1,5 +1,20 @@
 
-### 1.0.100 (None)
+### 1.0.101 (None)
+
+#### Feature  
+* **jwt**:  add jwt token ([61b2dc85](https://github.com/aml-development/ozp-backend/commit/61b2dc855cd456db9419932764b531733cb858c4))     
+
+#### Refactor 
+* **tests**
+  *  test ([423cd148](https://github.com/aml-development/ozp-backend/commit/423cd1483418ea41a0c00e4cae262f1a08282eeb))
+  *  refactor tests ([14fae1f1](https://github.com/aml-development/ozp-backend/commit/14fae1f10ae5acdad8207ca3ca6237293241edbf))     
+* **test**:  refactor tests ([4a839a1b](https://github.com/aml-development/ozp-backend/commit/4a839a1bac8717e2ff27e205237a1874b04130d4))    
+* **listing**:  refactor listing file class ([41c0fad5](https://github.com/aml-development/ozp-backend/commit/41c0fad5ae8a5f3f3f14c407fd7d11bcd572af4a))    
+
+#### Merge Pull Requests  
+* Merge pull request #417 from aml-development/20180222_review ([43671a44](https://github.com/aml-development/ozp-backend/commit/43671a443e553221c4db8983facb7916cb60d3a9))           
+
+### 1.0.100 (2018-02-21)
 
 #### Feature 
 * **celery**
