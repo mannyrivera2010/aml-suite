@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter import models
+from ozpcenter.utils import shorthand_dict
 from ozpcenter.scripts import sample_data_generator as data_gen
 import ozpcenter.api.listing.model_access as model_access
 from tests.ozpcenter.helper import validate_listing_map_keys
@@ -125,68 +126,38 @@ class ListingApiTest(APITestCase):
         }
         response = APITestHelper.request(self, url, 'POST', data=data, username='julia', status_code=201)
 
-        self.assertEqual(response.data['title'], title)
-        self.assertEqual(response.data['description'], 'description of app')
-        self.assertEqual(response.data['launch_url'], 'http://www.google.com/launch')
-        self.assertEqual(response.data['version_name'], '1.0.0')
-        self.assertEqual(response.data['unique_name'], 'org.apps.julia-one')
-        self.assertEqual(response.data['what_is_new'], 'nothing is new')
-        self.assertEqual(response.data['description_short'], 'a shorter description')
-        self.assertEqual(response.data['usage_requirements'], 'None')
-        self.assertEqual(response.data['system_requirements'], 'None')
-        self.assertEqual(response.data['is_private'], True)
+        compare_keys_data_exclude = [
+            {'key': 'title', 'exclude': []},
+            {'key': 'description', 'exclude': []},
+            {'key': 'launch_url', 'exclude': []},
+            {'key': 'version_name', 'exclude': []},
+            {'key': 'unique_name', 'exclude': []},
+            {'key': 'what_is_new', 'exclude': []},
+            {'key': 'description_short', 'exclude': []},
+            {'key': 'usage_requirements', 'exclude': []},
+            {'key': 'system_requirements', 'exclude': []},
+            {'key': 'security_marking', 'exclude': []},
+            {'key': 'listing_type', 'exclude': []},
+            {'key': 'small_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'large_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'banner_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'large_banner_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'contacts', 'exclude': ['id', 'organization']},
+            {'key': 'categories', 'exclude': ['id', 'description']},
+            {'key': 'tags', 'exclude': ['id']},
+            {'key': 'owners', 'exclude': ['id', 'display_name']},
+            {'key': 'intents', 'exclude': ['id', 'icon', 'label', 'media_type']},
+            {'key': 'doc_urls', 'exclude': ['id']},
+            {'key': 'screenshots', 'exclude': ['small_image.security_marking', 'large_image.security_marking', 'small_image.url', 'large_image.url', 'order', 'description']},
+        ]
 
-        names = [contact['name'] for contact in response.data['contacts']]
-        self.assertEqual(len(names), 2)
-        self.assertTrue('me' in names)
-        self.assertTrue('you' in names)
+        for key_to_compare_dict in compare_keys_data_exclude:
+            key_to_compare = key_to_compare_dict['key']
+            key_exclude = key_to_compare_dict['exclude']
 
-        self.assertEqual(response.data['security_marking'], 'UNCLASSIFIED')
-        self.assertEqual(response.data['listing_type']['title'], 'Web Application')
-        self.assertEqual(response.data['small_icon']['id'], 1)
-        self.assertEqual(response.data['large_icon']['id'], 2)
-        self.assertEqual(response.data['banner_icon']['id'], 3)
-        self.assertEqual(response.data['large_banner_icon']['id'], 4)
-
-        categories = [category['title'] for category in response.data['categories']]
-        self.assertTrue('Business' in categories)
-        self.assertTrue('Education' in categories)
-        # owners
-        owners = []
-        for o in response.data['owners']:
-            owners.append(o['user']['username'])
-        self.assertTrue('wsmith' in owners)
-        self.assertTrue('julia' in owners)
-        # tags
-        tags = []
-        for t in response.data['tags']:
-            tags.append(t['name'])
-        self.assertTrue('demo' in tags)
-        self.assertTrue('map' in tags)
-        # intents
-        intents = []
-        for i in response.data['intents']:
-            intents.append(i['action'])
-        self.assertTrue('/application/json/view' in intents)
-        self.assertTrue('/application/json/edit' in intents)
-        # doc_urls
-        doc_urls = []
-        for d in response.data['doc_urls']:
-            doc_urls.append(d['url'])
-        self.assertTrue('http://www.google.com/wiki' in doc_urls)
-        self.assertTrue('http://www.google.com/guide' in doc_urls)
-        # screenshots
-        screenshots_small = []
-        for s in response.data['screenshots']:
-            screenshots_small.append(s['small_image']['id'])
-        self.assertTrue(1 in screenshots_small)
-        self.assertTrue(3 in screenshots_small)
-
-        screenshots_large = []
-        for s in response.data['screenshots']:
-            screenshots_large.append(s['large_image']['id'])
-        self.assertTrue(2 in screenshots_large)
-        self.assertTrue(4 in screenshots_large)
+            response_key_value = shorthand_dict(response.data[key_to_compare], exclude_keys=key_exclude)
+            data_expected_value = shorthand_dict(data[key_to_compare], exclude_keys=key_exclude)
+            self.assertEqual(response_key_value, data_expected_value, 'Comparing {} key'.format(key_to_compare))
 
         # fields that should come back with default values
         self.assertEqual(response.data['approved_date'], None)
@@ -332,6 +303,7 @@ class ListingApiTest(APITestCase):
             ]
 
         }
+
         # for checking Activity status later on
         user = generic_model_access.get_profile('julia').user
         self.client.force_authenticate(user=user)
@@ -339,108 +311,56 @@ class ListingApiTest(APITestCase):
 
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # title
-        self.assertEqual(response.data['title'], data['title'])
-        # description
-        self.assertEqual(response.data['description'], data['description'])
-        # launch_url
-        self.assertEqual(response.data['launch_url'], data['launch_url'])
-        # version_name
-        self.assertEqual(response.data['version_name'], data['version_name'])
-        # unique_name
-        self.assertEqual(response.data['unique_name'], data['unique_name'])
-        # what_is_new
-        self.assertEqual(response.data['what_is_new'], data['what_is_new'])
-        # description_short
-        self.assertEqual(response.data['description_short'], data['description_short'])
-        # usage_requirements
-        self.assertEqual(response.data['usage_requirements'], data['usage_requirements'])
-        # system_requirements
-        self.assertEqual(response.data['system_requirements'], data['system_requirements'])
-        # is_private
+
+        compare_keys_data_exclude = [
+            {'key': 'title', 'exclude': []},
+            {'key': 'description', 'exclude': []},
+            {'key': 'launch_url', 'exclude': []},
+            {'key': 'version_name', 'exclude': []},
+            {'key': 'unique_name', 'exclude': []},
+            {'key': 'what_is_new', 'exclude': []},
+            {'key': 'description_short', 'exclude': []},
+            {'key': 'usage_requirements', 'exclude': []},
+            {'key': 'system_requirements', 'exclude': []},
+            {'key': 'security_marking', 'exclude': []},
+            {'key': 'listing_type', 'exclude': []},
+            {'key': 'small_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'large_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'banner_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'large_banner_icon', 'exclude': ['security_marking', 'url']},
+            {'key': 'contacts', 'exclude': ['id', 'organization']},
+            {'key': 'categories', 'exclude': ['id', 'description']},
+            {'key': 'tags', 'exclude': ['id']},
+            {'key': 'owners', 'exclude': ['id', 'display_name']},
+            {'key': 'intents', 'exclude': ['id', 'icon', 'label', 'media_type']},
+            {'key': 'doc_urls', 'exclude': ['id']},
+            {'key': 'screenshots', 'exclude': ['small_image.security_marking', 'large_image.security_marking', 'small_image.url', 'large_image.url', 'order']},
+        ]
+
+        for key_to_compare_dict in compare_keys_data_exclude:
+            key_to_compare = key_to_compare_dict['key']
+            key_exclude = key_to_compare_dict['exclude']
+
+            response_key_value = shorthand_dict(response.data[key_to_compare], exclude_keys=key_exclude)
+            data_expected_value = shorthand_dict(data[key_to_compare], exclude_keys=key_exclude)
+            self.assertEqual(response_key_value, data_expected_value, 'Comparing {} key'.format(key_to_compare))
+
         self.assertEqual(response.data['is_private'], True)
-        # contacts
-        self.assertEqual(len(response.data['contacts']), 2)
-        names = []
-        for c in response.data['contacts']:
-            names.append(c['name'])
-        self.assertTrue('me' in names)
-        self.assertTrue('you' in names)
-        # security_marking
-        self.assertEqual(response.data['security_marking'],
-            'SECRET')
-        # listing_type
-        self.assertEqual(response.data['listing_type']['title'],
-            'Widget')
-        # icons
-        self.assertEqual(response.data['small_icon']['id'], 1)
-        self.assertEqual(response.data['large_icon']['id'], 2)
-        self.assertEqual(response.data['banner_icon']['id'], 3)
-        self.assertEqual(response.data['large_banner_icon']['id'], 4)
-        # categories
-        categories = []
-        for c in response.data['categories']:
-            categories.append(c['title'])
-        self.assertEqual(len(response.data['categories']), 2)
-        self.assertTrue('Business' in categories)
-        self.assertTrue('Education' in categories)
-        # owners
-        owners = []
-        for o in response.data['owners']:
-            owners.append(o['user']['username'])
-        self.assertEqual(len(response.data['owners']), 2)
-        self.assertTrue('wsmith' in owners)
-        self.assertTrue('julia' in owners)
-        # tags
-        tags = []
-        for t in response.data['tags']:
-            tags.append(t['name'])
-        self.assertEqual(len(response.data['tags']), 2)
-        self.assertTrue('demo' in tags)
-        self.assertTrue('map' in tags)
-        # intents
-        intents = []
-        for i in response.data['intents']:
-            intents.append(i['action'])
-        self.assertEqual(len(response.data['intents']), 2)
-        self.assertTrue('/application/json/view' in intents)
-        self.assertTrue('/application/json/edit' in intents)
-        # doc_urls
-        doc_urls = []
-        for d in response.data['doc_urls']:
-            doc_urls.append(d['url'])
-        self.assertEqual(len(response.data['doc_urls']), 2)
-        self.assertTrue('http://www.google.com/wiki2' in doc_urls)
-        self.assertTrue('http://www.google.com/guide2' in doc_urls)
-        # screenshots
-        screenshots_small = []
-        self.assertEqual(len(response.data['screenshots']), 2)
-        for s in response.data['screenshots']:
-            screenshots_small.append(s['small_image']['id'])
-        self.assertTrue(1 in screenshots_small)
-        self.assertTrue(3 in screenshots_small)
-
-        screenshots_large = []
-        for s in response.data['screenshots']:
-            screenshots_large.append(s['large_image']['id'])
-        self.assertTrue(2 in screenshots_large)
-        self.assertTrue(4 in screenshots_large)
-
-        self.assertTrue(response.data['approved_date'])
-        self.assertEqual(response.data['approval_status'], models.Listing.APPROVED)
         self.assertEqual(response.data['is_enabled'], False)
         self.assertEqual(response.data['is_featured'], False)
+        self.assertEqual(response.data['approval_status'], models.Listing.APPROVED)
         self.assertEqual(response.data['avg_rate'], 3.0)
-        self.assertEqual(response.data['total_votes'], 3)
+        self.assertEqual(response.data['total_votes'], 4)
         self.assertEqual(response.data['total_rate5'], 1)
         self.assertEqual(response.data['total_rate4'], 0)
-        self.assertEqual(response.data['total_rate3'], 1)
+        self.assertEqual(response.data['total_rate3'], 2)
         self.assertEqual(response.data['total_rate2'], 0)
         self.assertEqual(response.data['total_rate1'], 1)
-        self.assertEqual(response.data['total_reviews'], 3)
+        self.assertEqual(response.data['total_reviews'], 4)
         self.assertEqual(response.data['iframe_compatible'], False)
         self.assertEqual(response.data['required_listings'], None)
         self.assertTrue(response.data['edited_date'])
+        self.assertTrue(response.data['approved_date'])
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

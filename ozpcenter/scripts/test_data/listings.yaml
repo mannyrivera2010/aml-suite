@@ -48,8 +48,8 @@
   - {author: wsmith, rate: 1, text: I don't like the sound of acoustic guitars. I
       like electric guitars more, day_delta: -5}
   - {author: syme, rate: 5, text: I love the sound of acoustic guitars, day_delta: -4}
-  - {author: bigbrother, rate: 5, text: Review for syme loving acoustic guitars, review: True, day_delta: 0}
-  - {author: charrington, rate: 3.5, text: I love the sound of acoustic guitars rock on, day_delta: -3}
+  - {author: bigbrother, rate: 0, text: Review for syme loving acoustic guitars, review: True, day_delta: 0}
+  - {author: charrington, rate: 3, text: I love the sound of acoustic guitars rock on, day_delta: -3}
 - library_entries:
   - {folder: old, owner: wsmith, position: 0}
   - {folder: null, owner: hodor, position: 0}

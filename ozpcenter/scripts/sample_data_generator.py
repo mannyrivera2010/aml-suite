@@ -118,7 +118,7 @@ def create_listing_review_batch(listing, review_list, object_cache):
 
     for review_entry in review_list:
         profile_obj = object_cache['Profile.{}'.format(review_entry['author'])]
-        current_rating = review_entry['rate']
+        current_rating = review_entry.get('rate', 0)
         current_text = review_entry['text']
         current_review_parent = None
         current_date_delta = review_entry.get('day_delta', None)

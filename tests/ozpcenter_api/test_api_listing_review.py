@@ -6,6 +6,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from unittest import skip
+from ozpcenter.utils import shorthand_dict
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
@@ -16,7 +17,7 @@ from tests.ozpcenter.helper import APITestHelper
 class ListingReviewApiTest(APITestCase):
 
     def setUp(self):
-        pass
+        self.maxDiff = None
 
     @classmethod
     def setUpTestData(cls):
@@ -25,8 +26,18 @@ class ListingReviewApiTest(APITestCase):
     def test_get_all_review_for_listing(self):
         url = '/api/listing/1/review/'
         response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+        keys_to_include = ['author', 'author.user', 'author.user.username', 'rate', 'text',
+                           'review_responses', 'review_responses[*]', 'review_responses[*].rate', 'review_responses[*].text']
+        response_shorten = shorthand_dict(response.data, include_keys=keys_to_include, list_star=True)
 
-        self.assertEqual(len(response.data), 3)
+        expected_data = [
+            '(author:(user:(username:charrington)),rate:3,review_responses:[],text:I love the sound of acoustic guitars rock on)',
+            '(author:(user:(username:syme)),rate:5,review_responses:[(rate:0,text:Review for syme loving acoustic guitars)],text:I love the sound of acoustic guitars)',
+            '(author:(user:(username:wsmith)),rate:1,review_responses:[],text:I don\'t like the sound of acoustic guitars. I like electric guitars more)',
+            '(author:(user:(username:bigbrother)),rate:3,review_responses:[],text:Favorite Instrument by far. BY. FAR.)'
+        ]
+
+        self.assertEqual(response_shorten, shorthand_dict(expected_data, include_keys=keys_to_include, list_star=True))
 
     def test_get_listing_review_by_id(self):
         url = '/api/listing/1/review/3/'
