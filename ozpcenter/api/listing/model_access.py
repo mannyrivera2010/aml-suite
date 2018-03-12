@@ -309,9 +309,13 @@ def get_all_screenshots():
 def _update_rating(username, listing):
     """
     Invoked each time a review is created, deleted, or updated
+
+    Args:
+        username (string): username
+        listing(model.Listing): Listing Object
+
     """
     reviews = models.Review.objects.filter(listing=listing, review_parent__isnull=True)
-    review_responses = models.Review.objects.filter(listing=listing, review_parent__isnull=False)
     rate1 = reviews.filter(rate=1).count()
     rate2 = reviews.filter(rate=2).count()
     rate3 = reviews.filter(rate=3).count()
@@ -319,6 +323,8 @@ def _update_rating(username, listing):
     rate5 = reviews.filter(rate=5).count()
     total_votes = reviews.count()
     total_reviews = total_votes - reviews.filter(text=None).count()
+
+    review_responses = models.Review.objects.filter(listing=listing, review_parent__isnull=False)
     total_review_responses = review_responses.count()
 
     # calculate weighted average
@@ -375,7 +381,7 @@ def _add_listing_activity(author, listing, action, change_details=None,
     Args:
         author (models.Profile): author of the change
         listing (models.Listing): listing being affected
-        action (models.Action): action being taken
+        action (models.ListingActivity.ACTION_CHOICES): action being taken
         change_details (Optional(List)): change change details
             [
                 {
@@ -394,13 +400,19 @@ def _add_listing_activity(author, listing, action, change_details=None,
     Raises:
         None
     """
-    listing_activity = models.ListingActivity(action=action,
-        author=author, listing=listing, description=description)
+    listing_activity = models.ListingActivity(
+        action=action,
+        author=author,
+        listing=listing,
+        description=description)
     listing_activity.save()
+
     if change_details:
         for i in change_details:
-            change = models.ChangeDetail(field_name=i['field_name'],
-                old_value=i['old_value'], new_value=i['new_value'])
+            change = models.ChangeDetail(
+                field_name=i['field_name'],
+                old_value=i['old_value'],
+                new_value=i['new_value'])
             change.save()
             listing_activity.change_details.add(change)
 
@@ -437,12 +449,16 @@ def log_listing_modification(author, listing, change_details):
     Log a listing modification
 
     Args:
-        author
-        listing
-        change_details
+        author(models.Profile)
+        listing(models.Listing)
+        change_details([{}]):
+            [
+                {'old_value': '?',
+                    'new_value': '?',
+                    'field_name': 'listing_model_field_name'}
+            ]
     """
-    listing = _add_listing_activity(author, listing, models.ListingActivity.MODIFIED,
-        change_details)
+    listing = _add_listing_activity(author, listing, models.ListingActivity.MODIFIED, change_details)
     return listing
 
 
@@ -637,7 +653,7 @@ def delete_recommendation_feedback(target_listing, recommendation_feedback):
     recommendation_feedback.delete()
 
 
-def create_listing_review(username, listing, rating, text=None, review_parent=None):
+def create_listing_review(username, listing, rating, text=None, review_parent=None, create_day_delta=None):
     """
     Create a new review for a listing
 
@@ -645,6 +661,8 @@ def create_listing_review(username, listing, rating, text=None, review_parent=No
         username (str): author's username
         rating (int): rating, 1-5
         text (Optional(str)): review text
+        create_date_delta(Optional(int)): Create date in days delta
+            example: 0 = Now, -1 = Minus one day, 1 = plus one day
 
     Returns:
         {
@@ -656,8 +674,12 @@ def create_listing_review(username, listing, rating, text=None, review_parent=No
         }
     """
     author = generic_model_access.get_profile(username)
-
     review = models.Review(listing=listing, author=author, rate=rating, text=text, review_parent=review_parent)
+
+    if create_day_delta:
+        # created_date = models.DateTimeField(default=utils.get_now_utc)
+        review.created_date = utils.get_now_utc(days_delta=create_day_delta)
+
     review.save()
 
     # add this action to the log
@@ -800,6 +822,7 @@ def delete_listing(username, listing, delete_description):
 
     if listing.is_deleted:
         raise errors.PermissionDenied('The listing has already been deleted')
+
     old_approval_status = listing.approval_status
     listing = _add_listing_activity(profile, listing, models.ListingActivity.DELETED,
                                     description=delete_description)

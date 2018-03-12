@@ -69,13 +69,19 @@ def find_between(s, start, end):
     return (s.split(start))[1].split(end)[0]
 
 
-def get_now_utc():
+def get_now_utc(days_delta=None):
     """
     Return current datetime in UTC
 
     Format: YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]
     """
-    return datetime.datetime.now(pytz.utc)
+    now_date = datetime.datetime.now(pytz.utc)
+
+    if days_delta:
+        day_delta = datetime.timedelta(days=days_delta)
+        now_date = now_date + day_delta
+
+    return now_date
 
 # Reference - Code not used
 # def render_template_string(template_string, context_dict):
@@ -162,7 +168,7 @@ def shorthand_types(input_object):
         return OrderedDict({'type': input_object.__class__.__name__})
 
 
-def shorthand_dict(input_object, key='', prefix_key='', exclude_keys=[]):
+def shorthand_dict(input_object, key=None, prefix_key=None, exclude_keys=None, include_keys=None, list_star=None):
     """
     Recursive function to create a shorthand representation of complex python objects into a string
 
@@ -186,34 +192,64 @@ def shorthand_dict(input_object, key='', prefix_key='', exclude_keys=[]):
     Usage:
         shorthand_dict({'key1':'app1', 'category':[{'key2':'weather'},{'key3':'utils'}]})
     """
-    is_base_boolean = isinstance(input_object, (int, str, float))
+    key = key or ''
+    prefix_key = prefix_key or ''
+    exclude_keys = exclude_keys or []
+    include_keys = include_keys or []
+    list_star = list_star or False
+
+    # is_base_boolean = isinstance(input_object, (int, str, float))
     is_dict_boolean = isinstance(input_object, dict)
     is_list_boolean = isinstance(input_object, list)
     has_key = True if key else False
+
+    # Expand exclude_keys
+    #   ['hello.world.in.here', 'bye'] > ['hello', 'hello.world'. 'hello.world.in', 'hello.world.in.here']
+
     if is_list_boolean and not has_key and not prefix_key:
-        return [shorthand_dict(ob, exclude_keys=exclude_keys) for ob in input_object]
+        return [shorthand_dict(ob, exclude_keys=exclude_keys, include_keys=include_keys, list_star=list_star) for ob in input_object]
+
     elif is_list_boolean and not has_key and prefix_key:
         output = []
         for index, ob in enumerate(input_object, start=0):
             current_prefix_key = '{}[{}]'.format(prefix_key, index) if prefix_key else '{}[{}]'.format(prefix_key, index)
-            if current_prefix_key not in exclude_keys:
-                output.append(shorthand_dict(ob, prefix_key=current_prefix_key, exclude_keys=exclude_keys))
+
+            if include_keys:
+                if current_prefix_key in include_keys:
+                    output.append(shorthand_dict(ob, prefix_key=current_prefix_key, exclude_keys=exclude_keys, include_keys=include_keys, list_star=list_star))
+            elif current_prefix_key not in exclude_keys:
+                output.append(shorthand_dict(ob, prefix_key=current_prefix_key, exclude_keys=exclude_keys, include_keys=include_keys, list_star=list_star))
         return '[{}]'.format(','.join(output))
+
     elif is_list_boolean and has_key:
         output = []
         for index, ob in enumerate(input_object, start=0):
-            current_prefix_key = '{}[{}]'.format(key, index) if prefix_key else '{}[{}]'.format(key, index)
-            if current_prefix_key not in exclude_keys:
-                output.append(shorthand_dict(ob, prefix_key=current_prefix_key, exclude_keys=exclude_keys))
+
+            if list_star:
+                current_prefix_key = '{}[*]'.format(key) if prefix_key else '{}[*]'.format(key, index)
+            else:
+                current_prefix_key = '{}[{}]'.format(key, index) if prefix_key else '{}[{}]'.format(key, index)
+
+            if include_keys:
+                if current_prefix_key in include_keys:
+                    output.append(shorthand_dict(ob, prefix_key=current_prefix_key, exclude_keys=exclude_keys, include_keys=include_keys, list_star=list_star))
+            elif current_prefix_key not in exclude_keys:
+                output.append(shorthand_dict(ob, prefix_key=current_prefix_key, exclude_keys=exclude_keys, include_keys=include_keys, list_star=list_star))
         return '[{}]'.format(','.join(output))
+
     elif is_dict_boolean:
         sorted_keys = sorted(input_object.keys())
         output = []
         for key in sorted_keys:
             current_prefix_key = '{}.{}'.format(prefix_key, key) if prefix_key else '{}'.format(key)
-            if current_prefix_key not in exclude_keys:
-                output.append('{}:{}'.format(key, shorthand_dict(input_object[key], key, prefix_key=current_prefix_key, exclude_keys=exclude_keys)))
+
+            if include_keys:
+                if current_prefix_key in include_keys:
+                    output.append('{}:{}'.format(key, shorthand_dict(input_object[key], key, prefix_key=current_prefix_key, exclude_keys=exclude_keys, include_keys=include_keys, list_star=list_star)))
+            elif current_prefix_key not in exclude_keys:
+                output.append('{}:{}'.format(key, shorthand_dict(input_object[key], key, prefix_key=current_prefix_key, exclude_keys=exclude_keys, include_keys=include_keys, list_star=list_star)))
         return '({})'.format(','.join(output))
-    elif is_base_boolean:
+
+    else:
         # print('{}={}'.format(prefix_key, input_object))  # Debug key location
         return '{}'.format(input_object)

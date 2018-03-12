@@ -97,17 +97,18 @@ def create_listing_review_batch(listing, review_list, object_cache):
     Args:
         listing
         review_list
-            [{
-              "text": "This app is great - well designed and easy to use",
-              "author": "charrington",
-              "rate": 5
-            },{
-              "text": "This app is great - well designed and easy to use",
-              "author": "bigbrother",
-              "rate": 5:,
-              "review":true
-            }
-
+            [
+                {
+                  "text": "This app is great - well designed and easy to use",
+                  "author": "charrington",
+                  "rate": 5,
+                  "date_delta":  0  // -1  for -1 days ,  5 - for 5 days from date
+                },{
+                  "text": "This app is great - well designed and easy to use",
+                  "author": "bigbrother",
+                  "rate": 5:,
+                  "review":true
+                }
             ]
 
     """
@@ -117,9 +118,10 @@ def create_listing_review_batch(listing, review_list, object_cache):
 
     for review_entry in review_list:
         profile_obj = object_cache['Profile.{}'.format(review_entry['author'])]
-        current_rating = review_entry['rate']
+        current_rating = review_entry.get('rate', 0)
         current_text = review_entry['text']
         current_review_parent = None
+        current_date_delta = review_entry.get('day_delta', None)
 
         current_review_parent_flag = review_entry.get('review', False)
         if current_review_parent_flag:
@@ -129,15 +131,18 @@ def create_listing_review_batch(listing, review_list, object_cache):
                             current_listing,
                             current_rating,
                             text=current_text,
-                            review_parent=current_review_parent)
+                            review_parent=current_review_parent,
+                            create_day_delta=current_date_delta)
 
 
 def create_library_entries(library_entries, object_cache):
     """
     Create Bookmarks for users
 
-    # library_entries = [{'folder': None, 'listing_id': 8, 'owner': 'wsmith', 'position': 0},
-    #    {'folder': None, 'listing_id': 5, 'owner': 'hodor', 'position': 0},...]
+    Args:
+        library_entries:
+            [{'folder': None, 'listing_id': 8, 'owner': 'wsmith', 'position': 0},
+             {'folder': None, 'listing_id': 5, 'owner': 'hodor', 'position': 0},...]
     """
     for current_entry in library_entries:
         current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
