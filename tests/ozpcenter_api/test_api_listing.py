@@ -157,6 +157,14 @@ class ListingApiTest(APITestCase):
 
             response_key_value = shorthand_dict(response.data[key_to_compare], exclude_keys=key_exclude)
             data_expected_value = shorthand_dict(data[key_to_compare], exclude_keys=key_exclude)
+
+            # Fix Order for Sqlite/Postgres diffrences
+            if isinstance(response_key_value, list):
+                response_key_value = sorted(response_key_value)
+
+            if isinstance(data_expected_value, list):
+                data_expected_value = sorted(data_expected_value)
+
             self.assertEqual(response_key_value, data_expected_value, 'Comparing {} key'.format(key_to_compare))
 
         # fields that should come back with default values
@@ -343,6 +351,14 @@ class ListingApiTest(APITestCase):
 
             response_key_value = shorthand_dict(response.data[key_to_compare], exclude_keys=key_exclude)
             data_expected_value = shorthand_dict(data[key_to_compare], exclude_keys=key_exclude)
+
+            # Fix Order for Sqlite/Postgres diffrences
+            if isinstance(response_key_value, list):
+                response_key_value = sorted(response_key_value)
+
+            if isinstance(data_expected_value, list):
+                data_expected_value = sorted(data_expected_value)
+
             self.assertEqual(response_key_value, data_expected_value, 'Comparing {} key'.format(key_to_compare))
 
         self.assertEqual(response.data['is_private'], True)
