@@ -253,6 +253,7 @@ CACHES = {
 
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_AUTH_COOKIE': 'jwt-token',
 }
 # django-cors-headers
 # TODO: lock this down in production
