@@ -4,7 +4,7 @@ Tests for listing reviews
 import collections
 from django.test import override_settings
 from rest_framework import status
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 from unittest import skip
 from ozpcenter.utils import shorthand_dict
 

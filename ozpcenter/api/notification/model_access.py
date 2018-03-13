@@ -133,7 +133,6 @@ def get_self_notifications_mailbox(username):
     Returns:
         django.db.models.query.QuerySet(Notification): List of notifications for username
     """
-
     notifications_mailbox = NotificationMailBox.objects.filter(target_profile=get_self(username), notification__expires_date__gt=datetime.datetime.now(pytz.utc)).all()
     return notifications_mailbox
 
@@ -169,6 +168,15 @@ def create_notification(author_username=None,
     Raises:
         AssertionError: If author_username or expires_date or message is None
     """
+    # TODO: Use get_notification_class instead of all the if statements
+    entity_dict = {
+        'listing': listing,
+        'agency': agency,
+        'peer_profile': peer_profile,
+        'peer': peer,
+        'entities': entities
+    }
+
     if notification_type == 'ListingSubmissionNotification':
         notification_instance = notifications.ListingSubmissionNotification()
         notification_instance.set_sender_and_entity(author_username, listing)

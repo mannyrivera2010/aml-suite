@@ -2,7 +2,7 @@
 Tests for category endpoints
 """
 from django.test import override_settings
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 
 from tests.ozpcenter.helper import APITestHelper
 from ozpcenter.utils import shorthand_dict

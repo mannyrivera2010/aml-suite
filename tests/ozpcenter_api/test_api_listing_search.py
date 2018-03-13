@@ -5,7 +5,7 @@ from django.test import override_settings
 from unittest import skip
 
 from rest_framework import status
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen

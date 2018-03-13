@@ -2,7 +2,7 @@
 Tests for ContactType endpoints
 """
 from django.test import override_settings
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from tests.ozpcenter.helper import APITestHelper

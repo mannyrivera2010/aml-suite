@@ -6,7 +6,7 @@ from unittest.mock import patch
 from django.test import override_settings
 from django.conf import settings
 from rest_framework import status
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 
 from ozpcenter import errors
 from tests.ozp import helper

@@ -2,7 +2,7 @@
 Tests for agency endpoints
 """
 from rest_framework import status
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 
 import ozpcenter.model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
