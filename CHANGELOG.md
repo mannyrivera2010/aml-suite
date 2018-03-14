@@ -1,5 +1,22 @@
 
-### 1.0.101 (None)
+### 1.0.102 (None)
+
+#### Feature  
+* **authentication**:  enable cookie fallback for JWT auth ([625cfa15](https://github.com/aml-development/ozp-backend/commit/625cfa15259d0c30d885a5daa7f92ecf2dfc27ad))    
+
+#### Fixes 
+* **test**
+  *  fix listing test field order ([d927c55c](https://github.com/aml-development/ozp-backend/commit/d927c55cfd5cd8eabcd01b46a8f955fd9773b827))
+  *  fix listing tests ([5a8ffdd4](https://github.com/aml-development/ozp-backend/commit/5a8ffdd4627f2f71d7ecb6d1eda8795cb5b32efc))     
+
+#### Refactor  
+* **review**:  add more review ([e4eceb77](https://github.com/aml-development/ozp-backend/commit/e4eceb777fbfbe478d9768fd03f100a92ad8b993))    
+
+#### Merge Pull Requests  
+* Merge pull request #419 from aml-development/20180307_review ([39d0228c](https://github.com/aml-development/ozp-backend/commit/39d0228c79f866f857560d4fccc7d87f03bceb63))
+* Merge pull request #418 from aml-development/authentication_module ([ed49f0a1](https://github.com/aml-development/ozp-backend/commit/ed49f0a1b14b585ce23860b8e4963c12554e4245))           
+
+### 1.0.101 (2018-03-07)
 
 #### Feature  
 * **jwt**:  add jwt token ([61b2dc85](https://github.com/aml-development/ozp-backend/commit/61b2dc855cd456db9419932764b531733cb858c4))     
