@@ -2,7 +2,7 @@
 Tests for listing endpoints
 """
 from django.test import override_settings
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 from rest_framework import status
 
 from ozpcenter import model_access as generic_model_access

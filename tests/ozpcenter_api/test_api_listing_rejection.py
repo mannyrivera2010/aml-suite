@@ -2,7 +2,7 @@
 Tests for listing endpoints
 """
 from django.test import override_settings
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 
 from ozpcenter.scripts import sample_data_generator as data_gen
 

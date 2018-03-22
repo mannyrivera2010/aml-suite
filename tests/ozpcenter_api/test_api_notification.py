@@ -8,7 +8,7 @@ import pytz
 
 from django.test import override_settings
 from rest_framework import status
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 from ozpcenter.utils import shorthand_dict
 
 from tests.ozpcenter.helper import ExceptionUnitTestHelper

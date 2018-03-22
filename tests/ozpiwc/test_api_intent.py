@@ -1,7 +1,7 @@
 """
 Tests for data.api endpoints
 """
-from rest_framework.test import APITestCase
+from tests.ozp.cases import APITestCase
 
 from ozpcenter.scripts import sample_data_generator as data_gen
 from ozpcenter import model_access as generic_model_access
