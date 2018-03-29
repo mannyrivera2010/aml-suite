@@ -1,5 +1,13 @@
 
-### 1.0.102 (None)
+### 1.0.103 (None)   
+
+#### Merge Pull Requests  
+* Merge pull request #420 from aml-development/20180313_tests ([7613b6aa](https://github.com/aml-development/ozp-backend/commit/7613b6aabbd0057ae901ce6105dd7adf4022e0b2))       
+
+#### Test  
+* **celery**:  add unit test for celery task ([f4e8d140](https://github.com/aml-development/ozp-backend/commit/f4e8d140d7df7f7b0f30ed1f72f7a28526c910c5))       
+
+### 1.0.102 (2018-03-14)
 
 #### Feature  
 * **authentication**:  enable cookie fallback for JWT auth ([625cfa15](https://github.com/aml-development/ozp-backend/commit/625cfa15259d0c30d885a5daa7f92ecf2dfc27ad))    
