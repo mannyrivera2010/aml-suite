@@ -694,10 +694,11 @@ class NotificationApiTest(APITestCase):
 
     def test_create_review_request_notification_app_mall_steward(self):
         now = datetime.datetime.now(pytz.utc)
-        data = {"expires_date": str(now),
-                "message": "Please review your agency's apps and make sure their information is up to date",
-                "notification_type": "StewardAppNotification"
-                }
+        data = {
+            "expires_date": str(now),
+            "message": "Please review your agency's apps and make sure their information is up to date",
+            "notification_type": "StewardAppNotification"
+        }
 
         url = '/api/notification/'
         response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
@@ -713,20 +714,22 @@ class NotificationApiTest(APITestCase):
     @skip("should work when data script gets refactored so org stewards cant create system notifications (semesky 20171102)")
     def test_create_review_request_notification_unauthorized_org_steward(self):
         now = datetime.datetime.now(pytz.utc)
-        data = {"expires_date": str(now),
-                "message": "Please review your agency's apps and make sure their information is up to date",
-                "notification_type": "StewardAppNotification"
-                }
+        data = {
+            "expires_date": str(now),
+            "message": "Please review your agency's apps and make sure their information is up to date",
+            "notification_type": "StewardAppNotification"
+        }
 
         url = '/api/notification/'
         APITestHelper.request(self, url, 'POST', data=data, username='wsmith', status_code=403)
 
     def test_create_review_request_notification_unauthorized_user(self):
         now = datetime.datetime.now(pytz.utc)
-        data = {"expires_date": str(now),
-                "message": "Please review your agency's apps and make sure their information is up to date",
-                "notification_type": "StewardAppNotification"
-                }
+        data = {
+            "expires_date": str(now),
+            "message": "Please review your agency's apps and make sure their information is up to date",
+            "notification_type": "StewardAppNotification"
+        }
 
         url = '/api/notification/'
         APITestHelper.request(self, url, 'POST', data=data, username='jones', status_code=403)
@@ -735,14 +738,16 @@ class NotificationApiTest(APITestCase):
     def test_create_peer_bookmark_notification_app_mall_steward(self):
 
         now = datetime.datetime.now(pytz.utc)
-        data = {"expires_date": str(now),
-                "message": "A Simple Peer to Peer Notification",
-                "peer": {
-                    "user": {
-                      "username": "jones"
-                    },
-                    "folder_name": "folder"}
-                }
+        data = {
+            "expires_date": str(now),
+            "message": "A Simple Peer to Peer Notification",
+            "peer": {
+                "user": {
+                  "username": "jones"
+                },
+                "folder_name": "folder"
+            }
+        }
         url = '/api/notification/'
         response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
 
@@ -869,15 +874,17 @@ class NotificationApiTest(APITestCase):
 
         for i in range(3):
             now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
-            data = {'expires_date': str(now),
-                    'message': 'restore folder Instruments',
-                    'peer': {
-                        'user': {
-                          'username': 'bigbrother',
-                        },
-                        'folder_name': 'Instruments',
-                        'deleted_folder': True
-                }}
+            data = {
+                'expires_date': str(now),
+                'message': 'restore folder Instruments',
+                'peer': {
+                    'user': {
+                        'username': 'bigbrother',
+                    },
+                    'folder_name': 'Instruments',
+                    'deleted_folder': True
+                }
+            }
 
             url = '/api/notification/'
             response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=201)
@@ -1016,14 +1023,16 @@ class NotificationApiTest(APITestCase):
 
         for i in range(3):
             now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
-            data = {'expires_date': str(now),
-                    'message': 'A Simple Peer to Peer Notification',
-                    'peer': {
-                        'user': {
-                          'username': 'julia',
-                        },
-                        'folder_name': 'foldername1'
-                }}
+            data = {
+                'expires_date': str(now),
+                'message': 'A Simple Peer to Peer Notification',
+                'peer': {
+                    'user': {
+                        'username': 'julia',
+                    },
+                    'folder_name': 'foldername1'
+                }
+            }
 
             url = '/api/notification/'
 

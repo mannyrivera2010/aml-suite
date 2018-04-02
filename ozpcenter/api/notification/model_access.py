@@ -179,47 +179,47 @@ def create_notification(author_username=None,
 
     if notification_type == 'ListingSubmissionNotification':
         notification_instance = notifications.ListingSubmissionNotification()
-        notification_instance.set_sender_and_entity(author_username, listing)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'ListingReviewNotification':
         notification_instance = notifications.ListingReviewNotification()
-        notification_instance.set_sender_and_entity(author_username, listing)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'ListingOwnerNotification':
         notification_instance = notifications.ListingOwnerNotification()
-        notification_instance.set_sender_and_entity(author_username, listing)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'PendingDeletionToOwnerNotification':
         notification_instance = notifications.PendingDeletionToOwnerNotification()
-        notification_instance.set_sender_and_entity(author_username, listing)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'PendingDeletionToStewardNotification':
         notification_instance = notifications.PendingDeletionToStewardNotification()
-        notification_instance.set_sender_and_entity(author_username, listing)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'PendingDeletionApprovedNotification':
         notification_instance = notifications.PendingDeletionApprovedNotification()
-        notification_instance.set_sender_and_entity(author_username, listing)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'CategorySubscriptionNotification':
         notification_instance = notifications.CategorySubscriptionNotification()
-        notification_instance.set_sender_and_entity(author_username, listing, entities)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'TagSubscriptionNotification':
         notification_instance = notifications.TagSubscriptionNotification()
-        notification_instance.set_sender_and_entity(author_username, listing, entities)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif notification_type == 'StewardAppNotification':
         notification_instance = notifications.StewardAppNotification()
-        notification_instance.set_sender_and_entity(author_username, None)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif listing is not None:
         notification_instance = notifications.ListingNotification()
-        notification_instance.set_sender_and_entity(author_username, listing)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif agency is not None:
         notification_instance = notifications.AgencyWideNotification()
-        notification_instance.set_sender_and_entity(author_username, agency)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     elif peer is not None:
         notification_instance = notifications.PeerNotification()
@@ -231,10 +231,10 @@ def create_notification(author_username=None,
         except ValueError:
             # Ignore Value Errors
             pass
-        notification_instance.set_sender_and_entity(author_username, peer_profile, peer)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
     else:
         notification_instance = notifications.SystemWideNotification()
-        notification_instance.set_sender_and_entity(author_username, None)
+        notification_instance.set_sender_and_entity(author_username, entity_dict)
 
     notification = notification_instance.notify(expires_date, message)
     return notification
