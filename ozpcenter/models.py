@@ -1118,6 +1118,7 @@ class Listing(models.Model):
     is_enabled = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
+    is_508_compliant = models.BooleanField(default=False)
     # a weighted average (5*total_rate5 + 4*total_rate4 + ...) / total_votes
     avg_rate = models.FloatField(default=0.0)
     total_votes = models.IntegerField(default=0)

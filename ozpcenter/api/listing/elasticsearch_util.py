@@ -269,6 +269,9 @@ def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
             "is_private": {
               "type": "boolean"
             },
+            "is_508_compliant": {
+              "type": "boolean"
+            },
             # listing_type_title is used for filtering , ex: ['Web Application', 'Web Services', 'Widget'..]
             "listing_type_title": {
               "type": "string",
