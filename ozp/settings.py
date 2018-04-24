@@ -29,6 +29,7 @@ SECRET_KEY = 'v%ue42rl)b*^6494!&1kd)dzfa--cs(#9#qwoe1p()hrjh#j9t'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# TODO: make this ['{{ api_fqdn}}', '{{ frontend_fqdn }}']
 ALLOWED_HOSTS = ['*']
 
 # Use nose to run all tests
@@ -254,6 +255,8 @@ CACHES = {
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
     'JWT_AUTH_COOKIE': 'jwt-token',
+    'JWT_ISSUER': 'ozp-backend',
+    'JWT_ALLOW_REFRESH': True,
 }
 # django-cors-headers
 # TODO: lock this down in production
