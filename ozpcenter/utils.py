@@ -28,7 +28,7 @@ def str_to_bool(user_input):
     if isinstance(user_input, bool):
         return user_input
     else:
-        if user_input.lower() in ['1', 'true']:
+        if '{}'.format(user_input).lower() in ['1', 'true']:
             return True
         else:
             return False
