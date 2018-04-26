@@ -71,6 +71,7 @@ from ozpcenter.models import ApplicationLibraryEntry
 from ozpcenter.models import Subscription
 
 import ozpcenter.model_access as generic_model_access
+from ozpcenter.wsservice.wsclient import web_service_client
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -276,6 +277,7 @@ class NotificationBase(object):
 
         if bulk_notification_list:
             bulk_notifications_saver(bulk_notification_list)
+            web_service_client.send_bulk_message(bulk_notification_list)
 
         return notification
 
