@@ -195,3 +195,13 @@ class PkiAuthenticationTest(TestCase):
         dn = '/THIRD=c/SECOND=b/FIRST=a'
         dn = pkiauth._preprocess_dn(dn)
         self.assertEqual(dn, 'FIRST=a, SECOND=b, THIRD=c')
+
+    def test_preprocess_dn_ldap_no_space(self):
+        dn = 'FIRST=a,SECOND=b,THIRD=c'
+        dn = pkiauth._preprocess_dn(dn)
+        self.assertEqual(dn, 'FIRST=a, SECOND=b, THIRD=c')
+
+    def test_preprocess_dn_ldap_space(self):
+        dn = 'FIRST=a, SECOND=b, THIRD=c'
+        dn = pkiauth._preprocess_dn(dn)
+        self.assertEqual(dn, 'FIRST=a, SECOND=b, THIRD=c')
