@@ -29,6 +29,7 @@ SECRET_KEY = 'v%ue42rl)b*^6494!&1kd)dzfa--cs(#9#qwoe1p()hrjh#j9t'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# TODO: make this ['{{ api_fqdn}}', '{{ frontend_fqdn }}']
 ALLOWED_HOSTS = ['*']
 
 # Use nose to run all tests
@@ -254,6 +255,8 @@ CACHES = {
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
     'JWT_AUTH_COOKIE': 'jwt-token',
+    'JWT_ISSUER': 'ozp-backend',
+    'JWT_ALLOW_REFRESH': True,
 }
 # django-cors-headers
 # TODO: lock this down in production
@@ -404,3 +407,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 # MEDIA_URL is the relative browser URL to be used when accessing media files
 #   from the browser
 MEDIA_URL = 'media/'
+
+#  Web Socket Service URL (aml-ws-service)
+WS_ENABLE = str_to_bool(os.getenv('WS_ENABLE', True))
+WS_URL = os.getenv('WS_URL', 'http://127.0.0.1:4200')

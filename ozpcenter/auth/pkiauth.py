@@ -7,6 +7,7 @@ $ssl_client_i_dn -> HTTP_X_SSL_ISSUER_DN
 $ssl_client_verify -> HTTP_X_SSL_AUTHENTICATED
 """
 import logging
+import re
 
 from django.conf import settings
 from rest_framework import authentication
@@ -83,11 +84,14 @@ def _preprocess_dn(original_dn):
     """
     Reverse the DN and replace slashes with commas
     """
-    # remove leading slash
-    dn = original_dn[1:]
+    dn = original_dn
+    if dn[:1] == '/':
+        # remove leading slash
+        dn = dn[1:]
     dn = dn.split('/')
     dn = dn[::-1]
     dn = ", ".join(dn)
+    dn = re.sub(r'(,)([\w])', r'\1 \2', dn)
     return dn
 
 
