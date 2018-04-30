@@ -1077,6 +1077,21 @@ class ListingApiTest(APITestCase):
 
         self.assertEqual(response.data['is_featured'], False)
 
+    def test_listing_508_compliant_true(self):
+        LISTING_ID = 11
+        USER_NAME = 'bigbrother'
+        request_profile = generic_model_access.get_profile(USER_NAME)
+        user = generic_model_access.get_profile(USER_NAME).user
+        self.client.force_authenticate(user=user)
+
+        APITestHelper.edit_listing(self, LISTING_ID, {'is_508_compliant': True}, USER_NAME)
+
+        url = '/api/listing/{0!s}/'.format(LISTING_ID)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(response.data['is_508_compliant'], True)
+
     def test_featured_listings_order(self):
         """
         test_featured_listings_order

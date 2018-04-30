@@ -135,7 +135,8 @@ class ListingFileClass(object):
                             accept_listing = False
 
                 else:
-                    raise Exception('Keyword {} is not in the listing'.format(keyword_key))
+                    accept_listing = False
+                    # raise Exception('Keyword {} is not in the listing'.format(keyword_key))
 
             if accept_listing:
                 listing_entries.append(current_listing)
