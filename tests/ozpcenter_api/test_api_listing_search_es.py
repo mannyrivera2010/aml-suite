@@ -144,6 +144,19 @@ class ListingESSearchApiTest(APITestCase):
         self.assertEqual(titles, sorted_listings_from_file)
 
     @override_settings(ES_ENABLED=True)
+    def test_essearch_is_508_compliant(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/?is_508_compliant=true'
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+
+        titles = sorted([i['title'] for i in response.data['results']])
+        listings_from_file = ListingFile.filter_listings(is_508_compliant=True)
+        sorted_listings_from_file = sorted([listing['title'] for listing in listings_from_file])
+        self.assertEqual(titles, sorted_listings_from_file)
+
+    @override_settings(ES_ENABLED=True)
     def test_essearch_tags(self):
         if self.es_failed:
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))

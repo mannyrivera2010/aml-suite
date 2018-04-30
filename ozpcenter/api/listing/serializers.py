@@ -251,13 +251,13 @@ def validate_listing(serializer_instance, data):
     data['description_short'] = data.get('description_short')
     data['usage_requirements'] = data.get('usage_requirements')
     data['system_requirements'] = data.get('system_requirements')
-    data['is_private'] = data.get('is_private', False)
+    data['is_private'] = data.get('is_private')
     data['security_marking'] = data.get('security_marking')
 
     # only checked on update, not create
-    data['is_enabled'] = data.get('is_enabled', False)
-    data['is_508_compliant'] = data.get('is_508_compliant', False)
-    data['is_featured'] = data.get('is_featured', False)
+    data['is_enabled'] = data.get('is_enabled')
+    data['is_508_compliant'] = data.get('is_508_compliant')
+    data['is_featured'] = data.get('is_featured')
     data['approval_status'] = data.get('approval_status')
 
     # Agency
@@ -439,9 +439,20 @@ def create_listing(serializer_instance, validated_data):
         usage_requirements=validated_data['usage_requirements'],
         system_requirements=validated_data['system_requirements'],
         security_marking=validated_data['security_marking'],
-        listing_type=validated_data['listing_type'],
-        is_private=validated_data['is_private'],
-        is_508_compliant=validated_data['is_508_compliant'])
+        listing_type=validated_data['listing_type'])
+
+    # is_enabled = models.BooleanField(default=True)
+    if validated_data['is_enabled'] is not None:
+        listing.is_enabled = validated_data['is_enabled']
+    # is_featured = models.BooleanField(default=False)
+    if validated_data['is_featured'] is not None:
+        listing.is_featured = validated_data['is_featured']
+    # is_private = models.BooleanField(default=False)
+    if validated_data['is_private'] is not None:
+        listing.is_private = validated_data['is_private']
+    # is_508_compliant = models.BooleanField(default=False)
+    if validated_data['is_508_compliant'] is not None:
+        listing.is_508_compliant = validated_data['is_508_compliant']
 
     image_keys = ['small_icon', 'large_icon', 'banner_icon', 'large_banner_icon']
     for image_key in image_keys:
@@ -540,11 +551,12 @@ def update_listing(serializer_instance, instance, validated_data):
 
     for i in simple_fields:
         if getattr(instance, i) != validated_data[i]:
-            change_details.append({'old_value': getattr(instance, i),
-                'new_value': validated_data[i], 'field_name': i})
-            setattr(instance, i, validated_data[i])
+            if validated_data[i] is not None:
+                change_details.append({'old_value': getattr(instance, i),
+                    'new_value': validated_data[i], 'field_name': i})
+                setattr(instance, i, validated_data[i])
 
-    if validated_data['is_enabled'] != instance.is_enabled:
+    if validated_data['is_enabled'] is not None and validated_data['is_enabled'] != instance.is_enabled:
         if validated_data['is_enabled']:
             model_access.enable_listing(user, instance)
         else:
@@ -558,13 +570,13 @@ def update_listing(serializer_instance, instance, validated_data):
                                profile=user,
                                is_enabled=validated_data['is_enabled'])
 
-    if validated_data['is_508_compliant'] != instance.is_508_compliant:
+    if validated_data['is_508_compliant'] is not None and validated_data['is_508_compliant'] != instance.is_508_compliant:
         changeset = {'old_value': model_access.bool_to_string(instance.is_508_compliant),
                 'new_value': model_access.bool_to_string(validated_data['is_508_compliant']), 'field_name': 'is_508_compliant'}
         change_details.append(changeset)
         instance.is_508_compliant = validated_data['is_508_compliant']
 
-    if validated_data['is_private'] != instance.is_private:
+    if validated_data['is_private'] is not None and validated_data['is_private'] != instance.is_private:
         changeset = {'old_value': model_access.bool_to_string(instance.is_private),
                 'new_value': model_access.bool_to_string(validated_data['is_private']), 'field_name': 'is_private'}
         change_details.append(changeset)
@@ -576,7 +588,7 @@ def update_listing(serializer_instance, instance, validated_data):
                                profile=user,
                                is_private=validated_data['is_private'])
 
-    if validated_data['is_featured'] != instance.is_featured:
+    if validated_data['is_featured'] is not None and validated_data['is_featured'] != instance.is_featured:
         if user.highest_role() not in ['APPS_MALL_STEWARD', 'ORG_STEWARD']:
             raise errors.PermissionDenied('Only stewards can change is_featured setting of a listing')
 
