@@ -28,6 +28,7 @@ import ozpcenter.api.intent.model_access as intent_model_access
 import ozpcenter.api.intent.serializers as intent_serializers
 import ozpcenter.api.listing.model_access as model_access
 import ozpcenter.api.profile.serializers as profile_serializers
+import ozpcenter.api.profile.model_access as profile_model_access
 import ozpcenter.model_access as generic_model_access
 
 
@@ -100,6 +101,54 @@ class ListingActivitySerializer(serializers.ModelSerializer):
         model = models.ListingActivity
         fields = ('action', 'activity_date', 'description', 'author', 'listing',
             'change_details')
+
+
+class ListingVisitCountSerializer(serializers.ModelSerializer):
+    profile = profile_serializers.ShortProfileSerializer()
+    listing = ShortListingSerializer()
+
+    class Meta:
+        model = models.ListingVisitCount
+        fields = '__all__'
+
+    def validate(self, data):
+        data['profile'] = self.context['profile']
+        data['listing'] = self.context['listing']
+
+        if not data['profile']:
+            raise serializers.ValidationError('Missing required field profile')
+
+        if not data['listing']:
+            raise serializers.ValidationError('Missing required field listing')
+
+        if 'count' not in data:
+            data['count'] = 0
+
+        if 'last_visit_date' not in data:
+            data['last_visit_date'] = None
+
+        return data
+
+    def create(self, validated_data):
+        try:
+            data = profile_model_access.create_listing_visit_count(validated_data['profile'],
+                                                                   validated_data['listing'],
+                                                                   validated_data['count'],
+                                                                   validated_data['last_visit_date'])
+        except ValidationError as err:
+            raise serializers.ValidationError('{}'.format(err))
+
+        return data
+
+    def update(self, visit_count, validated_data):
+        try:
+            data = profile_model_access.update_listing_visit_count(visit_count,
+                                                                   validated_data['count'],
+                                                                   validated_data['last_visit_date'])
+        except ValidationError as err:
+            raise serializers.ValidationError('{}'.format(err))
+
+        return data
 
 
 class RejectionListingActivitySerializer(serializers.ModelSerializer):

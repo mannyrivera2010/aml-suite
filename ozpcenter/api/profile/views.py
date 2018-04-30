@@ -14,14 +14,17 @@ from rest_framework import viewsets
 # from rest_framework.decorators import permission_classes
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.decorators import list_route, detail_route
 
 from plugins.plugin_manager import system_anonymize_identifiable_data
 from ozpcenter import errors
 from ozpcenter import permissions
 import ozpcenter.api.profile.serializers as serializers
 import ozpcenter.api.listing.serializers as listing_serializers
+import ozpcenter.api.storefront.serializers as storefront_serializers
 # from ozpcenter import pagination
 import ozpcenter.api.profile.model_access as model_access
+import ozpcenter.api.listing.model_access as listing_model_access
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -133,6 +136,12 @@ class ProfileListingViewSet(viewsets.ModelViewSet):
         Find a Profile Listing by ID
     Response:
         200 - Successful operation - ListingSerializer
+
+    GET /api/profile/{pk}/listing/visited/
+    Summary:
+        Get a list of frequently visited listings
+    Response:
+        200 - Successful operation - ListingSerializer
     """
 
     permission_classes = (permissions.IsUser,)
@@ -211,6 +220,216 @@ class ProfileListingViewSet(viewsets.ModelViewSet):
         This method is not supported
         """
         raise errors.NotImplemented('HTTP Verb(DELETE) Not Supported')
+
+
+class ProfileListingVisitCountViewSet(viewsets.ModelViewSet):
+    """
+    Get listing visit counts for a specific user
+
+    ModelViewSet for getting all profile listing visit counts
+
+    Access Control
+    ===============
+    - All users can view
+
+    URIs
+    ======
+    POST /api/profile/{pk}/listingvisit/
+    Summary:
+        Add a Listing Visit Count for the given listing and profile
+    Request:
+        data: ListingVisitCountSerializer Schema
+    Response:
+        200 - Successful operation - ListingVisitCountSerializer
+
+    GET /api/profile/{pk}/listingvisit/
+    Summary:
+        Find a Listing Visit Count by ID
+    Response:
+        200 - Successful operation - ListingVisitCountSerializer
+
+    GET /api/profile/{pk}/listingvisit/frequent/
+    Summary:
+        Get a list of frequently visited listings
+    Response:
+        200 - Successful operation - StorefrontListingSerializer
+
+    POST /api/profile/{pk}/listingvisit/increment/
+    Summary:
+        Increments a listing visit for the given profile by 1
+    Response:
+        200 - Successful operation - ListingVisitCountSerializer
+    """
+
+    permission_classes = (permissions.IsUser,)
+    serializer_class = listing_serializers.ListingVisitCountSerializer
+
+    def get_queryset(self, profile_pk=None, listing_pk=None):
+        queryset = model_access.get_listing_visit_counts_for_profile(self.request.user.username, profile_pk, listing_pk)
+        return queryset
+
+    @list_route(methods=['get'])
+    def frequent(self, request, profile_pk=None):
+        """
+        Retrieves frequently visited listings for a specific profile
+        """
+        current_request_username = request.user.username
+        # Used to anonymize usernames
+        anonymize_identifiable_data = system_anonymize_identifiable_data(current_request_username)
+
+        if anonymize_identifiable_data:
+            return Response([])
+
+        queryset = model_access.get_frequently_visited_listings(current_request_username, profile_pk)
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = storefront_serializers.StorefrontListingSerializer(page,
+                context={'request': request}, many=True)
+            response = self.get_paginated_response(serializer.data)
+            return response
+
+        serializer = storefront_serializers.StorefrontListingSerializer(queryset,
+            context={'request': request}, many=True)
+        return Response(serializer.data)
+
+    @list_route(methods=['post'])
+    def increment(self, request, profile_pk=None):
+        """
+        Increments a listing visit for the given profile by 1
+        """
+        if 'listing' not in request.data and 'id' not in request.data['listing']:
+            raise errors.InvalidInput('Missing required field listing')
+
+        listing_pk = request.data['listing']['id']
+        queryset = self.get_queryset(profile_pk, listing_pk)
+        if queryset.exists():
+            visit_count = queryset.first()
+            request.data['count'] = visit_count.count + 1
+            return self.update(request, visit_count.id, profile_pk)
+        else:
+            request.data['count'] = 1
+            return self.create(request, profile_pk)
+
+    @list_route(methods=['post'])
+    def clear(self, request, profile_pk=None):
+        """
+        Clears the listing visit count for the given profile
+        """
+        if 'listing' not in request.data and 'id' not in request.data['listing']:
+            raise errors.InvalidInput('Missing required field listing')
+
+        listing_pk = request.data['listing']['id']
+        queryset = self.get_queryset(profile_pk, listing_pk)
+        request.data['count'] = 0
+        if queryset.exists():
+            visit_count = queryset.first()
+            return self.update(request, visit_count.id, profile_pk)
+        else:
+            return self.create(request, profile_pk)
+
+    def list(self, request, profile_pk=None):
+        """
+        Retrieves all listing visit counts for a specific profile
+        """
+        current_request_username = request.user.username
+        # Used to anonymize usernames
+        anonymize_identifiable_data = system_anonymize_identifiable_data(current_request_username)
+
+        if anonymize_identifiable_data:
+            return Response([])
+
+        queryset = self.get_queryset(profile_pk)
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = listing_serializers.ListingVisitCountSerializer(page,
+                context={'request': request}, many=True)
+            response = self.get_paginated_response(serializer.data)
+            return response
+
+        serializer = listing_serializers.ListingVisitCountSerializer(queryset,
+            context={'request': request}, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk, profile_pk=None):
+        """
+        Retrieves a specific listing visit count for a specific profile
+        """
+        current_request_username = request.user.username
+        # Used to anonymize usernames
+        anonymize_identifiable_data = system_anonymize_identifiable_data(current_request_username)
+
+        if anonymize_identifiable_data:
+            return Response({'detail': 'Permission Denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        # TODO: implement access control to listing visit data if needed
+        visit_count = model_access.get_visit_count_by_id(pk)
+
+        serializer = listing_serializers.ListingVisitCountSerializer(visit_count,
+            context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, profile_pk=None):
+        """
+        Create a listing visit count
+        """
+        if profile_pk == 'self':
+            profile = model_access.get_self(request.user.username)
+        else:
+            profile = model_access.get_profile_by_id(profile_pk)
+        if 'listing' in request.data and 'id' in request.data['listing']:
+            listing = listing_model_access.get_listing_by_id(request.user.username, request.data['listing']['id'], True)
+        else:
+            listing = None
+
+        serializer = listing_serializers.ListingVisitCountSerializer(data=request.data,
+            context={'request': request, 'profile': profile, 'listing': listing}, partial=True)
+        if not serializer.is_valid():
+            logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
+            raise errors.ValidationException('{0}'.format(serializer.errors))
+
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None, profile_pk=None):
+        """
+        Update an existing listing visit count
+        """
+        if profile_pk == 'self':
+            profile = model_access.get_self(request.user.username)
+        else:
+            profile = model_access.get_profile_by_id(profile_pk)
+        if 'listing' in request.data and 'id' in request.data['listing']:
+            listing = listing_model_access.get_listing_by_id(request.user.username, request.data['listing']['id'], True)
+        else:
+            listing = None
+
+        visit_count = model_access.get_visit_count_by_id(pk)
+
+        serializer = listing_serializers.ListingVisitCountSerializer(visit_count, data=request.data,
+            context={'request': request, 'profile': profile, 'listing': listing}, partial=True)
+        if not serializer.is_valid():
+            logger.error('{0!s}'.format(serializer.errors), extra={'request': request})
+            raise errors.ValidationException('{0}'.format(serializer.errors))
+
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def partial_update(self, request, pk=None, profile_pk=None):
+        """
+        This method is not supported
+        """
+        raise errors.NotImplemented('HTTP Verb(PATCH) Not Supported')
+
+    def destroy(self, request, pk=None, profile_pk=None):
+        """
+        Delete an existing listing visit count
+        """
+        # TODO: implement access control to listing visit data if needed
+        visit_count = model_access.get_visit_count_by_id(pk)
+        model_access.delete_listing_visit_count(visit_count)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserViewSet(viewsets.ModelViewSet):

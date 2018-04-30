@@ -13,6 +13,7 @@ router.register(r'group', views.GroupViewSet)
 
 profile_router = routers.NestedSimpleRouter(router, r'profile', lookup='profile')
 profile_router.register(r'listing', views.ProfileListingViewSet, base_name='listing')
+profile_router.register(r'listingvisits', views.ProfileListingVisitCountViewSet, base_name='listingvisits')
 
 urlpatterns = [
     url(r'^', include(router.urls)),
