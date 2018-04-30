@@ -86,6 +86,8 @@ DEMO_APP_ROOT = settings.OZP['DEMO_APP_ROOT']
 
 FAST_MODE = bool(os.getenv('FAST_MODE', False))
 
+ES_ENABLED = settings.ES_ENABLED
+
 
 def time_ms():
     return time.time() * 1000.0
@@ -253,6 +255,7 @@ def create_listing(listing_builder_dict, object_cache):
         system_requirements=listing_data['system_requirements'],
         is_enabled=listing_data['is_enabled'],
         is_private=listing_data['is_private'],
+        is_508_compliant=listing_data.get('is_508_compliant', False),
         is_featured=listing_data['is_featured'],
         iframe_compatible=listing_data['iframe_compatible'],
         security_marking=listing_data['security_marking']
@@ -816,8 +819,18 @@ def run():
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
+    #                           Elasticsearch
+    ############################################################################
+    if ES_ENABLED:
+        print('--Indexing Elasticsearch')
+        model_access_es.bulk_reindex()
+    else:
+        print('--Indexing Elasticsearch: disabled')
+
+    ############################################################################
     #                           End of script
     ############################################################################
+
     total_end_time = time_ms()
     print('Sample Data Generator took: {} ms'.format(total_end_time - total_start_time))
 

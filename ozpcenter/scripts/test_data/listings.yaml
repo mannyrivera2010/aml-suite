@@ -17,6 +17,7 @@
     is_enabled: true
     is_featured: false
     is_private: false
+    is_508_compliant: true
     large_banner_icon: {filename: AcousticGuitar_large_banner_icon.jpeg, security_marking: UNCLASSIFIED}
     large_icon: {filename: AcousticGuitar_large_icon.jpeg, security_marking: UNCLASSIFIED}
     launch_url: https://en.wikipedia.org/wiki/Acoustic_guitar

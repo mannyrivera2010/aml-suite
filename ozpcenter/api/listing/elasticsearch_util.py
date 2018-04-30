@@ -504,6 +504,8 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
     categories = search_param_parser.categories
     agencies = search_param_parser.agencies
     listing_types = search_param_parser.listing_types
+    is_508_compliant = search_param_parser.is_508_compliant
+
     # Ordering
     ordering = search_param_parser.ordering
 
@@ -537,6 +539,19 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
             }
         }
     ]
+
+    if is_508_compliant is True:
+        filter_data.append({
+            "term": {
+                "is_508_compliant": 1
+            }
+        })
+    elif is_508_compliant is False:
+        filter_data.append({
+            "term": {
+                "is_508_compliant": 0
+            }
+        })
 
     # Agencies (agency_short_name) to filter
     if agencies:
