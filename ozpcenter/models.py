@@ -861,6 +861,8 @@ class Profile(models.Model):
     subscription_notification_flag = models.BooleanField(default=True)
     # leaving_ozp_warning_flag: True = Show warning modal when launching an app
     leaving_ozp_warning_flag = models.BooleanField(default=True)
+    # 508-only-search flag
+    only_508_search_flag = models.BooleanField(default=False)
 
     # TODO: on create, update, or delete, do the same for the related django_user
     objects = ProfileManager()

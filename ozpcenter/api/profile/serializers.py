@@ -131,7 +131,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'stewarded_organizations', 'user', 'highest_role', 'dn',
             'center_tour_flag', 'hud_tour_flag', 'webtop_tour_flag',
             'email_notification_flag', 'listing_notification_flag', 'subscription_notification_flag',
-            'leaving_ozp_warning_flag', 'is_beta_user')
+            'leaving_ozp_warning_flag', 'only_508_search_flag', 'is_beta_user')
 
         read_only_fields = ('id', 'bio', 'organizations', 'user',
             'highest_role', 'is_beta_user')
@@ -181,6 +181,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         if 'webtop_tour_flag' in validated_data:
             profile_instance.webtop_tour_flag = validated_data['webtop_tour_flag']
+
+        if 'only_508_search_flag' in validated_data:
+            profile_instance.only_508_search_flag = validated_data['only_508_search_flag']
 
         if 'email_notification_flag' in validated_data:
             profile_instance.email_notification_flag = validated_data['email_notification_flag']

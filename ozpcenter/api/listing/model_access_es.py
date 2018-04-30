@@ -64,12 +64,16 @@ class SearchParamParser(object):
         self.agencies = [str(record) for record in request.query_params.getlist('agency', [])]
         self.listing_types = [str(record) for record in request.query_params.getlist('type', [])]
 
-        self.is_508_compliant = request.query_params.get('is_508_compliant', None)  # Can be None, False, True
+        self.is_508_compliant = None
 
-        if self.is_508_compliant:
-            self.is_508_compliant = utils.str_to_bool(self.is_508_compliant)
-        else:
-            self.is_508_compliant = None
+        # Override is_508_compliant  if self.request.user.profile.only_508_search_flag is true
+        if request.user.profile.only_508_search_flag is True:
+            self.is_508_compliant = True
+
+        # Override is_508_compliant via params
+        self.is_508_compliant_params = request.query_params.get('is_508_compliant', '').strip()  # Can be None, False, True
+        if self.is_508_compliant_params:
+            self.is_508_compliant = utils.str_to_bool(self.is_508_compliant_params)
 
         # Ordering Example: api/listings/essearch/?search=&limit=24&offset=24&ordering=-title
         self.ordering = [str(record) for record in request.query_params.getlist('ordering', [])]
