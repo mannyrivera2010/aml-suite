@@ -298,23 +298,33 @@ class ModelExtractor(object):
                 listing_activity_dict['description'] = listing_activity_entry.description
                 listing_activity_list.append(listing_activity_dict)
 
+            # listing_visit_count
+            listing_visit_count_list = []
+            for listing_visit_count_entry in models.ListingVisitCount.objects.filter(listing=current_listing).order_by('-count').iterator():
+                listing_visit_count_dict = {}
+                listing_visit_count_dict['profile'] = listing_visit_count_entry.profile.user.username
+                listing_visit_count_dict['count'] = listing_visit_count_entry.count
+                listing_visit_count_dict['last_visit_date'] = listing_visit_count_entry.last_visit_date
+                listing_visit_count_list.append(listing_visit_count_dict)
+
             # Combine Dictionaries into output_dict
             output_dict = {}
             output_dict['listing'] = listing
             output_dict['listing_review_batch'] = review_list
             output_dict['library_entries'] = library_entries_list
             output_dict['listing_activity'] = listing_activity_list
+            output_dict['listing_visit_count'] = listing_visit_count_list
             output_list.append(output_dict)
 
         return output_list
 
 
-def save_to_yaml(filename, data):
+def save_to_yaml(filename, data, default_flow_style=False):
     """
     Save Data to Yaml file
     """
     with open(filename, 'w') as file_stream:
-        yaml.dump(data, file_stream, indent=2, default_flow_style=False)
+        yaml.dump(data, file_stream, indent=2, default_flow_style=default_flow_style)
 
 
 def run():
@@ -341,4 +351,4 @@ def run():
     save_to_yaml('contacts.yaml', ModelExtractor.extract_contacts_database())
 
     print('Extracting listings')
-    save_to_yaml('listings.yaml', ModelExtractor.extract_listings_database(save_images=save_images))
+    save_to_yaml('listings.yaml', ModelExtractor.extract_listings_database(save_images=save_images), None)

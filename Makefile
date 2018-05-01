@@ -142,7 +142,7 @@ sqlite_dump: dev
 sqlite_restore:
 	if [ -e 'db.sqlite3' ]; then rm db.sqlite3 ; fi && cat ozpcenter/scripts/test_data/dump_sqlite3.sql | sqlite3 db.sqlite3
 
-pgsql_dump: dev_psql
+pgsql_dump: use_psql dev
 	pg_dump --username=ozp_user --host=localhost ozp > ozpcenter/scripts/test_data/dump_pgsql.sql
 
 pgsql_create_user:
