@@ -254,6 +254,7 @@ class ListingObserver(Observer):
                         'contacts']
 
         changes = []
+
         for change_detail in change_details:
             if not (change_detail['field_name'] in ignoreFields):
                 changes.append(change_detail['field_name'].title().replace('_', ' '))

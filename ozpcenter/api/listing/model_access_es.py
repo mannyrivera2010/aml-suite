@@ -15,6 +15,7 @@ from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 from ozpcenter.api.listing import elasticsearch_util
 from ozpcenter import constants
 from ozpcenter import models
+from ozpcenter import utils
 from plugins.plugin_manager import system_has_access_control
 
 
@@ -62,6 +63,17 @@ class SearchParamParser(object):
         self.categories = [str(record) for record in request.query_params.getlist('category', [])]
         self.agencies = [str(record) for record in request.query_params.getlist('agency', [])]
         self.listing_types = [str(record) for record in request.query_params.getlist('type', [])]
+
+        self.is_508_compliant = None
+
+        # Override is_508_compliant  if self.request.user.profile.only_508_search_flag is true
+        if request.user.profile.only_508_search_flag is True:
+            self.is_508_compliant = True
+
+        # Override is_508_compliant via params
+        self.is_508_compliant_params = request.query_params.get('is_508_compliant', '').strip()  # Can be None, False, True
+        if self.is_508_compliant_params:
+            self.is_508_compliant = utils.str_to_bool(self.is_508_compliant_params)
 
         # Ordering Example: api/listings/essearch/?search=&limit=24&offset=24&ordering=-title
         self.ordering = [str(record) for record in request.query_params.getlist('ordering', [])]
@@ -221,7 +233,6 @@ def suggest(request_username, search_param_parser):
     Returns:
         listing titles in a list
     """
-    # Create ES client
     es_client = elasticsearch_factory.get_client()
 
     elasticsearch_factory.check_elasticsearch()
@@ -303,6 +314,7 @@ def search(request_username, search_param_parser):
      - category
      - agency
      - listing types
+     - is_508_compliant
 
     Users shall only see what they are authorized to see
       'is_private': false,
