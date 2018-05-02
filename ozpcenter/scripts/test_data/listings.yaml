@@ -45,12 +45,33 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch:
-  - {author: bigbrother, rate: 3, text: Favorite Instrument by far. BY. FAR., day_delta: -6}
-  - {author: wsmith, rate: 1, text: I don't like the sound of acoustic guitars. I
-      like electric guitars more, day_delta: -5}
-  - {author: syme, rate: 5, text: I love the sound of acoustic guitars, day_delta: -4}
-  - {author: bigbrother, rate: 0, text: Review for syme loving acoustic guitars, review: True, day_delta: 0}
-  - {author: charrington, rate: 3, text: I love the sound of acoustic guitars rock on, day_delta: -3}
+  - {author: bigbrother, day_delta: -6, rate: 3, text: Favorite Instrument by far.
+      BY. FAR.}
+  - {author: wsmith, day_delta: -5, rate: 1, text: I don't like the sound of acoustic
+      guitars. I like electric guitars more}
+  - {author: syme, day_delta: -4, rate: 5, text: I love the sound of acoustic guitars}
+  - {author: bigbrother, day_delta: 0, rate: 0, review: true, text: Review for syme
+      loving acoustic guitars}
+  - {author: charrington, day_delta: -3, rate: 3, text: I love the sound of acoustic
+      guitars rock on}
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: noah}
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: johnson}
+  - {count: 2, profile: wsmith}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: betaraybill}
+  - {count: 6, profile: david}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: jsnow}
+  - {count: 9, profile: julia}
+  - {count: 9, profile: syme}
+  - {count: 10, profile: obrien}
 - library_entries:
   - {folder: old, owner: wsmith, position: 0}
   - {folder: null, owner: hodor, position: 0}
@@ -105,6 +126,21 @@
       support IE 6!}
   - {author: khaleesi, rate: 4, text: 'On par with sending ravens across Westeros,
       though less likely to be eaten along the way. '}
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 1, profile: syme}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: khaleesi}
+  - {count: 6, profile: aaronson}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: obrien}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: johnson}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -146,6 +182,22 @@
   - {action: CREATED, author: bettafish, description: null}
   - {action: SUBMITTED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: charrington}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: khaleesi}
+  - {count: 6, profile: betaraybill}
+  - {count: 7, profile: david}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: abe}
 - library_entries: []
   listing:
     agency: Test 1
@@ -193,6 +245,25 @@
   - {author: aaronson, rate: 5, text: Very friendly. Would recommend to others}
   - {author: syme, rate: 1, text: 'I don''t want to talk about it. '}
   - {author: jones, rate: 4, text: 'The Gray''s... Moulder where are you?'}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: david}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: betaraybill}
+  - {count: 6, profile: jsnow}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: jones}
+  - {count: 9, profile: bettafish}
+  - {count: 9, profile: johnson}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: syme}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -252,6 +323,27 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jones}
+  - {count: 1, profile: tparsons}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: noah}
+  - {count: 2, profile: rutherford}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: charrington}
+  - {count: 3, profile: david}
+  - {count: 4, profile: jsnow}
+  - {count: 4, profile: tammy}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: obrien}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: julia}
+  - {count: 9, profile: syme}
 - library_entries: []
   listing:
     agency: Minipax
@@ -304,6 +396,25 @@
   listing_review_batch:
   - {author: syme, rate: 1, text: 'I will downvote anybody who is blue and you can''t
       stop me. '}
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: david}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: julia}
+  - {count: 2, profile: noah}
+  - {count: 2, profile: tammy}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: khaleesi}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: jsnow}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: charrington}
+  - {count: 8, profile: jones}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -354,6 +465,23 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: jsnow}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: obrien}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: jones}
+  - {count: 10, profile: david}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Test 3
@@ -415,6 +543,24 @@
   listing_review_batch:
   - {author: rutherford, rate: 5, text: I think that this is very cool software.  Must
       try it out.}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: tparsons}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: jsnow}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: obrien}
+  - {count: 8, profile: rutherford}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: david}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: bigbrother2}
 - library_entries:
   - {folder: null, owner: rutherford, position: 0}
   - {folder: planets, owner: wsmith, position: 8}
@@ -477,6 +623,25 @@
   - {author: khaleesi, rate: 3, text: Lots of great dragons but the humanoids sure
       like trying to kill them for loot. Not sure it's worth the effort to visit.}
   - {author: bettafish, rate: 5, text: Everything should be 5 stars}
+  listing_visit_count:
+  - {count: 1, profile: syme}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: khaleesi}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: noah}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: johnson}
+  - {count: 5, profile: jones}
+  - {count: 6, profile: bigbrother2}
+  - {count: 8, profile: david}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: jsnow}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: tammy}
 - library_entries:
   - {folder: null, owner: bettafish, position: 0}
   - {folder: null, owner: wsmith, position: 4}
@@ -536,6 +701,25 @@
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch:
   - {author: bettafish, rate: 5, text: BEST FOOTBALL TEAM EVER.}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: charrington}
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: noah}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: johnson}
+  - {count: 10, profile: tammy}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -632,6 +816,25 @@
   listing_review_batch:
   - {author: khaleesi, rate: 5, text: I love to bbq with my 3 dragons. Extra yum with
       dragon fire!}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: julia}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: jsnow}
+  - {count: 3, profile: tammy}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: betaraybill}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: rutherford}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: noah}
+  - {count: 8, profile: syme}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: bigbrother}
+  - {count: 10, profile: johnson}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -705,6 +908,23 @@
   - {author: syme, rate: 3, text: 'No roller coaster, a curfew and ice warriors.'}
   - {author: bettafish, rate: 5, text: Found this in the Marketplace.  Much better
       than expected.}
+  listing_visit_count:
+  - {count: 2, profile: abe}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: syme}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: julia}
+  - {count: 6, profile: obrien}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: johnson}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: charrington}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -753,6 +973,26 @@
   - {author: aaronson, rate: 2, text: Bad user interface but good content}
   - {author: syme, rate: 5, text: 'If you''re complaining about the UI, its because
       you have neither hops nor handles.  I''ve contacted the mods, you will be removed.  FOREVER. '}
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: noah}
+  - {count: 1, profile: syme}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: betaraybill}
+  - {count: 3, profile: johnson}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: julia}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: bettafish}
+  - {count: 7, profile: david}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: bigbrother2}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: rutherford}
+  - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: null, owner: jones, position: 0}
   listing:
@@ -807,6 +1047,25 @@
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch:
   - {author: jones, rate: 4, text: So easy a kid can do it.}
+  listing_visit_count:
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: johnson}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: tammy}
+  - {count: 3, profile: tparsons}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: noah}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: david}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: rutherford}
+  - {count: 9, profile: syme}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -894,6 +1153,20 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 1, profile: syme}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: johnson}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: tparsons}
+  - {count: 6, profile: obrien}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: betaraybill}
+  - {count: 8, profile: abe}
+  - {count: 9, profile: jones}
 - library_entries: []
   listing:
     agency: Minipax
@@ -967,6 +1240,25 @@
       '}
   - {author: syme, rate: 3, text: 'Why are they always blue?  It just doesn''t make
       any sense. '}
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: abe}
+  - {count: 4, profile: charrington}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: jones}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: david}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -1065,6 +1357,21 @@
   - {author: bigbrother, rate: 4, text: Should consider this one.  It might be worth
       it.}
   - {author: rutherford, rate: 3, text: Okay app must try it today.}
+  listing_visit_count:
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: rutherford}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: tammy}
 - library_entries:
   - {folder: null, owner: bettafish, position: 1}
   listing:
@@ -1119,6 +1426,24 @@
   listing_review_batch:
   - {author: rutherford, rate: 4, text: Better than average and grew up with them}
   - {author: syme, rate: 5, text: I think they could go places!}
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 3, profile: jones}
+  - {count: 4, profile: abe}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: tammy}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: hodor}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: johnson}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: obrien}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minipax
@@ -1172,6 +1497,24 @@
   - {author: david, rate: 5, text: 'Too scared to fly United?  Try a blink.'}
   - {author: syme, rate: 5, text: 5/5 Not blue!  Thank the lords.}
   - {author: betaraybill, rate: 1, text: 'I shimmer, not blink. SAD!'}
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: noah}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: bettafish}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: obrien}
+  - {count: 8, profile: jsnow}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: charrington}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -1228,6 +1571,22 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: hodor}
+  - {count: 5, profile: aaronson}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: david}
+  - {count: 6, profile: tammy}
+  - {count: 6, profile: wsmith}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: julia}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: noah}
 - library_entries:
   - {folder: Beverages, owner: bettafish, position: 5}
   listing:
@@ -1284,6 +1643,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: jsnow}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: hodor}
+  - {count: 6, profile: betaraybill}
+  - {count: 7, profile: julia}
+  - {count: 8, profile: charrington}
+  - {count: 8, profile: noah}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: david}
+  - {count: 9, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -1331,6 +1707,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: david}
+  - {count: 1, profile: noah}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: jsnow}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: tammy}
+  - {count: 5, profile: bigbrother2}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: johnson}
+  - {count: 8, profile: obrien}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: rutherford}
+  - {count: 9, profile: wsmith}
 - library_entries:
   - {folder: old, owner: wsmith, position: 1}
   - {folder: null, owner: bigbrother, position: 15}
@@ -1374,6 +1767,12 @@
   listing_review_batch:
   - {author: jones, rate: 2, text: This bread is stale!}
   - {author: julia, rate: 5, text: Yum!}
+  listing_visit_count:
+  - {count: 3, profile: wsmith}
+  - {count: 6, profile: bettafish}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -1437,6 +1836,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 2, profile: aaronson}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: rutherford}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: betaraybill}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: abe}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: khaleesi}
+  - {count: 8, profile: hodor}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: wsmith}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: david}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Test2
@@ -1479,6 +1896,22 @@
   listing_review_batch:
   - {author: aaronson, rate: 4, text: Essential for living life}
   - {author: syme, rate: 2, text: 'I don''t get it.  Does its just sit there? '}
+  listing_visit_count:
+  - {count: 1, profile: jones}
+  - {count: 4, profile: bettafish}
+  - {count: 5, profile: johnson}
+  - {count: 5, profile: noah}
+  - {count: 6, profile: obrien}
+  - {count: 8, profile: abe}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: david}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -1530,6 +1963,22 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 2, profile: david}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: noah}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: abe}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: hodor}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: charrington}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -1594,6 +2043,22 @@
       of Business Administration (DBA), or the PhD in Business Administration or Management.'}
   - {author: syme, rate: 2, text: 'I was told there would be cake, last time I did
       not get any cake, and i just want some cake. '}
+  listing_visit_count:
+  - {count: 2, profile: aaronson}
+  - {count: 3, profile: rutherford}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: julia}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: jones}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: obrien}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: syme}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: betaraybill}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -1643,6 +2108,27 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: tammy}
+  - {count: 3, profile: aaronson}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: hodor}
+  - {count: 4, profile: obrien}
+  - {count: 4, profile: tparsons}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: david}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: noah}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 18}
   listing:
@@ -1695,6 +2181,25 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: david}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: hodor}
+  - {count: 4, profile: obrien}
+  - {count: 5, profile: betaraybill}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: bettafish}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: noah}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: charrington}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: syme}
 - library_entries:
   - {folder: null, owner: hodor, position: 0}
   - {folder: null, owner: bigbrother, position: 20}
@@ -1738,6 +2243,23 @@
   listing_review_batch:
   - {author: wsmith, rate: 2, text: This Chart is bad!}
   - {author: bigbrother, rate: 5, text: Good Chart!}
+  listing_visit_count:
+  - {count: 2, profile: abe}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: noah}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: david}
+  - {count: 6, profile: julia}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: johnson}
 - library_entries: []
   listing:
     agency: Test
@@ -1791,6 +2313,24 @@
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch:
   - {author: rutherford, rate: 4, text: Might be pretty good to look at.}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: jsnow}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: david}
+  - {count: 5, profile: syme}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: charrington}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: obrien}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: rutherford}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -1830,6 +2370,22 @@
   - {action: APPROVED_ORG, author: wsmith, description: null}
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: julia}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: hodor}
+  - {count: 3, profile: david}
+  - {count: 3, profile: jones}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: abe}
+  - {count: 6, profile: tammy}
+  - {count: 8, profile: obrien}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: jsnow}
+  - {count: 9, profile: rutherford}
+  - {count: 9, profile: syme}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -1879,6 +2435,22 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: johnson}
+  - {count: 2, profile: obrien}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: hodor}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: david}
+  - {count: 5, profile: julia}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: rutherford}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: jsnow}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -1935,6 +2507,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: julia}
+  - {count: 2, profile: jsnow}
+  - {count: 3, profile: aaronson}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: khaleesi}
+  - {count: 3, profile: johnson}
+  - {count: 4, profile: noah}
+  - {count: 4, profile: obrien}
+  - {count: 5, profile: rutherford}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: bigbrother2}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: david}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: jones}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -1980,6 +2570,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jones}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: jsnow}
+  - {count: 4, profile: syme}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: obrien}
+  - {count: 6, profile: tparsons}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: rutherford}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -2029,6 +2637,20 @@
   listing_review_batch:
   - {author: rutherford, rate: 3, text: 'I really don''t care for this one, but it
       might be good for others.'}
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: noah}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: obrien}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: jones}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: bigbrother}
+  - {count: 8, profile: bigbrother2}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: charrington}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -2077,6 +2699,24 @@
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch:
   - {author: rutherford, rate: 3, text: This is an okay image and app.}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: hodor}
+  - {count: 1, profile: julia}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: noah}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: charrington}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: david}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: tammy}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: bigbrother2}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -2116,6 +2756,26 @@
   - {action: APPROVED_ORG, author: wsmith, description: null}
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: david}
+  - {count: 2, profile: johnson}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: rutherford}
+  - {count: 4, profile: tammy}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: julia}
+  - {count: 8, profile: bettafish}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -2167,6 +2827,27 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 3, profile: johnson}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: julia}
+  - {count: 4, profile: rutherford}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: obrien}
+  - {count: 5, profile: tparsons}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: jsnow}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: charrington}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: khaleesi}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: david}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -2233,6 +2914,21 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: tammy}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: david}
+  - {count: 4, profile: jones}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: julia}
+  - {count: 6, profile: syme}
+  - {count: 8, profile: noah}
+  - {count: 10, profile: bettafish}
 - library_entries: []
   listing:
     agency: Minipax
@@ -2298,6 +2994,25 @@
       of everybody can fly and you can sit behind them at concerts and still see the
       show.'}
   - {author: betaraybill, rate: 5, text: BEST. X-MEN. EVER!!!}
+  listing_visit_count:
+  - {count: 3, profile: khaleesi}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: obrien}
+  - {count: 5, profile: rutherford}
+  - {count: 5, profile: tparsons}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: david}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: bettafish}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: noah}
 - library_entries: []
   listing:
     agency: Minipax
@@ -2358,6 +3073,27 @@
   - {author: syme, rate: 2, text: 'He wrecked the freeway.  I was late to work and
       rushed my experiment.  After drinking the radioactive material i just got sick
       :('}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: syme}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: noah}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: tparsons}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: david}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: charrington}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: johnson}
+  - {count: 9, profile: obrien}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: jones}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -2418,6 +3154,21 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: bigbrother}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: david}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: jsnow}
+  - {count: 6, profile: syme}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: noah}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: obrien}
+  - {count: 10, profile: johnson}
 - library_entries:
   - {folder: null, owner: wsmith, position: 2}
   listing:
@@ -2501,6 +3252,23 @@
   - {action: APPROVED_ORG, author: khaleesi, description: null}
   - {action: APPROVED, author: khaleesi, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 1, profile: hodor}
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: bigbrother2}
+  - {count: 3, profile: johnson}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: syme}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: jsnow}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: obrien}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: tparsons}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Test
@@ -2553,6 +3321,26 @@
       substance. '}
   - {author: khaleesi, rate: 4, text: 'Close to dragons but -1 star for not having
       wings, breathing fire or flying'}
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: jsnow}
+  - {count: 1, profile: obrien}
+  - {count: 3, profile: wsmith}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: david}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: jones}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: tammy}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: rutherford}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -2597,6 +3385,25 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: charrington}
+  - {count: 3, profile: khaleesi}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: rutherford}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: julia}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: bettafish}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
   listing:
@@ -2658,6 +3465,27 @@
   listing_review_batch:
   - {author: khaleesi, rate: 5, text: Dragons are the best! I want to mother them
       all <3}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: rutherford}
+  - {count: 3, profile: syme}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: jsnow}
+  - {count: 4, profile: jones}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: tammy}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: charrington}
+  - {count: 9, profile: betaraybill}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: johnson}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -2705,6 +3533,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: julia}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: obrien}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: charrington}
+  - {count: 8, profile: david}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: syme}
+  - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 9}
   listing:
@@ -2750,6 +3595,23 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: khaleesi}
+  - {count: 3, profile: rutherford}
+  - {count: 3, profile: tparsons}
+  - {count: 5, profile: julia}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: syme}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: wsmith}
+  - {count: 8, profile: hodor}
+  - {count: 8, profile: jones}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: johnson}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 12}
   listing:
@@ -2798,6 +3660,20 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: hodor}
+  - {count: 3, profile: david}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: noah}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: rutherford}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: syme}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -2837,6 +3713,26 @@
   - {action: CREATED, author: bettafish, description: null}
   - {action: SUBMITTED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: bigbrother}
+  - {count: 5, profile: bigbrother2}
+  - {count: 5, profile: johnson}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: jones}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: rutherford}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -2886,6 +3782,22 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: david}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: julia}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: jsnow}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: jones}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: hodor}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -2933,6 +3845,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: david}
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: tparsons}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: wsmith}
+  - {count: 6, profile: noah}
+  - {count: 7, profile: bettafish}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Test 1
@@ -2979,6 +3909,9 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 7, profile: bettafish}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -3039,6 +3972,23 @@
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch:
   - {author: bettafish, rate: 3, text: 'Who broke the first rule?!?!'}
+  listing_visit_count:
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: charrington}
+  - {count: 4, profile: julia}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: abe}
+  - {count: 6, profile: rutherford}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: tammy}
 - library_entries: []
   listing:
     agency: Test 3
@@ -3091,6 +4041,25 @@
   - {author: bettafish, rate: 3, text: Won't even hold an MP3.  Write time is very
       slow.  Somewhat noisy too.}
   - {author: khaleesi, rate: 2, text: Real men don't use floppies.}
+  listing_visit_count:
+  - {count: 1, profile: syme}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: wsmith}
+  - {count: 4, profile: bettafish}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bigbrother2}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: julia}
+  - {count: 7, profile: betaraybill}
+  - {count: 8, profile: jones}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: obrien}
+  - {count: 9, profile: rutherford}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: david}
+  - {count: 10, profile: johnson}
 - library_entries: []
   listing:
     agency: Minipax
@@ -3139,6 +4108,26 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: obrien}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: aaronson}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: bigbrother}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: khaleesi}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: noah}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: syme}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -3178,6 +4167,23 @@
   - {action: APPROVED_ORG, author: wsmith, description: null}
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: syme}
+  - {count: 4, profile: betaraybill}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: bigbrother2}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: noah}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: tammy}
+  - {count: 6, profile: wsmith}
+  - {count: 8, profile: david}
+  - {count: 8, profile: obrien}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: johnson}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 19}
   listing:
@@ -3225,6 +4231,18 @@
   listing_review_batch:
   - {author: syme, rate: 4, text: 'I keep hitting M and the map doesn''t show up. '}
   - {author: rutherford, rate: 3, text: Okay app must try it today.}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: tammy}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: charrington}
+  - {count: 6, profile: johnson}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: bettafish}
+  - {count: 9, profile: david}
+  - {count: 10, profile: betaraybill}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -3268,6 +4286,21 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: rutherford}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: jsnow}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: wsmith}
+  - {count: 8, profile: david}
+  - {count: 9, profile: johnson}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: obrien}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -3321,6 +4354,27 @@
   listing_review_batch:
   - {author: bigbrother, rate: 5, text: One of the better ones that I have seen.}
   - {author: rutherford, rate: 5, text: Great app must try it today.}
+  listing_visit_count:
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: khaleesi}
+  - {count: 3, profile: johnson}
+  - {count: 3, profile: noah}
+  - {count: 5, profile: david}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: bigbrother2}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: syme}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: rutherford}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Test
@@ -3379,6 +4433,22 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jones}
+  - {count: 3, profile: charrington}
+  - {count: 4, profile: jsnow}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: syme}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: julia}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: david}
+  - {count: 7, profile: noah}
+  - {count: 9, profile: bettafish}
+  - {count: 9, profile: obrien}
+  - {count: 10, profile: hodor}
 - library_entries:
   - {folder: null, owner: wsmith, position: 3}
   listing:
@@ -3433,6 +4503,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: aaronson}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: johnson}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: julia}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: syme}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -3495,6 +4582,25 @@
       worst.  Anyways after a trip to the beach I didn''t have to worry about that
       anymore. '}
   - {author: rutherford, rate: 3, text: Okay this might be a good one.}
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: david}
+  - {count: 1, profile: tammy}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: jones}
+  - {count: 6, profile: jsnow}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: obrien}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: betaraybill}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -3558,6 +4664,25 @@
   listing_review_batch:
   - {author: wsmith, rate: 3, text: 'All new four-valve engine and suspension. Doubling
       down on valves, staying pat on styling.'}
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: jones}
+  - {count: 1, profile: syme}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: abe}
+  - {count: 3, profile: betaraybill}
+  - {count: 4, profile: obrien}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: rutherford}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: julia}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: hodor}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: noah}
+  - {count: 10, profile: david}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -3597,6 +4722,26 @@
   - {action: APPROVED_ORG, author: wsmith, description: null}
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 1, profile: syme}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: aaronson}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: julia}
+  - {count: 5, profile: abe}
+  - {count: 6, profile: wsmith}
+  - {count: 8, profile: charrington}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: khaleesi}
+  - {count: 10, profile: david}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: obrien}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minipax
@@ -3648,6 +4793,24 @@
   - {author: syme, rate: 5, text: I feel like I would like it!  10 stars!}
   - {author: rutherford, rate: 3, text: 'I know that I should not worry, but it is
       the volcanoes that I am worried about.  Otherwise a good place to visit.'}
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: david}
+  - {count: 3, profile: johnson}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: rutherford}
+  - {count: 5, profile: syme}
+  - {count: 6, profile: noah}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: bigbrother}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: jsnow}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
   listing:
@@ -3699,6 +4862,20 @@
   listing_review_batch:
   - {author: khaleesi, rate: 1, text: False rulers of the iron throne. They will soon
       fall in battle to my army of dragons. If I could give a 0 rating I would!}
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 1, profile: syme}
+  - {count: 2, profile: obrien}
+  - {count: 4, profile: betaraybill}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: wsmith}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: julia}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
   listing:
@@ -3755,6 +4932,22 @@
   - {author: betaraybill, rate: 1, text: Guy's not even a full stark.}
   - {author: khaleesi, rate: 4, text: 'Won''t bend the knee, but could prove to be
       a valuable ally. Dragons still beat direwolves though.'}
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: obrien}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: khaleesi}
+  - {count: 9, profile: david}
+  - {count: 10, profile: bigbrother}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
   listing:
@@ -3811,6 +5004,23 @@
   listing_review_batch:
   - {author: khaleesi, rate: 5, text: 'The best, most powerful house ever. True rulers
       of Westeros.'}
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: tammy}
+  - {count: 3, profile: bettafish}
+  - {count: 4, profile: julia}
+  - {count: 5, profile: david}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: syme}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: noah}
+  - {count: 9, profile: khaleesi}
+  - {count: 10, profile: rutherford}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Test 4
@@ -3863,6 +5073,21 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: aaronson}
+  - {count: 5, profile: noah}
+  - {count: 5, profile: tparsons}
+  - {count: 7, profile: rutherford}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: david}
+  - {count: 9, profile: obrien}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: betaraybill}
 - library_entries:
   - {folder: Beverages, owner: bettafish, position: 6}
   listing:
@@ -3914,6 +5139,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: noah}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: hodor}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: rutherford}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: wsmith}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: charrington}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: jones}
+  - {count: 10, profile: david}
+  - {count: 10, profile: julia}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 16}
   listing:
@@ -3974,6 +5217,20 @@
   - {author: syme, rate: 5, text: 'Zeus controls the world by creating brainwave modifiers
       that are sent through the air as cotton candy.  Its true!  You can read about
       it on wikipedia. '}
+  listing_visit_count:
+  - {count: 1, profile: noah}
+  - {count: 3, profile: aaronson}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: rutherford}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: julia}
+  - {count: 7, profile: syme}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: david}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -4037,6 +5294,22 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: charrington}
+  - {count: 1, profile: wsmith}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: obrien}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: jones}
+  - {count: 5, profile: syme}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: rutherford}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: khaleesi}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: noah}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -4091,6 +5364,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 1, profile: hodor}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: jsnow}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: bigbrother}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: syme}
+  - {count: 7, profile: tammy}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: noah}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: jones}
 - library_entries:
   - {folder: Funny, owner: bettafish, position: 3}
   listing:
@@ -4152,6 +5443,21 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 2, profile: jones}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: bigbrother2}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: david}
+  - {count: 9, profile: jsnow}
 - library_entries:
   - {folder: heros, owner: wsmith, position: 5}
   listing:
@@ -4228,6 +5534,25 @@
       is AWESOME!  '}
   - {author: rutherford, rate: 3, text: Ironman is okay not 100% sure it is good.}
   - {author: khaleesi, rate: 5, text: 'I like my men rich and arrogant. '}
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: david}
+  - {count: 1, profile: tparsons}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: obrien}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: khaleesi}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: bigbrother2}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: jones}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: bettafish}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -4279,6 +5604,25 @@
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch:
   - {author: rutherford, rate: 3, text: this okay not so sure.}
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: jsnow}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: david}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: jones}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: bettafish}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -4356,6 +5700,25 @@
   - {author: betaraybill, rate: 5, text: I like this planet. It's alright.}
   - {author: syme, rate: 2, text: Contains florida and the dallas cowboys.  This makes
       it irredeemable in the eyes of the lord.}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: syme}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: charrington}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: bigbrother2}
+  - {count: 5, profile: jones}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: david}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: khaleesi}
+  - {count: 10, profile: jsnow}
 - library_entries: []
   listing:
     agency: Test 4
@@ -4417,6 +5780,26 @@
   listing_review_batch:
   - {author: betaraybill, rate: 1, text: One of the main characters doesn't even speak.
       SAD!}
+  listing_visit_count:
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: bettafish}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: david}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: obrien}
+  - {count: 5, profile: tparsons}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: khaleesi}
+  - {count: 7, profile: johnson}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: abe}
+  - {count: 9, profile: syme}
+  - {count: 10, profile: jsnow}
 - library_entries:
   - {folder: heros, owner: wsmith, position: 6}
   listing:
@@ -4498,6 +5881,25 @@
   - {author: wsmith, rate: 3, text: 'After Jean and the X-Men defeated scientist Stephen
       Lang and his robotic Sentinels on his space station, the heroes escaped back
       to Earth in a shuttle through a lethal solar radiation storm.'}
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: julia}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: bigbrother}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: david}
+  - {count: 8, profile: abe}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: jsnow}
+  - {count: 9, profile: rutherford}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: aaronson}
 - library_entries:
   - {folder: null, owner: hodor, position: 0}
   listing:
@@ -4539,6 +5941,23 @@
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch:
   - {author: charrington, rate: 4, text: I really like it}
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: jsnow}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: obrien}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: bigbrother2}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: david}
+  - {count: 6, profile: hodor}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: tammy}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -4611,6 +6030,24 @@
   - {author: betaraybill, rate: 5, text: 'It''s pretty big. Like, bigly big.'}
   - {author: syme, rate: 3, text: To hard to to talk to because you just want to look
       at its eyestorm birthmark thing.}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: tammy}
+  - {count: 3, profile: jsnow}
+  - {count: 3, profile: jones}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: charrington}
+  - {count: 5, profile: noah}
+  - {count: 5, profile: obrien}
+  - {count: 5, profile: rutherford}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: abe}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: david}
+  - {count: 9, profile: johnson}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -4664,6 +6101,21 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 3, profile: jones}
+  - {count: 4, profile: charrington}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: david}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: obrien}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: bigbrother2}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Test2
@@ -4708,6 +6160,20 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: jones}
+  - {count: 4, profile: johnson}
+  - {count: 6, profile: julia}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: hodor}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -4756,6 +6222,23 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: aaronson}
+  - {count: 3, profile: khaleesi}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: bigbrother}
+  - {count: 6, profile: betaraybill}
+  - {count: 6, profile: david}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: syme}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: jsnow}
+  - {count: 8, profile: noah}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: jones}
 - library_entries:
   - {folder: null, owner: jones, position: 0}
   - {folder: Animals, owner: bigbrother, position: 4}
@@ -4831,6 +6314,24 @@
   listing_review_batch:
   - {author: jones, rate: 4, text: Samoo was fun to watch at Sea World.}
   - {author: rutherford, rate: 3, text: They are nice but not a big fan.}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: bettafish}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: khaleesi}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: noah}
+  - {count: 9, profile: johnson}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: jsnow}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -4912,6 +6413,25 @@
   listing_review_batch:
   - {author: bigbrother, rate: 1, text: 'I don''t think that cold blooded animals
       are very efficient '}
+  listing_visit_count:
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: johnson}
+  - {count: 2, profile: julia}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: david}
+  - {count: 4, profile: aaronson}
+  - {count: 5, profile: khaleesi}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: wsmith}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: charrington}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: obrien}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -4964,6 +6484,24 @@
   - {author: aaronson, rate: 1, text: No children were allowed}
   - {author: david, rate: 5, text: No children were allowed.}
   - {author: khaleesi, rate: 5, text: This place was LIT! Definitely will return.}
+  listing_visit_count:
+  - {count: 1, profile: hodor}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: tammy}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: khaleesi}
+  - {count: 7, profile: david}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: jsnow}
+  - {count: 8, profile: syme}
 - library_entries:
   - {folder: null, owner: jones, position: 0}
   listing:
@@ -5017,6 +6555,24 @@
   - {author: jones, rate: 5, text: This is an absolute must for every developers took
       kit.}
   - {author: wsmith, rate: 2, text: not everything can be 5 stars.}
+  listing_visit_count:
+  - {count: 1, profile: obrien}
+  - {count: 1, profile: syme}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: jsnow}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: khaleesi}
+  - {count: 4, profile: hodor}
+  - {count: 6, profile: david}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: johnson}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: jones}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minipax
@@ -5078,6 +6634,26 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: johnson}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: aaronson}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: hodor}
+  - {count: 5, profile: bettafish}
+  - {count: 5, profile: noah}
+  - {count: 5, profile: syme}
+  - {count: 6, profile: betaraybill}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: obrien}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: julia}
+  - {count: 10, profile: david}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -5144,6 +6720,24 @@
   - {action: APPROVED_ORG, author: khaleesi, description: null}
   - {action: APPROVED, author: khaleesi, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 2, profile: hodor}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: aaronson}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: noah}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: charrington}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: jsnow}
+  - {count: 9, profile: bigbrother2}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: rutherford}
+  - {count: 10, profile: syme}
+  - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Weather, owner: bigbrother, position: 1}
   listing:
@@ -5190,6 +6784,23 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: abe}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: david}
+  - {count: 4, profile: noah}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: charrington}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: johnson}
+  - {count: 9, profile: julia}
+  - {count: 9, profile: tammy}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 5}
   listing:
@@ -5251,6 +6862,25 @@
   listing_review_batch:
   - {author: khaleesi, rate: 1, text: Lions (and Lanisters) are the worst! The only
       reason you should want to find them is to feed them to your dragons.}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: david}
+  - {count: 4, profile: jones}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: rutherford}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: tparsons}
+  - {count: 9, profile: johnson}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: tammy}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -5290,6 +6920,21 @@
   - {action: APPROVED_ORG, author: wsmith, description: null}
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: hodor}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: johnson}
+  - {count: 4, profile: abe}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: rutherford}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: wsmith}
 - library_entries:
   - {folder: null, owner: hodor, position: 0}
   listing:
@@ -5331,6 +6976,20 @@
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch:
   - {author: charrington, rate: 4, text: I really like it}
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: jsnow}
+  - {count: 1, profile: tparsons}
+  - {count: 4, profile: khaleesi}
+  - {count: 4, profile: julia}
+  - {count: 5, profile: rutherford}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: charrington}
+  - {count: 7, profile: bigbrother}
+  - {count: 8, profile: bettafish}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: betaraybill}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -5370,6 +7029,24 @@
   - {action: APPROVED_ORG, author: wsmith, description: null}
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: tparsons}
+  - {count: 3, profile: david}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: tammy}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: jones}
+  - {count: 7, profile: betaraybill}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: bettafish}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: rutherford}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Minipax
@@ -5416,6 +7093,20 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jones}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: khaleesi}
+  - {count: 5, profile: betaraybill}
+  - {count: 6, profile: rutherford}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: obrien}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -5473,6 +7164,24 @@
   - {author: syme, rate: 1, text: 'Useless, everybody knows rooms are round.  So how
       does this even work?  '}
   - {author: rutherford, rate: 5, text: Great app must try it today.}
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: david}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: bigbrother2}
+  - {count: 7, profile: khaleesi}
+  - {count: 7, profile: noah}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: julia}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: johnson}
+  - {count: 9, profile: jones}
 - library_entries: []
   listing:
     agency: Minipax
@@ -5543,6 +7252,23 @@
       my stapler when around.}
   - {author: david, rate: 3, text: 'Won''t kill you for no reason.  Will kill you
       though. '}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: johnson}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: bettafish}
+  - {count: 4, profile: julia}
+  - {count: 6, profile: rutherford}
+  - {count: 6, profile: syme}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: noah}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: betaraybill}
 - library_entries:
   - {folder: Funny, owner: bettafish, position: 2}
   - {folder: heros, owner: wsmith, position: 7}
@@ -5599,6 +7325,24 @@
   listing_review_batch:
   - {author: rutherford, rate: 4, text: Interesting this might be something to look
       at.}
+  listing_visit_count:
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: david}
+  - {count: 4, profile: abe}
+  - {count: 4, profile: hodor}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: bigbrother2}
+  - {count: 5, profile: noah}
+  - {count: 6, profile: betaraybill}
+  - {count: 6, profile: tparsons}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: charrington}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: khaleesi}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -5659,6 +7403,23 @@
       map represent something that exists?  Like, if i''m standing on the ground,
       then how that ground be on the map?  Pure nonsense.  5/5 stars'}
   - {author: rutherford, rate: 5, text: Great app must try it today.}
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 1, profile: tparsons}
+  - {count: 2, profile: syme}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: johnson}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: jsnow}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: bettafish}
+  - {count: 7, profile: obrien}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: noah}
 - library_entries:
   - {folder: Games, owner: bettafish, position: 8}
   listing:
@@ -5707,6 +7468,20 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: julia}
+  - {count: 1, profile: obrien}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: noah}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: david}
+  - {count: 9, profile: tparsons}
+  - {count: 9, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -5753,6 +7528,23 @@
   - {author: bigbrother, rate: 5, text: A very very very very fun game}
   - {author: rutherford, rate: 2, text: I am not a very big fan of minesweeper.  But
       it would be good to pass the time.}
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: johnson}
+  - {count: 2, profile: rutherford}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: charrington}
+  - {count: 5, profile: david}
+  - {count: 6, profile: julia}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: bettafish}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -5810,6 +7602,24 @@
   - {author: david, rate: 1, text: 'Nobody likes this dog.  I asked everybody who
       is me.  YET!  Still it persists at a 2.0 rating?  fake reviews sheeple!  wake
       up. '}
+  listing_visit_count:
+  - {count: 1, profile: syme}
+  - {count: 1, profile: tammy}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: obrien}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: betaraybill}
+  - {count: 6, profile: khaleesi}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: david}
+  - {count: 8, profile: hodor}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: noah}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: jones}
 - library_entries: []
   listing:
     agency: Minipax
@@ -5863,6 +7673,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: david}
+  - {count: 2, profile: tparsons}
+  - {count: 2, profile: wsmith}
+  - {count: 4, profile: aaronson}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: hodor}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: rutherford}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: tammy}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -5933,6 +7761,26 @@
   listing_review_batch:
   - {author: bigbrother, rate: 1, text: I was looking for a food mixer and could not
       find it}
+  listing_visit_count:
+  - {count: 1, profile: obrien}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: david}
+  - {count: 3, profile: johnson}
+  - {count: 3, profile: jsnow}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: bigbrother2}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: khaleesi}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: rutherford}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: julia}
+  - {count: 10, profile: charrington}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 6}
   listing:
@@ -5995,6 +7843,23 @@
   listing_review_batch:
   - {author: jones, rate: 1, text: 'Is this a primate dating app?'}
   - {author: khaleesi, rate: 1, text: Not big enough for my dragons to eat}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: bettafish}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: david}
+  - {count: 6, profile: jones}
+  - {count: 6, profile: syme}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: rutherford}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -6050,6 +7915,25 @@
   - {author: khaleesi, rate: 5, text: An essential component of dragon fire. Helps
       burn citadels down. A+}
   - {author: rutherford, rate: 2, text: I am not a big fan of moonshine.}
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: bettafish}
+  - {count: 4, profile: julia}
+  - {count: 4, profile: syme}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: khaleesi}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: bigbrother2}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: david}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -6098,6 +7982,21 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: bigbrother2}
+  - {count: 2, profile: aaronson}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: charrington}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: david}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: noah}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: julia}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -6152,6 +8051,23 @@
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch:
   - {author: bigbrother, rate: 5, text: A motorcycle helmet can be a life saver}
+  listing_visit_count:
+  - {count: 1, profile: jones}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: jsnow}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: abe}
+  - {count: 5, profile: david}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: tammy}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: hodor}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: obrien}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -6206,6 +8122,26 @@
       the engine do all the work?  Shouldn''t it be called, "Trynottocrashthemotor"'}
   - {author: rutherford, rate: 3, text: Okay so it does not make sense from the images
       but the app is still great.}
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 2, profile: abe}
+  - {count: 3, profile: charrington}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: bigbrother2}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: rutherford}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: obrien}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -6249,6 +8185,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 2, profile: jones}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: david}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: tammy}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: charrington}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: tparsons}
+  - {count: 7, profile: wsmith}
+  - {count: 9, profile: julia}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -6298,6 +8251,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: julia}
+  - {count: 1, profile: syme}
+  - {count: 1, profile: tparsons}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: hodor}
+  - {count: 4, profile: noah}
+  - {count: 5, profile: khaleesi}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: jsnow}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: charrington}
+  - {count: 8, profile: betaraybill}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: david}
+  - {count: 10, profile: johnson}
 - library_entries:
   - {folder: Games, owner: bettafish, position: 7}
   listing:
@@ -6359,6 +8329,26 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: obrien}
+  - {count: 1, profile: tparsons}
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: khaleesi}
+  - {count: 4, profile: hodor}
+  - {count: 5, profile: bigbrother2}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: jones}
+  - {count: 6, profile: syme}
+  - {count: 8, profile: david}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: rutherford}
 - library_entries:
   - {folder: null, owner: rutherford, position: 0}
   listing:
@@ -6425,6 +8415,24 @@
   - {author: khaleesi, rate: 5, text: Aided us safely in our journey to Westeros.}
   - {author: bettafish, rate: 5, text: Everything can be 5 stars if you put your mind
       to it.}
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: noah}
+  - {count: 2, profile: tammy}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: julia}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: bigbrother}
+  - {count: 6, profile: david}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: bettafish}
+  - {count: 10, profile: khaleesi}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -6495,6 +8503,25 @@
   listing_review_batch:
   - {author: bigbrother, rate: 4, text: Pretty good to use for navigation.}
   - {author: rutherford, rate: 3, text: Okay app must try it today.}
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: abe}
+  - {count: 1, profile: jsnow}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: julia}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: david}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: noah}
+  - {count: 5, profile: rutherford}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: charrington}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -6575,6 +8602,24 @@
   listing_review_batch:
   - {author: betaraybill, rate: 5, text: It's so blueeeee~~~!!!!!}
   - {author: syme, rate: 1, text: 'NO MORE #$(*)&@#% BLUE THINGS. '}
+  listing_visit_count:
+  - {count: 1, profile: jones}
+  - {count: 1, profile: julia}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: obrien}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: betaraybill}
+  - {count: 6, profile: johnson}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: david}
 - library_entries: []
   listing:
     agency: Minipax
@@ -6638,6 +8683,25 @@
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch:
   - {author: bigbrother, rate: 4, text: This switch allows many computers to be connected}
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 1, profile: obrien}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: rutherford}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: david}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: betaraybill}
+  - {count: 9, profile: bettafish}
+  - {count: 9, profile: bigbrother}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Minipax
@@ -6690,6 +8754,27 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: syme}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: khaleesi}
+  - {count: 3, profile: jsnow}
+  - {count: 4, profile: david}
+  - {count: 4, profile: noah}
+  - {count: 4, profile: obrien}
+  - {count: 5, profile: rutherford}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: johnson}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: bettafish}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Minipax
@@ -6741,6 +8826,26 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 2, profile: julia}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: charrington}
+  - {count: 3, profile: johnson}
+  - {count: 5, profile: jsnow}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: rutherford}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: hodor}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: syme}
+  - {count: 8, profile: tammy}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: david}
+  - {count: 9, profile: wsmith}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 7}
   listing:
@@ -6787,6 +8892,25 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: noah}
+  - {count: 1, profile: tammy}
+  - {count: 1, profile: tparsons}
+  - {count: 2, profile: hodor}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: betaraybill}
+  - {count: 6, profile: jsnow}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: charrington}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: david}
+  - {count: 8, profile: rutherford}
+  - {count: 8, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -6832,6 +8956,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: hodor}
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: david}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: charrington}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: aaronson}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: wsmith}
 - library_entries: []
   listing:
     agency: Minipax
@@ -6902,6 +9044,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: syme}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: hodor}
+  - {count: 4, profile: tparsons}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: david}
+  - {count: 10, profile: bigbrother}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: obrien}
+  - {count: 10, profile: rutherford}
 - library_entries: []
   listing:
     agency: Test
@@ -6945,6 +9105,25 @@
   listing_review_batch:
   - {author: bigbrother, rate: 5, text: It prevented and controlled my high blood
       pressure during surgery}
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: bigbrother}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bettafish}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: jsnow}
+  - {count: 8, profile: julia}
+  - {count: 8, profile: rutherford}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: johnson}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -6999,6 +9178,25 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: david}
+  - {count: 2, profile: bettafish}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: abe}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: syme}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: noah}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: johnson}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 13}
   listing:
@@ -7043,6 +9241,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 1, profile: david}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: tammy}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: rutherford}
+  - {count: 5, profile: noah}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: obrien}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -7108,6 +9324,27 @@
       planet.'}
   - {author: syme, rate: 5, text: 'Fake news, Pluto was a planet when I was a kid,
       so its a planet now.  You can''t just go around unplaneting things. '}
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 1, profile: tparsons}
+  - {count: 2, profile: bettafish}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: hodor}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: tammy}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: bigbrother2}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: julia}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: noah}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: jones}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: david}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -7184,6 +9421,26 @@
   - {action: APPROVED_ORG, author: khaleesi, description: null}
   - {action: APPROVED, author: khaleesi, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: julia}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: wsmith}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: jones}
+  - {count: 6, profile: bigbrother}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: david}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: syme}
+  - {count: 10, profile: rutherford}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -7242,6 +9499,23 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: SUBMITTED, author: rutherford, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 2, profile: bigbrother}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: david}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: jsnow}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: jones}
+  - {count: 6, profile: bettafish}
+  - {count: 7, profile: khaleesi}
+  - {count: 8, profile: rutherford}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: syme}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: tammy}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Test 1
@@ -7290,6 +9564,25 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 2, profile: tammy}
+  - {count: 3, profile: david}
+  - {count: 3, profile: noah}
+  - {count: 5, profile: charrington}
+  - {count: 5, profile: rutherford}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -7337,6 +9630,24 @@
   listing_review_batch:
   - {author: khaleesi, rate: 3, text: Strong female rulers! As long as she doesn't
       invade Westeros she's cool}
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: tparsons}
+  - {count: 3, profile: wsmith}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: syme}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: david}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: jsnow}
+  - {count: 7, profile: johnson}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: tammy}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -7401,6 +9712,25 @@
       This does not meet my use cases at all.}
   - {author: bettafish, rate: 1, text: Not very interesting.  Hard to follow.  Does
       not seem to work.}
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: jsnow}
+  - {count: 3, profile: jones}
+  - {count: 4, profile: abe}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: bettafish}
+  - {count: 5, profile: bigbrother}
+  - {count: 6, profile: bigbrother2}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: syme}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: david}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -7497,6 +9827,25 @@
   - {author: syme, rate: 5, text: 'Railroad Ima gonna let you finish but everybody
       knows shipping lanes had the best transport ever. '}
   - {author: rutherford, rate: 4, text: Great app must try it today.}
+  listing_visit_count:
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: rutherford}
+  - {count: 4, profile: abe}
+  - {count: 4, profile: tammy}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: david}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: noah}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: johnson}
+  - {count: 9, profile: syme}
+  - {count: 9, profile: wsmith}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: obrien}
 - library_entries: []
   listing:
     agency: Minipax
@@ -7569,6 +9918,26 @@
   listing_review_batch:
   - {author: david, rate: 2, text: 'gave her a hug and was in a coma for 9 years.  Can''t
       recommend. '}
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 2, profile: betaraybill}
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: jsnow}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: khaleesi}
+  - {count: 6, profile: julia}
+  - {count: 6, profile: rutherford}
+  - {count: 6, profile: syme}
+  - {count: 7, profile: johnson}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: noah}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: obrien}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -7623,6 +9992,25 @@
   - {action: APPROVED, author: khaleesi, description: null}
   listing_review_batch:
   - {author: khaleesi, rate: 5, text: Good for jewelry in my house colors.}
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: rutherford}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: noah}
+  - {count: 6, profile: bigbrother2}
+  - {count: 7, profile: david}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: julia}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: jsnow}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: bigbrother}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -7662,6 +10050,22 @@
   - {action: APPROVED_ORG, author: khaleesi, description: null}
   - {action: APPROVED, author: khaleesi, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 3, profile: aaronson}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: bigbrother2}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: david}
+  - {count: 8, profile: rutherford}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: charrington}
+  - {count: 10, profile: bigbrother}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: obrien}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -7709,6 +10113,23 @@
   - {action: APPROVED_ORG, author: khaleesi, description: null}
   - {action: APPROVED, author: khaleesi, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: rutherford}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: betaraybill}
+  - {count: 7, profile: bettafish}
+  - {count: 10, profile: aaronson}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -7762,6 +10183,22 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: noah}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: johnson}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: julia}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: bettafish}
+  - {count: 7, profile: aaronson}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: bigbrother2}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -7815,6 +10252,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: rutherford}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: julia}
+  - {count: 2, profile: tammy}
+  - {count: 2, profile: wsmith}
+  - {count: 3, profile: tparsons}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: johnson}
+  - {count: 6, profile: aaronson}
+  - {count: 7, profile: hodor}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: noah}
+  - {count: 10, profile: bigbrother}
+  - {count: 10, profile: jsnow}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -7871,6 +10326,22 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: david}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: betaraybill}
+  - {count: 5, profile: hodor}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: khaleesi}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: rutherford}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: johnson}
 - library_entries: []
   listing:
     agency: Minipax
@@ -7917,6 +10388,23 @@
   listing_review_batch:
   - {author: wsmith, rate: 3, text: 'The currently available sailing publications
       and web sites are often filled with stories that are something less than insightful. '}
+  listing_visit_count:
+  - {count: 1, profile: charrington}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: johnson}
+  - {count: 3, profile: julia}
+  - {count: 3, profile: syme}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: rutherford}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: david}
+  - {count: 10, profile: jsnow}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -7976,6 +10464,22 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: hodor}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: johnson}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: wsmith}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: bettafish}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -8019,6 +10523,27 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: SUBMITTED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: khaleesi}
+  - {count: 1, profile: tparsons}
+  - {count: 3, profile: charrington}
+  - {count: 3, profile: johnson}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bettafish}
+  - {count: 5, profile: hodor}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: jones}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: david}
+  - {count: 7, profile: obrien}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: syme}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -8074,6 +10599,26 @@
   - {action: APPROVED_ORG, author: khaleesi, description: null}
   - {action: APPROVED, author: khaleesi, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: charrington}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: obrien}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: aaronson}
+  - {count: 6, profile: david}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: jsnow}
+  - {count: 6, profile: tparsons}
+  - {count: 6, profile: wsmith}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: khaleesi}
+  - {count: 9, profile: julia}
+  - {count: 9, profile: noah}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -8140,6 +10685,23 @@
   listing_review_batch:
   - {author: bigbrother, rate: 3, text: 'Okay to use for navigation, not the best.'}
   - {author: rutherford, rate: 5, text: Great app must try it today.}
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: tammy}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: charrington}
+  - {count: 5, profile: julia}
+  - {count: 5, profile: rutherford}
+  - {count: 6, profile: obrien}
+  - {count: 7, profile: jones}
+  - {count: 9, profile: aaronson}
+  - {count: 9, profile: hodor}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: david}
+  - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: planets, owner: wsmith, position: 9}
   listing:
@@ -8208,6 +10770,24 @@
   - {author: betaraybill, rate: 3, text: 'What''s up with that dumb ring?'}
   - {author: syme, rate: 5, text: 'I did like it.  I did like it so much.  So i put
       rings on it.  -God, probably. '}
+  listing_visit_count:
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: johnson}
+  - {count: 3, profile: jsnow}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: noah}
+  - {count: 4, profile: rutherford}
+  - {count: 4, profile: tammy}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: david}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: julia}
 - library_entries:
   - {folder: null, owner: bettafish, position: 4}
   listing:
@@ -8270,6 +10850,21 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 2, profile: rutherford}
+  - {count: 4, profile: jsnow}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: khaleesi}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: bigbrother2}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: julia}
+  - {count: 9, profile: obrien}
+  - {count: 9, profile: syme}
+  - {count: 10, profile: hodor}
 - library_entries: []
   listing:
     agency: Minipax
@@ -8319,6 +10914,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: syme}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: bigbrother}
+  - {count: 4, profile: khaleesi}
+  - {count: 4, profile: rutherford}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: abe}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: julia}
+  - {count: 7, profile: charrington}
+  - {count: 8, profile: david}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: noah}
+  - {count: 10, profile: obrien}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -8370,6 +10983,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: jones}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: bigbrother}
+  - {count: 3, profile: noah}
+  - {count: 3, profile: wsmith}
+  - {count: 4, profile: david}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: julia}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: charrington}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Test
@@ -8413,6 +11044,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: syme}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: david}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: hodor}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: johnson}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: jones}
+  - {count: 9, profile: tammy}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -8452,6 +11101,24 @@
   - {action: APPROVED_ORG, author: wsmith, description: null}
   - {action: APPROVED, author: wsmith, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: syme}
+  - {count: 3, profile: bigbrother2}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: obrien}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: bettafish}
+  - {count: 5, profile: bigbrother}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: wsmith}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: jsnow}
+  - {count: 9, profile: jones}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: julia}
+  - {count: 10, profile: rutherford}
 - library_entries: []
   listing:
     agency: Minipax
@@ -8498,6 +11165,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: abe}
+  - {count: 2, profile: hodor}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: obrien}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: syme}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: julia}
+  - {count: 8, profile: bigbrother}
+  - {count: 8, profile: jsnow}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: david}
+  - {count: 10, profile: wsmith}
 - library_entries:
   - {folder: Weather, owner: bigbrother, position: 2}
   listing:
@@ -8546,6 +11231,26 @@
   - {author: bigbrother, rate: 1, text: The cold does not feel good}
   - {author: syme, rate: 3, text: 'I''ve heard that it knows nothing. '}
   - {author: khaleesi, rate: 2, text: Snows refuse to bend the knee in my experience.}
+  listing_visit_count:
+  - {count: 1, profile: aaronson}
+  - {count: 1, profile: abe}
+  - {count: 1, profile: khaleesi}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: noah}
+  - {count: 2, profile: tparsons}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: julia}
+  - {count: 7, profile: bettafish}
+  - {count: 7, profile: wsmith}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: obrien}
+  - {count: 8, profile: tammy}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: david}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: jones}
+  - {count: 10, profile: charrington}
 - library_entries: []
   listing:
     agency: Test 1
@@ -8591,6 +11296,25 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: charrington}
+  - {count: 3, profile: wsmith}
+  - {count: 5, profile: betaraybill}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: david}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: jsnow}
+  - {count: 9, profile: julia}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: obrien}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 11}
   listing:
@@ -8638,6 +11362,22 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: tammy}
+  - {count: 3, profile: obrien}
+  - {count: 4, profile: jones}
+  - {count: 5, profile: david}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: julia}
+  - {count: 6, profile: wsmith}
+  - {count: 8, profile: johnson}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: syme}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: betaraybill}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -8700,6 +11440,25 @@
   - {action: CREATED, author: jones, description: null}
   - {action: SUBMITTED, author: jones, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: julia}
+  - {count: 2, profile: betaraybill}
+  - {count: 2, profile: jones}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: charrington}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: syme}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: david}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: tammy}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: bigbrother}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: wsmith}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 17}
   listing:
@@ -8745,6 +11504,25 @@
   - {author: bigbrother, rate: 5, text: 'This stop sign saved me from a accident!!! '}
   - {author: rutherford, rate: 5, text: I think that this is very necessary item to
       have on the roads.}
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: aaronson}
+  - {count: 3, profile: hodor}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: jones}
+  - {count: 6, profile: david}
+  - {count: 6, profile: johnson}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: obrien}
+  - {count: 7, profile: tammy}
+  - {count: 8, profile: charrington}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: jsnow}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -8801,6 +11579,22 @@
   listing_review_batch:
   - {author: wsmith, rate: 5, text: 'It takes bold brewers to brew bold beers. Brewers
       prepared to go to lengths that others wouldn''t to perfect their craft. '}
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: bigbrother2}
+  - {count: 2, profile: tammy}
+  - {count: 2, profile: wsmith}
+  - {count: 4, profile: jones}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: noah}
+  - {count: 7, profile: david}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: syme}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: rutherford}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -8869,6 +11663,25 @@
   listing_review_batch:
   - {author: wsmith, rate: 3, text: 'Stroke play, also known as medal play, is a scoring
       system in the sport of golf. '}
+  listing_visit_count:
+  - {count: 1, profile: abe}
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: obrien}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: david}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: bigbrother2}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: charrington}
+  - {count: 7, profile: khaleesi}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: julia}
+  - {count: 8, profile: tammy}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: johnson}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: noah}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -8917,6 +11730,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: david}
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: khaleesi}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: betaraybill}
+  - {count: 5, profile: tammy}
+  - {count: 7, profile: bettafish}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: syme}
+  - {count: 8, profile: tparsons}
+  - {count: 10, profile: jones}
+  - {count: 10, profile: noah}
+  - {count: 10, profile: obrien}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -8988,6 +11818,26 @@
   - {author: betaraybill, rate: 5, text: Kinda need this guy.}
   - {author: syme, rate: 5, text: 'I will allow it for now, but I dislike his posturing
       threat of blowing up in a billion years. '}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: david}
+  - {count: 2, profile: rutherford}
+  - {count: 2, profile: tparsons}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: jsnow}
+  - {count: 5, profile: obrien}
+  - {count: 5, profile: syme}
+  - {count: 7, profile: bigbrother}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: noah}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: tammy}
+  - {count: 10, profile: aaronson}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Minipax
@@ -9035,6 +11885,27 @@
   listing_review_batch:
   - {author: syme, rate: 5, text: 'I like this!  Are they touring soon? '}
   - {author: rutherford, rate: 3, text: Not sure about this one.}
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: bettafish}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: jsnow}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: noah}
+  - {count: 5, profile: obrien}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: david}
+  - {count: 6, profile: jones}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: tammy}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9086,6 +11957,25 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: julia}
+  - {count: 1, profile: rutherford}
+  - {count: 1, profile: wsmith}
+  - {count: 2, profile: charrington}
+  - {count: 3, profile: david}
+  - {count: 4, profile: jones}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: khaleesi}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: noah}
+  - {count: 7, profile: tparsons}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: obrien}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: bigbrother}
+  - {count: 10, profile: jsnow}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9137,6 +12027,21 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: johnson}
+  - {count: 1, profile: jones}
+  - {count: 2, profile: syme}
+  - {count: 3, profile: khaleesi}
+  - {count: 5, profile: julia}
+  - {count: 5, profile: tammy}
+  - {count: 6, profile: david}
+  - {count: 7, profile: bettafish}
+  - {count: 7, profile: jsnow}
+  - {count: 7, profile: noah}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9193,6 +12098,23 @@
   - {author: bigbrother, rate: 5, text: 'My favorite type of music genre '}
   - {author: david, rate: 3, text: 'I''ve not heard of this band.  I wish the radio
       would play them. '}
+  listing_visit_count:
+  - {count: 3, profile: abe}
+  - {count: 3, profile: tammy}
+  - {count: 4, profile: bettafish}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: david}
+  - {count: 4, profile: johnson}
+  - {count: 5, profile: julia}
+  - {count: 6, profile: hodor}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: syme}
+  - {count: 6, profile: tparsons}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: wsmith}
+  - {count: 9, profile: aaronson}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: bigbrother}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -9238,6 +12160,25 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: julia}
+  - {count: 2, profile: aaronson}
+  - {count: 3, profile: charrington}
+  - {count: 3, profile: jones}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: jsnow}
+  - {count: 5, profile: khaleesi}
+  - {count: 6, profile: david}
+  - {count: 6, profile: tparsons}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: abe}
+  - {count: 8, profile: noah}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: syme}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: rutherford}
 - library_entries: []
   listing:
     agency: Test 3
@@ -9296,6 +12237,24 @@
   listing_review_batch:
   - {author: rutherford, rate: 3, text: Okay this one looks good as well.}
   - {author: syme, rate: 4, text: 'I would listen to this when I want to. '}
+  listing_visit_count:
+  - {count: 1, profile: hodor}
+  - {count: 2, profile: bigbrother}
+  - {count: 2, profile: charrington}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: rutherford}
+  - {count: 2, profile: tammy}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: abe}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: david}
+  - {count: 6, profile: jsnow}
+  - {count: 8, profile: johnson}
+  - {count: 8, profile: julia}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: syme}
+  - {count: 10, profile: betaraybill}
 - library_entries:
   - {folder: Weather, owner: bigbrother, position: 0}
   listing:
@@ -9347,6 +12306,23 @@
   - {author: bettafish, rate: 1, text: Not a fan.  Scary and destructive.}
   - {author: khaleesi, rate: 1, text: Kicks up a lot of dust and makes the dothraki
       less effective}
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 3, profile: david}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: bigbrother2}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: wsmith}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: julia}
+  - {count: 6, profile: noah}
+  - {count: 7, profile: bigbrother}
+  - {count: 8, profile: bettafish}
+  - {count: 9, profile: rutherford}
+  - {count: 9, profile: tammy}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9402,6 +12378,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 2, profile: abe}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: julia}
+  - {count: 2, profile: rutherford}
+  - {count: 2, profile: tparsons}
+  - {count: 3, profile: hodor}
+  - {count: 4, profile: khaleesi}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: syme}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: charrington}
+  - {count: 7, profile: david}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: tammy}
+  - {count: 8, profile: wsmith}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -9449,6 +12443,25 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: rutherford}
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: abe}
+  - {count: 2, profile: betaraybill}
+  - {count: 3, profile: jsnow}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: wsmith}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: david}
+  - {count: 8, profile: noah}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: bigbrother2}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: tparsons}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9498,6 +12511,24 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: david}
+  - {count: 1, profile: jones}
+  - {count: 1, profile: julia}
+  - {count: 4, profile: aaronson}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: johnson}
+  - {count: 5, profile: obrien}
+  - {count: 6, profile: bigbrother}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: noah}
+  - {count: 6, profile: syme}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: khaleesi}
+  - {count: 8, profile: hodor}
+  - {count: 9, profile: rutherford}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9562,6 +12593,20 @@
   listing_review_batch:
   - {author: syme, rate: 5, text: 'Don''t be a child.  Its a fine enough place. '}
   - {author: jones, rate: 2, text: 'Looks like an egg, was there a chicken first?  '}
+  listing_visit_count:
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: aaronson}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: david}
+  - {count: 5, profile: noah}
+  - {count: 7, profile: charrington}
+  - {count: 8, profile: jones}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: bettafish}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9640,6 +12685,24 @@
   listing_review_batch:
   - {author: betaraybill, rate: 4, text: Not really feeling the vibes.}
   - {author: syme, rate: 1, text: 'It is too arrogant. '}
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: syme}
+  - {count: 2, profile: jsnow}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: david}
+  - {count: 5, profile: hodor}
+  - {count: 5, profile: jones}
+  - {count: 5, profile: wsmith}
+  - {count: 7, profile: abe}
+  - {count: 7, profile: noah}
+  - {count: 7, profile: rutherford}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 14}
   listing:
@@ -9684,6 +12747,24 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: hodor}
+  - {count: 1, profile: syme}
+  - {count: 4, profile: charrington}
+  - {count: 4, profile: jones}
+  - {count: 4, profile: tammy}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bigbrother2}
+  - {count: 6, profile: bigbrother}
+  - {count: 7, profile: betaraybill}
+  - {count: 8, profile: aaronson}
+  - {count: 8, profile: jsnow}
+  - {count: 8, profile: noah}
+  - {count: 8, profile: wsmith}
+  - {count: 10, profile: bettafish}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: johnson}
+  - {count: 10, profile: julia}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -9731,6 +12812,21 @@
   - {action: SUBMITTED, author: bettafish, description: null}
   - {action: APPROVED_ORG, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 2, profile: julia}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: jsnow}
+  - {count: 5, profile: tammy}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: aaronson}
+  - {count: 6, profile: rutherford}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: david}
+  - {count: 8, profile: jones}
+  - {count: 9, profile: johnson}
+  - {count: 10, profile: bettafish}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -9783,6 +12879,23 @@
   - {action: CREATED, author: jones, description: null}
   - {action: SUBMITTED, author: jones, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: noah}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: charrington}
+  - {count: 4, profile: khaleesi}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: betaraybill}
+  - {count: 5, profile: bigbrother}
+  - {count: 6, profile: jsnow}
+  - {count: 6, profile: rutherford}
+  - {count: 6, profile: tammy}
+  - {count: 6, profile: wsmith}
+  - {count: 8, profile: david}
+  - {count: 8, profile: jones}
+  - {count: 10, profile: aaronson}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -9833,6 +12946,25 @@
   - {author: syme, rate: 5, text: 'I ate a seed and a watermelon grew in my belly.  This
       provided an unlimited supply of food.  Try it and see! '}
   - {author: khaleesi, rate: 5, text: Hilariously ripe and delicioius.}
+  listing_visit_count:
+  - {count: 1, profile: rutherford}
+  - {count: 1, profile: syme}
+  - {count: 2, profile: betaraybill}
+  - {count: 3, profile: tammy}
+  - {count: 4, profile: abe}
+  - {count: 4, profile: julia}
+  - {count: 5, profile: tparsons}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: jsnow}
+  - {count: 6, profile: noah}
+  - {count: 7, profile: bettafish}
+  - {count: 7, profile: hodor}
+  - {count: 7, profile: jones}
+  - {count: 9, profile: bigbrother}
+  - {count: 9, profile: bigbrother2}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: david}
+  - {count: 10, profile: johnson}
 - library_entries: []
   listing:
     agency: Minipax
@@ -9884,6 +13016,24 @@
   - {action: CREATED, author: bettafish, description: null}
   - {action: SUBMITTED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: tammy}
+  - {count: 2, profile: noah}
+  - {count: 3, profile: johnson}
+  - {count: 3, profile: obrien}
+  - {count: 3, profile: syme}
+  - {count: 4, profile: hodor}
+  - {count: 4, profile: jsnow}
+  - {count: 4, profile: tparsons}
+  - {count: 4, profile: wsmith}
+  - {count: 5, profile: bettafish}
+  - {count: 5, profile: jones}
+  - {count: 6, profile: abe}
+  - {count: 7, profile: aaronson}
+  - {count: 7, profile: bigbrother}
+  - {count: 8, profile: betaraybill}
+  - {count: 8, profile: khaleesi}
+  - {count: 10, profile: bigbrother2}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 8}
   listing:
@@ -9943,6 +13093,22 @@
   listing_review_batch:
   - {author: khaleesi, rate: 4, text: The dothraki find these creatures useful though
       my dragons would prefer them as food. -1 Star for not flying}
+  listing_visit_count:
+  - {count: 1, profile: obrien}
+  - {count: 2, profile: julia}
+  - {count: 2, profile: tparsons}
+  - {count: 4, profile: bigbrother2}
+  - {count: 4, profile: david}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: syme}
+  - {count: 6, profile: abe}
+  - {count: 7, profile: wsmith}
+  - {count: 8, profile: khaleesi}
+  - {count: 8, profile: johnson}
+  - {count: 9, profile: betaraybill}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: hodor}
 - library_entries: []
   listing:
     agency: Miniluv
@@ -9986,6 +13152,23 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bettafish}
+  - {count: 1, profile: bigbrother}
+  - {count: 1, profile: jsnow}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: abe}
+  - {count: 3, profile: betaraybill}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: noah}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: bigbrother2}
+  - {count: 6, profile: rutherford}
+  - {count: 8, profile: charrington}
+  - {count: 9, profile: johnson}
+  - {count: 10, profile: david}
+  - {count: 10, profile: tammy}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -10033,6 +13216,26 @@
   - {action: APPROVED_ORG, author: bettafish, description: null}
   - {action: APPROVED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: david}
+  - {count: 2, profile: jones}
+  - {count: 2, profile: obrien}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: tparsons}
+  - {count: 5, profile: abe}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: syme}
+  - {count: 6, profile: bettafish}
+  - {count: 6, profile: bigbrother2}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: betaraybill}
+  - {count: 8, profile: noah}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: jsnow}
+  - {count: 10, profile: aaronson}
 - library_entries: []
   listing:
     agency: Miniplen
@@ -10085,6 +13288,23 @@
   - {action: CREATED, author: bettafish, description: null}
   - {action: SUBMITTED, author: bettafish, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 1, profile: rutherford}
+  - {count: 4, profile: aaronson}
+  - {count: 4, profile: jones}
+  - {count: 5, profile: david}
+  - {count: 5, profile: julia}
+  - {count: 5, profile: syme}
+  - {count: 5, profile: wsmith}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: obrien}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: noah}
+  - {count: 8, profile: tparsons}
+  - {count: 9, profile: charrington}
+  - {count: 9, profile: khaleesi}
+  - {count: 10, profile: bettafish}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -10143,6 +13363,27 @@
   - {action: CREATED, author: jones, description: null}
   - {action: SUBMITTED, author: jones, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: bigbrother2}
+  - {count: 1, profile: tparsons}
+  - {count: 2, profile: aaronson}
+  - {count: 2, profile: julia}
+  - {count: 3, profile: hodor}
+  - {count: 4, profile: bigbrother}
+  - {count: 5, profile: bettafish}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: david}
+  - {count: 6, profile: jones}
+  - {count: 6, profile: tammy}
+  - {count: 7, profile: noah}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: jsnow}
+  - {count: 9, profile: rutherford}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: syme}
+  - {count: 10, profile: wsmith}
 - library_entries: []
   listing:
     agency: Minitrue
@@ -10189,6 +13430,23 @@
   - {action: CREATED, author: jones, description: null}
   - {action: SUBMITTED, author: jones, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: jsnow}
+  - {count: 1, profile: syme}
+  - {count: 2, profile: hodor}
+  - {count: 2, profile: johnson}
+  - {count: 2, profile: tammy}
+  - {count: 4, profile: betaraybill}
+  - {count: 4, profile: bigbrother}
+  - {count: 7, profile: jones}
+  - {count: 7, profile: rutherford}
+  - {count: 8, profile: obrien}
+  - {count: 9, profile: bigbrother2}
+  - {count: 9, profile: noah}
+  - {count: 10, profile: abe}
+  - {count: 10, profile: charrington}
+  - {count: 10, profile: khaleesi}
+  - {count: 10, profile: julia}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
   - {folder: Animals, owner: bigbrother, position: 3}
@@ -10263,6 +13521,24 @@
   - {author: rutherford, rate: 5, text: Need this for my neighbourhood.}
   - {author: khaleesi, rate: 4, text: So easy to use that a wolf came to me! It's
       knee wasn't very bendy though so -1 star.}
+  listing_visit_count:
+  - {count: 2, profile: rutherford}
+  - {count: 3, profile: aaronson}
+  - {count: 4, profile: jsnow}
+  - {count: 4, profile: obrien}
+  - {count: 5, profile: david}
+  - {count: 6, profile: khaleesi}
+  - {count: 6, profile: jones}
+  - {count: 7, profile: bigbrother}
+  - {count: 7, profile: charrington}
+  - {count: 8, profile: abe}
+  - {count: 8, profile: bettafish}
+  - {count: 9, profile: hodor}
+  - {count: 9, profile: noah}
+  - {count: 9, profile: tammy}
+  - {count: 9, profile: tparsons}
+  - {count: 10, profile: bigbrother2}
+  - {count: 10, profile: syme}
 - library_entries: []
   listing:
     agency: Minipax
@@ -10334,6 +13610,22 @@
   listing_review_batch:
   - {author: syme, rate: 3, text: 'I don''t understand how the guy who controls metal
       doesn''t just throw this guy into orbit. '}
+  listing_visit_count:
+  - {count: 3, profile: bettafish}
+  - {count: 3, profile: bigbrother2}
+  - {count: 3, profile: jones}
+  - {count: 3, profile: julia}
+  - {count: 4, profile: johnson}
+  - {count: 4, profile: rutherford}
+  - {count: 5, profile: bigbrother}
+  - {count: 5, profile: charrington}
+  - {count: 5, profile: jsnow}
+  - {count: 5, profile: noah}
+  - {count: 5, profile: syme}
+  - {count: 9, profile: khaleesi}
+  - {count: 10, profile: betaraybill}
+  - {count: 10, profile: hodor}
+  - {count: 10, profile: obrien}
 - library_entries: []
   listing:
     agency: Minipax
@@ -10383,3 +13675,20 @@
   - {action: APPROVED_ORG, author: bigbrother, description: null}
   - {action: APPROVED, author: bigbrother, description: null}
   listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 2, profile: bigbrother}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: julia}
+  - {count: 4, profile: noah}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: david}
+  - {count: 9, profile: obrien}

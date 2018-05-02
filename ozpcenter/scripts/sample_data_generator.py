@@ -76,6 +76,7 @@ from ozpcenter import models
 from ozpcenter.api.notification import model_access as notification_model_access
 from ozpcenter.recommend.recommend import RecommenderDirectory
 import ozpcenter.api.listing.model_access as listing_model_access
+import ozpcenter.api.profile.model_access as profile_model_access
 import ozpcenter.api.listing.model_access_es as model_access_es
 
 TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__)))
@@ -135,6 +136,34 @@ def create_listing_review_batch(listing, review_list, object_cache):
                             text=current_text,
                             review_parent=current_review_parent,
                             create_day_delta=current_date_delta)
+
+
+def create_listing_visit_count_batch(listing, visit_count_list, object_cache):
+    """
+    Create ListingVisitCount
+
+    Args:
+        listing
+        visit_count_list
+            [
+                {
+                  "profile": "bigbrother",
+                  "count": 10,
+                  "last_visit_date": "Feb. 4, 2003, 4 p.m."
+                },
+                {
+                  "profile": "jones",
+                  "count": 13
+                },
+                ...
+            ]
+    """
+    for visit_count_entry in visit_count_list:
+        profile = object_cache['Profile.{}'.format(visit_count_entry['profile'])]
+        count = visit_count_entry.get('count', 0)
+        last_visit_date = visit_count_entry.get('last_visit_date', None)
+
+        visit_count = profile_model_access.create_listing_visit_count(profile, listing, count, last_visit_date)
 
 
 def create_library_entries(library_entries, object_cache):
@@ -662,6 +691,7 @@ def run():
     # ===========================================================================
     library_entries = []
     review_entries = []
+    visit_count_entries = []
 
     print('--Creating Listings Icons')
     listing_db_call_total = 0
@@ -695,6 +725,12 @@ def run():
                 review_entry['listing_review_batch'] = current_listing_data['listing_review_batch']
                 review_entries.append(review_entry)
 
+            if 'listing_visit_count' in current_listing_data and current_listing_data['listing_visit_count']:
+                visit_count_entry = {}
+                visit_count_entry['listing_obj'] = listing_obj
+                visit_count_entry['listing_visit_count'] = current_listing_data['listing_visit_count']
+                visit_count_entries.append(visit_count_entry)
+
             listing_id = listing_obj.id
             listing_library_entries = current_listing_data['library_entries']
 
@@ -718,6 +754,18 @@ def run():
     with transaction.atomic():
         for review_entry in review_entries:
             create_listing_review_batch(review_entry['listing_obj'], review_entry['listing_review_batch'], object_cache)
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
+    ############################################################################
+    #                           Visit Counts
+    ############################################################################
+    print('--Creating Visit Counts')
+    section_start_time = time_ms()
+    with transaction.atomic():
+        for visit_count_entry in visit_count_entries:
+            create_listing_visit_count_batch(visit_count_entry['listing_obj'], visit_count_entry['listing_visit_count'], object_cache)
 
     print('-----Took: {} ms'.format(time_ms() - section_start_time))
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))

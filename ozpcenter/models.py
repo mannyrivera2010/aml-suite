@@ -1478,6 +1478,48 @@ class ListingActivity(models.Model):
         verbose_name_plural = "listing activities"
 
 
+class AccessControlListingVisitCountManager(models.Manager):
+    """
+    Use a custom manager to control access to ListingVisitCounts
+    """
+
+    def apply_select_related(self, queryset):
+        queryset = queryset.select_related('profile')
+        queryset = queryset.select_related('listing')
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(AccessControlListingVisitCountManager, self).get_queryset()
+        return self.apply_select_related(queryset)
+
+    def for_user(self, username):
+        all_visit_counts = super(AccessControlListingVisitCountManager, self).get_queryset()
+        listings = Listing.objects.for_user(username).all()
+        filtered_visit_counts = all_visit_counts.filter(listing__in=listings)
+        return filtered_visit_counts
+
+
+class ListingVisitCount(models.Model):
+    """
+    Listing Visit Count
+    """
+    profile = models.ForeignKey('Profile', related_name='listing_visit_counts')
+    listing = models.ForeignKey('Listing', related_name='listing_visit_counts')
+    count = models.PositiveIntegerField(default=0)
+    last_visit_date = models.DateTimeField(default=utils.get_now_utc)
+
+    # use a custom Manager class to limit returned counts
+    objects = AccessControlListingVisitCountManager()
+
+    def __repr__(self):
+        return '{0!s} {1!s}, {2!s} visits, last at {3!s}'.format(self.profile.user.username,
+            self.listing.title, self.count, self.last_visit_date)
+
+    def __str__(self):
+        return '{0!s} {1!s}, {2!s} visits, last at {3!s}'.format(self.profile.user.username,
+            self.listing.title, self.count, self.last_visit_date)
+
+
 class ScreenshotManager(models.Manager):
     """
     Screenshot Manager
