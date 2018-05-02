@@ -8,7 +8,6 @@ from tests.ozp.cases import APITestCase
 from tests.ozpcenter.helper import APITestHelper
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen
-from tests.ozpcenter.helper import validate_listing_map_keys
 
 
 @override_settings(ES_ENABLED=False)
@@ -32,12 +31,15 @@ class ProfileListingVisitApiTest(APITestCase):
         response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
         freq_visit_ids = [i['id'] for i in response.data]
 
-        # API call sorts data by count DESC, title ASC, just like /frequent
         url = '/api/profile/self/listingvisits/'
         response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
-        visit_ids = [i['listing']['id'] for i in response.data if i['count'] > 0]
+        visit_counts = dict((i['listing']['id'], i['count']) for i in response.data)
 
-        self.assertEqual(freq_visit_ids, visit_ids)
+        curr_count = None
+        for id in freq_visit_ids:
+            if curr_count is not None:
+                self.assertTrue(visit_counts[id] <= curr_count)
+            curr_count = visit_counts[id]
 
     def test_increment_visit(self):
         # assumes bigbrother has at least one listing visit
