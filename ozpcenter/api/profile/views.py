@@ -136,12 +136,6 @@ class ProfileListingViewSet(viewsets.ModelViewSet):
         Find a Profile Listing by ID
     Response:
         200 - Successful operation - ListingSerializer
-
-    GET /api/profile/{pk}/listing/visited/
-    Summary:
-        Get a list of frequently visited listings
-    Response:
-        200 - Successful operation - ListingSerializer
     """
 
     permission_classes = (permissions.IsUser,)
@@ -257,6 +251,12 @@ class ProfileListingVisitCountViewSet(viewsets.ModelViewSet):
     POST /api/profile/{pk}/listingvisit/increment/
     Summary:
         Increments a listing visit for the given profile by 1
+    Response:
+        200 - Successful operation - ListingVisitCountSerializer
+
+    POST /api/profile/{pk}/listingvisit/clear/
+    Summary:
+        Sets a listing visit count for the given profile to 0
     Response:
         200 - Successful operation - ListingVisitCountSerializer
     """
