@@ -7,8 +7,15 @@ Usage:
 
 """
 import requests
+from rest_framework_jwt.settings import api_settings
 
+from rest_framework import serializers
+from ozpcenter import models
 from django.conf import settings
+
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
 
 if hasattr(settings, 'WS_URL'):
     WS_URL = settings.WS_URL
@@ -22,13 +29,42 @@ else:
     WS_ENABLED = False
 
 
+class DictField(serializers.ReadOnlyField):
+    """
+    Read Only Field
+    """
+
+    def from_native(self, obj):
+        return None
+
+
+class NotificationMailBoxSerializer(serializers.HyperlinkedModelSerializer):
+    created_date = serializers.DateTimeField(required=False, source='notification.created_date')
+    expires_date = serializers.DateTimeField(required=False, source='notification.expires_date')
+    author = serializers.IntegerField(required=False, source='notification.author.id')
+    message = serializers.CharField(required=False, source='notification.message')
+    listing = serializers.IntegerField(required=False, source='notification.listing.id')
+    agency = serializers.IntegerField(required=False, source='notification.agency.id')
+    # peer = DictField(required=False, source='notification.peer')
+    notification_type = serializers.CharField(required=False, source='notification.notification_type')
+    notification_subtype = serializers.CharField(required=False, source='notification.notification_subtype')
+    entity_id = serializers.IntegerField(required=False, source='notification.entity_id')
+    notification_id = serializers.IntegerField(required=False, source='notification.id')
+
+    class Meta:
+        model = models.NotificationMailBox
+        fields = ('id', 'notification_id', 'created_date', 'expires_date', 'author',
+            'message', 'notification_type', 'notification_subtype', 'listing', 'agency', 'entity_id',  # 'peer',
+            'read_status', 'acknowledged_status', )
+
+
 class WebServiceClient(object):
     """
     Client for WS Service
     https://github.com/aml-development/aml-ws-service
     """
 
-    def send_bulk_message(self, bulk_notification_list):
+    def send_bulk_message(self, sender_profile, bulk_notification_list):
         """
         Call API for sending messages to users
 
@@ -57,25 +93,33 @@ class WebServiceClient(object):
         data_to_send = []
 
         for notification_mail_box in bulk_notification_list:
+            current_data = NotificationMailBoxSerializer(notification_mail_box).data
+
             data_to_send.append(
                 {
                     "target": "{}".format(notification_mail_box.target_profile.id),
                     "channel": "notification",
-                    "payload": {
-                        "message": notification_mail_box.notification.message
-                    }
+                    "payload": current_data
                 }
             )
 
         try:
+            payload = jwt_payload_handler(sender_profile.user)
+            token = jwt_encode_handler(payload)
+
             # TODO: need to authentication to ws service (not everybody should be able to call this api)
-            request = requests.post('{}/api/send/'.format(WS_URL), json=data_to_send)
+            url = '{}/api/send/'.format(WS_URL)
+            headers = {
+                'Authorization': token
+            }
+            request = requests.post(url, json=data_to_send, headers=headers)
 
             if request.status_code == 200:
                 return request.json()
             else:
                 return request.text
-        except Exception:
+        except Exception as err:
+            print(err)
             return "error"
 
 
