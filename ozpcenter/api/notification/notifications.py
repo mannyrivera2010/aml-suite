@@ -277,7 +277,7 @@ class NotificationBase(object):
 
         if bulk_notification_list:
             bulk_notifications_saver(bulk_notification_list)
-            web_service_client.send_bulk_message(bulk_notification_list)
+            web_service_client.send_bulk_message(self.sender_profile, bulk_notification_list)
 
         return notification
 
