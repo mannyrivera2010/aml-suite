@@ -864,6 +864,7 @@ class Profile(models.Model):
     # 508-only-search flag
     only_508_search_flag = models.BooleanField(default=False)
 
+    theme = models.CharField(max_length=255, default='default')
     # TODO: on create, update, or delete, do the same for the related django_user
     objects = ProfileManager()
 
