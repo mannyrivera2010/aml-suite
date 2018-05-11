@@ -123,7 +123,7 @@ def get_frequently_visited_listings(current_request_username, profile_id):
     else:
         profile_instance = models.Profile.objects.get(id=profile_id)
 
-    visit_counts = models.ListingVisitCount.objects.select_related('listing').filter(profile=profile_instance, count__gt=0, listing__is_deleted=False).order_by('-count', 'listing__title')
+    visit_counts = models.ListingVisitCount.objects.select_related('listing').filter(profile=profile_instance, count__gt=0, listing__is_deleted=False, listing__is_enabled=True).order_by('-count', 'listing__title')
     listings = [vc.listing for vc in visit_counts]
 
     return listings
