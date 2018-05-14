@@ -1,5 +1,53 @@
 
-### 1.0.103 (None)   
+### 1.0.104 (None)
+
+#### Feature  
+* **theme**:  add theme to profile ([ef3dc48c](https://github.com/aml-development/ozp-backend/commit/ef3dc48c7830aa8732aa506b1d782d09e0a3c047))    
+* **jwt**:  add authentication to calls ([2ee7b5e4](https://github.com/aml-development/ozp-backend/commit/2ee7b5e4db9c0dd925c19bce1c18d3d83467d006))   
+* **508**
+  *  add only 508 search flag ([d6ac7144](https://github.com/aml-development/ozp-backend/commit/d6ac7144d5ab30d9c7a54fd150323ca8a01cef6a))
+  *  add unittest for 508 filtering ([5f2e7d3f](https://github.com/aml-development/ozp-backend/commit/5f2e7d3f9110c40cee420ad1ce4f967f843b052a))
+  *  add only 508 search flag ([87ca3a73](https://github.com/aml-development/ozp-backend/commit/87ca3a73cfea40075cb4530f4f2edf731ba77e65))
+  *  add unittest for 508 filtering ([ffd0bc69](https://github.com/aml-development/ozp-backend/commit/ffd0bc69edb442f442911edb0585ca8ba02af550))
+  *  add listing field to support 505 tag ([7e131b85](https://github.com/aml-development/ozp-backend/commit/7e131b85af745bcfc3cc1ccbe322bbf33eddad20))    
+* **es**
+  *  add 508 filter ([610f142c](https://github.com/aml-development/ozp-backend/commit/610f142c5e704325703b19ba88fdbb649f829c5c))
+  *  add 508 filter ([df6962c8](https://github.com/aml-development/ozp-backend/commit/df6962c8dca464a235105749f4bc6c1c574fc9ba))    
+* **ws**
+  *  add test skeleton ([0d285cb0](https://github.com/aml-development/ozp-backend/commit/0d285cb03c102df4185316082f6fcdef59b63716))
+  *  add ws service client ([88ae5687](https://github.com/aml-development/ozp-backend/commit/88ae5687476912d38436b3e1346116e49094a976))
+  *  integration to ws service ([a4543982](https://github.com/aml-development/ozp-backend/commit/a45439825bdcb50e403ef2eb0150b6077cebacb2))
+  *  add test skeleton ([3483d5f0](https://github.com/aml-development/ozp-backend/commit/3483d5f09a2d3a5468432fb1d94122ac9936a5f8))
+  *  add ws service client ([ec450ab0](https://github.com/aml-development/ozp-backend/commit/ec450ab00d9339f134fd6f8a0f87d0b54810d843))
+  *  integration to ws service ([ac166cbb](https://github.com/aml-development/ozp-backend/commit/ac166cbb72c5a17e164071eb60c44f08b441d0a3))    
+* **listing**
+  *  add unit tests for listing visit counts ([33611225](https://github.com/aml-development/ozp-backend/commit/3361122568c841874e3b1d36ba7d0a816e30569c))
+  *  update sample data and scripts to handle listing visit counts ([f48a39c0](https://github.com/aml-development/ozp-backend/commit/f48a39c05e1b7d2223a66ed6c21277fb69528ea7))
+  *  create tables and endpoints to track listing visit counts per user ([702cc77b](https://github.com/aml-development/ozp-backend/commit/702cc77b06a94350bcdab6b4d168f5e402aa2323))     
+
+#### Fixes  
+* **frequently visited listings**:  remove disabled listings from query ([f15996ee](https://github.com/aml-development/ozp-backend/commit/f15996ee37804dc1b1f387a959e5d8b930772d61))    
+* fix unit tests for pgsql ([10f9def5](https://github.com/aml-development/ozp-backend/commit/10f9def57d1a4915c0eeb2619fd110a9d684175a))   
+* **pki**
+  *  fix _preprocess_dn issue ([00134c99](https://github.com/aml-development/ozp-backend/commit/00134c99951d9afcbf9fda7f7f40f5a6f79e794f))
+  *  fix _preprocess_dn issue ([5f7cea2c](https://github.com/aml-development/ozp-backend/commit/5f7cea2c6c015cafee88e66f0dd8b583f1154c0f))     
+
+#### Refactor  
+* **notification**:  refactor notifcations ([253abc00](https://github.com/aml-development/ozp-backend/commit/253abc0047a2ab365709d30ba3af24df5f013cbb))    
+
+#### Merge Pull Requests  
+* Merge pull request #428 from aml-development/fix_frequently_visited_listings ([ccde85b9](https://github.com/aml-development/ozp-backend/commit/ccde85b950777b0b719ead9a045bdf4beabbe9fe))
+* Merge pull request #427 from aml-development/theme_db ([5cab8a7d](https://github.com/aml-development/ozp-backend/commit/5cab8a7d3f5b10e1df7350a79a7f811291609df0))
+* Merge pull request #426 from aml-development/auth_jwt ([19aeadd6](https://github.com/aml-development/ozp-backend/commit/19aeadd6a64cf2ca8ff437eb2ea076f9b433f310))
+* Merge pull request #425 from aml-development/listing_view_counts ([48fcc015](https://github.com/aml-development/ozp-backend/commit/48fcc015df20981049ab872275832442029fff4f))
+* Merge pull request #424 from aml-development/508_search ([e8cfffce](https://github.com/aml-development/ozp-backend/commit/e8cfffcec38c8707c0fb494a34178e6bec19cb24))
+* Merge pull request #423 from aml-development/integration ([09532ac5](https://github.com/aml-development/ozp-backend/commit/09532ac57d2d559f1dc67f584fc1e528c1274d53))
+* Merge pull request #421 from aml-development/20180402_notification ([f42bac98](https://github.com/aml-development/ozp-backend/commit/f42bac984db737d7c2eb53a9cc6396d1ed19cc6e))         
+
+#### Changes  
+* merge master and update migration ([587a4a41](https://github.com/aml-development/ozp-backend/commit/587a4a41f1f1c180d7385a70fab5cba0dd9e3b0f))     
+
+### 1.0.103 (2018-03-29)   
 
 #### Merge Pull Requests  
 * Merge pull request #420 from aml-development/20180313_tests ([7613b6aa](https://github.com/aml-development/ozp-backend/commit/7613b6aabbd0057ae901ce6105dd7adf4022e0b2))       
