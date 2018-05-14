@@ -23,6 +23,13 @@ git-working
 workspace
 distribution
 
+certs/*.crt
+certs/*.key
+certs/*.pem
+certs/*.csr
+certs/*.txt
+certs/*.p12
+
 # User-specific stuff:
 .idea/workspace.xml
 .idea/tasks.xml
