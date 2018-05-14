@@ -131,7 +131,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'stewarded_organizations', 'user', 'highest_role', 'dn',
             'center_tour_flag', 'hud_tour_flag', 'webtop_tour_flag',
             'email_notification_flag', 'listing_notification_flag', 'subscription_notification_flag',
-            'leaving_ozp_warning_flag', 'only_508_search_flag', 'is_beta_user')
+            'leaving_ozp_warning_flag', 'only_508_search_flag', 'is_beta_user', 'theme')
 
         read_only_fields = ('id', 'bio', 'organizations', 'user',
             'highest_role', 'is_beta_user')
@@ -196,6 +196,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         if 'leaving_ozp_warning_flag' in validated_data:
             profile_instance.leaving_ozp_warning_flag = validated_data['leaving_ozp_warning_flag']
+
+        if 'theme' in validated_data:
+            profile_instance.theme = validated_data['theme']
 
         current_request_profile = generic_model_access.get_profile(self.context['request'].user.username)
 
