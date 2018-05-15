@@ -1,8 +1,14 @@
+### Installing Nginx
+```
+mkdir -p ~/usr/local
+./configure --with-http_ssl_module --prefix=`echo ~`/usr/local/ngnix
+make
+make install
+```
 
 
 
-
-Command to test
+### Commands to test
 
 ```
 curl -kv https://localhost:4443/ --cacert ./ca_root.pem --cert ./bigbrother.crt --key ./bigbrother.pem
@@ -24,7 +30,7 @@ curl -kv https://localhost:4443/ --cacert ./ca_root.pem --cert ./bigbrother.crt 
 * 	expire date: May 14 18:50:10 2019 GMT
 * 	common name: localhost
 * 	issuer: E=admin@aml.com,CN=Demo ALM Root CA,OU=Domain Control,O=AML Demo CA,L=Baltimore,ST=MD,C=US
-> GET / HTTP/1.1
+> GET / HTTP/1.1cat
 > User-Agent: curl/7.29.0
 > Host: localhost:4443
 > Accept: */*
