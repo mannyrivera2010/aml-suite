@@ -19,6 +19,7 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
     agency = agency_serializers.CreateAgencySerializer(required=False)
     large_banner_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
     banner_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
+    owners = listing_serializers.CreateListingProfileSerializer(required=False, allow_null=True, many=True)
 
     class Meta:
         model = models.Listing
@@ -38,6 +39,7 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'launch_url',
                   'large_banner_icon',
                   'banner_icon',
+                  'owners',
                   'unique_name',
                   'is_enabled')
 
