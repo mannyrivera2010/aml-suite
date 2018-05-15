@@ -9,6 +9,7 @@ from ozpcenter import models
 from ozpcenter.api.library import model_access
 import ozpcenter.api.listing.model_access as listing_model_access
 import ozpcenter.api.image.serializers as image_serializers
+import ozpcenter.api.listing.serializers as listing_serializers
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -25,13 +26,14 @@ class LibraryListingSerializer(serializers.HyperlinkedModelSerializer):
     small_icon = image_serializers.ImageSerializer(required=False)
     large_icon = image_serializers.ImageSerializer(required=False)
     banner_icon = image_serializers.ImageSerializer(required=False)
+    owners = listing_serializers.CreateListingProfileSerializer(required=False, allow_null=True, many=True)
 
     class Meta:
         model = models.Listing
         fields = ('id', 'title', 'unique_name', 'launch_url', 'small_icon',
-            'large_icon', 'banner_icon')
+            'large_icon', 'banner_icon', 'owners')
         read_only_fields = ('title', 'unique_name', 'launch_url', 'small_icon',
-            'large_icon', 'banner_icon')
+            'large_icon', 'banner_icon', 'owners')
         # Any AutoFields on your model (which is what the automatically
         # generated id key is) are set to read-only by default when Django
         # REST Framework is creating fields in the background. read-only fields
