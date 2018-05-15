@@ -1,0 +1,39 @@
+#!/bin/sh
+
+HOME_CMD=/home/mrivera
+NGINX_CMD="$HOME_CMD/usr/local/ngnix/sbin/nginx"
+NGINX_CONF="$HOME_CMD/usr/local/ngnix/conf/nginx.conf"
+RETVAL=0
+
+start() {
+   echo "Starting NGINX Web Server: \c"
+   $NGINX_CMD -c $NGINX_CONF &
+   RETVAL=$?
+   [ $RETVAL -eq 0 ] && echo "ok" || echo "failed"
+   return $RETVAL
+}
+
+stop() {
+   echo "Stopping NGINX Web Server: \c"
+   $NGINX_CMD -s quit
+   RETVAL=$?
+   [ $RETVAL -eq 0 ] && echo "ok" || echo "failed"
+   return $RETVAL
+}
+
+case "$1" in
+   start)
+      start
+      ;;
+   stop)
+      stop
+      ;;
+   restart)
+      stop
+      start
+      ;;
+   *)
+      echo "Usage: $0 {start|stop|restart}"
+      exit 1
+esac
+exit $RETVAL
