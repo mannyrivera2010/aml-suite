@@ -1,3 +1,21 @@
+Draft
+
+## Overview
+* Creating Certificates
+  * Running script to create all the certificates
+* Ngnix
+  * Installing Nginx
+  * Configuring Nginx
+  * Testing Certificates
+* Backend
+* Center
+  * Running Center
+* Demo Auth Service
+  * Running demo
+* Websocket Service
+* Configuring Firefox
+
+
 ### Installing Nginx
 ```
 mkdir -p ~/usr/local
@@ -6,9 +24,13 @@ make
 make install
 ```
 
-
-
 ### Commands to test
+
+go to the directory that contains the certificates (should be located in one of the directories)
+```
+cd ~/certs
+cd ~/git/dev-tools/certs/dist
+```
 
 ```
 curl -kv https://localhost:4443/ --cacert ./ca_root.pem --cert ./bigbrother.crt --key ./bigbrother.pem
@@ -79,3 +101,94 @@ Your curl is compiled with NSS support and by default it sends SSL certificated 
 We recommend to use curl which is linked against openssl (see https://gist.github.com/floragunncom/4eecb1586b426a19b77457228d331c43)
 or make sure your certs in /etc/pki/nssd are sufficient (or your server truststore does accept them).
 ```
+
+
+### Setting up backend
+`https://github.com/aml-development/ozp-backend`
+
+```
+make use_psql use_es run_gunicorn_secure
+```
+
+if the certificates can not be found, go MakeFile and edit to :
+```
+--keyfile ~/certs/server_nopass.key \
+--certfile ~/certs/server_nopass.crt \
+--ca-certs ~/certs/ca_root.pem
+```
+OR
+```
+--keyfile ~/git/dev-tools/certs/dist/server_nopass.key \
+--certfile ~/git/dev-tools/certs/dist/server_nopass.crt \
+--ca-certs ~/git/dev-tools/certs/dist/ca_root.pem
+```
+
+Settings.py
+
+```
+diff --git a/ozp/settings.py b/ozp/settings.py
+index 53e3624..12c8d63 100644
+--- a/ozp/settings.py
++++ b/ozp/settings.py
+@@ -201,8 +201,8 @@ USE_TZ = True
+ REST_FRAMEWORK = {
+     'EXCEPTION_HANDLER': 'ozpcenter.errors.exception_handler',
+     'DEFAULT_AUTHENTICATION_CLASSES': (
+-        # 'ozpcenter.auth.pkiauth.PkiAuthentication'
+-        'rest_framework.authentication.BasicAuthentication',
++        'ozpcenter.auth.pkiauth.PkiAuthentication',
++        #'rest_framework.authentication.BasicAuthentication',
+         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+         # 'rest_framework.authentication.SessionAuthentication',
+         ),
+@@ -267,12 +267,13 @@ OZP = {
+     'DEMO_APP_ROOT': 'https://localhost:8443',
+     # if set to False, never try and update authorization-related info from
+     # an external source
+-    'USE_AUTH_SERVER': False,
++    'USE_AUTH_SERVER': True,
+     # convert DNs read as /CN=My Name/OU=Something... to CN=My Name, OU=Something
+     'PREPROCESS_DN': True,
+     'OZP_AUTHORIZATION': {
+-        'SERVER_CRT': '/ozp/server.crt',
+-        'SERVER_KEY': '/ozp/server.key',
++        'SERVER_CRT': '/home/{userName}/certs/server_nopass.crt',
++        'SERVER_KEY': '/home/{userName}/certs/server_nopass.key',
++
+         # assumes the real URL is <root>/users/<DN>/
+         'USER_INFO_URL': r'http://localhost:8003/demo-auth/users/%s/info.json?issuerDN=%s',
+         # assumes the real URL is <root>/users/<DN>/groups/<PROJECT_NAME>/
+```
+
+### Center
+```
+API_URL=https://berlin:4443 npm start
+```
+
+### Setting up demo-auth-service
+`https://github.com/aml-development/demo-auth-service`
+follow instructions from site
+
+```
+source env/bin/activate
+make run
+```
+
+
+### Firefox Steps
+Download Certs
+```
+https://berlin:4443/certs/ca_root.pem
+https://berlin:4443/certs/wsmith.p12
+https://berlin:4443/certs/bigbrother.p12
+```
+
+* Open Firefox (tested on 52.7.3)
+* Add CA, and user certificates to Firefox
+* Firefox -> Three Bars Menu -> Preference -> Advanced -> View Certificates
+* Under Authorities -> add ca_root.pem
+  * Check the first two
+* Under Your Certificates add wsmith.p12 and bigbrother.p12
+  * password is password
+
+Go to https://berlin:4443/center/, it should open window where it will give you choice for which cert to use
