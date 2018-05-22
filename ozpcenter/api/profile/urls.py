@@ -18,5 +18,6 @@ profile_router.register(r'listingvisits', views.ProfileListingVisitCountViewSet,
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^', include(profile_router.urls)),
-    url(r'^self/profile/$', views.CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'update'}))
+    url(r'^self/profile/$', views.CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'update'})),
+    url(r'^self/token/$', views.CurrentUserTokenViewSet.as_view({'get': 'retrieve'}))
 ]

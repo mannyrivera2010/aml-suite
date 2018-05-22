@@ -26,8 +26,12 @@ import ozpcenter.api.storefront.serializers as storefront_serializers
 import ozpcenter.api.profile.model_access as model_access
 import ozpcenter.api.listing.model_access as listing_model_access
 
+from rest_framework_jwt.settings import api_settings
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
+
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -570,3 +574,36 @@ class CurrentUserViewSet(viewsets.ViewSet):
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CurrentUserTokenViewSet(viewsets.ViewSet):
+    """
+    A simple ViewSet for retrieving users.
+
+    Access Control
+    ===============
+    - All users can view
+
+    URIs
+    ======
+    GET /api/self/token/
+    Summary:
+        Find the Current User Token
+    Response:
+        200 - Successful operation - ProfileSerializer
+    """
+
+    permission_classes = (permissions.IsUser,)
+
+    def retrieve(self, request):
+        current_request_profile = model_access.get_self(request.user.username)
+
+        payload = jwt_payload_handler(current_request_profile.user)
+        token = jwt_encode_handler(payload)
+
+        result = {
+            "token": token,
+            "username": current_request_profile.user.username
+        }
+
+        return Response(result)
