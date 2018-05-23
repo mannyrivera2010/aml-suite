@@ -194,7 +194,23 @@ def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
               "analyzer": "autocomplete",
               "search_analyzer": "autocomplete"
             },
-
+            "owners": {
+              "properties": {
+                "display_name": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "long"
+                },
+                "user": {
+                  "properties": {
+                    "username": {
+                      "type": "string"
+                    },
+                  }
+                }
+              }
+            },
             # categories is used for Filtering
             "categories": {
               "type": "nested",
@@ -369,6 +385,12 @@ def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
             },
             "avg_rate": {
               "type": "double"
+            },
+            "usage_requirements": {
+              "type": "string"
+            },
+            "system_requirements": {
+              "type": "string"
             }
           }
         }
@@ -832,7 +854,6 @@ def prepare_clean_listing_record(listing_serializer_record):
     keys_to_remove = ['contacts',
                       'last_activity',
                       'required_listings',
-                      'owners',
                       'current_rejection',
                       'what_is_new',
                       'iframe_compatible',
@@ -840,8 +861,6 @@ def prepare_clean_listing_record(listing_serializer_record):
                       'featured_date',
                       'version_name',
                       'feedback_score',
-                      'usage_requirements',
-                      'system_requirements',
                       'intents']
 
     # Clean Record
@@ -859,8 +878,18 @@ def prepare_clean_listing_record(listing_serializer_record):
         if listing_serializer_record.get(image_key):
             del listing_serializer_record[image_key]['image_type']
             del listing_serializer_record[image_key]['uuid']
-
     del listing_serializer_record['agency']['icon']
+
+    owners = []
+    for owner in listing_serializer_record['owners']:
+        current_owner = {}
+        current_owner['id'] = owner['id']
+        current_owner['display_name'] = owner['display_name']
+        current_owner['user'] = {}
+        current_owner['user']['username'] = owner['user']['username']
+
+        owners.append(current_owner)
+    listing_serializer_record['owners'] = owners
 
     record_clean_obj = json.loads(json.dumps(listing_serializer_record))
 
