@@ -223,6 +223,14 @@ class ListingESSearchApiTest(APITestCase):
 
         self.assertEqual(titles, expected_titles)
 
+        owners = [{'owners': record.get('owners')} for record in response.data['results']]
+        usage_requirements = [{'usage_requirements': record.get('usage_requirements')} for record in response.data['results']]
+        system_requirements = [{'system_requirements': record.get('system_requirements')} for record in response.data['results']]
+
+        self.assertIsNotNone(owners)
+        self.assertIsNotNone(usage_requirements)
+        self.assertIsNotNone(system_requirements)
+
         first_record = titles_ids[0]
         id_to_disable = first_record['id']
 
