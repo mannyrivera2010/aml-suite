@@ -1,4 +1,5 @@
 Backend High-level requirements
+
 * Provide REST Interface
 * Unit Testing with Coverage Report
 * Request/Object Validation
@@ -22,5 +23,6 @@ Backend High-level requirements
 * Works with Jenkins/TravisCI for builds/testing
 
 Future Backend High-level requirements
+
 * Support for Task Manager/Message Queue (Celery)
 * Support Elasticsearch 6.x
