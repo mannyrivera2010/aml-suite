@@ -1,5 +1,28 @@
 
-### 1.0.104 (None)
+### 1.0.105 (None)
+
+#### Feature  
+* **es**:  add owners, usage_requirements, system_requirements fields to endpoint ([830c592e](https://github.com/aml-development/ozp-backend/commit/830c592e234cf610d1ec57d61ba1d8c963bd085b))    
+* **jwt**:  get jwt token for user ([0cafb04b](https://github.com/aml-development/ozp-backend/commit/0cafb04b5c9c703e2992d7fa34834d11eea0fff4))    
+* **bookmarks**:  add owners field ([139cb217](https://github.com/aml-development/ozp-backend/commit/139cb217b515aa79465493dde6600d4e72f2b9f3))    
+
+#### Fixes  
+* fix: fix test cases ([c4512f86](https://github.com/aml-development/ozp-backend/commit/c4512f86b268e23bf71ad92550ce71ca29895a98))
+* fix: fix test cases ([d659a86a](https://github.com/aml-development/ozp-backend/commit/d659a86ab7607acdaca1678830b4edba7590bcb5))     
+
+#### Merge Pull Requests  
+* Merge pull request #430 from aml-development/20180522_self_token ([a9be762c](https://github.com/aml-development/ozp-backend/commit/a9be762ce3441beda1797fef96de7377fe2ec927))
+* Merge pull request #431 from aml-development/search_additional_fields ([72bbddec](https://github.com/aml-development/ozp-backend/commit/72bbddec78f6971386d2a787ca055b19bfde8b66))
+* Merge pull request #429 from aml-development/storefront_owners ([eae492ab](https://github.com/aml-development/ozp-backend/commit/eae492abcf1aa0485a6253bb0e4919fdb114427c))
+* Merge branch 'storefront_owners' of github.com:aml-development/ozp-backend into storefront_owners ([b4208c9e](https://github.com/aml-development/ozp-backend/commit/b4208c9e2a70cbf33126f99b8418e26efd0b5b6b))    
+
+#### Documentation  
+* **shared_folder**:  add docs for shared folders ([2b14ed27](https://github.com/aml-development/ozp-backend/commit/2b14ed276bdb3d58c2e238b582b4e7742025b5e5))      
+
+#### Test  
+* test: add test cases for new search fields ([2f103bfe](https://github.com/aml-development/ozp-backend/commit/2f103bfe6f23a05097e7f56dea3a8040f13be250))       
+
+### 1.0.104 (2018-05-14)
 
 #### Feature  
 * **theme**:  add theme to profile ([ef3dc48c](https://github.com/aml-development/ozp-backend/commit/ef3dc48c7830aa8732aa506b1d782d09e0a3c047))    
