@@ -102,6 +102,14 @@ http://www.django-rest-framework.org/api-guide/filtering/#filtering-and-object-l
 
 ### Method 2 - Relational fully normalized
 
+## Methods to maintain backward compatability
+### Method 1 - Create V2 API for 3.0 use 
+
+### Method 2 - Create a secondary API for shared folders
+This will leave the current bookmark folder structure intact
+Will require frontend to call 2 API methods to receive personal and shared folders
+Will not require a full re-structure of bookmarks and folders from 2.0
+
 
 # Reference
 
