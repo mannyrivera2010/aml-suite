@@ -1,5 +1,13 @@
 
-### 1.0.105 (None)
+### 1.0.106 (None)    
+
+#### Documentation  
+* **shared_folder**:  append docs for shared folders ([8aa12a77](https://github.com/aml-development/ozp-backend/commit/8aa12a771a830c55bff5f0f9c7edc002bf7c107c))        
+
+#### Changes  
+* Update shared_folders_2018.md ([6c1276db](https://github.com/aml-development/ozp-backend/commit/6c1276dbbf29d3eefe9a955fb637729a368f29fe))     
+
+### 1.0.105 (2018-05-30)
 
 #### Feature  
 * **es**:  add owners, usage_requirements, system_requirements fields to endpoint ([830c592e](https://github.com/aml-development/ozp-backend/commit/830c592e234cf610d1ec57d61ba1d8c963bd085b))    
