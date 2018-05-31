@@ -63,6 +63,7 @@
   groups: [APPS_MALL_STEWARD]
   organizations: [Ministry of Peace]
   stewarded_organizations: []
+  work_roles: [CEO, Developer, Contractor]
   username: bigbrother
 
 # APPS_MALL_STEWARD - Ministry of Truth
@@ -77,6 +78,7 @@
   groups: [APPS_MALL_STEWARD]
   organizations: [Ministry of Truth]
   stewarded_organizations: []
+  work_roles: [CEO, Manager]
   username: bigbrother2
 
 # APPS_MALL_STEWARD - Ministry of Plenty
@@ -91,6 +93,7 @@
   groups: [APPS_MALL_STEWARD]
   organizations: [Ministry of Plenty]
   stewarded_organizations: []
+  work_roles: [CEO]
   username: khaleesi
 
 # APPS_MALL_STEWARD - Ministry of Love
@@ -105,6 +108,7 @@
   groups: [APPS_MALL_STEWARD, BETA_USER]
   organizations: [Ministry of Love]
   stewarded_organizations: [Test, Test 1, Ministry of Truth, Test 2, Test 3, Test 4]
+  work_roles: []
   username: bettafish
 
 # ------------------------
@@ -123,6 +127,7 @@
   groups: [ORG_STEWARD]
   organizations: [Ministry of Truth]
   stewarded_organizations: [Ministry of Truth]
+  work_roles: [Manager]
   username: wsmith
 
 # ORG_STEWARD - Ministry of Truth, Ministry of Love]
@@ -137,6 +142,7 @@
   groups: [ORG_STEWARD]
   organizations: [Ministry of Truth]
   stewarded_organizations: [Ministry of Truth, Ministry of Love]
+  work_roles: [Manager, Contractor]
   username: julia
 
 # ORG_STEWARD - Ministry of Peace, Ministry of Plenty
@@ -151,6 +157,7 @@
   groups: [ORG_STEWARD]
   organizations: [Ministry of Peace]
   stewarded_organizations: [Ministry of Peace, Ministry of Plenty]
+  work_roles: [Manager, Developer]
   username: obrien
 
 # ORG_STEWARD - Ministry of Love
@@ -165,6 +172,7 @@
   groups: [ORG_STEWARD]
   organizations: [Ministry of Love]
   stewarded_organizations: [Ministry of Love]
+  work_roles: []
   username: david
 
 # ------------------------
@@ -182,6 +190,7 @@
   groups: [USER]
   organizations: [Ministry of Love]
   stewarded_organizations: []
+  work_roles: [Developer]
   username: aaronson
 
 # USER
@@ -196,6 +205,7 @@
   groups: [USER]
   organizations: [Ministry of Love]
   stewarded_organizations: []
+  work_roles: [Contractor]
   username: pmurt
 
 # USER - PKI
@@ -210,6 +220,7 @@
   groups: [USER]
   organizations: [Ministry of Love]
   stewarded_organizations: []
+  work_roles: []
   username: hodor
 
 # USER - BETA_USER
@@ -224,6 +235,7 @@
   groups: [USER, BETA_USER]
   organizations: [Ministry of Love]
   stewarded_organizations: []
+  work_roles: [Developer, Contractor]
   username: betaraybill
 
 # ------------------------
@@ -241,6 +253,7 @@
   groups: [USER]
   organizations: [Ministry of Truth]
   stewarded_organizations: []
+  work_roles: [Developer]
   username: jones
 
 # USER - PKI
@@ -255,6 +268,7 @@
   groups: [USER]
   organizations: [Ministry of Truth]
   stewarded_organizations: []
+  work_roles: [Contractor]
   username: tammy
 
 # ------------------------
@@ -272,6 +286,7 @@
   groups: [USER]
   organizations: [Ministry of Plenty]
   stewarded_organizations: []
+  work_roles: [Developer, Contractor, Manager]
   username: rutherford
 
 # USER - PKI
@@ -286,6 +301,7 @@
   groups: [USER]
   organizations: [Ministry of Plenty]
   stewarded_organizations: []
+  work_roles: [Manager]
   username: noah
 
 # ------------------------
@@ -303,6 +319,7 @@
   groups: [USER]
   organizations: [Ministry of Peace]
   stewarded_organizations: []
+  work_roles: [Developer]
   username: syme
 
 # USER - PKI
@@ -317,6 +334,7 @@
   groups: [USER]
   organizations: [Ministry of Peace]
   stewarded_organizations: []
+  work_roles: [Contractor]
   username: abe
 
 # ------------------------
@@ -334,6 +352,7 @@
   groups: [USER]
   organizations: [Ministry of Peace, Ministry of Love]
   stewarded_organizations: []
+  work_roles: []
   username: tparsons
 
 # USER - PKI
@@ -348,6 +367,7 @@
   groups: [USER]
   organizations: [Ministry of Peace, Ministry of Love]
   stewarded_organizations: []
+  work_roles: []
   username: jsnow
 
 # ------------------------
@@ -365,6 +385,7 @@
   groups: [USER]
   organizations: [Ministry of Truth, Ministry of Peace, Ministry of Love]
   stewarded_organizations: []
+  work_roles: [Manager]
   username: charrington
 
 # USER - PKI
@@ -379,4 +400,5 @@
   groups: [USER]
   organizations: [Ministry of Truth, Ministry of Peace, Ministry of Love]
   stewarded_organizations: []
+  work_roles: [Developer, Contractor]
   username: johnson

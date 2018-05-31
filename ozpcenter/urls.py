@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'', include('ozpcenter.api.profile.urls')),
     url(r'', include('ozpcenter.api.storefront.urls')),
     url(r'', include('ozpcenter.api.subscription.urls')),
+    url(r'', include('ozpcenter.api.work_role.urls')),
     url(r'^version/', views.version_view),
     url(r'^token-auth/', obtain_jwt_token),
     url(r'^token-verify/', verify_jwt_token),
