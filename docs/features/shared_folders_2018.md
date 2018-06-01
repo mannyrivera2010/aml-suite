@@ -1,11 +1,16 @@
-# Business Objective (draft - 05/03/2018)
-Add support for sharable folders
+# Business Objective - Bookmarks (hud)
 
+## Terms and Definitions
+* bookmark - enabled quick access for listing
+
+concept of shared folder was to make a
 ## Implementation of Legacy Bookmarks
-https://github.com/aml-development/ozp-backend/issues/7
+* https://github.com/aml-development/ozp-backend/issues/7
+* https://github.com/aml-development/ozp-backend/pull/252
 
-https://github.com/aml-development/ozp-backend/pull/252
 
+# Business Objective - Shared Bookmarks (aml3.0 draft - 05/03/2018)
+Add support for sharable folders
 
 ## Terms and Definitions
 * bookmark - can represent a folder or listing
@@ -97,13 +102,50 @@ http://www.django-rest-framework.org/api-guide/filtering/#filtering-and-object-l
 ## Methods without using custom order
 ### Method 1 - Relational self-reference
 
+
 ## Methods with custom order (integer position field)
+Two users
+
+[Listing,...] = List
+(Type-Title[Listing,...]) = Folder
+
+User 1
+  [
+    (
+      Shard-F1
+        [1, 2]
+    )
+    (
+        Folder-F2
+        [1]
+    )
+    1
+    2
+  ]
+
+User 2
+  [
+    1
+    (
+      Shared-F1
+        [1,2]
+    )
+    3
+  ]
+
 ### Method 1 - Relational self-reference
+
+Table `entry_profile`
+
+Table `entry`
+
 
 ### Method 2 - Relational fully normalized
 
+
+
 ## Methods to maintain backward compatability
-### Method 1 - Create V2 API for 3.0 use 
+### Method 1 - Create V2 API for 3.0 use
 
 ### Method 2 - Create a secondary API for shared folders
 This will leave the current bookmark folder structure intact
