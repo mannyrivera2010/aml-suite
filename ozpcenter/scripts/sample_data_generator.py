@@ -439,6 +439,7 @@ def run():
     print('--Loading Files')
     section_file_start_time = time_ms()
 
+    work_roles_data = load_yaml_file('work_roles.yaml')
     categories_data = load_yaml_file('categories.yaml')
     contact_data = load_yaml_file('contacts.yaml')
     profile_data = load_yaml_file('profile.yaml')
@@ -498,6 +499,22 @@ def run():
 
     print('-----Took: {} ms'.format(time_ms() - section_file_start_time))
     show_db_calls(db_connection)
+
+    ############################################################################
+    #                           Work Roles
+    ############################################################################
+    print('--Creating Work Roles')
+    section_start_time = time_ms()
+
+    with transaction.atomic():
+        for current_work_role in work_roles_data['work_roles']:
+            work_role = models.WorkRole(name=current_work_role['name'])
+            work_role.save()
+
+            object_cache['WorkRole.{}'.format(current_work_role['name'])] = work_role
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
     #                           Categories
@@ -644,6 +661,7 @@ def run():
                 access_control=access_control,
                 organizations=current_profile_data['organizations'],
                 stewarded_organizations=current_profile_data['stewarded_organizations'],
+                work_roles=current_profile_data['work_roles'],
                 groups=current_profile_data['groups'],
                 dn=current_profile_data['dn']
             )

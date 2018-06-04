@@ -784,6 +784,21 @@ class Review(models.Model):
                                           self.rate, self.text, self.review_parent)
 
 
+class WorkRole(models.Model):
+    """
+    Work roles for user profiles
+
+    TODO: Auditing for create, update, delete
+    """
+    name = models.CharField(max_length=30, unique=True)
+
+    def __repr__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
+
 class ProfileManager(models.Manager):
 
     def get_queryset(self):
@@ -865,6 +880,13 @@ class Profile(models.Model):
     only_508_search_flag = models.BooleanField(default=False)
 
     theme = models.CharField(max_length=255, default='default')
+
+    work_roles = models.ManyToManyField(
+        WorkRole,
+        related_name='profiles',
+        db_table='work_role_profile'
+    )
+
     # TODO: on create, update, or delete, do the same for the related django_user
     objects = ProfileManager()
 
@@ -996,6 +1018,12 @@ class Profile(models.Model):
         for i in organizations:
             org = Agency.objects.get(title=i)
             p.stewarded_organizations.add(org)
+
+        # add work roles
+        work_roles = kwargs.get('work_roles', [])
+        for i in work_roles:
+            work_role = WorkRole.objects.get(name=i)
+            p.work_roles.add(work_role)
 
         return p
 

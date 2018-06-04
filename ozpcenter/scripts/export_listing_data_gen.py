@@ -119,6 +119,21 @@ DEMO_APP_ROOT = settings.OZP['DEMO_APP_ROOT']
 class ModelExtractor(object):
 
     @staticmethod
+    def extract_work_roles_database():
+        """
+        Function used to extract work roles from database into python objects
+        """
+        model = models.WorkRole
+        work_role_list = []
+        for current_work_role in model.objects.order_by('name').iterator():
+            work_role = {}
+            work_role['name'] = current_work_role.name
+            work_role_list.append(work_role)
+        output_dict = {'work_roles': work_role_list}
+
+        return output_dict
+
+    @staticmethod
     def extract_contacts_database():
         """
         Function used to extract contact types and contacts from database into python objects
@@ -337,6 +352,9 @@ def run():
 
         if not os.path.exists(COPY_IMG_PATH):
             os.mkdir(COPY_IMG_PATH)
+
+    print('Extracting work roles')
+    save_to_yaml('work_roles.yaml', ModelExtractor.extract_work_roles_database())
 
     print('Extracting categories')
     save_to_yaml('categories.yaml', ModelExtractor.extract_categories_database())

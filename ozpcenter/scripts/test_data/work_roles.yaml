@@ -1,0 +1,5 @@
+work_roles:
+- name: Developer
+- name: Contractor
+- name: Manager
+- name: CEO

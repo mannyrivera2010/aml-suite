@@ -2,6 +2,7 @@
 Profile Serializers
 """
 import logging
+from collections import OrderedDict
 
 from django.contrib import auth
 
@@ -13,6 +14,8 @@ from plugins import plugin_manager
 from plugins.plugin_manager import system_anonymize_identifiable_data
 import ozpcenter.model_access as generic_model_access
 import ozpcenter.api.agency.model_access as agency_model_access
+import ozpcenter.api.work_role.model_access as work_role_model_access
+from ozpcenter.api.work_role.serializers import WorkRoleSerializer
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -123,18 +126,30 @@ class ShortUserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     organizations = AgencySerializer(many=True)
     stewarded_organizations = AgencySerializer(many=True)
+    work_roles = WorkRoleSerializer(many=True)
     user = UserSerializer()
 
     class Meta:
         model = models.Profile
         fields = ('id', 'display_name', 'bio', 'organizations',
-            'stewarded_organizations', 'user', 'highest_role', 'dn',
+            'stewarded_organizations', 'work_roles', 'user', 'highest_role', 'dn',
             'center_tour_flag', 'hud_tour_flag', 'webtop_tour_flag',
             'email_notification_flag', 'listing_notification_flag', 'subscription_notification_flag',
             'leaving_ozp_warning_flag', 'only_508_search_flag', 'is_beta_user', 'theme')
 
         read_only_fields = ('id', 'bio', 'organizations', 'user',
             'highest_role', 'is_beta_user')
+
+    def to_internal_value(self, data):
+        ret = super(ProfileSerializer, self).to_internal_value(data)
+
+        if 'work_roles' in data:
+            ret['work_roles'] = []
+            for work_role in data['work_roles']:
+                work_role_dict = OrderedDict({'id': work_role['id']})
+                ret['work_roles'].append(work_role_dict)
+
+        return ret
 
     def to_representation(self, data):
         access_control_instance = plugin_manager.get_system_access_control_plugin()
@@ -164,12 +179,18 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         stewarded_organizations = None
-
         if 'stewarded_organizations' in data:
             stewarded_organizations = []
             for org in data['stewarded_organizations']:
                 stewarded_organizations.append(agency_model_access.get_agency_by_title(org['title']))
         data['stewarded_organizations'] = stewarded_organizations
+
+        if 'work_roles' in data:
+            work_roles = []
+            for work_role in data['work_roles']:
+                work_roles.append(work_role_model_access.get_work_role_by_id(work_role['id']))
+            data['work_roles'] = work_roles
+
         return data
 
     def update(self, profile_instance, validated_data):
@@ -216,6 +237,11 @@ class ProfileSerializer(serializers.ModelSerializer):
                         profile_instance.user.groups.clear()
                         for group_instance in groups_list:
                             profile_instance.user.groups.add(group_instance)
+
+        if 'work_roles' in validated_data:
+            profile_instance.work_roles.clear()
+            for work_role in validated_data['work_roles']:
+                profile_instance.work_roles.add(work_role)
 
         profile_instance.save()
         return profile_instance
