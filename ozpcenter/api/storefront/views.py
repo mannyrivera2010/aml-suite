@@ -27,7 +27,7 @@ logger = logging.getLogger('ozp-center.' + str(__name__))
 def MetadataView(request):
     """
     Metadata for the store including categories, agencies, contact types,
-    intents, and listing types
+    work roles, intents, and listing types
     """
     request_username = request.user.username
     data = model_access.get_metadata(request_username)
