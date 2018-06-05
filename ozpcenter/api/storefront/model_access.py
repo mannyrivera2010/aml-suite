@@ -441,6 +441,7 @@ def get_metadata(username):
         * listing types
         * intents
         * contact types
+        * work roles
 
     Key: metadata
     """
@@ -457,6 +458,9 @@ def get_metadata(username):
 
         data['intents'] = values_query_set_to_dict(models.Intent.objects.all().values(
             'action', 'media_type', 'label', 'icon', 'id'))
+
+        data['work_roles'] = values_query_set_to_dict(models.WorkRole.objects.all().values(
+            'id', 'name'))
 
         agency_listing_count_queryset = models.Listing.objects.for_user(username).filter(approval_status=models.Listing.APPROVED, is_enabled=True)
         agency_listing_count_queryset = agency_listing_count_queryset.values('agency__id',

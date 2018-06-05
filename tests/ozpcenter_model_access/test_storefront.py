@@ -84,6 +84,11 @@ class StorefrontTest(TestCase):
         expected_keys = ['title', 'description'].sort()
         self.assertEqual(keys, expected_keys)
 
+        work_roles = metadata['work_roles']
+        keys = list(work_roles[0].keys()).sort()
+        expected_keys = ['id', 'name'].sort()
+        self.assertEqual(keys, expected_keys)
+
     # TODO: Fails on postgres
     # def test_get_sql_statement(self):
     #     sql = model_access.get_sql_statement()
