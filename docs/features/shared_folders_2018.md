@@ -100,30 +100,55 @@ http://www.django-rest-framework.org/api-guide/filtering/#filtering-and-object-l
 * User
 
 ## Methods without using custom order
-### Method 1 - Relational self-reference
+### Method 1 - Relational self-reference (child-parent)
+
+Models
+* bookmarks
+    * id (integer)
+    * name of folder (string)
+    * listing id (foreign key)
+    * root (boolean)
+    * parents (many to many)
+    * created_date (datetime)
+    * type (choice - folder/listing)
+
+* bookmark_parent_relationships (m2m table - storage of child-parent relationships)
+    * id (integer)
+    * bookmark (foreign_key to bookmarks id)
+    * parent_bookmark (foreign_key to bookmarks id, 1 bookmark can have many parents)
+
+* bookmarks_permission (m2m table - who can view bookmarks)
+    * id (integer)
+    * profile (foreign_id)
+    * permission (owner/viewer)
+    * bookmark (foreign_key to bookmarks id)
+
+Rules
+* Each user has only one bookmark root folder, the user is the owner of root folder
+    * bookmarks.objects.filter(root=true, )
+
 
 
 ## Methods with custom order (integer position field)
-Two users
-
+```
 [Listing,...] = List
 (Type-Title[Listing,...]) = Folder
 
-User 1
-  [
-    (
-      Shard-F1
-        [1, 2]
-    )
-    (
-        Folder-F2
-        [1]
-    )
-    1
-    2
-  ]
+bigbrother
+[
+  (
+    Shard-F1
+      [1, 2]
+  )
+  (
+      Folder-F2
+      [1]
+  )
+  1
+  2
+]
 
-User 2
+jones
   [
     1
     (
@@ -133,25 +158,100 @@ User 2
     3
   ]
 
-### Method 1 - Relational self-reference
+```
+
+Table View for entries
+```
+username   | folder_name | listing | position
+---------------------------------------------
+bigbrother (1) | s1          | 1       | 1 (nested order = 7)
+bigbrother (1) | s1          | 2       | 1 (nested order = 8)
+
+bigbrother (1) | f1          | 1       | 2 (nested order?)
+bigbrother (1) | f1          | 4       | 2 (nested order?)
+
+bigbrother (1) | null        | 1       | 3
+bigbrother (1) | null        | 2       | 4
+
+jones      (2) | null        | 1       | 1
+jones      (2) | s1          | 1       | 1 (nested order = 7)
+jones      (2) | s1          | 2       | 1 (nested order = 8)
+jones      (2) | null        | 3       | 6
+
+```
+
+### Method 2 - Relational self-reference
 
 Table `entry_profile`
 
 Table `entry`
 
 
-### Method 2 - Relational fully normalized
+### Method 3 - Relational fully normalized
+
+Tables
+```
+Table `profile`                 |   Table `Listing`
+                                |
+id | username                   |   id | ...
+1  | bigbrother                 |   1  |
+2  | jones                      |   2  |
+                                |   3  |
+                                |
+Table `folder_entry `           |  Table `entry_permission`
+                                |
+id | name | entry               |  id | entry | profile | permission
+1  | S1   | 1                   |  1  | 1     | 1       | owner
+2  | F1   | 2                   |  2  | 1     | 2       | viewer
+                                |
+                                |
+Table `folder_listing_entry`    |    Table `listing_entry`
+                                |    id  | listing | entry
+id | listing | folder | entry   |    1   | 1       | 3
+1  | 1       | 1      | 7       |    2   | 2       | 4
+2  | 2       | 1      | 8       |    3   | 1       | 5
+3  | 1       | 2      | 9       |    4   | 3       | 6
 
 
+Table `entry`
+
+id  | creator (profile)
+1   |  1
+2   |  1
+3   |  1
+4   |  1
+5   |  2
+6   |  2
+7   |  1
+8   |  1
+9   |  2
+
+Table `entry_position`
+
+id | entry | profile | position
+1  | 1     | 1       | 1
+2  | 2     | 1       | 2
+3  | 3     | 1       | 3
+4  | 4     | 1       | 4
+5  | 7     | 1       | 1
+6  | 8     | 1       | 2
+7  | 9     | 1       | 1
+8  | 5     | 2       | 1
+9  | 1     | 2       | 2
+10 | 7     | 2       | 1
+11 | 8     | 2       | 2
+12 | 6     | 2       | 3
+```
 
 ## Methods to maintain backward compatability
-### Method 1 - Create V2 API for 3.0 use
 
-### Method 2 - Create a secondary API for shared folders
-This will leave the current bookmark folder structure intact
-Will require frontend to call 2 API methods to receive personal and shared folders
-Will not require a full re-structure of bookmarks and folders from 2.0
+### Method 4 - Create V2 API for 3.0 use
+* look at method 1
 
+### Method 5 - Create a secondary API for shared folders
+* This will leave the current bookmark folder structure intact
+* Will require frontend to call 2 API methods to receive personal and shared folders
+* Will not require a full re-structure of bookmarks and folders from 2.0
 
 # Reference
 
