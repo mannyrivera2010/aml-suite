@@ -456,6 +456,63 @@ def post_delete_application_library_entry(sender, instance, **kwargs):
     cache.delete_pattern('library_self-*')
 
 
+class BookmarkEntry(models.Model):
+    bookmark_parent = models.ManyToManyField('BookmarkEntry', db_table='bookmark_parents')
+    # A Bookmark can have many parents.   User1Root ->
+    title = models.CharField(max_length=255)
+
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    listing = models.ForeignKey('Listing', related_name='listing_entries', null=True, blank=True)
+
+    is_root = models.BooleanField(default=False)
+
+    FOLDER = 'FOLDER'
+    LISTING = 'LISTING'
+
+    TYPE_CHOICES = (
+        (FOLDER, 'FOLDER'),
+        (LISTING, 'LISTING'),
+    )
+    type = models.CharField(max_length=255, choices=TYPE_CHOICES, default=FOLDER)
+
+    def __repr__(self):
+        return 'BookmarkEntry(bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
+            # self.bookmark_parent if self.bookmark_parent else 'None',
+            self.title,
+            self.type,
+            self.is_root,
+            self.listing
+        )
+
+    def __str__(self):
+        return 'BookmarkEntry(bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
+            # self.bookmark_parent if self.bookmark_parent else 'None',
+            self.title,
+            self.type,
+            self.is_root,
+            self.listing
+        )
+
+
+class BookmarkPermission(models.Model):
+    bookmark = models.ForeignKey('BookmarkEntry', related_name='bookmark_permission')
+    profile = models.ForeignKey('Profile')
+
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    OWNER = 'OWNER'
+    VIEWER = 'VIEWER'
+
+    USER_TYPE_CHOICES = (
+        (OWNER, 'OWNER'),
+        (VIEWER, 'VIEWER'),
+    )
+    user_type = models.CharField(max_length=255, choices=USER_TYPE_CHOICES, default=VIEWER)
+
+
 class Category(models.Model):
     """
     Categories for Listings

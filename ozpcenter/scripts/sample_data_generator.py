@@ -78,6 +78,7 @@ from ozpcenter.recommend.recommend import RecommenderDirectory
 import ozpcenter.api.listing.model_access as listing_model_access
 import ozpcenter.api.profile.model_access as profile_model_access
 import ozpcenter.api.listing.model_access_es as model_access_es
+import ozpcenter.api.bookmark.model_access as bookmark_model_access
 
 TEST_BASE_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 TEST_IMG_PATH = os.path.join(TEST_BASE_PATH, 'test_images') + '/'
@@ -166,15 +167,56 @@ def create_listing_visit_count_batch(listing, visit_count_list, object_cache):
         visit_count = profile_model_access.create_listing_visit_count(profile, listing, count, last_visit_date)
 
 
+def create_folder_bookmark_for_profile(profile, folder_bookmark_entry, folder_name):
+    bookmark_folder_entry = models.BookmarkEntry()
+    bookmark_folder_entry.type = models.BookmarkEntry.FOLDER
+    bookmark_folder_entry.is_root = False
+    bookmark_folder_entry.title = folder_name
+    bookmark_folder_entry.save()
+
+    bookmark_folder_entry.bookmark_parent.add(folder_bookmark_entry)
+
+    bookmark_permission_folder = models.BookmarkPermission()
+    bookmark_permission_folder.bookmark = bookmark_folder_entry
+    bookmark_permission_folder.profile = profile
+    bookmark_permission_folder.user_type = models.BookmarkPermission.OWNER
+    bookmark_permission_folder.save()
+
+
+def create_listing_bookmark_for_profile(profile, folder_bookmark_entry, listing):
+    # Add Bookmark Entry
+    bookmark_entry = models.BookmarkEntry()
+    bookmark_entry.type = bookmark_entry.LISTING
+    bookmark_entry.is_root = False
+    bookmark_entry.listing = listing
+    # bookmark_entry.title = 'LISTING'
+    bookmark_entry.save()
+
+    # Add Bookmark entry to current user root folder
+    bookmark_entry.bookmark_parent.add(folder_bookmark_entry)
+
+    # Add Permission so that user can see folder and make them owner
+    bookmark_permission = models.BookmarkPermission()
+    bookmark_permission.bookmark = bookmark_entry
+    bookmark_permission.profile = profile
+    bookmark_permission.user_type = models.BookmarkPermission.OWNER
+    bookmark_permission.save()
+
+    return bookmark_entry
+
+
 def create_library_entries(library_entries, object_cache):
     """
     Create Bookmarks for users
+        version 2.0 (ApplicationLibraryEntry)
+        version 3.0 (BookmarkEntry)
 
     Args:
         library_entries:
             [{'folder': None, 'listing_id': 8, 'owner': 'wsmith', 'position': 0},
              {'folder': None, 'listing_id': 5, 'owner': 'hodor', 'position': 0},...]
     """
+    # Creating 2.0 bookmarks
     for current_entry in library_entries:
         current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
         current_listing = current_entry['listing_obj']
@@ -184,7 +226,74 @@ def create_library_entries(library_entries, object_cache):
             folder=current_entry['folder'],
             position=current_entry['position'])
         library_entry.save()
+
         # print('--[{}] creating bookmark for listing [{}]'.format(current_profile.user.username, current_listing.title))
+
+    # Creating 3.0 bookmarks
+    for current_entry in library_entries:
+        print('---- Creating 3.0 bookmarks ----')
+        print('Entry: {}'.format(current_entry))
+
+        current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
+        current_listing = current_entry['listing_obj']
+
+        current_profile_root_folder = bookmark_model_access.create_get_user_root_bookmark_folder(current_profile)
+
+        bookmark_entry_query_folder_created = False
+        # If folder not supplied, will user root folder
+        current_entry_root_folder = current_profile_root_folder
+
+        print('Current_profile_root_folder: {}'.format(current_profile_root_folder))
+
+        # If Library Entry in a folder, create folder under current_profile_root_folder
+        # and make new folder current_profile_root_folder so that entries can be placed
+        # under that folder
+        print('-- Detected Folder in entry --')
+
+        if current_entry['folder']:
+            bookmark_entry_folder_query = models.BookmarkEntry.objects.filter(
+                bookmark_parent=current_profile_root_folder,
+                bookmark_permission__profile=current_profile,
+                bookmark_permission__user_type='OWNER',
+                is_root=False,
+                title=current_entry['folder'])
+
+            if not bookmark_entry_folder_query:
+                # Could not find folder, will create
+                bookmark_folder_entry = models.BookmarkEntry()
+                bookmark_folder_entry.type = models.BookmarkEntry.FOLDER
+                bookmark_folder_entry.is_root = False
+                bookmark_folder_entry.title = current_entry['folder']
+                bookmark_folder_entry.save()
+
+                bookmark_folder_entry.bookmark_parent.add(current_profile_root_folder)
+
+                bookmark_permission_folder = models.BookmarkPermission()
+                bookmark_permission_folder.bookmark = bookmark_folder_entry
+                bookmark_permission_folder.profile = current_profile
+                bookmark_permission_folder.user_type = models.BookmarkPermission.OWNER
+                bookmark_permission_folder.save()
+
+                current_entry_root_folder = bookmark_folder_entry
+                bookmark_entry_query_folder_created = True
+            else:
+                current_entry_root_folder = bookmark_entry_folder_query[0]
+
+            if bookmark_entry_query_folder_created:
+                print('CREATED {}'.format(bookmark_folder_entry))
+            else:
+                print('USING {}'.format(bookmark_folder_entry))
+        else:
+            print('No Folder Detected, will use profile root folder')
+
+        print('-- END Detected Folder in entry -- ')
+        print('')
+
+        bookmark_entry = create_listing_bookmark_for_profile(current_profile, current_entry_root_folder, current_listing)
+
+        print('CREATED {}'.format(bookmark_entry))
+        print('---------END----------')
+        print('')
 
 
 def create_listing_icons(listing_builder_dict, object_cache):
@@ -794,8 +903,18 @@ def run():
     print('--Creating Library')
     section_start_time = time_ms()
     with transaction.atomic():
-        create_library_entries(library_entries, object_cache)
+        ordered_library_entries = sorted(library_entries, key=lambda k: (k['owner'], k['folder'] if k['folder'] else ''))
+        create_library_entries(ordered_library_entries, object_cache)
 
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
+    ############################################################################
+    #                           Library (bookmark listings) Notifications
+    ############################################################################
+    print('--Creating Library Notifications')
+    section_start_time = time_ms()
+    with transaction.atomic():
         for library_entry in library_entries:
             current_listing = library_entry['listing_obj']
             current_listing_owner = current_listing.owners.first()
@@ -807,6 +926,7 @@ def run():
                                                                           listing=current_listing)
     print('-----Took: {} ms'.format(time_ms() - section_start_time))
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
     ############################################################################
     #                           Subscription
     ############################################################################

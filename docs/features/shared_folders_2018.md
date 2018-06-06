@@ -9,8 +9,55 @@ concept of shared folder was to make a
 * https://github.com/aml-development/ozp-backend/pull/252
 
 
+## API
+### Get User library
+```
+GET /api/self/library HTTP/1.1
+Host: 127.0.0.1:8001
+Authorization: Basic YmlnYnJvdGhlcjpwYXNzd29yZA==  # bigbrother
+
+[
+    {
+        "listing": {
+            "id": 169,
+            "title": "Tornado",
+            "unique_name": "tornado",
+            "launch_url": "https://en.wikipedia.org/wiki/Tornado",
+            "small_icon": {
+                "url": "http://127.0.0.1:8001/api/image/683/",
+                "id": 683,
+                "security_marking": "UNCLASSIFIED"
+            },
+            "large_icon": {
+                "url": "http://127.0.0.1:8001/api/image/684/",
+                "id": 684,
+                "security_marking": "UNCLASSIFIED"
+            },
+            "banner_icon": {
+                "url": "http://127.0.0.1:8001/api/image/685/",
+                "id": 685,
+                "security_marking": "UNCLASSIFIED"
+            },
+            "owners": [
+                {
+                    "id": 1,
+                    "user": {
+                        "username": "bigbrother"
+                    },
+                    "display_name": "Big Brother"
+                }
+            ]
+        },
+        "folder": "Weather",
+        "id": 50,
+        "position": 0
+    }, ...
+]
+
+```
+
 # Business Objective - Shared Bookmarks (aml3.0 draft - 05/03/2018)
-Add support for sharable folders
+Add support for share-able folders
 
 ## Terms and Definitions
 * bookmark - can represent a folder or listing
@@ -78,19 +125,152 @@ A new type of bookmark folder is available in the backend, that has permissions 
 
 http://www.django-rest-framework.org/api-guide/filtering/#filtering-and-object-lookups
 
-### operations
+### Operations
+
 * bookmark
-    * create - POST: /api/bookmarks - create bookmark listing
-    * list - GET: /api/bookmarks/?type=LISTING - list all bookmarks (listing)
+    * create - POST: /api/bookmark - create bookmark listing
+    * list - GET: /api/bookmark/?type=LISTING - list all bookmarks (listing)
     * bulk update
 * folder
-    * create - POST /api/bookmarks/ - create bookmark folder
-    * lists  - GET: /api/bookmarks/?type=FOLDER - list all bookmarks (folders/shared folders)
+    * create - POST /api/bookmark/ - create bookmark folder
+    * lists  - GET: /api/bookmark/?type=FOLDER - list all bookmarks (folders/shared folders)
 * children
-    * add - PUT : /bookmarks/{parentId}/children/{childId} -Adds child to a Folder
-    * move - POST: /bookmarks/{toparentId}/children	Move a child from one node to another
-    * delete - DELETE : /bookmarks/{parentId}/children/{childId} - Removes the child
-    * list - GET : /bookmarks/{id}/children - Lists all children
+    * add - PUT : /bookmark/{parentId}/children/{childId} -Adds child to a Folder
+    * move - POST: /bookmark/{toparentId}/children	Move a child from one node to another
+    * delete - DELETE : /bookmark/{parentId}/children/{childId} - Removes the child
+    * list - GET : /bookmark/{id}/children - Lists all children
+
+```
+[
+  {
+    "id" : {string} "unique identifier of a bookmark", # integer
+    "name" : {string} "user friendly name of a FOLDER", # string, max 256 characters
+    "kind" : "LISTING", # literal string, "LISTING",  can also be "FOLDER"
+    "modifiedDate" :  {datetime} Last modified date (ISO8601 date with timezone offset),
+    "createdDate" : {datetime} First uploaded date (ISO8601 date with timezone offset),
+    "parent": {
+      "id" : {string} "unique identifier of a bookmark", # integer
+      "name" : {string} "user friendly name of a FOLDER", # string, max 256 characters
+      "kind" : "FOLDER", # literal string "FOLDER"
+    },
+    "listing": {  # If the kind is a listing then fill else null
+        "id": 169,
+        "title": "Tornado",
+        "unique_name": "tornado",
+        "launch_url": "https://en.wikipedia.org/wiki/Tornado",
+        "small_icon": {
+            "url": "http://127.0.0.1:8001/api/image/683/",
+            "id": 683,
+            "security_marking": "UNCLASSIFIED"
+        },
+        "large_icon": {
+            "url": "http://127.0.0.1:8001/api/image/684/",
+            "id": 684,
+            "security_marking": "UNCLASSIFIED"
+        },
+        "banner_icon": {
+            "url": "http://127.0.0.1:8001/api/image/685/",
+            "id": 685,
+            "security_marking": "UNCLASSIFIED"
+        },
+        "owners": [
+            {
+                "id": 1,
+                "user": {
+                    "username": "bigbrother"
+                },
+                "display_name": "Big Brother"
+            }
+        ]
+    }
+  },...
+]
+```
+OR
+```
+[
+  {
+    "id" : {string} "unique identifier of a bookmark", # integer
+    "name" : {string} "user friendly name of a FOLDER", # string, max 256 characters
+    "kind" : "LISTING", # literal string, "LISTING",  can also be "FOLDER"
+    "modifiedDate" :  {datetime} Last modified date (ISO8601 date with timezone offset),
+    "createdDate" : {datetime} First uploaded date (ISO8601 date with timezone offset),
+    "listing": {  # If the kind is a listing then fill else null
+        "id": 169,
+        "title": "Tornado",
+        "unique_name": "tornado",
+        "launch_url": "https://en.wikipedia.org/wiki/Tornado",
+        "small_icon": {
+            "url": "http://127.0.0.1:8001/api/image/683/",
+            "id": 683,
+            "security_marking": "UNCLASSIFIED"
+        },
+        "large_icon": {
+            "url": "http://127.0.0.1:8001/api/image/684/",
+            "id": 684,
+            "security_marking": "UNCLASSIFIED"
+        },
+        "banner_icon": {
+            "url": "http://127.0.0.1:8001/api/image/685/",
+            "id": 685,
+            "security_marking": "UNCLASSIFIED"
+        },
+        "owners": [
+            {
+                "id": 1,
+                "user": {
+                    "username": "bigbrother"
+                },
+                "display_name": "Big Brother"
+            }
+        ]
+    },
+    children:[
+      {
+        "id" : {string} "unique identifier of a bookmark", # integer
+        "name" : {string} "user friendly name of a FOLDER", # string, max 256 characters
+        "kind" : "LISTING", # literal string, "LISTING",  can also be "FOLDER"
+        "modifiedDate" :  {datetime} Last modified date (ISO8601 date with timezone offset),
+        "createdDate" : {datetime} First uploaded date (ISO8601 date with timezone offset),
+        "listing": {  # If the kind is a listing then fill else null
+            "id": 169,
+            "title": "Tornado",
+            "unique_name": "tornado",
+            "launch_url": "https://en.wikipedia.org/wiki/Tornado",
+            "small_icon": {
+                "url": "http://127.0.0.1:8001/api/image/683/",
+                "id": 683,
+                "security_marking": "UNCLASSIFIED"
+            },
+            "large_icon": {
+                "url": "http://127.0.0.1:8001/api/image/684/",
+                "id": 684,
+                "security_marking": "UNCLASSIFIED"
+            },
+            "banner_icon": {
+                "url": "http://127.0.0.1:8001/api/image/685/",
+                "id": 685,
+                "security_marking": "UNCLASSIFIED"
+            },
+            "owners": [
+                {
+                    "id": 1,
+                    "user": {
+                        "username": "bigbrother"
+                    },
+                    "display_name": "Big Brother"
+                }
+            ]
+        },
+        children:[
+
+        ]
+      },......
+    ]
+  },......
+]
+```
+
 
 # Database Structure
 
@@ -100,34 +280,179 @@ http://www.django-rest-framework.org/api-guide/filtering/#filtering-and-object-l
 * User
 
 ## Methods without using custom order
-### Method 1 - Relational self-reference (child-parent)
+### Method 1 - Relational self-reference (child-parent not using root folder)
+#### Models
+```
+class BookmarkEntry(models.Model):
+    bookmark_parent = models.ForeignKey('BookmarkEntry', null=True, blank=True)
+    title = models.CharField(max_length=255)
 
-Models
-* bookmarks
-    * id (integer)
-    * name of folder (string)
-    * listing id (foreign key)
-    * root (boolean)
-    * parents (many to many)
-    * created_date (datetime)
-    * type (choice - folder/listing)
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    listing = models.ForeignKey('Listing', related_name='listing_entries', null=True, blank=True)
+
+    FOLDER = 'FOLDER'
+    LISTING = 'LISTING'
+
+    TYPE_CHOICES = (
+        (FOLDER, 'FOLDER'),
+        (LISTING, 'LISTING'),
+    )
+    type = models.CharField(max_length=255, choices=TYPE_CHOICES, default=FOLDER)
+
+    creator = models.ForeignKey('Profile')
+
+class BookmarkPermission(models.Model):
+    bookmark = models.ForeignKey('BookmarkEntry', related_name='bookmark_permission')
+    profile = models.ForeignKey('Profile')
+
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    OWNER = 'OWNER'
+    VIEWER = 'VIEWER'
+
+    USER_TYPE_CHOICES = (
+        (OWNER, 'OWNER'),
+        (VIEWER, 'VIEWER'),
+    )
+    user_type = models.CharField(max_length=255, choices=USER_TYPE_CHOICES, default=VIEWER)
+```
+
+#### Methods (pseudocode)
+##### Getting root folder for user
+```
+
+```
+
+##### Getting first level entries for user
+````
+
+````
+
+#### Adding a new listing under a folder
+````
+
+````
+
+#### Adding new user as a viewer to a shared folder
+
+#### Removing a user from shared folder list
+
+
+### Method 2 - Relational self-reference (child-parent using root folder)
+#### Models
+```
+class BookmarkEntry(models.Model):
+    bookmark_parent = models.ForeignKey('BookmarkEntry', null=True, blank=True)
+    # bookmark_parents = models.ManyToManyField('BookmarkEntry', null=True, blank=True)
+    # bookmark_parents m2mField is needed becuause of bookmark_parent_relationships
+    title = models.CharField(max_length=255)
+
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    listing = models.ForeignKey('Listing', related_name='listing_entries', null=True, blank=True)
+
+    is_root = models.BooleanField(default=False)
+
+    FOLDER = 'FOLDER'
+    LISTING = 'LISTING'
+
+    TYPE_CHOICES = (
+        (FOLDER, 'FOLDER'),
+        (LISTING, 'LISTING'),
+    )
+    type = models.CharField(max_length=255, choices=TYPE_CHOICES, default=FOLDER)
+
+
+class BookmarkPermission(models.Model):
+    bookmark = models.ForeignKey('BookmarkEntry', related_name='bookmark_permission')
+    profile = models.ForeignKey('Profile')
+
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    OWNER = 'OWNER'
+    VIEWER = 'VIEWER'
+
+    USER_TYPE_CHOICES = (
+        (OWNER, 'OWNER'),
+        (VIEWER, 'VIEWER'),
+    )
+    user_type = models.CharField(max_length=255, choices=USER_TYPE_CHOICES, default=VIEWER)
+```
+
 
 * bookmark_parent_relationships (m2m table - storage of child-parent relationships)
     * id (integer)
     * bookmark (foreign_key to bookmarks id)
     * parent_bookmark (foreign_key to bookmarks id, 1 bookmark can have many parents)
 
-* bookmarks_permission (m2m table - who can view bookmarks)
-    * id (integer)
-    * profile (foreign_id)
-    * permission (owner/viewer)
-    * bookmark (foreign_key to bookmarks id)
+when would `bookmark_parent_relationships` table be good to use?
+```
+r1 = root folder for user 1
+r2 = root folder for user 2
+S1 = Shared Folder for user 1 and user 2
++-----------------+  +-----------------+
+|                 |  |                 |
+|         +----+  |  | +------+        |
+|         |r1  |  |  | |r2    |        |
+|         +----+  |  | +--+---+        |
+|    +------+     |  |    |            |
+|    v            |  |    v            |
+| +--+-+          |  | +--+---+        |
+| | S1 |          |  | |S1    |        |
+| +----+          |  | +------+        |
+|   Owner         |  |  Viewer         |
+|                 |  |                 |
++-----------------+  +-----------------+
+```
 
 Rules
 * Each user has only one bookmark root folder, the user is the owner of root folder
     * bookmarks.objects.filter(root=true, )
 
+#### Methods (pseudocode)
+##### Getting root folder for user
+```
+def create_get_user_root_bookmark_folder(profile):
+    """
+    Create or Get user's root folder
+    profile = Profile.objects.first()
+    """
+    bookmark_entry_query = models.BookmarkEntry.objects.filter(
+                            bookmark_permission__profile=profile,
+                            bookmark_permission__user_type='OWNER',
+                            is_root=True)
 
+
+    if bookmark_entry_query:
+        if len(bookmark_entry_query) >= 2:
+            print('A USER SHOULD NOT HAVE MORE THAN ONE ROOT FOLDER')
+
+        return bookmark_entry_query[0]
+    else:
+        bookmark_entry = models.BookmarkEntry()
+        bookmark_entry.type = bookmark_entry.FOLDER
+        bookmark_entry.is_root = True
+        bookmark_entry.title = 'ROOT'
+        bookmark_entry.save()
+
+        bookmark_permission = models.BookmarkPermission()
+        bookmark_permission.bookmark=bookmark_entry
+        bookmark_permission.profile=profile
+        bookmark_permission.user_type=models.BookmarkPermission.OWNER
+        bookmark_permission.save()
+
+        return bookmark_entry
+```
+
+##### Getting first level entries for user
+````
+
+````
 
 ## Methods with custom order (integer position field)
 ```

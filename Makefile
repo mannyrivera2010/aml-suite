@@ -5,7 +5,7 @@ help:
 
 use_database := MAIN_DATABASE=sqlite
 use_elasticsearch_str := ES_ENABLED=False
-use_runserver_str := python manage.py runserver localhost:8001
+use_runserver_str := python manage.py runserver 0.0.0.0:8001
 use_runscript_str := python manage.py runscript
 
 use_psql:  ## - Use Postgres Database
@@ -15,7 +15,7 @@ use_es:  ## - Use elasticsearch Database
 	$(eval use_elasticsearch_str := ES_ENABLED=True)
 
 use_gunicorn:  ## - Use gunicorn
-	$(eval use_runserver_str := gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid)
+	$(eval use_runserver_str := gunicorn --workers=`nproc` ozp.wsgi -b 0.0.0.0:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid)
 
 clean: ## Clean Directory
 	rm -f db.sqlite3
