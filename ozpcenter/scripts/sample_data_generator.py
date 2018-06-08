@@ -167,44 +167,6 @@ def create_listing_visit_count_batch(listing, visit_count_list, object_cache):
         visit_count = profile_model_access.create_listing_visit_count(profile, listing, count, last_visit_date)
 
 
-def create_folder_bookmark_for_profile(profile, folder_bookmark_entry, folder_name):
-    bookmark_folder_entry = models.BookmarkEntry()
-    bookmark_folder_entry.type = models.BookmarkEntry.FOLDER
-    bookmark_folder_entry.is_root = False
-    bookmark_folder_entry.title = folder_name
-    bookmark_folder_entry.save()
-
-    bookmark_folder_entry.bookmark_parent.add(folder_bookmark_entry)
-
-    bookmark_permission_folder = models.BookmarkPermission()
-    bookmark_permission_folder.bookmark = bookmark_folder_entry
-    bookmark_permission_folder.profile = profile
-    bookmark_permission_folder.user_type = models.BookmarkPermission.OWNER
-    bookmark_permission_folder.save()
-
-
-def create_listing_bookmark_for_profile(profile, folder_bookmark_entry, listing):
-    # Add Bookmark Entry
-    bookmark_entry = models.BookmarkEntry()
-    bookmark_entry.type = bookmark_entry.LISTING
-    bookmark_entry.is_root = False
-    bookmark_entry.listing = listing
-    # bookmark_entry.title = 'LISTING'
-    bookmark_entry.save()
-
-    # Add Bookmark entry to current user root folder
-    bookmark_entry.bookmark_parent.add(folder_bookmark_entry)
-
-    # Add Permission so that user can see folder and make them owner
-    bookmark_permission = models.BookmarkPermission()
-    bookmark_permission.bookmark = bookmark_entry
-    bookmark_permission.profile = profile
-    bookmark_permission.user_type = models.BookmarkPermission.OWNER
-    bookmark_permission.save()
-
-    return bookmark_entry
-
-
 def create_library_entries(library_entries, object_cache):
     """
     Create Bookmarks for users
@@ -259,21 +221,7 @@ def create_library_entries(library_entries, object_cache):
                 title=current_entry['folder'])
 
             if not bookmark_entry_folder_query:
-                # Could not find folder, will create
-                bookmark_folder_entry = models.BookmarkEntry()
-                bookmark_folder_entry.type = models.BookmarkEntry.FOLDER
-                bookmark_folder_entry.is_root = False
-                bookmark_folder_entry.title = current_entry['folder']
-                bookmark_folder_entry.save()
-
-                bookmark_folder_entry.bookmark_parent.add(current_profile_root_folder)
-
-                bookmark_permission_folder = models.BookmarkPermission()
-                bookmark_permission_folder.bookmark = bookmark_folder_entry
-                bookmark_permission_folder.profile = current_profile
-                bookmark_permission_folder.user_type = models.BookmarkPermission.OWNER
-                bookmark_permission_folder.save()
-
+                bookmark_folder_entry = bookmark_model_access.create_folder_bookmark_for_profile(current_profile, current_entry['folder'], current_profile_root_folder)
                 current_entry_root_folder = bookmark_folder_entry
                 bookmark_entry_query_folder_created = True
             else:
@@ -289,7 +237,7 @@ def create_library_entries(library_entries, object_cache):
         print('-- END Detected Folder in entry -- ')
         print('')
 
-        bookmark_entry = create_listing_bookmark_for_profile(current_profile, current_entry_root_folder, current_listing)
+        bookmark_entry = bookmark_model_access.create_listing_bookmark_for_profile(current_profile, current_listing, current_entry_root_folder)
 
         print('CREATED {}'.format(bookmark_entry))
         print('---------END----------')

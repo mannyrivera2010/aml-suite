@@ -73,7 +73,7 @@
   - {count: 9, profile: syme}
   - {count: 10, profile: obrien}
 - library_entries:
-  - {folder: old, owner: wsmith, position: 0}
+  - {folder: old, owner: wsmith, position: 0, share_with: bigbrother2, share_permission: VIEWER}
   - {folder: null, owner: hodor, position: 0}
   listing:
     agency: Minitrue

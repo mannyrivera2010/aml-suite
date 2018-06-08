@@ -5,8 +5,12 @@ import logging
 
 from rest_framework import serializers
 
-from ozpcenter import models
-from ozpcenter.api.library import model_access
+import ozpcenter.api.bookmark.model_access as model_access
+
+import ozpcenter.models as models
+
+from ozpcenter.api.bookmark import model_access
+
 import ozpcenter.api.listing.model_access as listing_model_access
 import ozpcenter.api.image.serializers as image_serializers
 import ozpcenter.api.listing.serializers as listing_serializers
@@ -47,6 +51,14 @@ class BookmarkParentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BookmarkEntry
         fields = ('title', 'id')
+        read_only_fields = ('listing', 'bookmark_parent', 'type', 'created_date', 'modified_date', 'title')
+
+        extra_kwargs = {
+            "id": {
+                "read_only": False,
+                "required": False,
+            },
+        }
 
 
 class DictField(serializers.ReadOnlyField):
@@ -62,51 +74,136 @@ class BookmarkSerializer(serializers.ModelSerializer):
     """
     Serializer for self/library - owner is always current user
     """
-    listing = LibraryListingSerializer()
-    bookmark_parent = BookmarkParentSerializer(many=True)
+    listing = LibraryListingSerializer(required=False)
+    bookmark_parent = BookmarkParentSerializer(many=True, required=False)
 
     class Meta:
         model = models.BookmarkEntry
         fields = ('listing', 'bookmark_parent', 'id', 'type', 'created_date', 'modified_date', 'title')
 
-    # def validate(self, data):
-    #     """
-    #     Check for listing id
-    #     - folder is optional
-    #     - position is optional
-    #     """
-    #     if 'listing' not in data:
-    #         raise serializers.ValidationError('No listing provided')
-    #
-    #     username = self.context['request'].user.username
-    #     listing = listing_model_access.get_listing_by_id(username,
-    #         data['listing']['id'])
-    #
-    #     if listing:
-    #         if not listing.is_enabled:
-    #             raise serializers.ValidationError('Can not bookmark apps that are disabled')
-    #     else:
-    #         raise serializers.ValidationError('Listing id entry not found')
-    #
-    #     if 'id' not in data['listing']:
-    #         raise serializers.ValidationError('No listing id provided')
-    #
-    #     if 'folder' in data:
-    #         if not data.get('folder'):
-    #             data['folder'] = None
-    #
-    #     if 'position' in data:
-    #         try:
-    #             position_value = int(data['position'])
-    #             data['position'] = position_value
-    #         except ValueError:
-    #             raise serializers.ValidationError('Position is not a integer')
-    #
-    #     return data
-    #
-    # def create(self, validated_data):
-    #     username = self.context['request'].user.username
-    #     listing_id = validated_data['listing']['id']
-    #     folder_name = validated_data.get('folder')
-    #     position = validated_data.get('position')
-    #     return model_access.create_self_user_library_entry(username, listing_id, folder_name, position)
+        extra_kwargs = {
+            "listing": {
+                "read_only": False,
+                "required": False,
+            },
+            "title": {
+                "read_only": False,
+                "required": False,
+            },
+            # Type is a Required Field
+            "type": {
+                "read_only": False,
+                "required": True,
+            },
+        }
+
+    def to_representation(self, data):
+        ret = super(BookmarkSerializer, self).to_representation(data)
+
+        # if bookmark_parent length is more than or equal to two, it means that folder is shared between users
+        if len(ret['bookmark_parent']) >= 2:
+            ret['is_shared'] = True
+        else:
+            ret['is_shared'] = False
+
+        del ret['bookmark_parent']
+
+        if ret['type'] == models.BookmarkEntry.LISTING:
+            del ret['title']  # listing type does not have titles
+        elif ret['type'] == models.BookmarkEntry.FOLDER:
+            del ret['listing']  # folder type does not have listings
+
+        return ret
+
+    def validate(self, data):
+        """
+        validate
+        """
+        profile = self.context['request'].user.profile
+        username = self.context['request'].user.username
+
+        if 'type' not in data:
+            raise serializers.ValidationError('No type provided')
+
+        type = data['type']
+
+        if type == models.BookmarkEntry.LISTING:
+            listing = listing_model_access.get_listing_by_id(username,
+                data['listing']['id'])
+
+            if not listing:
+                raise serializers.ValidationError('Listing id entry not found')
+
+            data['listing_object'] = listing
+        elif type == models.BookmarkEntry.FOLDER:
+            if 'title' not in data:
+                raise serializers.ValidationError('No title provided')
+        else:
+            raise serializers.ValidationError('No valid type provided')
+
+        if 'bookmark_parent' in data:
+            if len(data['bookmark_parent']) > 1:
+                raise serializers.ValidationError('No valid bookmark_parent')
+            bookmark_parent_id = data['bookmark_parent'][0]['id']
+            data['bookmark_parent_object'] = model_access.get_bookmark_entry_by_id(profile, bookmark_parent_id)
+
+            if data['bookmark_parent_object'].type != 'FOLDER':
+                raise serializers.ValidationError('bookmark_parent entry must be FOLDER')
+
+        return data
+
+    def create(self, validated_data):
+        username = self.context['request'].user.username
+        profile = self.context['request'].user.profile
+        type = validated_data['type']
+
+        bookmark_parent_object = validated_data.get('bookmark_parent_object')
+
+        if type == models.BookmarkEntry.LISTING:
+
+            return model_access.create_listing_bookmark_for_profile(profile, validated_data['listing_object'], bookmark_parent_object)
+        elif type == models.BookmarkEntry.FOLDER:
+            title = validated_data['title']
+
+            return model_access.create_folder_bookmark_for_profile(profile, title, bookmark_parent_object)
+
+
+def get_bookmark_tree(profile, request, folder_bookmark_entry=None, is_parent=None):
+    """
+    Helper Function to get all nested bookmark
+
+    http://127.0.0.1:8001/api/bookmark/
+    """
+    folder_bookmark_entry = folder_bookmark_entry if folder_bookmark_entry else model_access.create_get_user_root_bookmark_folder(profile)
+    is_parent = is_parent if is_parent is not None else False
+
+    local_query = models.BookmarkEntry.objects.filter(
+        bookmark_permission__profile=profile  # Validate to make sure user can see folder
+    ).order_by('type', 'created_date')
+
+    if is_parent:
+        local_query = local_query.filter(id=folder_bookmark_entry.id)
+    else:
+        local_query = local_query.filter(bookmark_parent=folder_bookmark_entry)
+
+    local_data = BookmarkSerializer(local_query, many=True, context={'request': request}).data
+    return get_nested_bookmarks_tree(profile, local_data, request=request)
+
+
+def get_nested_bookmarks_tree(profile, data, serialized=False, request=None):
+    """
+    Recursive function to get all the nested folder and listings
+    """
+    output = []
+    for current_record in data:
+        if current_record.get('type') == 'FOLDER':
+            local_query = models.BookmarkEntry.objects.filter(
+                bookmark_parent=current_record['id'],
+                bookmark_permission__profile=profile  # Validate to make sure user can see folder
+            ).order_by('type', 'created_date')
+            # print(local_query.query)
+            local_data = BookmarkSerializer(local_query, many=True, context={'request': request}).data
+            current_record['children'] = get_nested_bookmarks_tree(profile, local_data, request=request)
+
+        output.append(current_record)
+    return output

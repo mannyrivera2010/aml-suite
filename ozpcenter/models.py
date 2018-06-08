@@ -468,6 +468,8 @@ class BookmarkEntry(models.Model):
 
     is_root = models.BooleanField(default=False)
 
+    creator_profile = models.ForeignKey('Profile')
+
     FOLDER = 'FOLDER'
     LISTING = 'LISTING'
 
