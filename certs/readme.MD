@@ -1,6 +1,6 @@
 Draft
 
-## Overview
+# Overview
 * Creating Certificates
   * Running script to create all the certificates
 * Ngnix
@@ -8,6 +8,7 @@ Draft
   * Configuring Nginx
   * Testing Certificates
 * Backend
+  * Running backend
 * Center
   * Running Center
 * Demo Auth Service
@@ -15,17 +16,19 @@ Draft
 * Websocket Service
 * Configuring Firefox
 
-
+### Creating Certificates
+```
+# Create directory for certificates, delete if exist
+mkdir ~/certs
+# Run script to create certs
+sh create_certs.sh
+# copy created certs into ~/certs
+cp ~/git/dev-tools/certs/dist/* ~/certs
+```
 ### Installing Nginx
-```
-mkdir -p ~/usr/local
-./configure --with-http_ssl_module --prefix=`echo ~`/usr/local/ngnix
-make
-make install
-```
+Follow `ngnix_dev_setup.sh`
 
 ### Commands to test
-
 go to the directory that contains the certificates (should be located in one of the directories)
 ```
 cd ~/certs
