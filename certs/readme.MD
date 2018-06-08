@@ -16,7 +16,7 @@ Draft
 * Websocket Service
 * Configuring Firefox
 
-### Creating Certificates
+## Creating Certificates
 ```
 # Create directory for certificates, delete if exist
 mkdir ~/certs
@@ -25,8 +25,13 @@ sh create_certs.sh
 # copy created certs into ~/certs
 cp ~/git/dev-tools/certs/dist/* ~/certs
 ```
-### Installing Nginx
+## Installing Nginx
 Follow `ngnix_dev_setup.sh`
+
+### Running nginx
+```
+~/init.d/nginx start
+```
 
 ### Commands to test
 go to the directory that contains the certificates (should be located in one of the directories)
@@ -171,19 +176,66 @@ API_URL=https://berlin:4443 npm start
 ### Setting up demo-auth-service
 `https://github.com/aml-development/demo-auth-service`
 follow instructions from site
-
 ```
 source env/bin/activate
 make run
+```
+### Websocket Service
+running ws service
+```
+nvm use 8.9.4
+node server/index.js 
+```
+
+configure ws service
+```
+diff --git a/server/config.js b/server/config.js
+index a892e10..d996e4f 100644
+--- a/server/config.js
++++ b/server/config.js
+@@ -3,5 +3,5 @@
+ module.exports = {
+   portNumber: process.env.PORT || 4200,
+   redisAdapter: { host: 'localhost', port: 6379 },
+-  backend2URL: 'http://127.0.0.1:8001'
++  backend2URL: 'http://localhost:8001'  // Do not forget to change for production
+ };
+```
+```
+diff --git a/server/service/backend2.js b/server/service/backend2.js
+index 893b5ad..4826ecf 100644
+--- a/server/service/backend2.js
++++ b/server/service/backend2.js
+@@ -2,6 +2,10 @@
+
+ const request = require('request');
+ const config = require('../config');
++const fs = require('fs');
++
++// Load CA Cert - Production uncomment line below
++//const ca = fs.readFileSync('/home/{username}/certs/ca_root.pem', {encoding: 'utf-8'})
+
+ /*
+ {
+@@ -23,7 +27,10 @@ function verifyToken(token){
+         url: config.backend2URL + '/api/token-verify/',
+         form: {
+           token: token
+-        }
++        },
++        rejectUnauthorized: true, // On production it needs to true
++        //ca: ca, //  Production uncomment line
++        // https://github.com/aacerox/node-rest-client/issues/126
+       };
 ```
 
 
 ### Firefox Steps
 Download Certs
 ```
-https://berlin:4443/certs/ca_root.pem
-https://berlin:4443/certs/wsmith.p12
-https://berlin:4443/certs/bigbrother.p12
+http://berlin:8085/certs/ca_root.pem
+http://berlin:8085/certs/wsmith.p12
+http://berlin:8085/certs/bigbrother.p12
 ```
 
 * Open Firefox (tested on 52.7.3)
