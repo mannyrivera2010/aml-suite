@@ -1,5 +1,7 @@
 """
-Library Serializers
+Bookmark Serializers
+
+http://127.0.0.1:8001/api/bookmark/
 """
 import logging
 
@@ -46,11 +48,11 @@ class LibraryListingSerializer(serializers.HyperlinkedModelSerializer):
 
 class BookmarkParentSerializer(serializers.ModelSerializer):
     """
-    Serializer for self/library - owner is always current user
+    Serializer for /api/bookmark - owner is always current user
     """
     class Meta:
         model = models.BookmarkEntry
-        fields = ('title', 'id')
+        fields = ('title', 'id', 'type')
         read_only_fields = ('listing', 'bookmark_parent', 'type', 'created_date', 'modified_date', 'title')
 
         extra_kwargs = {
@@ -72,7 +74,7 @@ class DictField(serializers.ReadOnlyField):
 
 class BookmarkSerializer(serializers.ModelSerializer):
     """
-    Serializer for self/library - owner is always current user
+    Serializer for /api/bookmark - owner is always current user
     """
     listing = LibraryListingSerializer(required=False)
     bookmark_parent = BookmarkParentSerializer(many=True, required=False)
@@ -119,7 +121,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
         """
         validate
         """
-        profile = self.context['request'].user.profile
+        request_profile = self.context['request'].user.profile
         username = self.context['request'].user.username
 
         if 'type' not in data:
@@ -145,7 +147,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
             if len(data['bookmark_parent']) > 1:
                 raise serializers.ValidationError('No valid bookmark_parent')
             bookmark_parent_id = data['bookmark_parent'][0]['id']
-            data['bookmark_parent_object'] = model_access.get_bookmark_entry_by_id(profile, bookmark_parent_id)
+            data['bookmark_parent_object'] = model_access.get_bookmark_entry_by_id(request_profile, bookmark_parent_id)
 
             if data['bookmark_parent_object'].type != 'FOLDER':
                 raise serializers.ValidationError('bookmark_parent entry must be FOLDER')
@@ -154,31 +156,57 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         username = self.context['request'].user.username
-        profile = self.context['request'].user.profile
+        request_profile = self.context['request'].user.profile
         type = validated_data['type']
 
         bookmark_parent_object = validated_data.get('bookmark_parent_object')
 
         if type == models.BookmarkEntry.LISTING:
 
-            return model_access.create_listing_bookmark_for_profile(profile, validated_data['listing_object'], bookmark_parent_object)
+            return model_access.create_listing_bookmark_for_profile(request_profile, validated_data['listing_object'], bookmark_parent_object)
         elif type == models.BookmarkEntry.FOLDER:
             title = validated_data['title']
 
-            return model_access.create_folder_bookmark_for_profile(profile, title, bookmark_parent_object)
+            return model_access.create_folder_bookmark_for_profile(request_profile, title, bookmark_parent_object)
 
 
-def get_bookmark_tree(profile, request, folder_bookmark_entry=None, is_parent=None):
+class BookmarkPermissionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for api/bookmark/{bookmark_id}/permission - owner is always current user
+    """
+    profile = listing_serializers.CreateListingProfileSerializer(required=False, allow_null=True, many=False)
+    # bookmark = BookmarkSerializer(many=False, required=False)
+
+    class Meta:
+        model = models.BookmarkPermission
+        fields = ('id', 'profile', 'created_date', 'modified_date', 'user_type',
+            # 'bookmark'
+        )
+        # read_only_fields = ('listing', 'bookmark_parent', 'type', 'created_date', 'modified_date', 'title')
+
+        extra_kwargs = {
+            "id": {
+                "read_only": False,
+                "required": False,
+            },
+        }
+
+
+def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_parent=None):
     """
     Helper Function to get all nested bookmark
 
-    http://127.0.0.1:8001/api/bookmark/
+    Args:
+        request_profile
+        request
+        folder_bookmark_entry
+        is_parent
     """
-    folder_bookmark_entry = folder_bookmark_entry if folder_bookmark_entry else model_access.create_get_user_root_bookmark_folder(profile)
+    folder_bookmark_entry = folder_bookmark_entry if folder_bookmark_entry else model_access.create_get_user_root_bookmark_folder(request_profile)
     is_parent = is_parent if is_parent is not None else False
 
     local_query = models.BookmarkEntry.objects.filter(
-        bookmark_permission__profile=profile  # Validate to make sure user can see folder
+        bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
     ).order_by('type', 'created_date')
 
     if is_parent:
@@ -187,10 +215,10 @@ def get_bookmark_tree(profile, request, folder_bookmark_entry=None, is_parent=No
         local_query = local_query.filter(bookmark_parent=folder_bookmark_entry)
 
     local_data = BookmarkSerializer(local_query, many=True, context={'request': request}).data
-    return get_nested_bookmarks_tree(profile, local_data, request=request)
+    return get_nested_bookmarks_tree(request_profile, local_data, request=request)
 
 
-def get_nested_bookmarks_tree(profile, data, serialized=False, request=None):
+def get_nested_bookmarks_tree(request_profile, data, serialized=False, request=None):
     """
     Recursive function to get all the nested folder and listings
     """
@@ -199,11 +227,11 @@ def get_nested_bookmarks_tree(profile, data, serialized=False, request=None):
         if current_record.get('type') == 'FOLDER':
             local_query = models.BookmarkEntry.objects.filter(
                 bookmark_parent=current_record['id'],
-                bookmark_permission__profile=profile  # Validate to make sure user can see folder
+                bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
             ).order_by('type', 'created_date')
             # print(local_query.query)
             local_data = BookmarkSerializer(local_query, many=True, context={'request': request}).data
-            current_record['children'] = get_nested_bookmarks_tree(profile, local_data, request=request)
+            current_record['children'] = get_nested_bookmarks_tree(request_profile, local_data, request=request)
 
         output.append(current_record)
     return output

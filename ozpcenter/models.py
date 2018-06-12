@@ -456,6 +456,31 @@ def post_delete_application_library_entry(sender, instance, **kwargs):
     cache.delete_pattern('library_self-*')
 
 
+class BookmarkEntryManager(models.Manager):
+    """
+    BookmarkEntry Manager
+    """
+
+    def apply_select_related(self, queryset):
+        queryset = queryset.select_related('listing')
+        # queryset = queryset.select_related('listing__agency')
+        # queryset = queryset.select_related('listing__listing_type')
+        # queryset = queryset.select_related('listing__small_icon')
+        # queryset = queryset.select_related('listing__large_icon')
+        # queryset = queryset.select_related('listing__banner_icon')
+        # queryset = queryset.select_related('listing__large_banner_icon')
+        # queryset = queryset.select_related('listing__required_listings')
+        # queryset = queryset.select_related('listing__last_activity')
+        # queryset = queryset.select_related('listing__current_rejection')
+        queryset = queryset.select_related('creator_profile')
+        queryset = queryset.select_related('creator_profile__user')
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(BookmarkEntryManager, self).get_queryset()
+        return self.apply_select_related(queryset)
+
+
 class BookmarkEntry(models.Model):
     bookmark_parent = models.ManyToManyField('BookmarkEntry', db_table='bookmark_parents')
     # A Bookmark can have many parents.   User1Root ->
@@ -479,9 +504,12 @@ class BookmarkEntry(models.Model):
     )
     type = models.CharField(max_length=255, choices=TYPE_CHOICES, default=FOLDER)
 
+    objects = BookmarkEntryManager()
+
     def __repr__(self):
-        return 'BookmarkEntry(bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
+        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
             # self.bookmark_parent if self.bookmark_parent else 'None',
+            self.id,
             self.title,
             self.type,
             self.is_root,
@@ -489,13 +517,29 @@ class BookmarkEntry(models.Model):
         )
 
     def __str__(self):
-        return 'BookmarkEntry(bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
+        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
             # self.bookmark_parent if self.bookmark_parent else 'None',
+            self.id,
             self.title,
             self.type,
             self.is_root,
             self.listing
         )
+
+
+class BookmarkPermissionManager(models.Manager):
+    """
+    BookmarkEntry Manager
+    """
+
+    def apply_select_related(self, queryset):
+        queryset = queryset.select_related('bookmark')
+        queryset = queryset.select_related('profile')
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(BookmarkPermissionManager, self).get_queryset()
+        return self.apply_select_related(queryset)
 
 
 class BookmarkPermission(models.Model):
@@ -513,6 +557,31 @@ class BookmarkPermission(models.Model):
         (VIEWER, 'VIEWER'),
     )
     user_type = models.CharField(max_length=255, choices=USER_TYPE_CHOICES, default=VIEWER)
+
+    objects = BookmarkPermissionManager()
+
+    class Meta:
+        # The same profile should not have multiple permission for the same Bookmark
+        unique_together = (('bookmark', 'profile'),)
+
+        indexes = [
+            # BookmarkPermission.objects.filter(profile=request_profile, bookmark=bookmark_entry)
+            models.Index(fields=['bookmark', 'profile']),
+        ]
+
+    def __repr__(self):
+        return 'BookmarkPermission(user_type:{},bookmark:{},profile:{})'.format(
+            self.user_type,
+            self.bookmark,
+            self.profile,
+        )
+
+    def __str__(self):
+        return 'BookmarkPermission(user_type:{},bookmark:{},profile:{})'.format(
+            self.user_type,
+            self.bookmark,
+            self.profile,
+        )
 
 
 class Category(models.Model):
