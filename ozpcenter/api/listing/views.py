@@ -651,6 +651,8 @@ class TagViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsUser,)
     queryset = model_access.get_all_tags()
     serializer_class = serializers.TagSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class ListingViewSet(viewsets.ModelViewSet):

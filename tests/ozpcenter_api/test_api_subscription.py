@@ -36,6 +36,19 @@ class SubscriptionApiTest(APITestCase):
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         self.assertEqual(len(response.data), 0)
 
+    def test_search_subscriptions(self):
+        for entity_type in self.entity_types:
+            subscription_response = self._create_subscription(entity_type)
+            search_term = subscription_response.data['entity_description']
+
+            url = '/api/subscription/?type={}&name={}'.format(entity_type, search_term)
+            response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+
+            self.assertTrue(len(response.data) > 0)
+
+            for entity_response in response.data:
+                self.assertTrue(search_term in entity_response['entity_description'])
+
     def _create_subscription(self, entity_type, username=None):
         username = username or 'bigbrother'
 
