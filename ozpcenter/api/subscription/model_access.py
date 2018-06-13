@@ -11,6 +11,8 @@ from django.core.exceptions import MultipleObjectsReturned
 # from django.db.models import Q
 # from ozpcenter import errors
 from ozpcenter.models import Subscription
+from ozpcenter.models import Category
+from ozpcenter.models import Tag
 
 import ozpcenter.model_access as generic_model_access
 
@@ -43,6 +45,30 @@ def get_all_subscriptions():
         django.db.models.query.QuerySet(Subscription): List of all subscriptions
     """
     return Subscription.objects.all()
+
+
+def search_subscriptions(entity_type, search_description=None):
+    """
+    Get subscriptions by type and name
+
+    Args:
+        entity_type (str): the type of subscription to filter on
+        search_description (str): optionally, the name of subscription to filter on
+
+    Returns:
+        django.db.models.query.QuerySet(Subscription): List of subscriptions
+    """
+
+    subscriptions = Subscription.objects.filter(entity_type=entity_type)
+    if search_description:
+        if entity_type == 'category':
+            categories = Category.objects.filter(title__contains=search_description)
+            subscriptions = subscriptions.filter(entity_id__in=categories)
+        elif entity_type == 'tag':
+            tags = Tag.objects.filter(name__contains=search_description)
+            subscriptions = subscriptions.filter(entity_id__in=tags)
+
+    return subscriptions.all()
 
 
 def get_self_subscriptions(username):

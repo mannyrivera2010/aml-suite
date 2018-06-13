@@ -47,7 +47,12 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsUser,)
 
     def get_queryset(self):
-        queryset = model_access.get_all_subscriptions()
+        entity_type = self.request.query_params.get('type', None)
+        search_description = self.request.query_params.get('name', None)
+        if entity_type:
+            queryset = model_access.search_subscriptions(entity_type, search_description)
+        else:
+            queryset = model_access.get_all_subscriptions()
 
         # listing_id = self.request.query_params.get('listing', None)
         # if listing_id is not None:

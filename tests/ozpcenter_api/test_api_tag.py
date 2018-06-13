@@ -3,6 +3,7 @@ Tests for listing endpoints
 """
 from django.test import override_settings
 from tests.ozp.cases import APITestCase
+from tests.ozpcenter.helper import APITestHelper
 
 from ozpcenter.scripts import sample_data_generator as data_gen
 
@@ -21,7 +22,19 @@ class TagApiTest(APITestCase):
         """
         Set up test data for the whole TestCase (only run once for the TestCase)
         """
-        pass
-        # data_gen.run()
+        data_gen.run()
+
+    def test_get_all_tags(self):
+        url = '/api/tag/'
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+        self.assertTrue(len(response.data) > 0)
+
+    def test_get_all_tags_with_search(self):
+        search_term = 'one'
+        url = '/api/tag/?search={}'.format(search_term)
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+
+        for tag_response in response.data:
+            self.assertTrue(search_term in tag_response['name'])
 
     # TODO: Add more Unit Test (rivera 20160727)
