@@ -85,7 +85,7 @@ class WebServiceClient(object):
         """
         if not WS_ENABLED:
             # Call to ws service not enabled
-            pass
+            return 'Not Enabled'
 
         if not bulk_notification_list:
             assert 'call is missing input data'

@@ -409,5 +409,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = 'media/'
 
 #  Web Socket Service URL (aml-ws-service)
-WS_ENABLE = str_to_bool(os.getenv('WS_ENABLE', True))
+WS_ENABLE = str_to_bool(os.getenv('WS_ENABLE', False))
 WS_URL = os.getenv('WS_URL', 'http://127.0.0.1:4200')

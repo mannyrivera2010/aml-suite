@@ -121,7 +121,7 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
 
     def list(self, request, bookmark_pk=None):
         """
-        Get All Bookmarks for request profile
+        Get a list of permissions for a bookmark for request profile
         """
         current_request_profile = request.user.profile
         bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, bookmark_pk)
@@ -135,24 +135,24 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
         """
         Bookmark a Listing for the current user.
 
-
         POST JSON data if creating a folder bookmark:
         {
             "profile": {"id": 4}}
             "user_type": "OWNER/VIEWER",
         }
         """
-        return Response({}, status=status.HTTP_201_CREATED)
+        current_request_profile = request.user.profile
+        bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, bookmark_pk)
 
-        # serializer = serializers.BookmarkSerializer(data=request.data, context={'request': request})
-        #
-        # if not serializer.is_valid():
-        #     logger.error('{0!s}'.format(serializer.errors))
-        #     raise errors.RequestException('{0!s}'.format(serializer.errors))
-        #
-        # serializer.save()
-        #
-        # return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = serializers.BookmarkPermissionSerializer(data=request.data, context={'request': request, 'bookmark_entry': bookmark_entry}, partial=True)
+
+        if not serializer.is_valid():
+            logger.error('{0!s}'.format(serializer.errors))
+            raise errors.RequestException('{0!s}'.format(serializer.errors))
+
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, bookmark_pk=None, pk=None):
         """

@@ -70,29 +70,82 @@ def get_all_user_permission_for_bookmark_entry(request_profile, bookmark_entry):
     return query
 
 
-def add_profile_permission_for_bookmark_entry(request_profile, bookmark_entry_root_folder, target_profile, target_bookmark, target_user_type=None):
+def add_profile_permission_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target_profile, target_bookmark, target_user_type=None, share=False):
     """
-    Add Profile to Bookmark Entry
+    Add Profile Permission to Bookmark Entry
 
     Args:
         request_profile:
-            profile performing the action (view, add, edit, delete)
-        bookmark_entry_root_folder:
+            Profile performing the action (view, add, edit, delete)
+        bookmark_entry_folder_to_share:
+            The folder `request_profile` is trying to share/add permission
         target_profile:
+            The profile the `bookmark_entry_folder_to_share` should go to
         target_bookmark:
+
         target_user_type:
+
+    Steps:
+        check to see if `request_profile` has owner permission on the folder `bookmark_entry_folder_to_share` trying to be shared
 
     Defaults the target_user_type to BookmarkPermission.VIEWER
     """
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_root_folder)
+    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share)
     target_user_type = target_user_type if target_user_type else models.BookmarkPermission.VIEWER
 
-    # Add Bookmark entry to bookmark_entry_root_folder folder, add behaves like a set
-    target_bookmark.bookmark_parent.add(bookmark_entry_root_folder)
+    # Add Bookmark entry to bookmark_entry_folder_to_share folder, add behaves like a set
+    target_bookmark.bookmark_parent.add(bookmark_entry_folder_to_share)
 
     if target_bookmark.type == 'FOLDER':
         bookmark_permission_folder = models.BookmarkPermission()
-        bookmark_permission_folder.bookmark = target_bookmark
+
+        if share:
+            # If sharing `bookmark_entry_folder_to_share` to a different user
+            # it should add permission to `bookmark_entry_folder_to_share` so that `target_profile`
+            # has access to it
+            bookmark_permission_folder.bookmark = bookmark_entry_folder_to_share
+        else:
+            bookmark_permission_folder.bookmark = target_bookmark
+
+        bookmark_permission_folder.profile = target_profile
+        bookmark_permission_folder.user_type = target_user_type
+        bookmark_permission_folder.save()
+    elif target_bookmark.type == 'LISTING':
+        # LISTINGs inherit folder permissions
+        pass
+
+
+def share_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target_profile, target_profile_bookmark_entry, target_user_type=None):
+    """
+    Add Profile Permission to Bookmark Entry
+
+    Args:
+        request_profile:
+            Profile performing the action (view, add, edit, delete)
+        bookmark_entry_folder_to_share:
+            The folder `request_profile` is trying to share/add permission
+        target_profile:
+            The profile the `bookmark_entry_folder_to_share` should go to
+        target_bookmark:
+
+        target_user_type:
+
+    Steps:
+        check to see if `request_profile` has owner permission on the folder `bookmark_entry_folder_to_share` trying to be shared
+
+    Defaults the target_user_type to BookmarkPermission.VIEWER
+    """
+    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share)
+    target_user_type = target_user_type if target_user_type else models.BookmarkPermission.VIEWER
+
+    # Add Bookmark entry to bookmark_entry_folder_to_share folder, add behaves like a set
+    # target_profile_bookmark_entry.bookmark_parent.add(bookmark_entry_folder_to_share)
+
+    bookmark_entry_folder_to_share.bookmark_parent.add(target_profile_bookmark_entry)
+
+    if bookmark_entry_folder_to_share.type == 'FOLDER':
+        bookmark_permission_folder = models.BookmarkPermission()
+        bookmark_permission_folder.bookmark = bookmark_entry_folder_to_share
         bookmark_permission_folder.profile = target_profile
         bookmark_permission_folder.user_type = target_user_type
         bookmark_permission_folder.save()

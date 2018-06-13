@@ -193,9 +193,8 @@ def create_library_entries(library_entries, object_cache):
 
     # Creating 3.0 bookmarks
     for current_entry in library_entries:
-        print('---- Creating 3.0 bookmarks ----')
-        print('Entry: {}'.format(current_entry))
-
+        # print('---- Creating 3.0 bookmarks ----')
+        # print('Entry: {}'.format(current_entry))
         current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
         current_listing = current_entry['listing_obj']
 
@@ -205,12 +204,11 @@ def create_library_entries(library_entries, object_cache):
         # If folder not supplied, will user root folder
         current_entry_root_folder = current_profile_root_folder
 
-        print('Current_profile_root_folder: {}'.format(current_profile_root_folder))
-
+        # print('Current_profile_root_folder: {}'.format(current_profile_root_folder))
         # If Library Entry in a folder, create folder under current_profile_root_folder
         # and make new folder current_profile_root_folder so that entries can be placed
         # under that folder
-        print('-- Detected Folder in entry --')
+        # print('-- Detected Folder in entry --')
 
         if current_entry['folder']:
             bookmark_entry_folder_query = models.BookmarkEntry.objects.filter(
@@ -227,21 +225,39 @@ def create_library_entries(library_entries, object_cache):
             else:
                 current_entry_root_folder = bookmark_entry_folder_query[0]
 
+            object_cache['{}.Folder[{}]'.format(current_entry['owner'], current_entry['folder'])] = current_entry_root_folder
+
             if bookmark_entry_query_folder_created:
-                print('CREATED {}'.format(bookmark_folder_entry))
+                pass
+                # print('CREATED {}'.format(bookmark_folder_entry))
             else:
-                print('USING {}'.format(bookmark_folder_entry))
+                pass
+                # print('USING {}'.format(bookmark_folder_entry))
         else:
-            print('No Folder Detected, will use profile root folder')
-
-        print('-- END Detected Folder in entry -- ')
-        print('')
-
+            pass
+            # print('No Folder Detected, will use profile root folder')
+        # print('-- END Detected Folder in entry -- ')
+        # print('')
         bookmark_entry = bookmark_model_access.create_listing_bookmark_for_profile(current_profile, current_listing, current_entry_root_folder)
-
         print('CREATED {}'.format(bookmark_entry))
-        print('---------END----------')
-        print('')
+        # print('---------END----------')
+        # print('')
+
+
+def create_library_sharing_entries(library_sharing_entries, object_cache):
+    # Creating 3.0 bookmarks shares
+    for current_entry in library_sharing_entries:
+        current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
+        folder_entry = object_cache['{}.Folder[{}]'.format(current_entry['owner'], current_entry['folder'])]
+
+        share_with_profile = object_cache['Profile.{}'.format(current_entry['share_with'])]
+        share_permission = current_entry['share_permission']
+
+        target_bookmark = bookmark_model_access.create_get_user_root_bookmark_folder(share_with_profile)
+        # First two parameters check to see if
+        bookmark_model_access.share_bookmark_entry(current_profile, folder_entry, share_with_profile, target_bookmark, target_user_type=share_permission)
+
+        print('{} SHARE {} GRANT {} AS {} '.format(current_profile, folder_entry.title, share_with_profile, share_permission))
 
 
 def create_listing_icons(listing_builder_dict, object_cache):
@@ -765,6 +781,7 @@ def run():
     #                           Listings Icons
     # ===========================================================================
     library_entries = []
+    library_sharing_entries = []
     review_entries = []
     visit_count_entries = []
 
@@ -808,11 +825,17 @@ def run():
 
             listing_id = listing_obj.id
             listing_library_entries = current_listing_data['library_entries']
+            listing_library_sharing = current_listing_data['library_sharing']
 
             if listing_library_entries:
                 for listing_library_entry in listing_library_entries:
                     listing_library_entry['listing_obj'] = listing_obj
                     library_entries.append(listing_library_entry)
+
+            if listing_library_sharing:
+                for listing_library_sharing_entry in listing_library_sharing:
+                    listing_library_sharing_entry['listing_obj'] = listing_obj
+                    library_sharing_entries.append(listing_library_sharing_entry)
 
             db_calls = show_db_calls(db_connection, False)
             listing_db_call_total = listing_db_call_total + db_calls
@@ -853,6 +876,19 @@ def run():
     with transaction.atomic():
         ordered_library_entries = sorted(library_entries, key=lambda k: (k['owner'], k['folder'] if k['folder'] else ''))
         create_library_entries(ordered_library_entries, object_cache)
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
+    ############################################################################
+    #                           Library (bookmark listings)
+    ############################################################################
+    print('--Creating Library Sharing')
+    section_start_time = time_ms()
+
+    with transaction.atomic():
+        ordered_library_entries = sorted(library_sharing_entries, key=lambda k: (k['owner'], k['folder'] if k['folder'] else ''))
+        create_library_sharing_entries(ordered_library_entries, object_cache)
 
     print('-----Took: {} ms'.format(time_ms() - section_start_time))
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
