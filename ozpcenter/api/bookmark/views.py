@@ -49,7 +49,8 @@ class BookmarkViewSet(viewsets.ViewSet):
         current_request_profile = request.user.profile
 
         entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
-        data = serializers.get_bookmark_tree(current_request_profile, request=request, folder_bookmark_entry=entry, is_parent=True)
+        data = serializers.get_bookmark_tree(current_request_profile, request=request,
+            folder_bookmark_entry=entry, is_parent=True)
         return Response(data)
 
     def create(self, request):

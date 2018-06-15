@@ -46,13 +46,39 @@ class LibraryListingSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
+class BookmarkPermissionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for api/bookmark/{bookmark_id}/permission - owner is always current user
+    """
+    profile = listing_serializers.CreateListingProfileSerializer(required=False, allow_null=True, many=False)
+    # bookmark = BookmarkSerializer(many=False, required=False)
+
+    class Meta:
+        model = models.BookmarkPermission
+        fields = ('id', 'profile', 'created_date', 'modified_date', 'user_type',
+            # 'bookmark'
+        )
+        # read_only_fields = ('listing', 'bookmark_parent', 'type', 'created_date', 'modified_date', 'title')
+
+        extra_kwargs = {
+            "id": {
+                "read_only": False,
+                "required": False,
+            },
+        }
+
+
 class BookmarkParentSerializer(serializers.ModelSerializer):
     """
     Serializer for /api/bookmark - owner is always current user
     """
+    # bookmark_permission = BookmarkPermissionSerializer(many=True, required=False)
+
     class Meta:
         model = models.BookmarkEntry
-        fields = ('title', 'id', 'type')
+        fields = (
+            'title', 'id', 'type'  # , 'bookmark_permission'
+        )
         read_only_fields = ('listing', 'bookmark_parent', 'type', 'created_date', 'modified_date', 'title')
 
         extra_kwargs = {
@@ -78,10 +104,28 @@ class BookmarkSerializer(serializers.ModelSerializer):
     """
     listing = LibraryListingSerializer(required=False)
     bookmark_parent = BookmarkParentSerializer(many=True, required=False)
+    bookmark_permission_self = serializers.SerializerMethodField('get_bookmark_permission')
+
+    def get_bookmark_permission(self, container):
+        request_profile = self.context['request'].user.profile
+
+        if container.type == 'FOLDER':
+            profile_bookmark_permission = container.bookmark_permission.filter(profile=request_profile)
+            # profile_bookmark_permission = models.BookmarkPermission.objects.filter(profile=request_profile, bookmark=container).first()
+            # print(profile_bookmark_permission)
+            # container = BookmarkEntry(40, bookmark_parent,title:InstrumentSharing,type:FOLDER,is_root:False,listing:None)
+            return BookmarkPermissionSerializer(profile_bookmark_permission.first(), context={'request': self.context['request']}).data
+        else:
+            return {}
 
     class Meta:
         model = models.BookmarkEntry
-        fields = ('listing', 'bookmark_parent', 'id', 'type', 'created_date', 'modified_date', 'title')
+        fields = (
+            'listing', 'bookmark_parent',
+            # 'bookmark_permission',  # TODO: Figure out how to do custom queryset for this field, should only show
+            'bookmark_permission_self',
+            'id', 'type', 'created_date', 'modified_date', 'title'
+        )
 
         extra_kwargs = {
             "listing": {
@@ -102,6 +146,8 @@ class BookmarkSerializer(serializers.ModelSerializer):
     def to_representation(self, data):
         ret = super(BookmarkSerializer, self).to_representation(data)
 
+        # import pprint
+        # print(pprint.pprint(ret))
         # if bookmark_parent length is more than or equal to two, it means that folder is shared between users
         if len(ret['bookmark_parent']) >= 2:
             ret['is_shared'] = True
@@ -112,6 +158,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
         if ret['type'] == models.BookmarkEntry.LISTING:
             del ret['title']  # listing type does not have titles
+            del ret['bookmark_permission_self']  # listing type does not have titles
         elif ret['type'] == models.BookmarkEntry.FOLDER:
             del ret['listing']  # folder type does not have listings
 
@@ -170,28 +217,6 @@ class BookmarkSerializer(serializers.ModelSerializer):
             return model_access.create_folder_bookmark_for_profile(request_profile, title, bookmark_parent_object)
 
 
-class BookmarkPermissionSerializer(serializers.ModelSerializer):
-    """
-    Serializer for api/bookmark/{bookmark_id}/permission - owner is always current user
-    """
-    profile = listing_serializers.CreateListingProfileSerializer(required=False, allow_null=True, many=False)
-    # bookmark = BookmarkSerializer(many=False, required=False)
-
-    class Meta:
-        model = models.BookmarkPermission
-        fields = ('id', 'profile', 'created_date', 'modified_date', 'user_type',
-            # 'bookmark'
-        )
-        # read_only_fields = ('listing', 'bookmark_parent', 'type', 'created_date', 'modified_date', 'title')
-
-        extra_kwargs = {
-            "id": {
-                "read_only": False,
-                "required": False,
-            },
-        }
-
-
 def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_parent=None):
     """
     Helper Function to get all nested bookmark
@@ -229,6 +254,7 @@ def get_nested_bookmarks_tree(request_profile, data, serialized=False, request=N
                 bookmark_parent=current_record['id'],
                 bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
             ).order_by('type', 'created_date')
+
             # print(local_query.query)
             local_data = BookmarkSerializer(local_query, many=True, context={'request': request}).data
             current_record['children'] = get_nested_bookmarks_tree(request_profile, local_data, request=request)
