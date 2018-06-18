@@ -12,6 +12,21 @@ from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 
 
+def find_first_shared_folder(data):
+    for record in data:
+        if record.get('type') == 'FOLDER' and record.get('is_shared') is True:
+            return record
+    return {}
+
+
+def shorthand_permissions(data):
+    output = []
+    for record in data:
+        username = record.get('profile', {}).get('user', {}).get('username')
+        output.append('{}({})'.format(username, record.get('user_type')))
+    return output
+
+
 def shorthand_shared_folder(data, level=0):
     """
     Shorthand Shared Folder
@@ -72,7 +87,7 @@ class BookmarkApiTest(APITestCase):
         """
         self.maxDiff = None
 
-        self.bigbrother_bookmarks = [
+        self.bigbrother_expected_bookmarks = [
             '+(F) Animals',
             ' -(L) Killer Whale',
             ' -(L) Lion Finder',
@@ -99,7 +114,7 @@ class BookmarkApiTest(APITestCase):
             '-(L) Stop sign'
         ]
 
-        self.wsmith_bookmarks = [
+        self.wsmith_expected_bookmarks = [
             '+(F) heros',
             ' -(L) Iron Man',
             ' -(L) Jean Grey',
@@ -115,6 +130,25 @@ class BookmarkApiTest(APITestCase):
             '-(L) Grandfather clock'
         ]
 
+    def _get_bookmarks_and_check_for_user(self, username, expected_results):
+        url = '/api/bookmark/'
+        response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
+        shorten_data = shorthand_shared_folder(response.data).split("\n")
+        # sorted by type, created_date
+        self.assertEqual(shorten_data, expected_results, 'username:{}'.format(username))
+        return response.data
+
+    def _get_folder_permission(self, username, folder_id, permission_shorthand_expected, status_code=200):
+        # Check for permission
+        url = '/api/bookmark/{}/permission/'.format(folder_id)
+        response = APITestHelper.request(self, url, 'GET', username=username, status_code=status_code)
+
+        if status_code == 200:
+            permission_shorthand = shorthand_permissions(response.data)
+            self.assertEqual(permission_shorthand, permission_shorthand_expected)
+        elif status_code == 403:
+            self.assertEqual(response.data.get('error_code'), 'permission_denied')
+
     @classmethod
     def setUpTestData(cls):
         """
@@ -123,35 +157,100 @@ class BookmarkApiTest(APITestCase):
         data_gen.run()
 
     def test_get_bookmark_list_admin(self):
+        self._get_bookmarks_and_check_for_user('bigbrother', self.bigbrother_expected_bookmarks)
+
+    def test_get_bookmark_list_shared_folder_permissions(self):
+        username = 'bigbrother2'
         url = '/api/bookmark/'
-        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
-        shorten_data = shorthand_shared_folder(response.data).split("\n")
+        response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
+        bigbrother2_bookmarks = response.data
+        # Getting the id of the first shared folder
+        shared_folder_id = find_first_shared_folder(bigbrother2_bookmarks).get('id')
 
-        # sorted by type, created_date
-        expected_results = self.bigbrother_bookmarks
+        bigbrother2_permission_shorthand_expected = [
+            'bigbrother2(OWNER)',
+            'julia(OWNER)',
+            'johnson(VIEWER)'
+        ]
 
+        # Check OWNER permission
+        self._get_folder_permission('bigbrother2', shared_folder_id, bigbrother2_permission_shorthand_expected)
+        # Check OWNER permission
+        self._get_folder_permission('julia', shared_folder_id, bigbrother2_permission_shorthand_expected)
+        # Check VIEWER permission
+        self._get_folder_permission('johnson', shared_folder_id, bigbrother2_permission_shorthand_expected, status_code=403)
+        # Check OTHER permission
+        self._get_folder_permission('bigbrother', shared_folder_id, bigbrother2_permission_shorthand_expected, status_code=403)
+
+    def test_get_bookmark_list_shared_folder(self):
+        """
+        test_get_bookmark_list_shared_folder
+
+        test checks for shared folders (InstrumentSharing)
+        """
+        shared_folder_bookmarks = [
+            '+(SF) InstrumentSharing',
+            ' -(L) Acoustic Guitar',
+        ]
+
+        bigbrother2_expected_bookmarks = shared_folder_bookmarks + [
+            '-(L) Alingano Maisu'
+        ]
+
+        julia_expected_bookmarks = shared_folder_bookmarks + [
+            '-(L) Astrology software'
+        ]
+
+        johnson_expected_bookmarks = shared_folder_bookmarks + [
+            '-(L) Applied Ethics Inc.'
+        ]
+
+        bigbrother2_bookmarks = self._get_bookmarks_and_check_for_user('bigbrother2', bigbrother2_expected_bookmarks)  # OWNER
+        julia_bookmarks = self._get_bookmarks_and_check_for_user('julia', julia_expected_bookmarks)  # OWNER
+        johnson_bookmarks = self._get_bookmarks_and_check_for_user('johnson', johnson_expected_bookmarks)  # VIEWER
+
+        # Getting the id of the first shared folder
+        shared_folder_id = find_first_shared_folder(bigbrother2_bookmarks).get('id')
+
+        # Create Listing bookmark under shared_folder_bookmark
+        url = '/api/bookmark/'
+        # TODO: How to elimate listing id from call
+        data = {"type": "LISTING", "listing": {"id": 2}, "bookmark_parent": [{"id": shared_folder_id}]}
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother2', status_code=201)
+        shorten_data = shorthand_dict(response.data, include_keys=['is_shared', 'listing', 'listing.title', 'type'])
+        shorten_shared_data = [' ' + record for record in shorthand_shared_folder(response.data).split("\n")]
+
+        expected_results = "(is_shared:False,listing:(title:Air Mail),type:LISTING)"
         self.assertEqual(shorten_data, expected_results)
+
+        # Add recently added bookmark to folder
+        shared_folder_bookmarks.extend(shorten_shared_data)
+
+        bigbrother2_expected_bookmarks = shared_folder_bookmarks + [
+            '-(L) Alingano Maisu'
+        ]
+
+        julia_expected_bookmarks = shared_folder_bookmarks + [
+            '-(L) Astrology software'
+        ]
+
+        johnson_expected_bookmarks = shared_folder_bookmarks + [
+            '-(L) Applied Ethics Inc.'
+        ]
+
+        # All users should be able to see the recently added bookmark under shared folder
+        bigbrother2_bookmarks = self._get_bookmarks_and_check_for_user('bigbrother2', bigbrother2_expected_bookmarks)  # OWNER
+        julia_bookmarks = self._get_bookmarks_and_check_for_user('julia', julia_expected_bookmarks)  # OWNER
+        johnson_bookmarks = self._get_bookmarks_and_check_for_user('johnson', johnson_expected_bookmarks)  # VIEWER
+
+        # TODO: Delete recently added bookmark
 
     def test_get_bookmark_list_steward(self):
-        url = '/api/bookmark/'
-        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-        shorten_data = shorthand_shared_folder(response.data).split("\n")
-
-        # sorted by type, created_date
-        expected_results = self.wsmith_bookmarks
-
-        self.assertEqual(shorten_data, expected_results)
+        self._get_bookmarks_and_check_for_user('wsmith', self.wsmith_expected_bookmarks)
 
     def test_create_listing_bookmark_list_admin(self):
         # Verify bookmarks
-        url = '/api/bookmark/'
-        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
-        shorten_data = shorthand_shared_folder(response.data).split("\n")
-
-        # sorted by type, created_date
-        expected_results = self.bigbrother_bookmarks
-
-        self.assertEqual(shorten_data, expected_results)
+        self._get_bookmarks_and_check_for_user('bigbrother', self.bigbrother_expected_bookmarks)
 
         # Create Listing bookmark
         url = '/api/bookmark/'
@@ -165,12 +264,7 @@ class BookmarkApiTest(APITestCase):
         self.assertEqual(shorten_data, expected_results)
 
         # Verify bookmarks
-        url = '/api/bookmark/'
-        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
-        shorten_data = shorthand_shared_folder(response.data).split("\n")
-
-        # sorted by type, created_date
-        expected_results = self.bigbrother_bookmarks
+        expected_results = self.bigbrother_expected_bookmarks
         expected_results.extend(shorten_shared_data)
 
-        self.assertEqual(shorten_data, expected_results)
+        self._get_bookmarks_and_check_for_user('bigbrother', expected_results)

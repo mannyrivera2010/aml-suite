@@ -271,7 +271,8 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: syme}
   - {count: 10, profile: tparsons}
-- library_entries: []
+- library_entries:
+  - {folder: null, owner: bigbrother2, position: 10}
   library_sharing: []
   listing:
     agency: Miniplen
@@ -424,7 +425,8 @@
   - {count: 7, profile: charrington}
   - {count: 8, profile: jones}
   - {count: 10, profile: wsmith}
-- library_entries: []
+- library_entries:
+  - {folder: null, owner: johnson, position: 10}
   library_sharing: []
   listing:
     agency: Miniplen
@@ -492,7 +494,8 @@
   - {count: 9, profile: jones}
   - {count: 10, profile: david}
   - {count: 10, profile: tparsons}
-- library_entries: []
+- library_entries:
+  - {folder: null, owner: julia, position: 10}
   library_sharing: []
   listing:
     agency: Test 3
