@@ -47,17 +47,18 @@ class RecommenderTest(APITestCase):
         title_scores = shorthand_dict(title_scores)
 
         expected_result = [
-            '(_score:(Baseline:(raw_score:8.0,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:13.0),title:White Horse)',
             '(_score:(Baseline:(raw_score:8.2,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:13.2),title:Navigation)',
             '(_score:(Baseline:(raw_score:8.5,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:13.5),title:Bleach)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:14.0),title:Informational Book)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:14.0),title:JotSpot)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:14.0),title:LocationLister)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:14.0),title:Stop sign)',
+            '(_score:(Baseline:(raw_score:10.0,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:15.0),title:Acoustic Guitar)',
             '(_score:(Baseline:(raw_score:10.5,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:15.5),title:Killer Whale)',
             '(_score:(Baseline:(raw_score:11.5,weight:1.0),Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:16.5),title:Wolf Finder)',
             '(_score:(Baseline:(raw_score:11.5,weight:1.0),Bookmark Collaborative Filtering:(raw_score:2.0,weight:5.0),_sort_score:21.5),title:Chart Course)'
         ]
+
         # import pprint
         # print(pprint.pprint(title_scores))
         self.assertEquals(expected_result, title_scores)
@@ -79,17 +80,18 @@ class RecommenderTest(APITestCase):
         title_scores = shorthand_dict(title_scores)
 
         expected_result = [
+            '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:Astrology software)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:Bass Fishing)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:Dragons)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:House Targaryen)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:Informational Book)',
             '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:JotSpot)',
-            '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:LocationLister)',
-            '(_score:(Baseline:(raw_score:9.0,weight:1.0),_sort_score:9.0),title:Stop sign)',
+            '(_score:(Baseline:(raw_score:10.0,weight:1.0),_sort_score:10.0),title:Acoustic Guitar)',
             '(_score:(Baseline:(raw_score:10.5,weight:1.0),_sort_score:10.5),title:Killer Whale)',
             '(_score:(Baseline:(raw_score:11.5,weight:1.0),_sort_score:11.5),title:Chart Course)',
             '(_score:(Baseline:(raw_score:11.5,weight:1.0),_sort_score:11.5),title:Wolf Finder)'
         ]
+
         # import pprint
         # print(pprint.pprint(title_scores))
         self.assertEquals(expected_result, title_scores)
@@ -109,6 +111,9 @@ class RecommenderTest(APITestCase):
         title_scores = [{'title': listing['title'], '_score': listing['_score']} for listing in response.data['recommended']]
         title_scores = sorted(title_scores, key=lambda k: (k['_score']['_sort_score'], k['title']))  # Order can change between postgres and sqlite
         title_scores = shorthand_dict(title_scores)
+
+        import pprint
+        pprint.pprint(title_scores)
 
         expected_result = [
             '(_score:(Bookmark Collaborative Filtering:(raw_score:1.0,weight:5.0),_sort_score:5.0),title:Acoustic Guitar)',

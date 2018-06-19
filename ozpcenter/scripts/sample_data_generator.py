@@ -180,6 +180,9 @@ def create_library_entries(library_entries, object_cache):
     """
     # Creating 2.0 bookmarks
     for current_entry in library_entries:
+
+        print(current_entry)
+
         current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
         current_listing = current_entry['listing_obj']
         library_entry = models.ApplicationLibraryEntry(

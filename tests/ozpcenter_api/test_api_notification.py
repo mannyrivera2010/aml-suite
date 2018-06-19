@@ -56,7 +56,9 @@ class NotificationApiTest(APITestCase):
             'Lager-None'
         ]
 
-        self.user_library_julia = []
+        self.user_library_julia = [
+            'Astrology software-None'
+        ]
 
         self.user_library_wsmith = [
             'Air Mail-old',

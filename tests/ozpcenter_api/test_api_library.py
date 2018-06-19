@@ -24,7 +24,7 @@ class LibraryApiTest(APITestCase):
         """
         setUp is invoked before each test method
         """
-        self
+        self.maxDiff = None
 
     @classmethod
     def setUpTestData(cls):
@@ -115,7 +115,7 @@ class LibraryApiTest(APITestCase):
         self.assertEqual([], response.data)
 
     def test_get_library_pk(self):
-        url = '/api/self/library/2/'
+        url = '/api/self/library/55/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         self.assertIn('listing', response.data)
@@ -131,12 +131,12 @@ class LibraryApiTest(APITestCase):
         put_data = []
         position_count = 0
 
-        for i in response.data:
+        for current_bookmark_record in response.data:
             position_count = position_count + 1
 
-            data = {'id': i['id'],
+            data = {'id': current_bookmark_record['id'],
                     'folder': 'test',
-                    'listing': {'id': i['listing']['id']},
+                    'listing': {'id': current_bookmark_record['listing']['id']},
                     'position': position_count
                     }
             put_data.append(data)
@@ -145,19 +145,68 @@ class LibraryApiTest(APITestCase):
         response = APITestHelper.request(self, url, 'PUT', data=put_data, username='wsmith', status_code=200)
         self.assertIsNotNone(response)
 
-    def _compare_library(self, usernames_list):
-        usernames_list_actual = {}
-        for username, ids_list in usernames_list.items():
+    def _compare_library(self, username_bookmark_dict):
+        """
+        Compare Library for a list of username:bookmark pairs
+        """
+        username_bookmark_dict_actual = {}
+        for username, ids_list in username_bookmark_dict.items():
             url = '/api/self/library/'
             response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
             before_notification_ids = ['{}-{}'.format(entry['listing']['title'], entry['folder']) for entry in response.data]
-            usernames_list_actual[username] = before_notification_ids
+            username_bookmark_dict_actual[username] = before_notification_ids
 
-        for username, ids_list in usernames_list.items():
-            before_notification_ids = usernames_list_actual[username]
+        for username, ids_list in username_bookmark_dict.items():
+            before_notification_ids = username_bookmark_dict_actual[username]
+            # import pprint
+            # print(username)
+            # print('_actual_')
+            # pprint.pprint(before_notification_ids)
+            # print('_expected')
+            # pprint.pprint(ids_list)
+            # print('----')
             self.assertEqual(sorted(ids_list), sorted(before_notification_ids), 'Checking for {}'.format(username))
 
     def test_import_bookmarks(self):
+        """
+        Test import
+        """
+        bigbrother_bookmark2 = [
+            'Tornado-Weather',
+            'Lightning-Weather',
+            'Snow-Weather',
+            'Wolf Finder-Animals',
+            'Killer Whale-Animals',
+            'Lion Finder-Animals',
+            'Monkey Finder-Animals',
+            'Parrotlet-Animals',
+            'White Horse-Animals',
+            'Electric Guitar-Instruments',
+            'Acoustic Guitar-Instruments',
+            'Sound Mixer-Instruments',
+            'Electric Piano-Instruments',
+            'Piano-Instruments',
+            'Violin-Instruments',
+            'Bread Basket-None',
+            'Informational Book-None',
+            'Stop sign-None',
+            'Chain boat navigation-None',
+            'Gallery of Maps-None',
+            'Chart Course-None'
+        ]
+
+        julia_bookmark2 = [
+            'Astrology software-None',
+        ]
+
+        julia_bookmark2_weather_folder = [
+            'Tornado-Weather',
+            'Lightning-Weather',
+            'Snow-Weather'
+        ]
+
+        # Compare Library for users
+        self._compare_library({'bigbrother': bigbrother_bookmark2, 'julia': julia_bookmark2})
 
         # Create notification to share Weater foler from Bigbrother to Julia
         now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
@@ -178,15 +227,15 @@ class LibraryApiTest(APITestCase):
 
         bookmark_notification1_id = response.data['id']
 
+        # Compare Library for users
+        self._compare_library({'bigbrother': bigbrother_bookmark2, 'julia': julia_bookmark2})
+
         # Import Bookmarks
         results = APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
 
-        # Compare Library for users
-        user_library_data = {'julia': ['Tornado-Weather',
-                                       'Lightning-Weather',
-                                       'Snow-Weather']}
-
-        self._compare_library(user_library_data)
+        # Add julia_bookmark2_weather_folder to julia_bookmark2 and compare library
+        julia_bookmark2 = julia_bookmark2 + julia_bookmark2_weather_folder
+        self._compare_library({'bigbrother': bigbrother_bookmark2, 'julia': julia_bookmark2})
 
         # Modify Bigbrother's library to add another listing to the weather library
         url_lib = '/api/self/library/'
@@ -195,21 +244,23 @@ class LibraryApiTest(APITestCase):
         put_data = []
         position_count = 0
 
-        for i in response.data:
-            if i['id'] is 12:
-                data = {'id': i['id'],
-                        'folder': "Weather",
-                        'listing': {'id': i['listing']['id']},
-                        'position': position_count
-                        }
-                put_data.append(data)
-            else:
-                data = {'id': i['id'],
-                        'folder': i['folder'],
-                        'listing': {'id': i['listing']['id']},
-                        'position': position_count
-                        }
-                put_data.append(data)
+        for current_bookmark_record in response.data:
+            current_bookmark_listing_title = current_bookmark_record.get('listing', {}).get('title')
+
+            data = {'id': current_bookmark_record['id'],
+                    'folder': current_bookmark_record['folder'],
+                    'listing': {'id': current_bookmark_record['listing']['id']},
+                    'position': current_bookmark_record['position']
+                    }
+
+            if current_bookmark_listing_title == 'Chart Course':
+                data['folder'] = "Weather"
+
+            put_data.append(data)
+
+        # Modify Memory version of bigbrother bookmarks
+        bigbrother_bookmark2.append("Chart Course-Weather")
+        bigbrother_bookmark2 = [record for record in bigbrother_bookmark2 if record not in ['Chart Course-None']]
 
         url_update = '/api/self/library/update_all/'
         response = APITestHelper.request(self, url_update, 'PUT', data=put_data, username='bigbrother', status_code=200)
@@ -236,32 +287,10 @@ class LibraryApiTest(APITestCase):
 
         # Import Bookmarks
         results = APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
-
+        # Adding a folder should not duplicate the same listing bookmark in the same folder
         # Compare Library for users
-        user_library_data = {'bigbrother': ['Tornado-Weather',
-                                       'Lightning-Weather',
-                                       'Snow-Weather',
-                                       'Wolf Finder-Animals',
-                                       'Killer Whale-Animals',
-                                       'Lion Finder-Animals',
-                                       'Monkey Finder-Animals',
-                                       'Parrotlet-Animals',
-                                       'White Horse-Animals',
-                                       'Electric Guitar-Instruments',
-                                       'Acoustic Guitar-Instruments',
-                                       'Sound Mixer-Instruments',
-                                       'Electric Piano-Instruments',
-                                       'Piano-Instruments',
-                                       'Violin-Instruments',
-                                       'Bread Basket-Weather',
-                                       'Informational Book-None',
-                                       'Stop sign-None',
-                                       'Chain boat navigation-None',
-                                       'Gallery of Maps-None',
-                                       'Chart Course-None'],
-                             'julia': ['Tornado-Weather',
-                                       'Lightning-Weather',
-                                       'Snow-Weather',
-                                       'Bread Basket-Weather']}
-
-        self._compare_library(user_library_data)
+        julia_bookmark2 = julia_bookmark2 + ['Chart Course-Weather']
+        self._compare_library({
+            'bigbrother': bigbrother_bookmark2,
+            'julia': julia_bookmark2
+        })
