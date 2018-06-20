@@ -166,6 +166,12 @@ class BookmarkApiTest(APITestCase):
         """
         data_gen.run()
 
+    def test_get_bookmark_list_admin_disable_listing(self):
+        """
+        Check for bookmarks when listing owner disables listing, it should not be visable
+        """
+        pass
+
     def test_get_bookmark_list_admin(self):
         self._get_bookmarks_and_check_for_user('bigbrother', self.bigbrother_expected_bookmarks)
 

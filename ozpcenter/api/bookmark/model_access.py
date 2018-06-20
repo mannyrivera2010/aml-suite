@@ -39,13 +39,23 @@ root_folder = model_access.create_get_user_root_bookmark_folder(request_profile)
 [b for b in BookmarkEntry.objects.filter(bookmark_parent__bookmark_permission__profile=request_profile, bookmark_parent=root_folder)]
 
 """
+import copy
+
 import ozpcenter.models as models
 from ozpcenter import errors
-
 
 FOLDER_TYPE = models.BookmarkEntry.FOLDER
 LISTING_TYPE = models.BookmarkEntry.LISTING
 BOOKMARK_TYPE_CHOICES = [choice[0] for choice in models.BookmarkEntry.TYPE_CHOICES]
+FOLDER_QUERY_ORDER_MAPPING = {
+    'created_date': 'created_date',
+    '-created_date': '-created_date',
+    'title': 'title',
+    '-title': '-title'
+}
+LISTING_QUERY_ORDER_MAPPING = copy.deepcopy(FOLDER_QUERY_ORDER_MAPPING)
+LISTING_QUERY_ORDER_MAPPING['title'] = 'listing__title'
+LISTING_QUERY_ORDER_MAPPING['-title'] = '-listing__title'
 
 
 def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):

@@ -39,7 +39,10 @@ class BookmarkViewSet(viewsets.ViewSet):
         Get All Bookmarks for request profile
         """
         current_request_profile = request.user.profile
-        data = serializers.get_bookmark_tree(current_request_profile, request=request)
+
+        ordering_fields = [str(record) for record in request.query_params.getlist('order', [])]
+
+        data = serializers.get_bookmark_tree(current_request_profile, request=request, ordering_fields=ordering_fields)
         return Response(data)
 
     def retrieve(self, request, pk=None):
@@ -48,9 +51,11 @@ class BookmarkViewSet(viewsets.ViewSet):
         """
         current_request_profile = request.user.profile
 
+        ordering_fields = [str(record) for record in request.query_params.getlist('order', [])]
+
         entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
         data = serializers.get_bookmark_tree(current_request_profile, request=request,
-            folder_bookmark_entry=entry, is_parent=True)
+            folder_bookmark_entry=entry, is_parent=True, ordering_fields=ordering_fields)
         return Response(data)
 
     def create(self, request):

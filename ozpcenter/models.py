@@ -480,25 +480,23 @@ class BookmarkEntryManager(models.Manager):
         queryset = super(BookmarkEntryManager, self).get_queryset()
         return self.apply_select_related(queryset)
 
-    def for_profile(self, profile_instance):
-        objects = super(AccessControlApplicationLibraryEntryManager, self).get_queryset()
-
+    def for_profile_minus_security_marking(self, profile_instance):
+        objects = super(BookmarkEntryManager, self).get_queryset()
         # filter out private listings
         exclude_orgs = get_user_excluded_orgs(profile_instance)
 
-        objects = objects.filter(owner__user__username=username)
         objects = objects.filter(listing__is_enabled=True)
         objects = objects.filter(listing__is_deleted=False)
         objects = objects.exclude(listing__is_private=True, listing__agency__in=exclude_orgs)
         objects = self.apply_select_related(objects)
         # Filter out listings by user's access level
-        ids_to_exclude = []
-        for i in objects:
-            if not i.listing.security_marking:
-                logger.debug('Listing {0!s} has no security_marking'.format(i.listing.title))
-            if not system_has_access_control(username, i.listing.security_marking):
-                ids_to_exclude.append(i.listing.id)
-        objects = objects.exclude(listing__pk__in=ids_to_exclude)
+        # ids_to_exclude = []
+        # for i in objects:
+        #     if not i.listing.security_marking:
+        #         logger.debug('Listing {0!s} has no security_marking'.format(i.listing.title))
+        #     if not system_has_access_control(profile_instance.user.username, i.listing.security_marking):
+        #         ids_to_exclude.append(i.listing.id)
+        # objects = objects.exclude(listing__pk__in=ids_to_exclude)
         return objects
 
 
