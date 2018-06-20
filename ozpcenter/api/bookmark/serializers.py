@@ -209,11 +209,10 @@ class BookmarkSerializer(serializers.ModelSerializer):
         bookmark_parent_object = validated_data.get('bookmark_parent_object')
 
         if type == models.BookmarkEntry.LISTING:
-
             return model_access.create_listing_bookmark_for_profile(request_profile, validated_data['listing_object'], bookmark_parent_object)
+
         elif type == models.BookmarkEntry.FOLDER:
             title = validated_data['title']
-
             return model_access.create_folder_bookmark_for_profile(request_profile, title, bookmark_parent_object)
 
 
@@ -230,17 +229,29 @@ def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_p
     folder_bookmark_entry = folder_bookmark_entry if folder_bookmark_entry else model_access.create_get_user_root_bookmark_folder(request_profile)
     is_parent = is_parent if is_parent is not None else False
 
-    local_query = models.BookmarkEntry.objects.filter(
+    folder_query = models.BookmarkEntry.objects.filter(
+        type=models.BookmarkEntry.FOLDER,
         bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
-    ).order_by('type', 'created_date')
+    ).order_by('created_date')
+
+    listing_query = models.BookmarkEntry.objects.filter(
+        type=models.BookmarkEntry.LISTING,
+        bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder,
+
+    ).order_by('created_date')
 
     if is_parent:
-        local_query = local_query.filter(id=folder_bookmark_entry.id)
+        folder_query = folder_query.filter(id=folder_bookmark_entry.id)
+        listing_query = listing_query.filter(id=folder_bookmark_entry.id)
     else:
-        local_query = local_query.filter(bookmark_parent=folder_bookmark_entry)
+        folder_query = folder_query.filter(bookmark_parent=folder_bookmark_entry)
+        listing_query = listing_query.filter(bookmark_parent=folder_bookmark_entry)
 
-    local_data = BookmarkSerializer(local_query, many=True, context={'request': request}).data
-    return get_nested_bookmarks_tree(request_profile, local_data, request=request)
+    folder_data = BookmarkSerializer(folder_query, many=True, context={'request': request}).data
+    listing_data = BookmarkSerializer(listing_query, many=True, context={'request': request}).data
+    # TODO: Deals with private listing and access control
+
+    return {"folders": get_nested_bookmarks_tree(request_profile, folder_data, request=request), "listings": listing_data}
 
 
 def get_nested_bookmarks_tree(request_profile, data, serialized=False, request=None):
@@ -250,14 +261,23 @@ def get_nested_bookmarks_tree(request_profile, data, serialized=False, request=N
     output = []
     for current_record in data:
         if current_record.get('type') == 'FOLDER':
-            local_query = models.BookmarkEntry.objects.filter(
+            folder_query = models.BookmarkEntry.objects.filter(
+                type=models.BookmarkEntry.FOLDER,
                 bookmark_parent=current_record['id'],
                 bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
-            ).order_by('type', 'created_date')
+            ).order_by('created_date')
 
+            listing_query = models.BookmarkEntry.objects.filter(
+                type=models.BookmarkEntry.LISTING,
+                bookmark_parent=current_record['id'],
+                bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
+            ).order_by('created_date')
+
+            folder_data = BookmarkSerializer(folder_query, many=True, context={'request': request}).data
+            listing_data = BookmarkSerializer(listing_query, many=True, context={'request': request}).data
             # print(local_query.query)
-            local_data = BookmarkSerializer(local_query, many=True, context={'request': request}).data
-            current_record['children'] = get_nested_bookmarks_tree(request_profile, local_data, request=request)
+
+            current_record['children'] = {"folders": get_nested_bookmarks_tree(request_profile, folder_data, request=request), "listings": listing_data}
 
         output.append(current_record)
     return output

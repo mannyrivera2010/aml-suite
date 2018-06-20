@@ -126,7 +126,7 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
         """
         current_request_profile = request.user.profile
         bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, bookmark_pk)
-        permissions = model_access.get_all_user_permission_for_bookmark_entry(current_request_profile, bookmark_entry)
+        permissions = model_access.get_user_permissions_for_bookmark_entry(current_request_profile, bookmark_entry)
 
         serializer = serializers.BookmarkPermissionSerializer(permissions, context={'request': request}, many=True)
 

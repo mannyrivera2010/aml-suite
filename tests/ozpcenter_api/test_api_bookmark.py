@@ -13,7 +13,10 @@ from ozpcenter.scripts import sample_data_generator as data_gen
 
 
 def find_first_shared_folder(data):
-    for record in data:
+    is_dict_boolean = isinstance(data, dict)
+    is_root_object = is_dict_boolean and 'folders' in data and 'listings' in data
+
+    for record in data.get('folders', []):
         if record.get('type') == 'FOLDER' and record.get('is_shared') is True:
             return record
     return {}
@@ -34,9 +37,23 @@ def shorthand_shared_folder(data, level=0):
     """
     is_dict_boolean = isinstance(data, dict)
     is_list_boolean = isinstance(data, list)
+    is_root_object = is_dict_boolean and 'folders' in data and 'listings' in data
 
     if not data:
-        return ""
+        return {}
+    elif is_root_object:
+        folders = data.get('folders', [])
+        listings = data.get('listings', [])
+
+        output = []
+
+        for folders in folders:
+            output.append(shorthand_shared_folder(folders, level))
+
+        for listings in listings:
+            output.append(shorthand_shared_folder(listings, level))
+
+        return '\n'.join(output)
     elif is_list_boolean:
         output = []
 
@@ -71,14 +88,7 @@ class BookmarkApiTest(APITestCase):
     Unit Tests for bookmark feature
 
     What to test:
-    * Displaying all nested bookmarks for a user
-    * Adding a new listing bookmark under a user root folder (level 1)
-    * Adding a new listing bookmark under a user existing folder (level 2)
-    * Delete Listing Bookmark from user bookmarks
-    * Displaying all owners and viewers of a folder bookmark
-    * An Owner adding new listing bookmark to folder bookmark
-    * An Viewer adding new listing bookmark to folder bookmark and getting denied
-    * Moving bookmark between two different folder bookmark
+        look at the top of ozpcenter.api.bookmark.model_access
     """
 
     def setUp(self):

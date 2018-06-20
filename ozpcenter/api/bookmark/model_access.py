@@ -1,15 +1,26 @@
 """
+Shared Folder Rules:
+    * All Permissions are handle at folder level
+    * Listing Bookmarks and Folder Bookmarks inheritance Permissions from the folder it is part of.
+    * Folder Bookmark are the only Bookmark Entries that have Bookmark Permissions
+    * Root Folders can never been public, users will be able to share any folder
+    * Every Record has BookmarkPermission
 
-All Permissions are handle at folder level
+Shared Folder Actions:
+    * Displaying all nested bookmarks for a user
+    * Adding a new listing bookmark under a user root folder (level 1)
+    * Adding a new listing bookmark under a user existing folder (level 2)
+    * Delete Listing Bookmark from user bookmarks
+    * Moving bookmark between two different folder bookmark
 
-Listing Bookmarks and Folder Bookmarks inheritance Permissions from the folder it is part of.
+Shared Folder Permission Actions:
+    * Getting a list of owners and viewers of a shared folder bookmark (as an owner)
+    * Getting denied access to see owners and viewers of a shared folder bookmark (as a viewer)
+    * An Owner adding new listing bookmark to a shared folder bookmark
+    * An Viewer adding new listing bookmark to a shared folder bookmark and getting denied
 
-Folder Bookmark are the only Bookmark Entries that have Bookmark Permissions
-
-Root Folders can never been public, users will be able to share any folder
-
-
-Every Record has BookmarkPermission
+https://aml-development.github.io/ozp-backend/features/shared_folders_2018/
+---------
 
     query = models.BookmarkEntry.objects.filter(
         id=id,
@@ -30,6 +41,11 @@ root_folder = model_access.create_get_user_root_bookmark_folder(request_profile)
 """
 import ozpcenter.models as models
 from ozpcenter import errors
+
+
+FOLDER_TYPE = models.BookmarkEntry.FOLDER
+LISTING_TYPE = models.BookmarkEntry.LISTING
+BOOKMARK_TYPE_CHOICES = [choice[0] for choice in models.BookmarkEntry.TYPE_CHOICES]
 
 
 def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
@@ -54,7 +70,60 @@ def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     return profile_bookmark_permission
 
 
-def get_all_user_permission_for_bookmark_entry(request_profile, bookmark_entry):
+def create_bookmark_entry(request_profile=None, entry_type=None, folder_title=None, listing=None, is_root=None):
+    is_folder_type = (entry_type == FOLDER_TYPE)
+    is_listing_type = (entry_type == LISTING_TYPE)
+    is_root = is_root if is_root is True else False
+    try:
+        assert request_profile is not None, 'To create bookmark entry, profile is required'
+        assert entry_type in BOOKMARK_TYPE_CHOICES, 'Entry Type needs to be one of the following: {}'.format(BOOKMARK_TYPE_CHOICES)
+
+        if is_folder_type:
+            if is_root is False and folder_title is None:
+                raise AssertionError('Bookmark {} Entry require folder_title and is_root kwargs'.format(FOLDER_TYPE))
+        elif is_listing_type and listing is None:
+            raise AssertionError('Bookmark {} Entry require listing object'.format(LISTING_TYPE))
+    except AssertionError as err:
+        raise errors.PermissionDenied(err)
+
+    # Add Bookmark Entry
+    bookmark_entry = models.BookmarkEntry()
+    bookmark_entry.type = entry_type
+    bookmark_entry.is_root = False
+
+    if is_folder_type:
+        if is_root:
+            bookmark_entry.is_root = True
+            bookmark_entry.title = 'ROOT'
+        else:
+            bookmark_entry.title = folder_title
+    elif is_listing_type:
+        bookmark_entry.listing = listing
+
+    bookmark_entry.creator_profile = request_profile
+    bookmark_entry.save()
+
+    return bookmark_entry
+
+
+def get_bookmark_entry_by_id(request_profile, id):
+    """
+    Get bookmark entry by id and filter based on permissions
+    Only owner or viewer of folder should be able to see it
+    """
+    # Validate to make sure user can see folder - bookmark_permission__profile
+    query = models.BookmarkEntry.objects.filter(
+        id=id,
+        bookmark_parent__bookmark_permission__profile=request_profile
+    ).first()
+
+    if query is None:
+        raise errors.PermissionDenied('Can not view bookmarks')
+
+    return query
+
+
+def get_user_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     """
     Get permissions for bookmark_entry
 
@@ -96,7 +165,7 @@ def add_profile_permission_for_bookmark_entry(request_profile, bookmark_entry_fo
     # Add Bookmark entry to bookmark_entry_folder_to_share folder, add behaves like a set
     target_bookmark.bookmark_parent.add(bookmark_entry_folder_to_share)
 
-    if target_bookmark.type == 'FOLDER':
+    if target_bookmark.type == FOLDER_TYPE:
         bookmark_permission_folder = models.BookmarkPermission()
 
         if share:
@@ -143,13 +212,13 @@ def share_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target
 
     bookmark_entry_folder_to_share.bookmark_parent.add(target_profile_bookmark_entry)
 
-    if bookmark_entry_folder_to_share.type == 'FOLDER':
+    if bookmark_entry_folder_to_share.type == FOLDER_TYPE:
         bookmark_permission_folder = models.BookmarkPermission()
         bookmark_permission_folder.bookmark = bookmark_entry_folder_to_share
         bookmark_permission_folder.profile = target_profile
         bookmark_permission_folder.user_type = target_user_type
         bookmark_permission_folder.save()
-    elif target_bookmark.type == 'LISTING':
+    elif target_bookmark.type == LISTING_TYPE:
         # LISTINGs inherit folder permissions
         pass
 
@@ -186,13 +255,7 @@ def create_get_user_root_bookmark_folder(request_profile):
 
         return bookmark_entry_query.first()
     else:
-        bookmark_entry = models.BookmarkEntry()
-        bookmark_entry.type = bookmark_entry.FOLDER
-        bookmark_entry.is_root = True
-        bookmark_entry.title = 'ROOT'
-        bookmark_entry.creator_profile = request_profile
-        bookmark_entry.save()
-        # ROOT Folder does not have any parents
+        bookmark_entry = create_bookmark_entry(request_profile, FOLDER_TYPE, folder_title='', is_root=True)
 
         bookmark_permission = models.BookmarkPermission()
         bookmark_permission.bookmark = bookmark_entry
@@ -203,34 +266,29 @@ def create_get_user_root_bookmark_folder(request_profile):
         return bookmark_entry
 
 
-def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_entry_root_folder=None):
+def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_entry_folder=None):
     """
     Create Folder Bookmark for profile
 
     Args:
         profile (models.Profile): Profile
         folder_name (String): Folder name
-        bookmark_entry_root_folder: (models.BookmarkEntry): Entry folder
+        bookmark_entry_folder: (models.BookmarkEntry): Entry folder
     """
-    bookmark_entry_root_folder = bookmark_entry_root_folder if bookmark_entry_root_folder else create_get_user_root_bookmark_folder(request_profile)
+    bookmark_entry_folder = bookmark_entry_folder if bookmark_entry_folder else create_get_user_root_bookmark_folder(request_profile)
 
-    if bookmark_entry_root_folder.type != models.BookmarkEntry.FOLDER:
+    if bookmark_entry_folder.type != FOLDER_TYPE:
         raise errors.PermissionDenied('bookmark_entry needs to be a folder type')
 
-    # Only owners of bookmark_entry_root_folder should be able to add to folder
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_root_folder)
+    # Only owners of bookmark_entry_folder should be able to add to folder
+    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder)
 
-    bookmark_folder_entry = models.BookmarkEntry()
-    bookmark_folder_entry.type = models.BookmarkEntry.FOLDER
-    bookmark_folder_entry.is_root = False
-    bookmark_folder_entry.title = folder_name
-    bookmark_folder_entry.creator_profile = request_profile
-    bookmark_folder_entry.save()
+    bookmark_folder_entry = create_bookmark_entry(request_profile, FOLDER_TYPE, folder_title=folder_name, is_root=False)
 
     # Add Permission so that user can see folder and make them owner
     add_profile_permission_for_bookmark_entry(
         request_profile,
-        bookmark_entry_root_folder,
+        bookmark_entry_folder,
         request_profile,
         bookmark_folder_entry,
         target_user_type=models.BookmarkPermission.OWNER
@@ -239,50 +297,27 @@ def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_en
     return bookmark_folder_entry
 
 
-def create_listing_bookmark_for_profile(request_profile, listing, bookmark_entry_root_folder=None):
+def create_listing_bookmark_for_profile(request_profile, listing, bookmark_entry_folder=None):
     """
     Create Listing Bookmark for profile
     """
-    bookmark_entry_root_folder = bookmark_entry_root_folder if bookmark_entry_root_folder else create_get_user_root_bookmark_folder(request_profile)
+    bookmark_entry_folder = bookmark_entry_folder if bookmark_entry_folder else create_get_user_root_bookmark_folder(request_profile)
 
-    if bookmark_entry_root_folder.type != models.BookmarkEntry.FOLDER:
+    if bookmark_entry_folder.type != FOLDER_TYPE:
         raise errors.PermissionDenied('bookmark_entry needs to be a folder type')
 
-    # Only owners of bookmark_entry_root_folder should be able to add to folder
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_root_folder)
+    # Only owners of bookmark_entry_folder should be able to add to folder
+    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder)
 
-    # Add Bookmark Entry
-    bookmark_entry = models.BookmarkEntry()
-    bookmark_entry.type = models.BookmarkEntry.LISTING
-    bookmark_entry.is_root = False
-    bookmark_entry.listing = listing
-    bookmark_entry.creator_profile = request_profile
-    # bookmark_entry.title = 'LISTING'
-    bookmark_entry.save()
+    bookmark_entry = create_bookmark_entry(request_profile, LISTING_TYPE, listing=listing)
 
     # Add Permission so that user can see folder and make them owner
     add_profile_permission_for_bookmark_entry(
         request_profile,
-        bookmark_entry_root_folder,
+        bookmark_entry_folder,
         request_profile,
         bookmark_entry,
         target_user_type=models.BookmarkPermission.OWNER
     )
 
     return bookmark_entry
-
-
-def get_bookmark_entry_by_id(request_profile, id):
-    """
-    Get bookmark entry by id and filter based on permissions
-    Only owner or viewer of folder should be able to see it
-    """
-    query = models.BookmarkEntry.objects.filter(
-        id=id,
-        bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder)  bookmark_permission__profile
-    ).first()
-
-    if query is None:
-        raise errors.PermissionDenied('Can not view bookmarks')
-
-    return query
