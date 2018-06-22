@@ -18,6 +18,7 @@ class IsAppsMallStewardOrReadOnly(permissions.BasePermission):
         if not request.user.is_authenticated():
             return False
 
+        plugin_manager.plugin_manager_instance._load()
         ozp_authorization = plugin_manager.get_system_authorization_plugin()
         ozp_authorization.authorization_update(request.user.username, request=request)
         user_profile = model_access.get_profile(request.user.username)
@@ -33,6 +34,7 @@ class IsOrgStewardOrReadOnly(permissions.BasePermission):
         if not request.user.is_authenticated():
             return False
 
+        plugin_manager.plugin_manager_instance._load()
         ozp_authorization = plugin_manager.get_system_authorization_plugin()
         ozp_authorization.authorization_update(request.user.username, request=request)
         user_profile = model_access.get_profile(request.user.username)
@@ -51,6 +53,7 @@ class IsUser(permissions.BasePermission):
         if not request.user.is_authenticated():
             return False
 
+        plugin_manager.plugin_manager_instance._load()
         ozp_authorization = plugin_manager.get_system_authorization_plugin()
         ozp_authorization.authorization_update(request.user.username, request=request)
         profile = model_access.get_profile(request.user.username)
@@ -71,6 +74,7 @@ class IsOrgSteward(permissions.BasePermission):
         if not request.user.is_authenticated():
             return False
 
+        plugin_manager.plugin_manager_instance._load()
         ozp_authorization = plugin_manager.get_system_authorization_plugin()
         ozp_authorization.authorization_update(request.user.username, request=request)
         profile = model_access.get_profile(request.user.username)
@@ -90,6 +94,8 @@ class IsAppsMallSteward(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated():
             return False
+
+        plugin_manager.plugin_manager_instance._load()
 
         ozp_authorization = plugin_manager.get_system_authorization_plugin()
         ozp_authorization.authorization_update(request.user.username, request=request)

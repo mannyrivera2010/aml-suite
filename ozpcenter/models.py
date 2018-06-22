@@ -49,7 +49,8 @@ from rest_framework import serializers
 from ozpcenter import constants
 from ozpcenter import utils
 from ozpcenter.api.listing import elasticsearch_util
-from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
+system_has_access_control = plugin_manager.system_has_access_control
 from ozp.storage import media_storage
 
 

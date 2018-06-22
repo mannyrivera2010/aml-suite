@@ -16,7 +16,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import list_route, detail_route
 
-from plugins.plugin_manager import system_anonymize_identifiable_data
+from plugins import plugin_manager
 from ozpcenter import errors
 from ozpcenter import permissions
 import ozpcenter.api.profile.serializers as serializers
@@ -29,6 +29,9 @@ import ozpcenter.api.listing.model_access as listing_model_access
 from rest_framework_jwt.settings import api_settings
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
+
+system_anonymize_identifiable_data = plugin_manager.system_anonymize_identifiable_data
+system_has_access_control = plugin_manager.system_has_access_control
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER

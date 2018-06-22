@@ -17,7 +17,8 @@ from ozpcenter.pipe import pipes
 from ozpcenter.recommend import recommend_utils
 from ozpcenter import errors
 from ozpcenter import permissions
-from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
+system_has_access_control = plugin_manager.system_has_access_control
 import ozpcenter.api.image.model_access as model_access
 import ozpcenter.api.image.serializers as serializers
 import ozpcenter.model_access as generic_model_access

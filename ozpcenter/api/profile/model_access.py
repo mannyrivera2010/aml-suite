@@ -9,7 +9,8 @@ from ozpcenter import utils
 from django.contrib import auth
 import ozpcenter.model_access as generic_model_access
 
-from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
+system_has_access_control = plugin_manager.system_has_access_control
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))

@@ -143,7 +143,7 @@ LOGGING = {
         'json': {
            '()': 'ozp.logging_formatter.CustomisedJSONFormatter', },
         'simple': {
-            'format': '%(asctime)s - %(levelname)s - %(module)s - %(message)s'
+            'format': '%(asctime)s - %(process)d - %(levelname)s - %(module)s - %(message)s'
         },
     },
     'loggers': {

@@ -1,5 +1,29 @@
 """
 Plugin Manager
+https://stackoverflow.com/questions/16546652/why-does-django-run-everything-twice
+
+TODO: Fix this error (it seems to be a race condition)
+https://bugs.python.org/issue30891
+
+2018-06-21 16:02:16,631 - 16811 - INFO - plugin_manager - Success Loading Plugin: (<module 'plugins.default_access_control.main' from '/home/{}/git/ozp-backend/plugins/default_access_control/main.py'>,<class 'plugins.default_access_control.main.PluginMain'>,False)
+Traceback (most recent call last):
+2018-06-21 16:02:16,632 - 16811 - INFO - plugin_manager - Success Loading Plugin: (<module 'plugins.default_authorization.main' from '/home/{}/git/ozp-backend/plugins/default_authorization/main.py'>,<class 'plugins.default_authorization.main.PluginMain'>,False)
+  File "/home/{}/git/ozp-backend/plugins/plugin_manager.py", line 101, in dynamic_importer
+    loaded_module = current_module.loader.load_module()
+  File "<frozen importlib._bootstrap>", line 539, in _check_name_wrapper
+  File "<frozen importlib._bootstrap>", line 1614, in load_module
+  File "<frozen importlib._bootstrap>", line 593, in _load_module_shim
+  File "<frozen importlib._bootstrap>", line 1139, in exec
+ImportError: module 'plugins.default_authorization.main' not in sys.modules
+2018-06-21 16:02:16,643 - 16811 - ERROR - errors - Input module [] not of type module, it is type: None
+Traceback (most recent call last):
+  File "/home/{}/git/ozp-backend/plugins/plugin_manager.py", line 101, in dynamic_importer
+    loaded_module = current_module.loader.load_module()
+  File "<frozen importlib._bootstrap>", line 539, in _check_name_wrapper
+  File "<frozen importlib._bootstrap>", line 1614, in load_module
+  File "<frozen importlib._bootstrap>", line 593, in _load_module_shim
+  File "<frozen importlib._bootstrap>", line 1139, in exec
+ImportError: module 'plugins.default_authorization.main' not in sys.modules
 """
 from types import ModuleType
 import importlib
@@ -23,12 +47,6 @@ class DynamicImporterWrapper(object):
     Dynamic Importer Wrapper
     """
 
-    def _validate(self):
-        if not isinstance(self.input_module, ModuleType):
-            raise TypeError('Input module not of type module')
-        if not hasattr(self.input_class, '__class__'):
-            raise TypeError('Input class not of type class')
-
     def __init__(self, input_module, input_class, error_message=None):
         self.input_module = input_module
         self.input_class = input_class
@@ -38,6 +56,12 @@ class DynamicImporterWrapper(object):
         if error_message:
             self.error = True
             self.error_message = error_message
+
+    def _validate(self):
+        if not isinstance(self.input_module, ModuleType):
+            raise TypeError('Input module [] not of type module, it is type: {}'.format(self.input_module, type(self.input_module)))
+        if not hasattr(self.input_class, '__class__'):
+            raise TypeError('Input class not of type class')
 
     def __str__(self):
         return '({0!s},{1!s},{2!s})'.format(self.input_module, self.input_class, self.error)
@@ -107,6 +131,18 @@ def dynamic_mock_service_importer(path=BASE_PLUGIN_DIRECTORY):
     return output_list
 
 
+class SingletonDecorator:
+    def __init__(self, klass):
+        self.klass = klass
+        self.instance = None
+
+    def __call__(self, *args, **kwds):
+        if self.instance == None:
+            self.instance = self.klass(*args, **kwds)
+        return self.instance
+
+
+# @SingletonDecorator
 class PluginManager(object):
     """
 
@@ -124,18 +160,25 @@ class PluginManager(object):
         """
         Lazy loading of plugins
         """
+        # logger.info("pre - calling load: {}".format(self.loaded))
+        # logger.info("pre - calling instances: {}".format(self.instances))
+        dynamic_directory_importer_path = dynamic_directory_importer(path)
+        # logger.info('dynamic_directory_importer: {}'.format(dynamic_directory_importer_path))
+
         if not self.instances and not self.loaded:
             self.loaded = True
             # Load plugins
             self.instances = {}
-
-            for importer_wrapper in dynamic_directory_importer(path):
+            for importer_wrapper in dynamic_directory_importer_path:
                 if importer_wrapper.error:
-                    logger.error('Error Loading Plugin: {0!s} - Error Message {1!s} '.format(importer_wrapper, importer_wrapper.error_message))
+                    logger.error('Error Loading Plugin: {} - Error Message {} '.format(importer_wrapper, importer_wrapper.error_message))
                 else:
                     current_class_instance = importer_wrapper.input_class(settings=settings, requests=requests)
                     self.instances[current_class_instance.plugin_name] = current_class_instance
-                    logger.info('Success Loading Plugin: {0!s}'.format(importer_wrapper))
+                    logger.info('Success Loading Plugin: {}'.format(importer_wrapper))
+
+        # logger.info("post - calling load: {}".format(self.loaded))
+        # logger.info("post - calling instances: {}".format(self.instances))
 
     def __getattr__(self, plugin_name, path=BASE_PLUGIN_DIRECTORY):
         """
@@ -184,6 +227,16 @@ class PluginManager(object):
 
 
 plugin_manager_instance = PluginManager()
+
+# import inspect
+#
+# # print(inspect.getframeinfo(inspect.currentframe()))
+# import pprint
+# pprint.pprint(inspect.getouterframes(inspect.currentframe()))
+
+# # print(inspect.getframeinfo(inspect.getouterframes()))
+logger.info('Initialized PluginManager: {}'.format(plugin_manager_instance))
+
 
 # Import helper for the mock services
 try:

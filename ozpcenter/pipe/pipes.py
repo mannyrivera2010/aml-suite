@@ -4,7 +4,8 @@ import random
 from ozpcenter.recommend import recommend_utils
 from ozpcenter.recommend.recommend_utils import Direction
 from ozpcenter.recommend.recommend_utils import FastNoSuchElementException
-from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
+system_has_access_control = plugin_manager.system_has_access_control
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))

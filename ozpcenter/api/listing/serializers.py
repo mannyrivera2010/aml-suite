@@ -13,8 +13,6 @@ from ozpcenter.pubsub import dispatcher
 from ozpcenter import constants
 from ozpcenter import errors
 from ozpcenter import models
-from plugins.plugin_manager import system_anonymize_identifiable_data
-from plugins.plugin_manager import system_has_access_control
 from plugins import plugin_manager
 import ozpcenter.api.agency.model_access as agency_model_access
 import ozpcenter.api.agency.serializers as agency_serializers
@@ -31,6 +29,8 @@ import ozpcenter.api.profile.serializers as profile_serializers
 import ozpcenter.api.profile.model_access as profile_model_access
 import ozpcenter.model_access as generic_model_access
 
+system_anonymize_identifiable_data = plugin_manager.system_anonymize_identifiable_data
+system_has_access_control = plugin_manager.system_has_access_control
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
