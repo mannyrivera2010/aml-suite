@@ -174,54 +174,81 @@ class BookmarkSerializer(serializers.ModelSerializer):
         request_profile = self.context['request'].user.profile
         username = self.context['request'].user.username
 
-        if 'type' not in data:
-            raise serializers.ValidationError('No type provided')
-
-        type = data['type']
-
-        if type == models.BookmarkEntry.LISTING:
-            listing = listing_model_access.get_listing_by_id(username,
-                data['listing']['id'])
-
-            if not listing:
-                raise serializers.ValidationError('Listing id entry not found')
-
-            data['listing_object'] = listing
-        elif type == models.BookmarkEntry.FOLDER:
-            if 'title' not in data:
-                raise serializers.ValidationError('No title provided')
-        else:
-            raise serializers.ValidationError('No valid type provided')
-
         if 'bookmark_parent' in data:
-            if len(data['bookmark_parent']) > 1:
-                raise serializers.ValidationError('No valid bookmark_parent')
-            bookmark_parent_id = data['bookmark_parent'][0]['id']
-            data['bookmark_parent_object'] = model_access.get_bookmark_entry_by_id(request_profile, bookmark_parent_id)
+            bookmark_parent_len = len(data['bookmark_parent'])
 
-            if data['bookmark_parent_object'].type != 'FOLDER':
-                raise serializers.ValidationError('bookmark_parent entry must be FOLDER')
+            if bookmark_parent_len > 1:
+                raise serializers.ValidationError('bookmark_parent')
+            elif bookmark_parent_len == 1:
+                bookmark_parent_id = data['bookmark_parent'][0]['id']
+                data['bookmark_parent_object'] = model_access.get_bookmark_entry_by_id(request_profile, bookmark_parent_id)
+
+                if data['bookmark_parent_object'].type != 'FOLDER':
+                    raise serializers.ValidationError('bookmark_parent entry must be FOLDER')
+            elif bookmark_parent_len < 1:
+                data['bookmark_parent_object'] = model_access.create_get_user_root_bookmark_folder(request_profile)
 
         return data
 
     def create(self, validated_data):
+        """
+        Create BOOKMARK entry
+
+        Required Fields:
+            * Type
+            * `listing id` if type is LISTING
+            * `title` if type is folder
+        """
         username = self.context['request'].user.username
         request_profile = self.context['request'].user.profile
-        type = validated_data['type']
-
         bookmark_parent_object = validated_data.get('bookmark_parent_object')
+        type = validated_data.get('type')
 
         if type == models.BookmarkEntry.LISTING:
-            return model_access.create_listing_bookmark_for_profile(request_profile, validated_data['listing_object'], bookmark_parent_object)
+            listing_id = validated_data.get('listing', {}).get('id')
+
+            if not listing_id:
+                raise serializers.ValidationError('Listing id entry not found')
+
+            listing = listing_model_access.get_listing_by_id(username, listing_id)
+
+            if not listing:
+                raise serializers.ValidationError('Listing id entry not found')
+
+            return model_access.create_listing_bookmark_for_profile(request_profile, listing, bookmark_parent_object)
 
         elif type == models.BookmarkEntry.FOLDER:
-            title = validated_data['title']
-            return model_access.create_folder_bookmark_for_profile(request_profile, title, bookmark_parent_object)
+            if 'title' not in validated_data:
+                raise serializers.ValidationError('No title provided')
+
+            return model_access.create_folder_bookmark_for_profile(request_profile, validated_data['title'], bookmark_parent_object)
+        else:
+            raise serializers.ValidationError('No valid type provided')
+
+    def update(self, bookmark_entry_instance, validated_data):
+        request_profile = self.context['request'].user.profile
+        bookmark_parent_object = validated_data.get('bookmark_parent_object')
+        title = validated_data.get('title')
+
+        return model_access.update_bookmark_entry_for_profile(
+            request_profile,
+            bookmark_entry_instance,
+            bookmark_parent_object,
+            title)
 
 
 def _create_folder_listing_queries_and_serialized(request_profile, request, folder_bookmark_entry, is_parent=None, ordering_fields=None):
     """
     Create queries to get folder and listing data
+
+    Args:
+        request_profile:
+            used to filter profile bookmarks
+        request:
+            used for serializer to create urls
+        folder_bookmark_entry:
+        is_parent:
+        ordering_fields:
     """
     is_parent = is_parent if is_parent else False
     ordering_fields = ordering_fields if ordering_fields else ['created_date']
@@ -237,12 +264,18 @@ def _create_folder_listing_queries_and_serialized(request_profile, request, fold
         bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder,
     )
 
+    folder_order_fields = []
+    listing_order_fields = []
+
     for ordering_field in ordering_fields:
         if ordering_field in model_access.FOLDER_QUERY_ORDER_MAPPING:
-            folder_query = folder_query.order_by(model_access.FOLDER_QUERY_ORDER_MAPPING[ordering_field])
+            folder_order_fields.append(model_access.FOLDER_QUERY_ORDER_MAPPING[ordering_field])
 
         if ordering_field in model_access.LISTING_QUERY_ORDER_MAPPING:
-            listing_query = listing_query.order_by(model_access.LISTING_QUERY_ORDER_MAPPING[ordering_field])
+            listing_order_fields.append(model_access.LISTING_QUERY_ORDER_MAPPING[ordering_field])
+
+    folder_query = folder_query.order_by(*folder_order_fields)
+    listing_query = listing_query.order_by(*listing_order_fields)
 
     if is_parent:
         folder_query = folder_query.filter(id=folder_bookmark_entry.id)
@@ -262,7 +295,6 @@ def _create_folder_listing_queries_and_serialized(request_profile, request, fold
             "listing_data_after_filter": listing_data_after_filter}
 
 
-# TODO: Combine get_bookmark_tree and _get_nested_bookmarks_tree to reduce code duplication
 def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_parent=None, ordering_fields=None):
     """
     Helper Function to get all nested bookmark

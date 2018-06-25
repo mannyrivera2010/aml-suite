@@ -176,6 +176,9 @@ class BookmarkApiTest(APITestCase):
         self._get_bookmarks_and_check_for_user('bigbrother', self.bigbrother_expected_bookmarks)
 
     def test_get_bookmark_list_shared_folder_permissions(self):
+        """
+        Test getting permissions for a shared folder, test between owner, viewer, other
+        """
         username = 'bigbrother2'
         url = '/api/bookmark/'
         response = APITestHelper.request(self, url, 'GET', username=username, status_code=200)
@@ -264,7 +267,15 @@ class BookmarkApiTest(APITestCase):
     def test_get_bookmark_list_steward(self):
         self._get_bookmarks_and_check_for_user('wsmith', self.wsmith_expected_bookmarks)
 
-    def test_create_listing_bookmark_list_admin(self):
+    def test_listing_bookmark_owner_create_delete(self):
+        """
+        Test for creating listing bookmark under a non-shared folder and deleting same bookmark
+
+        Steps:
+            1. Validate existing bookmarks for bigbrother
+            2. Add a listing bookmark under root folder for bigbrother
+            3. Validate existing
+        """
         # Verify bookmarks
         self._get_bookmarks_and_check_for_user('bigbrother', self.bigbrother_expected_bookmarks)
 

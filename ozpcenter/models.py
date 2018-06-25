@@ -512,6 +512,7 @@ class BookmarkEntry(models.Model):
     listing = models.ForeignKey('Listing', related_name='listing_entries', null=True, blank=True)
 
     is_root = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=False)
 
     creator_profile = models.ForeignKey('Profile')
 
@@ -525,6 +526,7 @@ class BookmarkEntry(models.Model):
     type = models.CharField(max_length=255, choices=TYPE_CHOICES, default=FOLDER)
 
     objects = BookmarkEntryManager()
+    manager = models.Manager()
 
     def __repr__(self):
         return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
@@ -579,6 +581,7 @@ class BookmarkPermission(models.Model):
     user_type = models.CharField(max_length=255, choices=USER_TYPE_CHOICES, default=VIEWER)
 
     objects = BookmarkPermissionManager()
+    manager = models.Manager()
 
     class Meta:
         # The same profile should not have multiple permission for the same Bookmark

@@ -37,6 +37,11 @@ class BookmarkViewSet(viewsets.ViewSet):
     def list(self, request):
         """
         Get All Bookmarks for request profile
+
+        API:
+            Order bookmark by title - `GET /api/bookmark/?order=title`
+            Reverse Order bookmark by title - `GET /api/bookmark/?order=-title`
+            Secondary Sort - `/api/bookmark/?order=-created_date&order=-title`
         """
         current_request_profile = request.user.profile
 
@@ -62,27 +67,39 @@ class BookmarkViewSet(viewsets.ViewSet):
         """
         Bookmark a Listing for the current user.
 
-        POST JSON data if creating a folder bookmark under a different folder:
-        {
-            "type":"FOLDER",
-            "title":"new",
-            "bookmark_parent":[{"id":75}]
-        }
+        API:
+            Create a Listing Bookmark under user's root folder.
+            ```
+            POST /api/bookmark/
 
-        POST JSON data if creating a listing bookmark:
-        {
-            "listing":
-                {
-                    "id": 1
-                },
-            "type": "LISTING",
-        }
+            {
+                "type":"LISTING",
+                "listing":{"id":1}
+            }
+            ```
 
-        POST JSON data if creating a folder bookmark:
-        {
-            "title": "Folder 1"
-            "type": "FOLDER",
-        }
+            Create a Listing Bookmark under different folder for user
+            ```
+            POST /api/bookmark/
+
+            {
+                "type":"LISTING",
+                "listing":{"id":1},
+                "bookmark_parent":[{"id":40}]
+            }
+            ```
+
+            Create a 'Empty' Folder bookmark under root folder for user:
+            ```
+            POST /api/bookmark/
+            {
+                "title": "Folder 1"
+                "type": "FOLDER"
+            }
+            ```
+            Error:
+                A folder with that name already exist (TODO)
+
         """
         serializer = serializers.BookmarkSerializer(data=request.data, context={'request': request})
 
@@ -93,6 +110,51 @@ class BookmarkViewSet(viewsets.ViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None):
+        """
+        Updating bookmarks
+
+        API:
+            Move a folder/listing bookmark to a different folder
+            ```
+            PUT /api/bookmark/{bookmark_id}/
+            {
+                "bookmark_parent":[{"id":40}]
+            }
+            ```
+
+            Move a folder/listing bookmark to a user's root folder
+            ```
+            PUT /api/bookmark/{bookmark_id}/
+            {
+                "bookmark_parent":[]
+            }
+            ```
+
+            Rename a folder bookmark folder
+            ```
+            PUT /api/bookmark/{folder_bookmark_id}/
+            {
+                "title": "new title"
+            }
+            ```
+
+            Error:
+                A folder with that name already exist (TODO)
+        """
+        current_request_profile = request.user.profile
+        bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
+
+        serializer = serializers.BookmarkSerializer(bookmark_entry, data=request.data, context={'request': request}, partial=True)
+
+        if not serializer.is_valid():
+            logger.error('{0!s}'.format(serializer.errors))
+            raise errors.RequestException('{0!s}'.format(serializer.errors))
+
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
         """
@@ -108,6 +170,10 @@ class BookmarkViewSet(viewsets.ViewSet):
         else:
             Remove Bookmark from user's bookmark list.
 
+        API:
+            Delete Folder/Listing Bookmark\
+
+            DELETE /api/bookmark/{id}
         """
         return Response({"pk": pk})
 
@@ -143,7 +209,9 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
 
         POST JSON data if creating a folder bookmark:
         {
-            "profile": {"id": 4}}
+            "profile": {
+                "username":"username"
+            }
             "user_type": "OWNER/VIEWER",
         }
         """

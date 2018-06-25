@@ -65,7 +65,22 @@ def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     OWNER can view/add/edit/delete BookmarkEntry and BookmarkPermission models
     VIEWERs have no permissions
     """
-    profile_bookmark_permission = models.BookmarkPermission.objects.filter(profile=request_profile, bookmark=bookmark_entry).first()
+    bookmark_entry_type = bookmark_entry.type
+
+    profile_bookmark_permission = None
+
+    if bookmark_entry_type == FOLDER_TYPE:
+        profile_bookmark_permission = models.BookmarkPermission.objects.filter(
+            profile=request_profile,
+            bookmark=bookmark_entry)
+    elif bookmark_entry_type == LISTING_TYPE:
+        profile_bookmark_permission = models.BookmarkPermission.objects.filter(
+            profile=request_profile,
+            bookmark__bookmarkentry=bookmark_entry)
+
+    # Convert query to BookmarkPermission object
+    if profile_bookmark_permission:
+        profile_bookmark_permission = profile_bookmark_permission.first()
 
     if not profile_bookmark_permission:
         raise errors.PermissionDenied('request profile does not have permission to view permissions')
@@ -144,6 +159,9 @@ def get_user_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     Access Control handle by get_bookmark_entry_by_id
     """
     check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry)
+
+    if bookmark_entry.type != FOLDER_TYPE:
+        raise errors.PermissionDenied('Can only check permissions for folder bookmarks')
 
     query = models.BookmarkPermission.objects.filter(bookmark=bookmark_entry)
     return query
@@ -331,3 +349,45 @@ def create_listing_bookmark_for_profile(request_profile, listing, bookmark_entry
     )
 
     return bookmark_entry
+
+
+def update_bookmark_entry_for_profile(request_profile, bookmark_entry_instance, bookmark_parent_object, title):
+    """
+    Update Bookmark Entries
+
+    Method Responsibilities:
+        * Rename folder bookmark titles
+        * Moving folder/listing bookmarks under different folders
+
+    Args:
+        request_profile
+        bookmark_entry_instance
+        bookmark_parent_object:
+            `BookmarkEntry` bookmark instance where request_profile want to put bookmark_entry_instance in that folder
+        title
+    """
+    if bookmark_parent_object is None and title is None:
+        raise errors.PermissionDenied('Need at least the bookmark_parent or title field')
+    # Check to see if request profile has access to bookmark_entry_instance
+    # (bookmark_entry_instance can be folder or listing bookmark)
+    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_instance)
+
+    if bookmark_parent_object:
+        if bookmark_parent_object.type != FOLDER_TYPE:
+            raise errors.PermissionDenied('bookmark_parent_object needs to be a folder type')
+        # make sure user has owner access on bookmark_parent_object
+        check_owner_permissions_for_bookmark_entry(request_profile, bookmark_parent_object)
+
+        # get bookmark entries to folder relationships for request_profile
+        bookmark_entry_folder_relationships = bookmark_entry_instance.bookmark_parent.filter(
+            bookmark_permission__profile=request_profile)
+        bookmark_entry_instance.bookmark_parent.remove(*bookmark_entry_folder_relationships)
+
+        bookmark_entry_instance.bookmark_parent.add(bookmark_parent_object)
+
+    if bookmark_entry_instance.type == FOLDER_TYPE:
+        if title:
+            bookmark_entry_instance.title = title
+
+    bookmark_entry_instance.save()
+    return bookmark_entry_instance
