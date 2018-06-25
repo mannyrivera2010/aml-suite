@@ -15,7 +15,9 @@ from plugins.plugin_manager import system_anonymize_identifiable_data
 import ozpcenter.model_access as generic_model_access
 import ozpcenter.api.agency.model_access as agency_model_access
 import ozpcenter.api.work_role.model_access as work_role_model_access
+import ozpcenter.api.image.model_access as image_model_access
 from ozpcenter.api.work_role.serializers import WorkRoleSerializer
+from ozpcenter.api.image.serializers import ImageSerializer
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -124,6 +126,7 @@ class ShortUserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    avatar = ImageSerializer()
     organizations = AgencySerializer(many=True)
     stewarded_organizations = AgencySerializer(many=True)
     work_roles = WorkRoleSerializer(many=True)
@@ -131,7 +134,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Profile
-        fields = ('id', 'display_name', 'bio', 'organizations',
+        fields = ('id', 'display_name', 'bio', 'avatar', 'organizations',
             'stewarded_organizations', 'work_roles', 'user', 'highest_role', 'dn',
             'center_tour_flag', 'hud_tour_flag', 'webtop_tour_flag',
             'email_notification_flag', 'listing_notification_flag', 'subscription_notification_flag',
@@ -191,6 +194,11 @@ class ProfileSerializer(serializers.ModelSerializer):
                 work_roles.append(work_role_model_access.get_work_role_by_id(work_role['id']))
             data['work_roles'] = work_roles
 
+        avatar = None
+        if 'avatar' in data and 'id' in data['avatar']:
+            avatar = image_model_access.get_image_by_id(data['avatar']['id'])
+        data['avatar'] = avatar
+
         return data
 
     def update(self, profile_instance, validated_data):
@@ -220,6 +228,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         if 'theme' in validated_data:
             profile_instance.theme = validated_data['theme']
+
+        if 'avatar' in validated_data:
+            profile_instance.avatar = validated_data['avatar']
 
         current_request_profile = generic_model_access.get_profile(self.context['request'].user.username)
 
