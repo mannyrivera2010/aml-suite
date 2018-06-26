@@ -2,6 +2,38 @@
 Test bookmark
 
 TEST_MODE=True pytest tests/ozpcenter_api/test_api_bookmark.py
+
+[
+    {
+        "id": 3,
+        "type": "FOLDER",
+        "title": "Animals",
+        "is_shared": False,
+        "children":[
+            {
+                "id": 4,
+                "type": "LISTING",
+                "title": "Killer Whale"
+            },
+            {
+                "id": 5,
+                "type": "LISTING",
+                "title": "Lion Finder"
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "type": "LISTING",
+        "title": "Parrotlet"
+    }
+]
+
+Nodes()
+    .parse(data)
+    .move('/Animals/Killer Whale')
+    .to('/')
+    .search('/Killer Whale').id()
 """
 from django.test import override_settings
 from tests.ozp.cases import APITestCase
@@ -68,15 +100,15 @@ def shorthand_shared_folder(data, level=0):
 
         if type == 'FOLDER':
             if data['is_shared']:
-                output.append('{}+({}) {}'.format(' ' * level, 'SF', data['title']))
+                output.append('{}({}) {}'.format(' ' * level, 'SF', data['title']))
             else:
-                output.append('{}+({}) {}'.format(' ' * level, 'F', data['title']))
+                output.append('{}({}) {}'.format(' ' * level, 'F', data['title']))
 
             if 'children' in data:
                 output.append(shorthand_shared_folder(data['children'], level + 1))
 
         elif type == 'LISTING':
-            output.append('{}-({}) {}'.format(' ' * level, 'L', data['listing']['title']))
+            output.append('{}({}) {}'.format(' ' * level, 'L', data['listing']['title']))
 
         return '\n'.join(output)
 
@@ -98,46 +130,46 @@ class BookmarkApiTest(APITestCase):
         self.maxDiff = None
 
         self.bigbrother_expected_bookmarks = [
-            '+(F) Animals',
-            ' -(L) Killer Whale',
-            ' -(L) Lion Finder',
-            ' -(L) Monkey Finder',
-            ' -(L) Parrotlet',
-            ' -(L) White Horse',
-            ' -(L) Wolf Finder',
-            '+(F) Instruments',
-            ' -(L) Acoustic Guitar',
-            ' -(L) Electric Guitar',
-            ' -(L) Electric Piano',
-            ' -(L) Piano',
-            ' -(L) Sound Mixer',
-            ' -(L) Violin',
-            '+(F) Weather',
-            ' -(L) Lightning',
-            ' -(L) Snow',
-            ' -(L) Tornado',
-            '-(L) Bread Basket',
-            '-(L) Chain boat navigation',
-            '-(L) Chart Course',
-            '-(L) Gallery of Maps',
-            '-(L) Informational Book',
-            '-(L) Stop sign'
+            '(F) Animals',
+            ' (L) Killer Whale',
+            ' (L) Lion Finder',
+            ' (L) Monkey Finder',
+            ' (L) Parrotlet',
+            ' (L) White Horse',
+            ' (L) Wolf Finder',
+            '(F) Instruments',
+            ' (L) Acoustic Guitar',
+            ' (L) Electric Guitar',
+            ' (L) Electric Piano',
+            ' (L) Piano',
+            ' (L) Sound Mixer',
+            ' (L) Violin',
+            '(F) Weather',
+            ' (L) Lightning',
+            ' (L) Snow',
+            ' (L) Tornado',
+            '(L) Bread Basket',
+            '(L) Chain boat navigation',
+            '(L) Chart Course',
+            '(L) Gallery of Maps',
+            '(L) Informational Book',
+            '(L) Stop sign'
         ]
 
         self.wsmith_expected_bookmarks = [
-            '+(F) heros',
-            ' -(L) Iron Man',
-            ' -(L) Jean Grey',
-            ' -(L) Mallrats',
-            '+(F) old',
-            ' -(L) Air Mail',
-            ' -(L) Bread Basket',
-            '+(F) planets',
-            ' -(L) Azeroth',
-            ' -(L) Saturn',
-            '-(L) Baltimore Ravens',
-            '-(L) Diamond',
-            '-(L) Grandfather clock'
+            '(F) heros',
+            ' (L) Iron Man',
+            ' (L) Jean Grey',
+            ' (L) Mallrats',
+            '(F) old',
+            ' (L) Air Mail',
+            ' (L) Bread Basket',
+            '(F) planets',
+            ' (L) Azeroth',
+            ' (L) Saturn',
+            '(L) Baltimore Ravens',
+            '(L) Diamond',
+            '(L) Grandfather clock'
         ]
 
     def _get_bookmarks_and_check_for_user(self, username, expected_results):
@@ -208,20 +240,20 @@ class BookmarkApiTest(APITestCase):
         test checks for shared folders (InstrumentSharing)
         """
         shared_folder_bookmarks = [
-            '+(SF) InstrumentSharing',
-            ' -(L) Acoustic Guitar',
+            '(SF) InstrumentSharing',
+            ' (L) Acoustic Guitar',
         ]
 
         bigbrother2_expected_bookmarks = shared_folder_bookmarks + [
-            '-(L) Alingano Maisu'
+            '(L) Alingano Maisu'
         ]
 
         julia_expected_bookmarks = shared_folder_bookmarks + [
-            '-(L) Astrology software'
+            '(L) Astrology software'
         ]
 
         johnson_expected_bookmarks = shared_folder_bookmarks + [
-            '-(L) Applied Ethics Inc.'
+            '(L) Applied Ethics Inc.'
         ]
 
         bigbrother2_bookmarks = self._get_bookmarks_and_check_for_user('bigbrother2', bigbrother2_expected_bookmarks)  # OWNER
@@ -246,15 +278,15 @@ class BookmarkApiTest(APITestCase):
         shared_folder_bookmarks.extend(shorten_shared_data)
 
         bigbrother2_expected_bookmarks = shared_folder_bookmarks + [
-            '-(L) Alingano Maisu'
+            '(L) Alingano Maisu'
         ]
 
         julia_expected_bookmarks = shared_folder_bookmarks + [
-            '-(L) Astrology software'
+            '(L) Astrology software'
         ]
 
         johnson_expected_bookmarks = shared_folder_bookmarks + [
-            '-(L) Applied Ethics Inc.'
+            '(L) Applied Ethics Inc.'
         ]
 
         # All users should be able to see the recently added bookmark under shared folder

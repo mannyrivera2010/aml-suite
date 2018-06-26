@@ -85,7 +85,7 @@ def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     if not profile_bookmark_permission:
         raise errors.PermissionDenied('request profile does not have permission to view permissions')
     elif profile_bookmark_permission.user_type == models.BookmarkPermission.VIEWER:
-        raise errors.PermissionDenied('request profile does not have permission to view permissions becuase of user_type')
+        raise errors.PermissionDenied('request profile does not have permission to view permissions because of user_type')
     elif profile_bookmark_permission.user_type == models.BookmarkPermission.OWNER:
         pass
         # Owners are allowed to do view/edit/delete
@@ -391,3 +391,66 @@ def update_bookmark_entry_for_profile(request_profile, bookmark_entry_instance, 
 
     bookmark_entry_instance.save()
     return bookmark_entry_instance
+
+
+def build_folder_queries_recursive_flatten(request_profile, bookmark_entry_instance, is_start=True):
+    """
+    Build Queries to get all folder and listing queries under a bookmark_entry folder bookmark recursively
+
+    Args:
+        request_profile
+        bookmark_entry_instance
+        is_start
+    """
+    output = []
+
+    folder_query = models.BookmarkEntry.manager.filter(type=models.BookmarkEntry.FOLDER)
+    listing_query = models.BookmarkEntry.manager.filter(type=models.BookmarkEntry.LISTING)
+
+    if is_start:
+        folder_query = folder_query.filter(bookmark_parent__bookmark_permission__profile=request_profile)  # Validate to make sure user can see folder
+        listing_query = listing_query.filter(bookmark_parent__bookmark_permission__profile=request_profile)  # Validate to make sure user can see folder,
+
+    folder_query = folder_query.filter(bookmark_parent=bookmark_entry_instance)
+    listing_query = listing_query.filter(bookmark_parent=bookmark_entry_instance)
+
+    output.append(listing_query)
+
+    for folder_entry in folder_query:
+        output.extend(build_folder_queries_recursive_flatten(request_profile, folder_entry, is_start=False))
+
+    output.append(bookmark_entry_instance)
+
+    return output
+
+
+def delete_bookmark_entry_for_profile(request_profile, bookmark_entry_instance):
+    """
+    Delete Bookmark Entry for profile
+    Validate make sure user has access
+
+    Deleting a BookmarkEntry that is a folder will have this behavior
+        BookmarkEntry.manager.get(id=5).delete()
+
+        DELETE FROM "bookmark_parents" WHERE "bookmark_parents"."from_bookmarkentry_id" IN (5)
+        DELETE FROM "bookmark_parents" WHERE "bookmark_parents"."to_bookmarkentry_id" IN (5)
+        DELETE FROM "ozpcenter_bookmarkpermission" WHERE "ozpcenter_bookmarkpermission"."bookmark_id" IN (5)
+        DELETE FROM "ozpcenter_bookmarkentry" WHERE "ozpcenter_bookmarkentry"."id" IN (5)
+
+        (5,
+         {'ozpcenter.BookmarkEntry': 1,
+          'ozpcenter.BookmarkEntry_bookmark_parent': 3,
+          'ozpcenter.BookmarkPermission': 1})
+    """
+    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_instance)
+
+    if bookmark_entry_instance.type == FOLDER_TYPE:
+        # root_folder = create_get_user_root_bookmark_folder(request_profile)
+        folder_queries = build_folder_queries_recursive_flatten(request_profile, bookmark_entry_instance, is_start=True)
+
+        for current_query in folder_queries:
+            current_query.delete()
+
+    elif bookmark_entry_instance.type == LISTING_TYPE:
+        # If bookmark_entry_instance type is LISTING_TYPE then just delete
+        bookmark_entry_instance.delete()

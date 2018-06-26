@@ -565,7 +565,7 @@ class BookmarkPermissionManager(models.Manager):
 
 
 class BookmarkPermission(models.Model):
-    bookmark = models.ForeignKey('BookmarkEntry', related_name='bookmark_permission')
+    bookmark = models.ForeignKey('BookmarkEntry', related_name='bookmark_permission')  # , on_delete=models.CASCADE)
     profile = models.ForeignKey('Profile')
 
     created_date = models.DateTimeField(default=utils.get_now_utc)

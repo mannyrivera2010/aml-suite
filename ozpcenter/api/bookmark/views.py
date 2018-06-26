@@ -93,7 +93,7 @@ class BookmarkViewSet(viewsets.ViewSet):
             ```
             POST /api/bookmark/
             {
-                "title": "Folder 1"
+                "title": "Folder 1",
                 "type": "FOLDER"
             }
             ```
@@ -158,24 +158,19 @@ class BookmarkViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         """
-        Validate make sure user has access
-
-        if shared folder:
-            if request_profile is viewer:
-                raise PermissionDenied
-            elif request_profile is owner and there is only one owner:
-                Give owner "Are you sure you want to remove folder, it will affect all users"
-            elif request_profile is owner and there is more than 1 owner:
-                Remove Bookmark from user's bookmark list.
-        else:
-            Remove Bookmark from user's bookmark list.
+        Delete/Remove Bookmark Entry from request_profile
 
         API:
-            Delete Folder/Listing Bookmark\
+            Delete Folder/Listing Bookmark
 
             DELETE /api/bookmark/{id}
         """
-        return Response({"pk": pk})
+        current_request_profile = request.user.profile
+        bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
+
+        model_access.delete_bookmark_entry_for_profile(current_request_profile, bookmark_entry)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class BookmarkPermissionViewSet(viewsets.ViewSet):
