@@ -828,6 +828,7 @@ class Profile(models.Model):
     """
     display_name = models.CharField(max_length=255)
     bio = models.CharField(max_length=1000, blank=True)
+    avatar = models.ForeignKey(Image, related_name='profile_avatar', blank=True, null=True)
     # user's DN from PKI cert
     # ideally this wouldn't be here and in a system using PKI, the user's DN
     # would be the username. DNs can be longer than Django's User.username

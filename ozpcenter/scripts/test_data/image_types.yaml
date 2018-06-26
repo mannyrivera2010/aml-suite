@@ -39,3 +39,8 @@ image_types:
   max_width: 2048
   min_width: 16
   name: small_screenshot
+- max_height: 2048
+  max_size_bytes: 2097152
+  max_width: 2048
+  min_width: 16
+  name: profile_avatar
