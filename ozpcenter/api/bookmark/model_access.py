@@ -42,7 +42,9 @@ root_folder = model_access.create_get_user_root_bookmark_folder(request_profile)
 import copy
 
 import ozpcenter.models as models
+from ozpcenter.pubsub import dispatcher
 from ozpcenter import errors
+
 
 FOLDER_TYPE = models.BookmarkEntry.FOLDER
 LISTING_TYPE = models.BookmarkEntry.LISTING
@@ -95,7 +97,7 @@ def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     return profile_bookmark_permission
 
 
-def create_bookmark_entry(request_profile=None, entry_type=None, folder_title=None, listing=None, is_root=None):
+def _validate_create_bookmark_entry(request_profile=None, entry_type=None, folder_title=None, listing=None, is_root=None):
     is_folder_type = (entry_type == FOLDER_TYPE)
     is_listing_type = (entry_type == LISTING_TYPE)
     is_root = is_root if is_root is True else False
@@ -110,6 +112,23 @@ def create_bookmark_entry(request_profile=None, entry_type=None, folder_title=No
             raise AssertionError('Bookmark {} Entry require listing object'.format(LISTING_TYPE))
     except AssertionError as err:
         raise errors.PermissionDenied(err)
+
+
+def create_bookmark_entry(request_profile=None, entry_type=None, folder_title=None, listing=None, is_root=None):
+    """
+    Create BookmarkEntry
+
+    Args:
+        request_profile
+        entry_type
+        folder_title
+        listing
+        is_root
+    """
+    is_folder_type = (entry_type == FOLDER_TYPE)
+    is_listing_type = (entry_type == LISTING_TYPE)
+    is_root = is_root if is_root is True else False
+    _validate_create_bookmark_entry(request_profile, entry_type, folder_title, listing, is_root)
 
     # Add Bookmark Entry
     bookmark_entry = models.BookmarkEntry()
@@ -283,7 +302,7 @@ def create_get_user_root_bookmark_folder(request_profile):
 
         return bookmark_entry_query.first()
     else:
-        bookmark_entry = create_bookmark_entry(request_profile, FOLDER_TYPE, folder_title='', is_root=True)
+        bookmark_entry = create_bookmark_entry(request_profile, FOLDER_TYPE, folder_title='ROOT', is_root=True)
 
         bookmark_permission = models.BookmarkPermission()
         bookmark_permission.bookmark = bookmark_entry
@@ -372,6 +391,9 @@ def update_bookmark_entry_for_profile(request_profile, bookmark_entry_instance, 
     # (bookmark_entry_instance can be folder or listing bookmark)
     check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_instance)
 
+    folder_title_changed = False
+    bookmark_entry_moved = False
+
     if bookmark_parent_object:
         if bookmark_parent_object.type != FOLDER_TYPE:
             raise errors.PermissionDenied('bookmark_parent_object needs to be a folder type')
@@ -384,12 +406,22 @@ def update_bookmark_entry_for_profile(request_profile, bookmark_entry_instance, 
         bookmark_entry_instance.bookmark_parent.remove(*bookmark_entry_folder_relationships)
 
         bookmark_entry_instance.bookmark_parent.add(bookmark_parent_object)
+        bookmark_entry_moved = True
 
     if bookmark_entry_instance.type == FOLDER_TYPE:
         if title:
             bookmark_entry_instance.title = title
+            folder_title_changed = True
 
     bookmark_entry_instance.save()
+
+    if bookmark_entry_moved or folder_title_changed:
+        dispatcher.publish('update_bookmark_entry',
+            bookmark_entry_instance=bookmark_entry_instance,
+            bookmark_parent_object=bookmark_parent_object,
+            folder_title_changed=folder_title_changed,
+            bookmark_entry_moved=bookmark_entry_moved)
+
     return bookmark_entry_instance
 
 
@@ -447,6 +479,8 @@ def delete_bookmark_entry_for_profile(request_profile, bookmark_entry_instance):
     if bookmark_entry_instance.type == FOLDER_TYPE:
         # root_folder = create_get_user_root_bookmark_folder(request_profile)
         folder_queries = build_folder_queries_recursive_flatten(request_profile, bookmark_entry_instance, is_start=True)
+
+        dispatcher.publish('remove_bookmark_folder', bookmark_entry=bookmark_entry_instance, folder_queries=folder_queries)
 
         for current_query in folder_queries:
             current_query.delete()
