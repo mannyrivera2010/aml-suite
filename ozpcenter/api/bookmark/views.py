@@ -146,7 +146,8 @@ class BookmarkViewSet(viewsets.ViewSet):
         current_request_profile = request.user.profile
         bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
 
-        serializer = serializers.BookmarkSerializer(bookmark_entry, data=request.data, context={'request': request}, partial=True)
+        serializer = serializers.BookmarkSerializer(bookmark_entry, data=request.data,
+            context={'request': request}, partial=True)
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
@@ -181,7 +182,7 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
 
     URIs
     ======
-    GET /api/bookmark
+    GET /api/bookmark/{id}/permission/
 
     """
     permission_classes = (permissions.IsUser,)
@@ -189,6 +190,12 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
     def list(self, request, bookmark_pk=None):
         """
         Get a list of permissions for a bookmark for request profile
+
+        API:
+            Get a list of who has access to {folder_bookmark_id} BookmarkEntry
+            ```
+            GET /api/bookmark/{folder_bookmark_id}/permission/
+            ```
         """
         current_request_profile = request.user.profile
         bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, bookmark_pk)
@@ -198,22 +205,65 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
 
         return Response(serializer.data)
 
+    def retrieve(self, request, bookmark_pk=None, pk=None):
+        """
+        Get BookmarkPermission by id for request profile
+        """
+        request_profile = request.user.profile
+        bookmark_entry = model_access.get_bookmark_entry_by_id(request_profile, bookmark_pk)
+        bookmark_permission = model_access.get_bookmark_permission_by_id(request_profile, bookmark_entry, pk)
+
+        serializer = serializers.BookmarkPermissionSerializer(bookmark_permission,
+            context={'request': request}, many=False)
+
+        return Response(serializer.data)
+
     def create(self, request, bookmark_pk=None):
         """
-        Bookmark a Listing for the current user.
+        Add Permission to BookmarkEntry
 
-        POST JSON data if creating a folder bookmark:
-        {
-            "profile": {
-                "username":"username"
+        API:
+            Add OWNER {username} to {bookmark_id} BookmarkEntry
+            ```
+            POST /api/bookmark/{bookmark_id}/permission/
+            {
+                "user_type":"OWNER",
+                "profile":{
+                    "user":{
+                        "username":{username}
+                    }
+                }
             }
-            "user_type": "OWNER/VIEWER",
-        }
+            ```
+
+            Add VIEWER {username} to {bookmark_id} BookmarkEntry
+            ```
+            POST /api/bookmark/{bookmark_id}/permission/
+            {
+                "user_type":"VIEWER",
+                "profile":{
+                    "user":{
+                        "username":{username}
+                    }
+                }
+            }
+            ```
+
+        API Errors:
+            When the Profile is not found via username
+            ```
+            {
+                "detail": "Valid User is Required",
+                "error": true,
+                "error_code": "validation_error"
+            }
+            ```
         """
         current_request_profile = request.user.profile
         bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, bookmark_pk)
 
-        serializer = serializers.BookmarkPermissionSerializer(data=request.data, context={'request': request, 'bookmark_entry': bookmark_entry}, partial=True)
+        serializer = serializers.BookmarkPermissionSerializer(data=request.data,
+            context={'request': request, 'bookmark_entry': bookmark_entry}, partial=True)
 
         if not serializer.is_valid():
             logger.error('{0!s}'.format(serializer.errors))
@@ -222,6 +272,52 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, bookmark_pk=None, pk=None):
+        """
+        Updating Bookmark Permission
+            * Use to convert OWNER User Permission to VIEWER User Permission
+            * Use to convert VIEWER User Permission to OWNER User Permission
+
+        Rules:
+            * The request profile that is a VIEWER can't self promote to OWNER
+            * The request profile that is a OWNER can't self demote to VIEWER
+
+        API:
+            Change permission for profile to VIEWER
+            ```
+            PUT /api/bookmark/{bookmark_id}/permission/{permission_id}
+            {
+                "user_type":"VIEWER"
+            }
+            ```
+
+            Change permission for profile to OWNER
+            ```
+            PUT /api/bookmark/{bookmark_id}/permission/{permission_id}
+            {
+                "user_type":"OWNER"
+            }
+            ```
+
+        API Error:
+            Can only update permissions for other users
+        """
+        request_profile = request.user.profile
+
+        bookmark_entry = model_access.get_bookmark_entry_by_id(request_profile, bookmark_pk)
+        bookmark_permission = model_access.get_bookmark_permission_by_id(request_profile, bookmark_entry, pk)
+
+        serializer = serializers.BookmarkPermissionSerializer(bookmark_permission, data=request.data,
+            context={'request': request, 'bookmark_entry': bookmark_entry}, partial=True)
+
+        if not serializer.is_valid():
+            logger.error('{0!s}'.format(serializer.errors))
+            raise errors.RequestException('{0!s}'.format(serializer.errors))
+
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, bookmark_pk=None, pk=None):
         """
@@ -238,4 +334,23 @@ class BookmarkPermissionViewSet(viewsets.ViewSet):
             Remove Bookmark from user's bookmark list.
 
         """
-        return Response({"bookmark_pk": bookmark_pk, "pk": pk})
+        request_profile = request.user.profile
+
+        bookmark_entry = model_access.get_bookmark_entry_by_id(request_profile, bookmark_pk)
+        bookmark_permission_entry = model_access.get_bookmark_permission_by_id(request_profile, bookmark_entry, pk)
+
+        # TODO: refactor to remove_profile_permission_for_bookmark_entry
+        bookmark_permission_entry_profile = bookmark_permission_entry.profile
+
+        if request_profile == bookmark_permission_entry_profile:
+            raise errors.PermissionDenied('can only delete permissions for other users')
+
+        # get bookmark entries to folder relationships for request_profile
+        bookmark_entry_folder_relationships = bookmark_entry.bookmark_parent.filter(
+            bookmark_permission__profile=bookmark_permission_entry_profile)
+
+        bookmark_entry.bookmark_parent.remove(*bookmark_entry_folder_relationships)
+
+        bookmark_permission_entry.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

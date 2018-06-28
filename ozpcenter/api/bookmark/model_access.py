@@ -98,6 +98,9 @@ def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
 
 
 def _validate_create_bookmark_entry(request_profile=None, entry_type=None, folder_title=None, listing=None, is_root=None):
+    """
+    Validate values for creating bookmark entries
+    """
     is_folder_type = (entry_type == FOLDER_TYPE)
     is_listing_type = (entry_type == LISTING_TYPE)
     is_root = is_root if is_root is True else False
@@ -186,6 +189,15 @@ def get_user_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     return query
 
 
+def get_bookmark_permission_by_id(request_profile, bookmark_entry, id):
+    """
+    Get bookmark entry by id and filter based on permissions
+    Only owner or viewer of folder should be able to see it
+    """
+    query = get_user_permissions_for_bookmark_entry(request_profile, bookmark_entry)
+    return query.get(id=id)
+
+
 def add_profile_permission_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target_profile, target_bookmark, target_user_type=None, share=False):
     """
     Add Profile Permission to Bookmark Entry
@@ -231,7 +243,7 @@ def add_profile_permission_for_bookmark_entry(request_profile, bookmark_entry_fo
         pass
 
 
-def share_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target_profile, target_profile_bookmark_entry, target_user_type=None):
+def share_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target_profile, target_profile_bookmark_entry=None, target_user_type=None):
     """
     Add Profile Permission to Bookmark Entry
 
@@ -254,8 +266,22 @@ def share_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target
     check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share)
     target_user_type = target_user_type if target_user_type else models.BookmarkPermission.VIEWER
 
+    if bookmark_entry_folder_to_share.type != FOLDER_TYPE:
+        raise errors.PermissionDenied('bookmark_entry needs to be a folder type')
+
+    # Check if target profile already has permissions for BookmarkEntry
+    existing_target_profile_permission = models.BookmarkPermission.objects.filter(
+        bookmark=bookmark_entry_folder_to_share,
+        profile=target_profile
+    ).first()
+
+    if existing_target_profile_permission:
+        raise errors.PermissionDenied('target user already has access to folder')
+
     # Add Bookmark entry to bookmark_entry_folder_to_share folder, add behaves like a set
     # target_profile_bookmark_entry.bookmark_parent.add(bookmark_entry_folder_to_share)
+    if not target_profile_bookmark_entry:
+        target_profile_bookmark_entry = create_get_user_root_bookmark_folder(target_profile)
 
     bookmark_entry_folder_to_share.bookmark_parent.add(target_profile_bookmark_entry)
 
@@ -265,9 +291,26 @@ def share_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target
         bookmark_permission_folder.profile = target_profile
         bookmark_permission_folder.user_type = target_user_type
         bookmark_permission_folder.save()
+        return bookmark_permission_folder
     elif target_bookmark.type == LISTING_TYPE:
         # LISTINGs inherit folder permissions
         pass
+
+
+def update_profile_permission_for_bookmark_entry(request_profile, bookmark_permission_entry, user_type):
+    """
+    Update Profile Permission for Bookmark Entry
+
+    Assumes all the permission checks happen before this is called for bookmark_permission_entry
+    """
+    bookmark_permission_entry_profile = bookmark_permission_entry.profile
+
+    if request_profile == bookmark_permission_entry_profile:
+        raise errors.PermissionDenied('can only update permissions for other users')
+
+    bookmark_permission_entry.user_type = user_type
+    bookmark_permission_entry.save()
+    return bookmark_permission_entry
 
 
 def remove_profile_permission_for_bookmark_entry(request_profile, target_profile, target_bookmark):

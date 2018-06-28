@@ -55,6 +55,15 @@ def find_first_shared_folder(data):
 
 
 def shorthand_permissions(data):
+    """
+    Convert Bookmark Permission endpoint data to simple strings
+
+    [{id": 6,
+     "profile": { ...,"user": { "username": "bigbrother" },}, ...,
+     "user_type": "OWNER" }]
+    TO
+    ['bigbrother(OWNER)']
+    """
     output = []
     for record in data:
         username = record.get('profile', {}).get('user', {}).get('username')

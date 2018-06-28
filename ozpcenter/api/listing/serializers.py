@@ -196,6 +196,14 @@ class CreateListingProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'display_name')
         read_only = ('id', 'display_name')
 
+        extra_kwargs = {
+            "id": {
+                "read_only": False,
+                "required": False,
+            },
+
+        }
+
     def to_representation(self, data):
         access_control_instance = plugin_manager.get_system_access_control_plugin()
         ret = super(CreateListingProfileSerializer, self).to_representation(data)

@@ -12,6 +12,8 @@ import ozpcenter.api.bookmark.model_access as model_access
 import ozpcenter.models as models
 
 from ozpcenter.api.bookmark import model_access
+import ozpcenter.model_access as generic_model_access
+from ozpcenter import errors
 
 import ozpcenter.api.listing.model_access as listing_model_access
 import ozpcenter.api.image.serializers as image_serializers
@@ -61,14 +63,73 @@ class BookmarkPermissionSerializer(serializers.ModelSerializer):
         fields = ('id', 'profile', 'created_date', 'modified_date', 'user_type',
             # 'bookmark'
         )
-        # read_only_fields = ('listing', 'bookmark_parent', 'type', 'created_date', 'modified_date', 'title')
+        read_only_fields = ('profile', 'created_date', 'modified_date')
 
         extra_kwargs = {
             "id": {
                 "read_only": False,
                 "required": False,
             },
+            "profile": {
+                "read_only": True,
+                "required": False,
+            },
         }
+
+    def to_representation(self, data):
+        ret = super(BookmarkPermissionSerializer, self).to_representation(data)
+        return ret
+
+    def validate(self, data):
+        """
+        validate
+        """
+        request_profile = self.context['request'].user.profile
+        # data: {'user_type': 'OWNER', 'profile': OrderedDict([('id', 1)])}
+
+        user_type = data.get('user_type')
+        # user_type is required field, choices are validate via django non_field_errors
+        if not user_type:
+            raise errors.ValidationException('user_type field is missing')
+
+        return data
+
+    def create(self, validated_data):
+        """
+        Create BookmarkPermission entry
+
+        Required Fields:
+            pass
+        """
+        username = self.context['request'].user.username
+        request_profile = self.context['request'].user.profile
+        bookmark_entry = self.context['bookmark_entry']
+
+        user_type = validated_data.get('user_type')
+
+        target_username = validated_data.get('profile', {}).get('user', {}).get('username')
+        if not target_username:
+            raise errors.ValidationException('Valid Username is Required')
+
+        target_profile = generic_model_access.get_profile(target_username)
+
+        if not target_profile:
+            raise errors.ValidationException('Valid User is Required')
+
+        return model_access.share_bookmark_entry(
+            request_profile,
+            bookmark_entry,
+            target_profile,
+            None,
+            user_type)
+
+    def update(self, bookmark_permission_entry, validated_data):
+        request_profile = self.context['request'].user.profile
+        bookmark_entry = self.context['bookmark_entry']
+        user_type = validated_data.get('user_type')
+
+        return model_access.update_profile_permission_for_bookmark_entry(
+            request_profile, bookmark_permission_entry, user_type)
 
 
 class BookmarkParentSerializer(serializers.ModelSerializer):
@@ -178,13 +239,13 @@ class BookmarkSerializer(serializers.ModelSerializer):
             bookmark_parent_len = len(data['bookmark_parent'])
 
             if bookmark_parent_len > 1:
-                raise serializers.ValidationError('bookmark_parent')
+                raise errors.ValidationException('bookmark_parent has more than one folder')
             elif bookmark_parent_len == 1:
                 bookmark_parent_id = data['bookmark_parent'][0]['id']
                 data['bookmark_parent_object'] = model_access.get_bookmark_entry_by_id(request_profile, bookmark_parent_id)
 
                 if data['bookmark_parent_object'].type != 'FOLDER':
-                    raise serializers.ValidationError('bookmark_parent entry must be FOLDER')
+                    raise errors.ValidationException('bookmark_parent entry must be FOLDER')
             elif bookmark_parent_len < 1:
                 data['bookmark_parent_object'] = model_access.create_get_user_root_bookmark_folder(request_profile)
 
@@ -208,22 +269,22 @@ class BookmarkSerializer(serializers.ModelSerializer):
             listing_id = validated_data.get('listing', {}).get('id')
 
             if not listing_id:
-                raise serializers.ValidationError('Listing id entry not found')
+                raise errors.ValidationException('Listing id entry not found')
 
             listing = listing_model_access.get_listing_by_id(username, listing_id)
 
             if not listing:
-                raise serializers.ValidationError('Listing id entry not found')
+                raise errors.ValidationException('Listing id entry not found')
 
             return model_access.create_listing_bookmark_for_profile(request_profile, listing, bookmark_parent_object)
 
         elif type == models.BookmarkEntry.FOLDER:
             if 'title' not in validated_data:
-                raise serializers.ValidationError('No title provided')
+                raise errors.ValidationException('No title provided')
 
             return model_access.create_folder_bookmark_for_profile(request_profile, validated_data['title'], bookmark_parent_object)
         else:
-            raise serializers.ValidationError('No valid type provided')
+            raise errors.ValidationException('No valid type provided')
 
     def update(self, bookmark_entry_instance, validated_data):
         request_profile = self.context['request'].user.profile
