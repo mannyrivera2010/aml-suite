@@ -356,7 +356,7 @@ def create_get_user_root_bookmark_folder(request_profile):
         return bookmark_entry
 
 
-def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_entry_folder=None):
+def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_entry_folder=None, bookmark_children=None):
     """
     Create Folder Bookmark for profile
 
@@ -364,8 +364,10 @@ def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_en
         profile (models.Profile): Profile
         folder_name (String): Folder name
         bookmark_entry_folder: (models.BookmarkEntry): Entry folder
+        bookmark_children: (List of Integers)
     """
     bookmark_entry_folder = bookmark_entry_folder if bookmark_entry_folder else create_get_user_root_bookmark_folder(request_profile)
+    bookmark_children = bookmark_children if bookmark_children else []
 
     if bookmark_entry_folder.type != FOLDER_TYPE:
         raise errors.PermissionDenied('bookmark_entry needs to be a folder type')
@@ -383,6 +385,15 @@ def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_en
         bookmark_folder_entry,
         target_user_type=models.BookmarkPermission.OWNER
     )
+
+    print(bookmark_children)
+
+    for bookmark_child in bookmark_children:
+        update_bookmark_entry_for_profile(
+            request_profile,
+            get_bookmark_entry_by_id(request_profile, bookmark_child),
+            bookmark_folder_entry,
+            None)
 
     return bookmark_folder_entry
 

@@ -169,6 +169,9 @@ class BookmarkSerializer(serializers.ModelSerializer):
     listing = LibraryListingSerializer(required=False)
     bookmark_parent = BookmarkParentSerializer(many=True, required=False)
     bookmark_permission_self = serializers.SerializerMethodField('get_bookmark_permission')
+    children = serializers.ListField(
+       child=DictField(), read_only=True
+    )
 
     def get_bookmark_permission(self, container):
         request_profile = self.context['request'].user.profile
@@ -187,7 +190,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
         fields = (
             'listing', 'bookmark_parent',
             # 'bookmark_permission',  # TODO: Figure out how to do custom queryset for this field, should only show
-            'bookmark_permission_self',
+            'bookmark_permission_self', 'children',
             'id', 'type', 'created_date', 'modified_date', 'title'
         )
 
@@ -205,6 +208,10 @@ class BookmarkSerializer(serializers.ModelSerializer):
                 "read_only": False,
                 "required": True,
             },
+            # "children": {
+            #     "read_only": True,
+            #     "required": False,
+            # },
         }
 
     def to_representation(self, data):
@@ -220,11 +227,23 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
         del ret['bookmark_parent']
 
-        if ret['type'] == models.BookmarkEntry.LISTING:
+        if ret['type'] == model_access.LISTING_TYPE:
             del ret['title']  # listing type does not have titles
             del ret['bookmark_permission_self']  # listing type does not have titles
-        elif ret['type'] == models.BookmarkEntry.FOLDER:
+        elif ret['type'] == model_access.FOLDER_TYPE:
             del ret['listing']  # folder type does not have listings
+
+        return ret
+
+    def to_internal_value(self, data):
+        ret = super(BookmarkSerializer, self).to_internal_value(data)
+        ret['children'] = data.get('children', [])
+        if 'children' in ret:
+            for child in ret['children']:
+                if not isinstance(child, dict):
+                    raise errors.ValidationException('children has to be a list of dictionaries')
+                if 'id' not in child:
+                    raise errors.ValidationException('child in children list of dictionaries is mising id field')
 
         return ret
 
@@ -249,6 +268,13 @@ class BookmarkSerializer(serializers.ModelSerializer):
             elif bookmark_parent_len < 1:
                 data['bookmark_parent_object'] = model_access.create_get_user_root_bookmark_folder(request_profile)
 
+        if 'children' in data:
+            bookmark_children_ids = []
+            for child in data['children']:
+                if 'id' in child:
+                    bookmark_children_ids.append(child['id'])
+            data['bookmark_children'] = bookmark_children_ids
+
         return data
 
     def create(self, validated_data):
@@ -260,12 +286,15 @@ class BookmarkSerializer(serializers.ModelSerializer):
             * `listing id` if type is LISTING
             * `title` if type is folder
         """
+        print(validated_data)
+
         username = self.context['request'].user.username
         request_profile = self.context['request'].user.profile
         bookmark_parent_object = validated_data.get('bookmark_parent_object')
         type = validated_data.get('type')
+        bookmark_children = validated_data.get('bookmark_children')
 
-        if type == models.BookmarkEntry.LISTING:
+        if type == model_access.LISTING_TYPE:
             listing_id = validated_data.get('listing', {}).get('id')
 
             if not listing_id:
@@ -276,13 +305,20 @@ class BookmarkSerializer(serializers.ModelSerializer):
             if not listing:
                 raise errors.ValidationException('Listing id entry not found')
 
-            return model_access.create_listing_bookmark_for_profile(request_profile, listing, bookmark_parent_object)
+            return model_access.create_listing_bookmark_for_profile(
+                request_profile,
+                listing,
+                bookmark_parent_object)
 
-        elif type == models.BookmarkEntry.FOLDER:
+        elif type == model_access.FOLDER_TYPE:
             if 'title' not in validated_data:
                 raise errors.ValidationException('No title provided')
 
-            return model_access.create_folder_bookmark_for_profile(request_profile, validated_data['title'], bookmark_parent_object)
+            return model_access.create_folder_bookmark_for_profile(
+                request_profile,
+                validated_data['title'],
+                bookmark_parent_object,
+                bookmark_children)
         else:
             raise errors.ValidationException('No valid type provided')
 
@@ -315,13 +351,13 @@ def _create_folder_listing_queries_and_serialized(request_profile, request, fold
     ordering_fields = ordering_fields if ordering_fields else ['created_date']
 
     folder_query = models.BookmarkEntry.objects.filter(
-        type=models.BookmarkEntry.FOLDER,
+        type=model_access.FOLDER_TYPE,
         bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
     )
 
     # for_profile should do `private listing` check for listing
     listing_query = models.BookmarkEntry.objects.for_profile_minus_security_marking(request_profile).filter(
-        type=models.BookmarkEntry.LISTING,
+        type=model_access.LISTING_TYPE,
         bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder,
     )
 
@@ -372,8 +408,11 @@ def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_p
     bookmarks_dict = _create_folder_listing_queries_and_serialized(
         request_profile, request, folder_bookmark_entry, is_parent, ordering_fields=ordering_fields)
 
-    return {"folders": _get_nested_bookmarks_tree(request_profile, bookmarks_dict['folder_data'], request=request, ordering_fields=ordering_fields),
-            "listings": bookmarks_dict['listing_data_after_filter']}
+    return {
+        "folders": _get_nested_bookmarks_tree(request_profile, bookmarks_dict['folder_data'], request=request, ordering_fields=ordering_fields),
+        # "folders": bookmarks_dict['folder_data'],
+        "listings": bookmarks_dict['listing_data_after_filter']
+    }
 
 
 def _get_nested_bookmarks_tree(request_profile, data, serialized=False, request=None, ordering_fields=None):

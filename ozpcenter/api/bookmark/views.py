@@ -97,6 +97,20 @@ class BookmarkViewSet(viewsets.ViewSet):
                 "type": "FOLDER"
             }
             ```
+
+            Create a 'Merged' Folder bookmark under root folder for user with 2 children:
+            ```
+            POST /api/bookmark/
+            {
+                "title": "Folder 2",
+                "type": "FOLDER",
+                "children":[
+                        {"id":16},
+                        {"id":17}
+                ]
+            }
+            ```
+
             Error:
                 A folder with that name already exist (TODO)
 
