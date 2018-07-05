@@ -60,7 +60,7 @@ class ProfileListingVisitApiTest(APITestCase):
         response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
         visit = response.data[0]
 
-        self.assertTrue(visit['count'] > 0)
+        self.assertTrue(visit['count'] >= 0)
 
         url = '/api/profile/self/listingvisits/clear/'
         data = {'listing': {'id': visit['listing']['id']}}
@@ -72,3 +72,21 @@ class ProfileListingVisitApiTest(APITestCase):
         new_visit = response.data
 
         self.assertTrue(new_visit['count'] == 0)
+
+    def test_clear_all_visits(self):
+        # assumes bigbrother has at least one listing visit
+        url = '/api/profile/self/listingvisits/frequent/'
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+        visit = response.data[0]
+
+        self.assertTrue(len(response.data) > 0)
+
+        url = '/api/profile/self/listingvisits/clear/'
+        data = {}
+        response = APITestHelper.request(self, url, 'POST', data=data, username='bigbrother', status_code=200)
+
+        # get the freq visited listings after making the clear all API call
+        url = '/api/profile/self/listingvisits/frequent/'
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+
+        self.assertTrue(len(response.data) == 0)
