@@ -13,6 +13,7 @@ from ozpcenter import models
 from plugins import plugin_manager
 from plugins.plugin_manager import system_anonymize_identifiable_data
 import ozpcenter.model_access as generic_model_access
+import ozpcenter.api.profile.model_access as profile_model_access
 import ozpcenter.api.agency.model_access as agency_model_access
 import ozpcenter.api.work_role.model_access as work_role_model_access
 import ozpcenter.api.image.model_access as image_model_access
@@ -46,6 +47,13 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
                 'validators': []
             }
         }
+
+
+class StorefrontCustomizationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.StorefrontCustomization
+        fields = ('section', 'position', 'is_hidden')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -130,13 +138,14 @@ class ProfileSerializer(serializers.ModelSerializer):
     organizations = AgencySerializer(many=True)
     stewarded_organizations = AgencySerializer(many=True)
     work_roles = WorkRoleSerializer(many=True)
+    storefront_customizations = StorefrontCustomizationSerializer(many=True)
     user = UserSerializer()
 
     class Meta:
         model = models.Profile
         fields = ('id', 'display_name', 'bio', 'avatar', 'organizations',
-            'stewarded_organizations', 'work_roles', 'user', 'highest_role', 'dn',
-            'center_tour_flag', 'hud_tour_flag', 'webtop_tour_flag',
+            'stewarded_organizations', 'work_roles', 'storefront_customizations', 'user',
+            'highest_role', 'dn', 'center_tour_flag', 'hud_tour_flag', 'webtop_tour_flag',
             'email_notification_flag', 'listing_notification_flag', 'subscription_notification_flag',
             'leaving_ozp_warning_flag', 'only_508_search_flag', 'is_beta_user', 'theme')
 
@@ -193,6 +202,11 @@ class ProfileSerializer(serializers.ModelSerializer):
             for work_role in data['work_roles']:
                 work_roles.append(work_role_model_access.get_work_role_by_id(work_role['id']))
             data['work_roles'] = work_roles
+
+        if 'storefront_customizations' in data:
+            for customization in data['storefront_customizations']:
+                if 'section' not in customization or not customization['section']:
+                    raise serializers.ValidationError("All items in storefront_customizations must have a section")
 
         avatar = None
         if 'avatar' in data and 'id' in data['avatar']:
@@ -253,6 +267,15 @@ class ProfileSerializer(serializers.ModelSerializer):
             profile_instance.work_roles.clear()
             for work_role in validated_data['work_roles']:
                 profile_instance.work_roles.add(work_role)
+
+        if 'storefront_customizations' in validated_data:
+            for customization in validated_data['storefront_customizations']:
+                profile_model_access.create_or_update_storefront_customization(
+                    profile_instance,
+                    customization['section'],
+                    customization['position'] if 'position' in customization else None,
+                    customization['is_hidden'] if 'is_hidden' in customization else None,
+                )
 
         profile_instance.save()
         return profile_instance

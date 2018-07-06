@@ -129,6 +129,26 @@ def get_frequently_visited_listings(current_request_username, profile_id):
     return listings
 
 
+def create_or_update_storefront_customization(profile, section, position=None, is_hidden=None):
+    """
+    Updates the storefront customization settings for a given profile and section,
+    or creates a new one if it doesn't exist
+    """
+    customizations = profile.storefront_customizations.filter(section=section)
+
+    if customizations.exists():
+        customization = customizations.first()
+    else:
+        customization = models.StorefrontCustomization(profile=profile, section=section)
+
+    if position is not None:
+        customization.position = position
+    if is_hidden is not None:
+        customization.is_hidden = is_hidden
+
+    return customization.save()
+
+
 def create_listing_visit_count(profile, listing, count, last_visit_date=None):
     """
     Set initial visit count for a given profile and listing.  Ensures that there is
