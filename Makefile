@@ -5,7 +5,7 @@ help:
 
 use_database := MAIN_DATABASE=sqlite
 use_elasticsearch_str := ES_ENABLED=False
-use_runserver_str := python manage.py runserver localhost:8001
+use_runserver_str := python manage.py runserver 172.16.98.33:8001
 use_runscript_str := python manage.py runscript
 
 use_psql:  ## - Use Postgres Database
