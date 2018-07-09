@@ -205,7 +205,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         if 'storefront_customizations' in data:
             for customization in data['storefront_customizations']:
-                if 'section' not in customization or not customization['section']:
+                if not customization.get('section', None):
                     raise serializers.ValidationError("All items in storefront_customizations must have a section")
 
         avatar = None
