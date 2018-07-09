@@ -173,6 +173,27 @@ def delete_listing_visit_count(visit_count):
     visit_count.delete()
 
 
+def clear_all_listing_visit_counts(current_request_username, profile_id):
+    """
+    Clear all listing visit counts for a profile_id
+
+    Args:
+        current_request_username
+        profile_id
+
+    Raises:
+        models.Profile.DoesNotExist
+    """
+    if profile_id == 'self':
+        profile_instance = models.Profile.objects.get(user__username=current_request_username)
+    else:
+        profile_instance = models.Profile.objects.get(id=profile_id)
+
+    visit_counts = models.ListingVisitCount.objects.for_user(current_request_username).filter(profile=profile_instance).update(count=0)
+
+    return visit_counts
+
+
 def get_profiles_by_role(role):
     """
     Get Profiles by the role and ordered by display_name
