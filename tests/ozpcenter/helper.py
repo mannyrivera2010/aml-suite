@@ -227,6 +227,8 @@ class APITestHelper(object):
         Return:
             response
         """
+        assert id is not None, "Id can not be None"
+
         url = '/api/listing/{0!s}/'.format(id)
 
         user = generic_model_access.get_profile(default_user).user
