@@ -82,15 +82,17 @@ def _create_bookmark_bulk(test_case_instance, username, folder_name, to_bookmark
 
         user_library.search('/{}/{}/'.format(username, folder_name)).add_listing_bookmark(response.data['listing']['title'])
 
+    _compare_library(test_case_instance, user_library)
 
-def _create_peer_bookmark(test_case_instance, username, to_username, folder_name):
+
+def _create_peer_bookmark(test_case_instance, username, to_username, folder_name, notifications_object):
     now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
     data = {
         'expires_date': str(now),
         'message': 'A Simple Peer to Peer Notification',
         'peer': {
             'user': {
-                'username': username,
+                'username': to_username,
             },
             'folder_name': folder_name
         }
@@ -103,13 +105,25 @@ def _create_peer_bookmark(test_case_instance, username, to_username, folder_name
     response = test_case_instance.client.post(url, data, format='json')
     test_case_instance.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    peer_data = {'user': {'username': username}, 'folder_name': folder_name}  # '_bookmark_listing_ids': [3, 4]}
+    peer_data = {'user': {'username': to_username}, 'folder_name': folder_name}  # '_bookmark_listing_ids': [3, 4]}
     test_case_instance.assertEqual(response.data['message'], 'A Simple Peer to Peer Notification')
     test_case_instance.assertEqual(response.data['notification_type'], 'peer_bookmark')
     test_case_instance.assertEqual(response.data['agency'], None)
     test_case_instance.assertEqual(response.data['listing'], None)
     test_case_instance.assertEqual(response.data['peer'], peer_data)
     test_case_instance.assertTrue('expires_date' in data)
+
+    notification_id = response.data['id']
+    notification_type = response.data['notification_type']
+    notification_message = ''.join(response.data['message'].split())
+
+    if notifications_object.search('/{}/{}/'.format(to_username, notification_type)) is None:
+        notifications_object.search('/{}/'.format(to_username)).add_folder_bookmark('{}'.format(notification_type), prepend=True)
+
+    notifications_object.search('/{}/{}/'.format(to_username, notification_type)).add_listing_bookmark(notification_message, bookmark_id=notification_id)  # prepend=True)
+
+    _compare_user_notification(test_case_instance, notifications_object)
+
     return response
 
 
@@ -1046,7 +1060,7 @@ class NotificationApiTest(APITestCase):
         user_notifications_list = copy.deepcopy(usernames_list_main)
         user_notifications_list['bigbrother'] = bookmark_notification_ids[::-1] + usernames_list_main['bigbrother']
 
-        self._compare_user_notification(user_notifications_list)
+        _compare_user_notification(self, user_notifications_list)
 
     def test_create_peer_bookmark_notification_integration(self):
         """
@@ -1061,12 +1075,8 @@ class NotificationApiTest(APITestCase):
         """
         # Library for users
         user_library = self.library_object
-
         _compare_library(self, user_library)
-
         _create_bookmark_bulk(self, 'wsmith', 'foldername1', [3, 4], user_library)
-
-        _compare_library(self, user_library)
 
         _compare_user_notification(self, self.notifications_object)
 
@@ -1077,29 +1087,18 @@ class NotificationApiTest(APITestCase):
         user_library_endpoint = _compare_library(self, user_library)
 
         # Create Bookmark Notification
-        bookmark_notification_ids = []
-        bookmark_notification_ids_raw = []
-
         for i in range(3):
-            response = _create_peer_bookmark(self, 'wsmith', 'julia', 'foldername1')
+            response = _create_peer_bookmark(self, 'wsmith', 'julia', 'foldername1', self.notifications_object)
 
-            bookmark_notification_ids.append('{}-{}'.format(response.data['notification_type'], ''.join(response.data['message'].split())))
-            bookmark_notification_ids_raw.append(response.data['id'])
-
-            _compare_user_notification(self, self.notifications_object)
-
-        bookmark_notification1_id = bookmark_notification_ids_raw[0]
+        bookmark_notification1_id = self.notifications_object.search('/{}/{}/'.format('julia', 'peer_bookmark')).first_listing_bookmark().id
 
         # Import Bookmarks
         APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
 
+        user_library.copy('/wsmith/foldername1/', '/julia/')
+
         _compare_library(self, user_library)
-
-        # Compare Notifications for users
-        notifications_user_data = copy.deepcopy(usernames_list_main)
-        notifications_user_data['julia'] = bookmark_notification_ids[::-1] + usernames_list_main['julia']
-
-        self._compare_user_notification(notifications_user_data)
+        _compare_user_notification(self, self.notifications_object)
 
     def test_delete_system_notification_apps_mall_steward(self):
         url = '/api/notification/1/'

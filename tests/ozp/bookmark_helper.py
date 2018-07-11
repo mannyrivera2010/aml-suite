@@ -202,7 +202,7 @@ def _bookmark_node_parse_shorthand(data):
             folder_stack.append(next_root_folder)
 
         elif action == 'CREATE_FOLDER_POP_PUSH_PEEK':
-
+            level_diff = 1 if level_diff == 0 else level_diff
             for i in range(0, level_diff):
                 if len(folder_stack) > 1:
                     folder_stack.pop()
@@ -215,6 +215,7 @@ def _bookmark_node_parse_shorthand(data):
         elif action == 'CREATE_LISTING_PEEK':
             current_root_folder = folder_stack[-1]
             current_root_folder.add_bookmark_object(bookmark_class(record_title))
+
         elif action == 'CREATE_LISTING_POP_PEEK':
             for i in range(0, level_diff):
                 if len(folder_stack) > 1:
@@ -222,6 +223,7 @@ def _bookmark_node_parse_shorthand(data):
             current_root_folder = folder_stack[-1]
             current_root_folder.add_bookmark_object(bookmark_class(record_title))
 
+        # print("{}({}) {}".format(action, level_diff, record_title))
         # set previous level
         previous_level = record_level
         previous_is_folder = record_is_folder
@@ -344,18 +346,21 @@ class BookmarkFolder(BookmarkNode):
     def __init__(self, title, id=None, is_shared=False):
         super().__init__(id, title, 'FOLDER', is_shared)
 
-    def add_folder_bookmark(self, folder_title, bookmark_id=None):
+    def add_folder_bookmark(self, folder_title, bookmark_id=None, prepend=False):
         bookmark_listing = BookmarkFolder(folder_title, id=bookmark_id)
-        self.add_bookmark_object(bookmark_listing)
+        self.add_bookmark_object(bookmark_listing, prepend=prepend)
         return bookmark_listing
 
-    def add_listing_bookmark(self, listing_title, bookmark_id=None):
+    def add_listing_bookmark(self, listing_title, bookmark_id=None, prepend=False):
         bookmark_listing = BookmarkListing(listing_title, id=bookmark_id)
-        self.add_bookmark_object(bookmark_listing)
+        self.add_bookmark_object(bookmark_listing, prepend=prepend)
         return bookmark_listing
 
-    def add_bookmark_object(self, bookmark_object):
-        self.bookmark_objects.append(bookmark_object)
+    def add_bookmark_object(self, bookmark_object, prepend=False):
+        if prepend:
+            self.bookmark_objects.insert(0, bookmark_object)
+        else:
+            self.bookmark_objects.append(bookmark_object)
         bookmark_object.parent = self
         return True
 
@@ -461,6 +466,27 @@ class BookmarkFolder(BookmarkNode):
             return False
 
         src_bookmark.delete()
+        dest_bookmark.add_bookmark_object(src_bookmark)
+
+        return True
+
+    def copy(self, src_name, dest_name):
+        directory_tuples = self._build_filesystem_structure()
+
+        src_bookmark = self.search(src_name, directory_tuples)
+        dest_bookmark = self.search(dest_name, directory_tuples)
+
+        if src_bookmark is None or dest_bookmark is None:
+            return False
+
+        if src_bookmark == dest_bookmark:
+            return False
+
+        if isinstance(dest_bookmark, BookmarkListing):
+            return False
+
+        # src_bookmark.delete()
+        # TODO: Do true clone
         dest_bookmark.add_bookmark_object(src_bookmark)
 
         return True

@@ -164,6 +164,7 @@ class BookmarkApiTest(APITestCase):
         bookmark_folder = BookmarkFolder.parse_shorthand_list(self.one_listing_expected_bookmarks)
         self.assertEqual(bookmark_folder.shorten_data(), self.one_listing_expected_bookmarks)
 
+    def test_bookmark_folder_parse_shorthand_complex(self):
         bookmark_folder = BookmarkFolder.parse_shorthand_list(self.nested_expected_bookmarks)
         self.assertEqual(bookmark_folder.shorten_data(), self.nested_expected_bookmarks)
 
