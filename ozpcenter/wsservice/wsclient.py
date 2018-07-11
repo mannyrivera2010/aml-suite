@@ -97,7 +97,7 @@ class WebServiceClient(object):
 
             data_to_send.append(
                 {
-                    "target": "{}".format(notification_mail_box.target_profile.id),
+                    "target": "{}".format(notification_mail_box.target_profile.user.id),
                     "channel": "notification",
                     "payload": current_data
                 }

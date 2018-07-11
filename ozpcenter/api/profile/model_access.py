@@ -130,6 +130,26 @@ def get_frequently_visited_listings(current_request_username, profile_id):
     return listings
 
 
+def create_or_update_storefront_customization(profile, section, position=None, is_hidden=None):
+    """
+    Updates the storefront customization settings for a given profile and section,
+    or creates a new one if it doesn't exist
+    """
+    customizations = profile.storefront_customizations.filter(section=section)
+
+    if customizations.exists():
+        customization = customizations.first()
+    else:
+        customization = models.StorefrontCustomization(profile=profile, section=section)
+
+    if position is not None:
+        customization.position = position
+    if is_hidden is not None:
+        customization.is_hidden = is_hidden
+
+    return customization.save()
+
+
 def create_listing_visit_count(profile, listing, count, last_visit_date=None):
     """
     Set initial visit count for a given profile and listing.  Ensures that there is
@@ -172,6 +192,27 @@ def delete_listing_visit_count(visit_count):
     Delete visit count
     """
     visit_count.delete()
+
+
+def clear_all_listing_visit_counts(current_request_username, profile_id):
+    """
+    Clear all listing visit counts for a profile_id
+
+    Args:
+        current_request_username
+        profile_id
+
+    Raises:
+        models.Profile.DoesNotExist
+    """
+    if profile_id == 'self':
+        profile_instance = models.Profile.objects.get(user__username=current_request_username)
+    else:
+        profile_instance = models.Profile.objects.get(id=profile_id)
+
+    visit_counts = models.ListingVisitCount.objects.for_user(current_request_username).filter(profile=profile_instance).update(count=0)
+
+    return visit_counts
 
 
 def get_profiles_by_role(role):

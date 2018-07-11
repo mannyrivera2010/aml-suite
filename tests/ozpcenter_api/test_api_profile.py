@@ -240,6 +240,62 @@ class ProfileApiTest(APITestCase):
                 # self.assertEqual(displaynames, sorted(displaynames))
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    def test_update_work_roles(self, mock_request):
+        settings.OZP['USE_AUTH_SERVER'] = True
+
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/self/profile/'
+        data = {
+            "work_roles": [{"id": 1}, {"id": 2}]
+        }
+        response = self.client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_ids = sorted([x['id'] for x in data['work_roles']])
+        actual_ids = sorted([x['id'] for x in response.data.get('work_roles')])
+
+        self.assertEqual(expected_ids, actual_ids)
+
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    def test_update_storefront_customizations(self, mock_request):
+        settings.OZP['USE_AUTH_SERVER'] = True
+
+        user = generic_model_access.get_profile('bigbrother').user
+        self.client.force_authenticate(user=user)
+
+        url = '/api/self/profile/'
+        data = {
+            "storefront_customizations": [
+                {"section": "FEATURED", "is_hidden": True},
+                {"section": "RECOMMENDED", "position": 1},
+                {"section": "RECENTLY_ADDED", "position": 2, "is_hidden": False},
+                {"section": "MOST_POPULAR", "position": 3, "is_hidden": True},
+                {"section": "FREQUENTLY_VISITED"},
+                {"section": "UPDATES", "is_hidden": False},
+                {"section": "MY_LISTINGS", "position": 4, "is_hidden": False},
+            ]
+        }
+        response = self.client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_results = []
+        for item in data['storefront_customizations']:
+            expected_item = {
+                "section": item['section'],
+                "position": item['position'] if 'position' in item else 0,
+                "is_hidden": item['is_hidden'] if 'is_hidden' in item else False,
+            }
+            expected_results.append(expected_item)
+        results = sorted(response.data.get('storefront_customizations'), key=lambda x: x['section'])
+        expected_results = sorted(expected_results, key=lambda x: x['section'])
+
+        self.assertEqual(results, expected_results)
+
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_get_update_self_for_all_access_control_levels(self, mock_request):
         """
         test_get_update_self_for_all_access_control_levels

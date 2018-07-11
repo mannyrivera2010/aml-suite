@@ -422,7 +422,9 @@ def _add_listing_activity(author, listing, action, change_details=None,
 
     # update the listing
     listing.last_activity = listing_activity
-    if listing_activity.action == models.ListingActivity.REJECTED:
+    is_rejected = listing_activity.action == models.ListingActivity.REJECTED
+    is_pending_delete = listing_activity.action == models.ListingActivity.PENDING_DELETION
+    if is_rejected or is_pending_delete:
         listing.current_rejection = listing_activity
     listing.edited_date = utils.get_now_utc()
     listing.save()

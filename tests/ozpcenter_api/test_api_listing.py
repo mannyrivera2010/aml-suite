@@ -186,6 +186,28 @@ class ListingApiTest(APITestCase):
         self.assertEqual(response.data['is_bookmarked'], False)
         self.assertEqual(validate_listing_map_keys(response.data), [])
 
+    def test_pending_delete_listing(self):
+        url = '/api/listing/1/pendingdeletion/'
+        data = {'description': 'because it\'s not great'}
+
+        user = generic_model_access.get_profile('wsmith').user
+        self.client.force_authenticate(user=user)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        url = '/api/listing/1/activity/'
+        response = self.client.get(url, format='json')
+        actions = [i['action'] for i in response.data]
+        self.assertTrue('PENDING_DELETION' in actions)
+
+        url = '/api/listing/1/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data['last_activity']['action'], 'PENDING_DELETION')
+        current_rejection = response.data['current_rejection']
+        self.assertEqual(current_rejection['author']['user']['username'], 'wsmith')
+        self.assertEqual(current_rejection['description'], data['description'])
+        self.assertTrue(current_rejection['author']['display_name'])
+
     def test_delete_listing(self):
         url = '/api/listing/1/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)

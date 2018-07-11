@@ -323,8 +323,10 @@ class ProfileListingVisitCountViewSet(viewsets.ModelViewSet):
         """
         Clears the listing visit count for the given profile
         """
-        if 'listing' not in request.data and 'id' not in request.data['listing']:
-            raise errors.InvalidInput('Missing required field listing')
+        if 'listing' not in request.data or 'id' not in request.data['listing']:
+            current_request_username = request.user.username
+            model_access.clear_all_listing_visit_counts(current_request_username, profile_pk)
+            return self.list(request, profile_pk)
 
         listing_pk = request.data['listing']['id']
         queryset = self.get_queryset(profile_pk, listing_pk)

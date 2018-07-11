@@ -454,7 +454,7 @@ def get_metadata(username):
             'title', 'description'))
 
         data['contact_types'] = values_query_set_to_dict(models.ContactType.objects.all().values(
-            'name', 'required'))
+            'id', 'name', 'required'))
 
         data['intents'] = values_query_set_to_dict(models.Intent.objects.all().values(
             'action', 'media_type', 'label', 'icon', 'id'))
