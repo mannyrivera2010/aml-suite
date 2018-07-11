@@ -57,8 +57,12 @@ from ozpcenter import constants
 from ozpcenter import errors
 from ozpcenter import models
 from ozpcenter import utils
-from plugins.plugin_manager import system_anonymize_identifiable_data
+from plugins import plugin_manager
 import ozpcenter.model_access as generic_model_access
+
+
+system_anonymize_identifiable_data = plugin_manager.system_anonymize_identifiable_data
+system_has_access_control = plugin_manager.system_has_access_control
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))

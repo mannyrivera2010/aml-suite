@@ -4,7 +4,8 @@ import random
 from ozpcenter.recommend import recommend_utils
 from ozpcenter.recommend.recommend_utils import Direction
 from ozpcenter.recommend.recommend_utils import FastNoSuchElementException
-from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
+system_has_access_control = plugin_manager.system_has_access_control
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
@@ -270,8 +271,31 @@ class ListingPostSecurityMarkingCheckPipe(Pipe):
             listing = self.starts.next()
             if not listing.security_marking:
                 logger.debug('Listing {0!s} has no security_marking'.format(listing.title))
-            if system_has_access_control(self.username, listing.security_marking):
-                return listing
+            else:
+                if system_has_access_control(self.username, listing.security_marking):
+                    return listing
+
+
+class BookmarkListingDictPostSecurityMarkingCheckPipe(Pipe):
+
+    def __init__(self, username):
+        super().__init__()
+        self.username = username
+
+    def process_next_start(self):
+        """
+        execute security_marking check on each listing
+        """
+        while True:
+            serialized_bookmark = self.starts.next()
+            serialized_bookmark_title = serialized_bookmark.get('listing', {}).get('title')
+            serialized_bookmark_security_marking = serialized_bookmark.get('listing', {}).get('security_marking')
+
+            if not serialized_bookmark_security_marking:
+                logger.debug('Listing {0!s} has no security_marking'.format(serialized_bookmark_title))
+            else:
+                if system_has_access_control(self.username, serialized_bookmark_security_marking):
+                    return serialized_bookmark
 
 
 class JitterPipe(Pipe):

@@ -9,9 +9,10 @@ from rest_framework import serializers
 import ozpcenter.api.agency.serializers as agency_serializers
 
 from ozpcenter import models
-from plugins.plugin_manager import system_anonymize_identifiable_data
-from plugins.plugin_manager import system_has_access_control
 from plugins import plugin_manager
+
+system_anonymize_identifiable_data = plugin_manager.system_anonymize_identifiable_data
+system_has_access_control = plugin_manager.system_has_access_control
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))

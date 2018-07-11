@@ -8,13 +8,16 @@ from rest_framework import serializers
 
 from ozpcenter import models
 from plugins import plugin_manager
-from plugins.plugin_manager import system_anonymize_identifiable_data
+
 import ozpcenter.api.listing.model_access as listing_model_access
 import ozpcenter.api.library.model_access as library_model_access
 import ozpcenter.api.agency.model_access as agency_model_access
 import ozpcenter.api.notification.model_access as model_access
 import ozpcenter.model_access as generic_model_access
 import ozpcenter.api.profile.serializers as profile_serializers
+
+system_anonymize_identifiable_data = plugin_manager.system_anonymize_identifiable_data
+system_has_access_control = plugin_manager.system_has_access_control
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))

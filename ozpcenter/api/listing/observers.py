@@ -41,7 +41,7 @@ class ListingObserver(Observer):
                 'listing_changed']
 
     def execute(self, event_type, **kwargs):
-        logger.debug('message: event_type:{}, kwards:{}'.format(event_type, kwargs))
+        logger.debug('ListingObserver: event_type:{}, kwards:{}'.format(event_type, kwargs))
 
     def listing_approval_status_changed(self, listing=None, profile=None, old_approval_status=None, new_approval_status=None):
         """

@@ -49,7 +49,8 @@ from rest_framework import serializers
 from ozpcenter import constants
 from ozpcenter import utils
 from ozpcenter.api.listing import elasticsearch_util
-from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
+system_has_access_control = plugin_manager.system_has_access_control
 from ozp.storage import media_storage
 
 
@@ -454,6 +455,156 @@ def post_save_application_library_entry(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=ApplicationLibraryEntry)
 def post_delete_application_library_entry(sender, instance, **kwargs):
     cache.delete_pattern('library_self-*')
+
+
+class BookmarkEntryManager(models.Manager):
+    """
+    BookmarkEntry Manager
+    """
+
+    def apply_select_related(self, queryset):
+        queryset = queryset.select_related('listing')
+        # queryset = queryset.select_related('listing__agency')
+        # queryset = queryset.select_related('listing__listing_type')
+        # queryset = queryset.select_related('listing__small_icon')
+        # queryset = queryset.select_related('listing__large_icon')
+        # queryset = queryset.select_related('listing__banner_icon')
+        # queryset = queryset.select_related('listing__large_banner_icon')
+        # queryset = queryset.select_related('listing__required_listings')
+        # queryset = queryset.select_related('listing__last_activity')
+        # queryset = queryset.select_related('listing__current_rejection')
+        queryset = queryset.select_related('creator_profile')
+        queryset = queryset.select_related('creator_profile__user')
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(BookmarkEntryManager, self).get_queryset()
+        return self.apply_select_related(queryset)
+
+    def for_profile_minus_security_marking(self, profile_instance):
+        objects = super(BookmarkEntryManager, self).get_queryset()
+        # filter out private listings
+        exclude_orgs = get_user_excluded_orgs(profile_instance)
+
+        objects = objects.filter(listing__is_enabled=True)
+        objects = objects.filter(listing__is_deleted=False)
+        objects = objects.exclude(listing__is_private=True, listing__agency__in=exclude_orgs)
+        objects = self.apply_select_related(objects)
+        # Filter out listings by user's access level
+        # ids_to_exclude = []
+        # for i in objects:
+        #     if not i.listing.security_marking:
+        #         logger.debug('Listing {0!s} has no security_marking'.format(i.listing.title))
+        #     if not system_has_access_control(profile_instance.user.username, i.listing.security_marking):
+        #         ids_to_exclude.append(i.listing.id)
+        # objects = objects.exclude(listing__pk__in=ids_to_exclude)
+        return objects
+
+
+class BookmarkEntry(models.Model):
+    bookmark_parent = models.ManyToManyField('BookmarkEntry', db_table='bookmark_parents')
+    # A Bookmark can have many parents.   User1Root ->
+    title = models.CharField(max_length=255)
+
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    listing = models.ForeignKey('Listing', related_name='listing_entries', null=True, blank=True)
+
+    is_root = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=False)
+
+    creator_profile = models.ForeignKey('Profile')
+
+    FOLDER = 'FOLDER'
+    LISTING = 'LISTING'
+
+    TYPE_CHOICES = (
+        (FOLDER, 'FOLDER'),
+        (LISTING, 'LISTING'),
+    )
+    type = models.CharField(max_length=255, choices=TYPE_CHOICES, default=FOLDER)
+
+    objects = BookmarkEntryManager()
+    manager = models.Manager()
+
+    def __repr__(self):
+        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
+            # self.bookmark_parent if self.bookmark_parent else 'None',
+            self.id,
+            self.title,
+            self.type,
+            self.is_root,
+            self.listing
+        )
+
+    def __str__(self):
+        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
+            # self.bookmark_parent if self.bookmark_parent else 'None',
+            self.id,
+            self.title,
+            self.type,
+            self.is_root,
+            self.listing
+        )
+
+
+class BookmarkPermissionManager(models.Manager):
+    """
+    BookmarkEntry Manager
+    """
+
+    def apply_select_related(self, queryset):
+        queryset = queryset.select_related('bookmark')
+        queryset = queryset.select_related('profile')
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(BookmarkPermissionManager, self).get_queryset()
+        return self.apply_select_related(queryset)
+
+
+class BookmarkPermission(models.Model):
+    bookmark = models.ForeignKey('BookmarkEntry', related_name='bookmark_permission')  # , on_delete=models.CASCADE)
+    profile = models.ForeignKey('Profile')
+
+    created_date = models.DateTimeField(default=utils.get_now_utc)
+    modified_date = models.DateTimeField(default=utils.get_now_utc)
+
+    OWNER = 'OWNER'
+    VIEWER = 'VIEWER'
+
+    USER_TYPE_CHOICES = (
+        (OWNER, 'OWNER'),
+        (VIEWER, 'VIEWER'),
+    )
+    user_type = models.CharField(max_length=255, choices=USER_TYPE_CHOICES, default=VIEWER)
+
+    objects = BookmarkPermissionManager()
+    manager = models.Manager()
+
+    class Meta:
+        # The same profile should not have multiple permission for the same Bookmark
+        unique_together = (('bookmark', 'profile'),)
+
+        indexes = [
+            # BookmarkPermission.objects.filter(profile=request_profile, bookmark=bookmark_entry)
+            models.Index(fields=['bookmark', 'profile']),
+        ]
+
+    def __repr__(self):
+        return 'BookmarkPermission(user_type:{},bookmark:{},profile:{})'.format(
+            self.user_type,
+            self.bookmark,
+            self.profile,
+        )
+
+    def __str__(self):
+        return 'BookmarkPermission(user_type:{},bookmark:{},profile:{})'.format(
+            self.user_type,
+            self.bookmark,
+            self.profile,
+        )
 
 
 class Category(models.Model):

@@ -5,6 +5,9 @@ import sys
 
 from plugins.plugin_manager import plugin_manager_instance
 
+# from plugins import plugin_manager
+# plugin_manager_instance = plugin_manager.plugin_manager_instance
+
 TEST_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 

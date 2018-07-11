@@ -9,6 +9,7 @@ import ozpcenter.api.library.model_access as model_access
 import ozpcenter.model_access as generic_model_access
 from ozpcenter import errors
 from ozpcenter import models
+from tests.ozpcenter.data_util import FileQuery
 
 
 @override_settings(ES_ENABLED=False)
@@ -29,7 +30,13 @@ class LibraryTest(TestCase):
 
     def test_get_all_library_entries(self):
         results = model_access.get_all_library_entries()
-        self.assertEquals(len(results), 54)
+
+        query_list = (FileQuery()
+                      .load_yaml_file('listings.yaml')
+                      .each_key('library_entries')
+                      .to_list())
+
+        self.assertEquals(len(results), len(query_list))
 
     def test_get_library_entry_by_id(self):
         results = model_access.get_library_entry_by_id(1)

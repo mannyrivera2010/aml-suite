@@ -10,7 +10,8 @@ import logging
 from rest_framework import serializers
 
 from ozpcenter import models
-from plugins.plugin_manager import system_has_access_control
+from plugins import plugin_manager
+system_has_access_control = plugin_manager.system_has_access_control
 import ozpcenter.model_access as generic_model_access
 
 

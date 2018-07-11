@@ -142,7 +142,7 @@ class CategoryApiTest(APITestCase):
 
     # TODO def test_delete_category(self): test different user groups access control
 
-    def test_GET_bulk_category_listings_apps_mall_steward(self):
+    def test_get_bulk_category_listings_apps_mall_steward(self):
         expected_results = ['apocalypse',
                         'applied_ethics_inc.',
                         'beast',
@@ -169,7 +169,7 @@ class CategoryApiTest(APITestCase):
         self.assertIsNotNone(response.data)
         self.assertListEqual(listing_names, expected_results)
 
-    def test_GET_bulk_category_listings_org_steward(self):
+    def test_get_bulk_category_listings_org_steward(self):
         expected_results = ['harley-davidson_cvo', 'ruby']
 
         # get list of listings containing category id {7} within the org_steward's agencies.
@@ -180,7 +180,7 @@ class CategoryApiTest(APITestCase):
         self.assertIsNotNone(response.data)
         self.assertListEqual(listing_names, expected_results)
 
-    def test_GET_bulk_category_listings_owner(self):
+    def test_get_bulk_category_listings_owner(self):
         # The listing categories in these test case all have two or more category associations
 
         expected_results = ['apocalypse',

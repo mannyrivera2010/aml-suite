@@ -5,7 +5,7 @@ help:
 
 use_database := MAIN_DATABASE=sqlite
 use_elasticsearch_str := ES_ENABLED=False
-use_runserver_str := python manage.py runserver localhost:8001
+use_runserver_str := python manage.py runserver 0.0.0.0:8001
 use_runscript_str := python manage.py runscript
 
 use_psql:  ## - Use Postgres Database
@@ -15,7 +15,7 @@ use_es:  ## - Use elasticsearch Database
 	$(eval use_elasticsearch_str := ES_ENABLED=True)
 
 use_gunicorn:  ## - Use gunicorn
-	$(eval use_runserver_str := gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid)
+	$(eval use_runserver_str := gunicorn --workers=`nproc` ozp.wsgi -b 0.0.0.0:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid)
 
 clean: ## Clean Directory
 	rm -f db.sqlite3
@@ -68,11 +68,11 @@ kill_celery_worker:
 	ps aux | grep "celery worker" | grep "Ss" | awk '{print $$2}' | xargs -I {} echo "{}" | xargs kill
 
 run_gunicorn_secure:   ## Run server using gunicorn on HTTPS (preq: clone dev-tools repo)
-	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
+	$(use_database) $(use_elasticsearch_str) gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
 		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
-		--keyfile ~/git/dev-tools/certs/server_nopass.key \
-		--certfile ~/git/dev-tools/certs/server_nopass.crt \
-		--ca-certs ~/git/dev-tools/certs/ca_root.pem
+		--keyfile ~/certs/server_nopass.key \
+		--certfile ~/certs/server_nopass.crt \
+		--ca-certs ~/certs/ca_root.pem
 
 run_gunicorn_secure_ansible:     ## Run server using gunicorn on HTTPS (preq: clone ozp-ansible repo)
 	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \

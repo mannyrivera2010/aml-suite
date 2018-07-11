@@ -130,7 +130,7 @@ class GraphAlgoritms(object):
             - Filter out all listings that 'profile 1' has bookmarked
             - Group by Listings with Count (recommendation weight) and sort by count DSC
 
-        TODO: Additions to improve relevance (usefull-ness to profile):
+        TODO: Additions to improve relevance (useful-ness to profile):
         For the results, sort by Category, then Agency
 
         Returns:

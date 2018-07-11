@@ -56,6 +56,14 @@ class Query(object):
     def has(self, key, value):
         pass
 
+    def key(self, key):
+        """
+        Enter into key
+        """
+        current_pipe = pipes.DictKeyPipe(key)
+        self.pipeline.add_pipe(current_pipe)
+        return self
+
     def out(self, *labels):
         """
         VerticesToVertices

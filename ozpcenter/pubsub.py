@@ -42,9 +42,11 @@ class Dispatcher(object):
 # Import Observers
 import ozpcenter.auth.observers as auth_observers
 import ozpcenter.api.listing.observers as listing_observers
+import ozpcenter.api.bookmark.observers as bookmark_observers
 
 # Dispatcher Instance
 dispatcher = Dispatcher()
 
 dispatcher.register(listing_observers.ListingObserver)
 dispatcher.register(auth_observers.AuthObserver)
+dispatcher.register(bookmark_observers.BookmarkObserver)

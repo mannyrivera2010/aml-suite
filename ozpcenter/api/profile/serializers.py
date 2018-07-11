@@ -11,7 +11,7 @@ from rest_framework import serializers
 
 from ozpcenter import models
 from plugins import plugin_manager
-from plugins.plugin_manager import system_anonymize_identifiable_data
+
 import ozpcenter.model_access as generic_model_access
 import ozpcenter.api.profile.model_access as profile_model_access
 import ozpcenter.api.agency.model_access as agency_model_access
@@ -20,6 +20,8 @@ import ozpcenter.api.image.model_access as image_model_access
 from ozpcenter.api.work_role.serializers import WorkRoleSerializer
 from ozpcenter.api.image.serializers import ImageSerializer
 
+system_anonymize_identifiable_data = plugin_manager.system_anonymize_identifiable_data
+system_has_access_control = plugin_manager.system_has_access_control
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
 

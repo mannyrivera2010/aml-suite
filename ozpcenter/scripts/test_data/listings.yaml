@@ -1,5 +1,9 @@
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 10}
+  - {folder: InstrumentSharing, owner: bigbrother2, position: 10}
+  library_sharing:
+  - {folder: InstrumentSharing, owner: bigbrother2, share_permission: OWNER, share_with: julia}
+  - {folder: InstrumentSharing, owner: bigbrother2, share_permission: VIEWER, share_with: johnson}
   listing:
     agency: Minipax
     banner_icon: {filename: AcousticGuitar_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -13,11 +17,11 @@
       vibration of the strings.
     doc_urls: []
     iframe_compatible: false
+    is_508_compliant: true
     is_deleted: false
     is_enabled: true
     is_featured: false
     is_private: false
-    is_508_compliant: true
     large_banner_icon: {filename: AcousticGuitar_large_banner_icon.jpeg, security_marking: UNCLASSIFIED}
     large_icon: {filename: AcousticGuitar_large_icon.jpeg, security_marking: UNCLASSIFIED}
     launch_url: https://en.wikipedia.org/wiki/Acoustic_guitar
@@ -75,6 +79,7 @@
 - library_entries:
   - {folder: old, owner: wsmith, position: 0}
   - {folder: null, owner: hodor, position: 0}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: AirMail_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -142,6 +147,7 @@
   - {count: 10, profile: bigbrother2}
   - {count: 10, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: AlbatronTechnology_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -199,6 +205,7 @@
   - {count: 7, profile: syme}
   - {count: 8, profile: abe}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 1
     banner_icon: {filename: Aliens_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -264,7 +271,9 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: syme}
   - {count: 10, profile: tparsons}
-- library_entries: []
+- library_entries:
+  - {folder: null, owner: bigbrother2, position: 10}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: AlinganoMaisu_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -345,6 +354,7 @@
   - {count: 9, profile: julia}
   - {count: 9, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Apocalypse_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -415,7 +425,9 @@
   - {count: 7, profile: charrington}
   - {count: 8, profile: jones}
   - {count: 10, profile: wsmith}
-- library_entries: []
+- library_entries:
+  - {folder: null, owner: johnson, position: 10}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: AppliedEthicsInc._banner_icon.png, security_marking: UNCLASSIFIED}
@@ -482,7 +494,9 @@
   - {count: 9, profile: jones}
   - {count: 10, profile: david}
   - {count: 10, profile: tparsons}
-- library_entries: []
+- library_entries:
+  - {folder: null, owner: julia, position: 10}
+  library_sharing: []
   listing:
     agency: Test 3
     banner_icon: {filename: Astrologysoftware_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -564,6 +578,7 @@
 - library_entries:
   - {folder: null, owner: rutherford, position: 0}
   - {folder: planets, owner: wsmith, position: 8}
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Azeroth_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -645,6 +660,7 @@
 - library_entries:
   - {folder: null, owner: bettafish, position: 0}
   - {folder: null, owner: wsmith, position: 4}
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: BaltimoreRavens_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -721,6 +737,7 @@
   - {count: 9, profile: johnson}
   - {count: 10, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Barbecue_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -836,6 +853,7 @@
   - {count: 9, profile: bigbrother}
   - {count: 10, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Barsoom_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -926,6 +944,7 @@
   - {count: 9, profile: rutherford}
   - {count: 10, profile: charrington}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Basketball_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -995,6 +1014,7 @@
   - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: null, owner: jones, position: 0}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: BassFishing_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1067,6 +1087,7 @@
   - {count: 10, profile: julia}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: BassLures_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -1168,6 +1189,7 @@
   - {count: 8, profile: abe}
   - {count: 9, profile: jones}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Beast_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1260,6 +1282,7 @@
   - {count: 9, profile: hodor}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: BeiDouNavigationSatelliteSystem_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1374,6 +1397,7 @@
   - {count: 10, profile: tammy}
 - library_entries:
   - {folder: null, owner: bettafish, position: 1}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Bleach_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1445,6 +1469,7 @@
   - {count: 10, profile: obrien}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Blink_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1516,6 +1541,7 @@
   - {count: 9, profile: bigbrother2}
   - {count: 9, profile: charrington}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: BombardierTransportation_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1589,6 +1615,7 @@
   - {count: 10, profile: noah}
 - library_entries:
   - {folder: Beverages, owner: bettafish, position: 5}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Bourbon_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1661,6 +1688,7 @@
   - {count: 9, profile: david}
   - {count: 9, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Bowser_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -1727,6 +1755,7 @@
 - library_entries:
   - {folder: old, owner: wsmith, position: 1}
   - {folder: null, owner: bigbrother, position: 15}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: BreadBasket_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -1774,6 +1803,7 @@
   - {count: 10, profile: jones}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Brisket_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -1855,6 +1885,7 @@
   - {count: 10, profile: jsnow}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test2
     banner_icon: {filename: Building_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -1913,6 +1944,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: BusinessInsuranceRisk_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -1980,6 +2012,7 @@
   - {count: 8, profile: tammy}
   - {count: 9, profile: charrington}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: BusinessManagementSystem_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -2060,6 +2093,7 @@
   - {count: 9, profile: wsmith}
   - {count: 10, profile: betaraybill}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Cableferry_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2131,6 +2165,7 @@
   - {count: 10, profile: noah}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 18}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Chainboatnavigation_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2203,6 +2238,7 @@
 - library_entries:
   - {folder: null, owner: hodor, position: 0}
   - {folder: null, owner: bigbrother, position: 20}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: ChartCourse_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -2261,6 +2297,7 @@
   - {count: 8, profile: bigbrother2}
   - {count: 8, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test
     banner_icon: {filename: ChasingAmy_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2332,6 +2369,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: rutherford}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: ChatterBox_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -2387,6 +2425,7 @@
   - {count: 9, profile: rutherford}
   - {count: 9, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: CheeseandCrackers_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2452,6 +2491,7 @@
   - {count: 9, profile: bigbrother}
   - {count: 9, profile: jsnow}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Cheesecake_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2526,6 +2566,7 @@
   - {count: 8, profile: tparsons}
   - {count: 9, profile: jones}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: ChickenandWaffles_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2589,6 +2630,7 @@
   - {count: 10, profile: johnson}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Clerks_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2652,6 +2694,7 @@
   - {count: 10, profile: bettafish}
   - {count: 10, profile: charrington}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: ClerksII_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2718,6 +2761,7 @@
   - {count: 9, profile: abe}
   - {count: 9, profile: bigbrother2}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Clipboard_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -2777,6 +2821,7 @@
   - {count: 10, profile: jsnow}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Clippy_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -2849,6 +2894,7 @@
   - {count: 10, profile: david}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Compoundbow_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -2930,6 +2976,7 @@
   - {count: 8, profile: noah}
   - {count: 10, profile: bettafish}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Cyclops_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3014,6 +3061,7 @@
   - {count: 9, profile: jones}
   - {count: 9, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Deadpool_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -3095,6 +3143,7 @@
   - {count: 10, profile: jsnow}
   - {count: 10, profile: jones}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: DesktopVirtualization_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -3171,6 +3220,7 @@
   - {count: 10, profile: johnson}
 - library_entries:
   - {folder: null, owner: wsmith, position: 2}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Diamond_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3270,6 +3320,7 @@
   - {count: 10, profile: jones}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test
     banner_icon: {filename: Dinosaur_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3342,6 +3393,7 @@
   - {count: 10, profile: noah}
   - {count: 10, profile: rutherford}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: DoubleHeroides_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3406,6 +3458,7 @@
   - {count: 9, profile: bettafish}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Dragons_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3487,6 +3540,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: E-ZPass_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -3552,6 +3606,7 @@
   - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 9}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: ElectricGuitar_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3614,6 +3669,7 @@
   - {count: 9, profile: johnson}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 12}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: ElectricPiano_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3675,6 +3731,7 @@
   - {count: 9, profile: charrington}
   - {count: 9, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: EnglishBitter_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3734,6 +3791,7 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Eraser_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3799,6 +3857,7 @@
   - {count: 10, profile: khaleesi}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Excitebike_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -3864,6 +3923,7 @@
   - {count: 9, profile: tammy}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 1
     banner_icon: {filename: Fiat525_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3913,6 +3973,7 @@
   - {count: 1, profile: bigbrother2}
   - {count: 7, profile: bettafish}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: FightClub_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -3990,6 +4051,7 @@
   - {count: 10, profile: noah}
   - {count: 10, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 3
     banner_icon: {filename: FloppyDisk_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4061,6 +4123,7 @@
   - {count: 10, profile: david}
   - {count: 10, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Formula_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4129,6 +4192,7 @@
   - {count: 9, profile: wsmith}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: FrameIt_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -4186,6 +4250,7 @@
   - {count: 10, profile: johnson}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 19}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: GalleryofMaps_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -4244,6 +4309,7 @@
   - {count: 9, profile: david}
   - {count: 10, profile: betaraybill}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Gerris_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4302,6 +4368,7 @@
   - {count: 10, profile: julia}
   - {count: 10, profile: obrien}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: GlobalNavigationGridCode_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4376,6 +4443,7 @@
   - {count: 10, profile: rutherford}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test
     banner_icon: {filename: Gramophonerecord_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4451,6 +4519,7 @@
   - {count: 10, profile: hodor}
 - library_entries:
   - {folder: null, owner: wsmith, position: 3}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Grandfatherclock_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4521,6 +4590,7 @@
   - {count: 10, profile: syme}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Greatwhiteshark_banner_icon.jpeg, security_marking: UNCLASSIFIED//FOR
@@ -4602,6 +4672,7 @@
   - {count: 8, profile: hodor}
   - {count: 9, profile: betaraybill}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Harley-DavidsonCVO_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4684,6 +4755,7 @@
   - {count: 10, profile: david}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: HatchLatch_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -4743,6 +4815,7 @@
   - {count: 10, profile: obrien}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Hawaii_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4813,6 +4886,7 @@
   - {count: 10, profile: jsnow}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: HouseLannister_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4878,6 +4952,7 @@
   - {count: 10, profile: julia}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: HouseStark_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -4950,6 +5025,7 @@
   - {count: 10, profile: bigbrother}
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: HouseTargaryen_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5022,6 +5098,7 @@
   - {count: 10, profile: rutherford}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 4
     banner_icon: {filename: HuexotzincoCodex_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5090,6 +5167,7 @@
   - {count: 10, profile: betaraybill}
 - library_entries:
   - {folder: Beverages, owner: bettafish, position: 6}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: IndiaPaleAle_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5159,6 +5237,7 @@
   - {count: 10, profile: julia}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 16}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: InformationalBook_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -5232,6 +5311,7 @@
   - {count: 9, profile: jones}
   - {count: 9, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: IntelligenceUnleashed_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -5311,6 +5391,7 @@
   - {count: 9, profile: aaronson}
   - {count: 9, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Intelligenttransportationsystem_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5384,6 +5465,7 @@
   - {count: 10, profile: jones}
 - library_entries:
   - {folder: Funny, owner: bettafish, position: 3}
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Internetmeme_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5460,6 +5542,7 @@
   - {count: 9, profile: jsnow}
 - library_entries:
   - {folder: heros, owner: wsmith, position: 5}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: IronMan_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5554,6 +5637,7 @@
   - {count: 9, profile: jsnow}
   - {count: 10, profile: bettafish}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: JarofFlies_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5624,6 +5708,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Jasoom_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5720,6 +5805,7 @@
   - {count: 9, profile: khaleesi}
   - {count: 10, profile: jsnow}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 4
     banner_icon: {filename: JayandSilentBobStrikeBack_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -5802,6 +5888,7 @@
   - {count: 10, profile: jsnow}
 - library_entries:
   - {folder: heros, owner: wsmith, position: 6}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: JeanGrey_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -5902,6 +5989,7 @@
   - {count: 10, profile: aaronson}
 - library_entries:
   - {folder: null, owner: hodor, position: 0}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: JotSpot_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -5959,6 +6047,7 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Jupiter_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6049,6 +6138,7 @@
   - {count: 9, profile: david}
   - {count: 9, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: KIAA0319_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6117,6 +6207,7 @@
   - {count: 9, profile: bigbrother2}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test2
     banner_icon: {filename: KSnapshot_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -6175,6 +6266,7 @@
   - {count: 9, profile: tammy}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: KartaGPS_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6242,6 +6334,7 @@
 - library_entries:
   - {folder: null, owner: jones, position: 0}
   - {folder: Animals, owner: bigbrother, position: 4}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: KillerWhale_banner_icon.jpeg, security_marking: UNCLASSIFIED//FOR
@@ -6333,6 +6426,7 @@
   - {count: 10, profile: bigbrother2}
   - {count: 10, profile: jsnow}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: KomodoDragon_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6433,6 +6527,7 @@
   - {count: 10, profile: noah}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: LITRANCH_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6504,6 +6599,7 @@
   - {count: 8, profile: syme}
 - library_entries:
   - {folder: null, owner: jones, position: 0}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Lager_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6574,6 +6670,7 @@
   - {count: 9, profile: jones}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Lamprey_banner_icon.jpeg, security_marking: UNCLASSIFIED//FOR
@@ -6655,6 +6752,7 @@
   - {count: 9, profile: julia}
   - {count: 10, profile: david}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: LearningCurves_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -6740,6 +6838,7 @@
   - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Weather, owner: bigbrother, position: 1}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Lightning_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6803,6 +6902,7 @@
   - {count: 9, profile: tammy}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 5}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: LionFinder_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -6882,6 +6982,7 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: LocationAnalyzer_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -6937,6 +7038,7 @@
   - {count: 9, profile: wsmith}
 - library_entries:
   - {folder: null, owner: hodor, position: 0}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: LocationLister_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -6991,6 +7093,7 @@
   - {count: 9, profile: abe}
   - {count: 9, profile: betaraybill}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: LocationViewer_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7048,6 +7151,7 @@
   - {count: 10, profile: rutherford}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Luigi_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7108,6 +7212,7 @@
   - {count: 10, profile: jsnow}
   - {count: 10, profile: obrien}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Magneticpositioning_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -7183,6 +7288,7 @@
   - {count: 9, profile: johnson}
   - {count: 9, profile: jones}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Magneto_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7272,6 +7378,7 @@
 - library_entries:
   - {folder: Funny, owner: bettafish, position: 2}
   - {folder: heros, owner: wsmith, position: 7}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Mallrats_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -7344,6 +7451,7 @@
   - {count: 9, profile: bigbrother}
   - {count: 9, profile: khaleesi}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Mapoftheworld_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7422,6 +7530,7 @@
   - {count: 10, profile: noah}
 - library_entries:
   - {folder: Games, owner: bettafish, position: 8}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Mario_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7483,6 +7592,7 @@
   - {count: 9, profile: tparsons}
   - {count: 9, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Minesweeper_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7546,6 +7656,7 @@
   - {count: 10, profile: noah}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: MiniDachshund_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -7621,6 +7732,7 @@
   - {count: 10, profile: jsnow}
   - {count: 10, profile: jones}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: MisterMxyzptlk_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7692,6 +7804,7 @@
   - {count: 10, profile: julia}
   - {count: 10, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: MixingConsole_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -7783,6 +7896,7 @@
   - {count: 10, profile: charrington}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 6}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: MonkeyFinder_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -7861,6 +7975,7 @@
   - {count: 10, profile: julia}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Moonshine_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -7935,6 +8050,7 @@
   - {count: 10, profile: jones}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: MorseCode_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -7998,6 +8114,7 @@
   - {count: 8, profile: tammy}
   - {count: 9, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: MotorcycleHelmet_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8069,6 +8186,7 @@
   - {count: 10, profile: obrien}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Motorsport_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -8143,6 +8261,7 @@
   - {count: 10, profile: jsnow}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: MovieProjector_banner_icon.gif, security_marking: UNCLASSIFIED}
@@ -8203,6 +8322,7 @@
   - {count: 10, profile: johnson}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: N64_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8270,6 +8390,7 @@
   - {count: 10, profile: johnson}
 - library_entries:
   - {folder: Games, owner: bettafish, position: 7}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: NES_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8351,6 +8472,7 @@
   - {count: 10, profile: rutherford}
 - library_entries:
   - {folder: null, owner: rutherford, position: 0}
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Navigation_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8434,6 +8556,7 @@
   - {count: 9, profile: bettafish}
   - {count: 10, profile: khaleesi}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: NavigationusingMaps_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8523,6 +8646,7 @@
   - {count: 9, profile: bigbrother}
   - {count: 9, profile: charrington}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Neptune_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8621,6 +8745,7 @@
   - {count: 9, profile: jsnow}
   - {count: 10, profile: david}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: NetworkSwitch_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8703,6 +8828,7 @@
   - {count: 10, profile: noah}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Newspaper_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8776,6 +8902,7 @@
   - {count: 9, profile: bettafish}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Parrot_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8848,6 +8975,7 @@
   - {count: 9, profile: wsmith}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 7}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Parrotlet_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8912,6 +9040,7 @@
   - {count: 8, profile: rutherford}
   - {count: 8, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Pencil_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -8975,6 +9104,7 @@
   - {count: 8, profile: jsnow}
   - {count: 9, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: PersonalComputer_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -9063,6 +9193,7 @@
   - {count: 10, profile: obrien}
   - {count: 10, profile: rutherford}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test
     banner_icon: {filename: Phentolamine_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -9125,6 +9256,7 @@
   - {count: 9, profile: charrington}
   - {count: 9, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Phylo_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -9199,6 +9331,7 @@
   - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 13}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Piano_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9260,6 +9393,7 @@
   - {count: 10, profile: bettafish}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Pluto(Notaplanet)_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9346,6 +9480,7 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: david}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: PokemonRubyandSapphire_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9442,6 +9577,7 @@
   - {count: 10, profile: rutherford}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Polynesiannavigation_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9517,6 +9653,7 @@
   - {count: 10, profile: tammy}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 1
     banner_icon: {filename: PostageStamp_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9584,6 +9721,7 @@
   - {count: 10, profile: julia}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: PrincessPeach_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9649,6 +9787,7 @@
   - {count: 10, profile: bigbrother2}
   - {count: 10, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: ProjectManagement_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -9732,6 +9871,7 @@
   - {count: 9, profile: hodor}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Railroad_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9847,6 +9987,7 @@
   - {count: 10, profile: julia}
   - {count: 10, profile: obrien}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Rogue_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -9939,6 +10080,7 @@
   - {count: 10, profile: obrien}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Ruby_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10012,6 +10154,7 @@
   - {count: 10, profile: bigbrother}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: RubyMiner_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -10067,6 +10210,7 @@
   - {count: 10, profile: noah}
   - {count: 10, profile: obrien}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: RubyonRails_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -10131,6 +10275,7 @@
   - {count: 7, profile: bettafish}
   - {count: 10, profile: aaronson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: RutebokforNorge_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10200,6 +10345,7 @@
   - {count: 9, profile: jsnow}
   - {count: 10, profile: bigbrother2}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: SImpleText_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -10271,6 +10417,7 @@
   - {count: 10, profile: bigbrother}
   - {count: 10, profile: jsnow}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: SNES_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10343,6 +10490,7 @@
   - {count: 9, profile: tammy}
   - {count: 10, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: SailboatRacing_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10406,6 +10554,7 @@
   - {count: 10, profile: jsnow}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Salmon_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10481,6 +10630,7 @@
   - {count: 10, profile: betaraybill}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: SanBernardinoStrait_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10545,6 +10695,7 @@
   - {count: 9, profile: jsnow}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Sapphire_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10620,6 +10771,7 @@
   - {count: 9, profile: julia}
   - {count: 9, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Satellitenavigation_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10704,6 +10856,7 @@
   - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: planets, owner: wsmith, position: 9}
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Saturn_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10790,6 +10943,7 @@
   - {count: 8, profile: julia}
 - library_entries:
   - {folder: null, owner: bettafish, position: 4}
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: ScreaminEagleCVO_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -10866,6 +11020,7 @@
   - {count: 9, profile: syme}
   - {count: 10, profile: hodor}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Sheetmusic_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -10933,6 +11088,7 @@
   - {count: 9, profile: noah}
   - {count: 10, profile: obrien}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: SiemensMobility_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11002,6 +11158,7 @@
   - {count: 10, profile: johnson}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test
     banner_icon: {filename: SirBaboonMcGood_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11063,6 +11220,7 @@
   - {count: 9, profile: jones}
   - {count: 9, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Skybox_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -11120,6 +11278,7 @@
   - {count: 10, profile: julia}
   - {count: 10, profile: rutherford}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: SmartPhone_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11185,6 +11344,7 @@
   - {count: 10, profile: wsmith}
 - library_entries:
   - {folder: Weather, owner: bigbrother, position: 2}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Snow_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11252,6 +11412,7 @@
   - {count: 9, profile: jones}
   - {count: 10, profile: charrington}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 1
     banner_icon: {filename: Soterosanthus_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11317,6 +11478,7 @@
   - {count: 10, profile: obrien}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 11}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: SoundMixer_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11379,6 +11541,7 @@
   - {count: 10, profile: abe}
   - {count: 10, profile: betaraybill}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Steak_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11461,6 +11624,7 @@
   - {count: 10, profile: wsmith}
 - library_entries:
   - {folder: null, owner: bigbrother, position: 17}
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Stopsign_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11524,6 +11688,7 @@
   - {count: 9, profile: rutherford}
   - {count: 10, profile: jsnow}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Stout_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11596,6 +11761,7 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Strokeplay_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11683,6 +11849,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: noah}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: SudovianBook_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11748,6 +11915,7 @@
   - {count: 10, profile: noah}
   - {count: 10, profile: obrien}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Sun_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11839,6 +12007,7 @@
   - {count: 10, profile: abe}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Superunknown_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -11907,6 +12076,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: T-slotnut_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -11977,6 +12147,7 @@
   - {count: 9, profile: bigbrother}
   - {count: 10, profile: jsnow}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: TaxonomyClassifier_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12043,6 +12214,7 @@
   - {count: 9, profile: bigbrother}
   - {count: 9, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Ten_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12116,6 +12288,7 @@
   - {count: 10, profile: betaraybill}
   - {count: 10, profile: bigbrother}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: Tennis_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12180,6 +12353,7 @@
   - {count: 10, profile: bigbrother2}
   - {count: 10, profile: rutherford}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Test 3
     banner_icon: {filename: TinyMusic...SongsfromtheVaticanGiftShop_banner_icon.jpeg,
@@ -12257,6 +12431,7 @@
   - {count: 10, profile: betaraybill}
 - library_entries:
   - {folder: Weather, owner: bigbrother, position: 0}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Tornado_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12324,6 +12499,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Toyota_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -12397,6 +12573,7 @@
   - {count: 8, profile: tammy}
   - {count: 8, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: TransportDirectPortal_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12463,6 +12640,7 @@
   - {count: 10, profile: johnson}
   - {count: 10, profile: tparsons}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Udeawashingtonalis_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12530,6 +12708,7 @@
   - {count: 8, profile: hodor}
   - {count: 9, profile: rutherford}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Uranus_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12608,6 +12787,7 @@
   - {count: 8, profile: obrien}
   - {count: 9, profile: bettafish}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: Venus_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12705,6 +12885,7 @@
   - {count: 10, profile: tparsons}
 - library_entries:
   - {folder: Instruments, owner: bigbrother, position: 14}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Violin_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12766,6 +12947,7 @@
   - {count: 10, profile: johnson}
   - {count: 10, profile: julia}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: VirtualBoy_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -12828,6 +13010,7 @@
   - {count: 9, profile: johnson}
   - {count: 10, profile: bettafish}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Voodoo_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12897,6 +13080,7 @@
   - {count: 8, profile: jones}
   - {count: 10, profile: aaronson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: WatermeLon_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -12966,6 +13150,7 @@
   - {count: 10, profile: david}
   - {count: 10, profile: johnson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Weissbier_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -13036,6 +13221,7 @@
   - {count: 10, profile: bigbrother2}
 - library_entries:
   - {folder: Animals, owner: bigbrother, position: 8}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: WhiteHorse_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -13110,6 +13296,7 @@
   - {count: 10, profile: charrington}
   - {count: 10, profile: hodor}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniluv
     banner_icon: {filename: White-tailedolallarat_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -13170,6 +13357,7 @@
   - {count: 10, profile: david}
   - {count: 10, profile: tammy}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Wii_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -13237,6 +13425,7 @@
   - {count: 9, profile: jsnow}
   - {count: 10, profile: aaronson}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Miniplen
     banner_icon: {filename: WiiU_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -13306,6 +13495,7 @@
   - {count: 9, profile: khaleesi}
   - {count: 10, profile: bettafish}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: Wikipedia_banner_icon.png, security_marking: UNCLASSIFIED}
@@ -13385,6 +13575,7 @@
   - {count: 10, profile: syme}
   - {count: 10, profile: wsmith}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minitrue
     banner_icon: {filename: WitchDoctor_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -13450,6 +13641,7 @@
 - library_entries:
   - {folder: null, owner: khaleesi, position: 0}
   - {folder: Animals, owner: bigbrother, position: 3}
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: WolfFinder_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -13540,6 +13732,7 @@
   - {count: 10, profile: bigbrother2}
   - {count: 10, profile: syme}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Wolverine_banner_icon.jpeg, security_marking: UNCLASSIFIED}
@@ -13627,6 +13820,7 @@
   - {count: 10, profile: hodor}
   - {count: 10, profile: obrien}
 - library_entries: []
+  library_sharing: []
   listing:
     agency: Minipax
     banner_icon: {filename: Writing_banner_icon.jpeg, security_marking: UNCLASSIFIED}
