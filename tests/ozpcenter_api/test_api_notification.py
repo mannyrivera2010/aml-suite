@@ -33,7 +33,7 @@ def _compare_library(test_case_instance, expected_library_object):
         actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
         user_folder_bookmark.add_bookmark_object(actual_library)
 
-    test_case_instance.assertEqual(root_folder.shorten_data(), expected_library_object.shorten_data())
+    test_case_instance.assertEqual(root_folder.shorten_data(order=True), expected_library_object.shorten_data(order=True))
 
     return root_folder
 
@@ -64,8 +64,8 @@ def _compare_user_notification(test_case_instance, expected_notification_object)
             notification_message = ''.join(entry.get('message').split())
             type_folder.add_listing_bookmark(notification_message, notification_id)
     #
-    # import pprint; pprint.pprint(root_folder.shorten_data())
-    test_case_instance.assertEqual(root_folder.shorten_data(), expected_notification_object.shorten_data())
+    # import pprint; pprint.pprint(root_folder.shorten_data(order=True))
+    test_case_instance.assertEqual(root_folder.shorten_data(order=True), expected_notification_object.shorten_data(order=True))
     return root_folder
 
 

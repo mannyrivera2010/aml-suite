@@ -263,7 +263,7 @@ def _bookmark_node_parse(bookmark_folder, data):
                 bookmark_listing.set_parent(bookmark_folder)
 
 
-def bookmark_node_string_helper(bookmark_node, level=0):
+def bookmark_node_string_helper(bookmark_node, level=0, order=False, show_root=True):
     if isinstance(bookmark_node, BookmarkFolder):
         bookmark_node_is_root = bookmark_node.title is None
 
@@ -273,7 +273,10 @@ def bookmark_node_string_helper(bookmark_node, level=0):
 
         bookmarks = []
 
-        if not bookmark_node_is_root:
+        if show_root is False:
+            level = level - 1
+
+        if not bookmark_node_is_root and show_root:
             bookmarks.append('{}({}) {}'.format(' ' * level, prefix, bookmark_node.title))
 
         # This is needed for order
@@ -289,17 +292,21 @@ def bookmark_node_string_helper(bookmark_node, level=0):
             elif isinstance(bookmark, BookmarkListing):
                 listings.append(bookmark)
 
+        if order is True:
+            folders.sort(key=lambda x: x.title, reverse=False)
+            listings.sort(key=lambda x: x.title, reverse=False)
+
         for bookmark in folders:
             if not bookmark_node_is_root:
-                bookmarks.extend(bookmark_node_string_helper(bookmark, level + 1))
+                bookmarks.extend(bookmark_node_string_helper(bookmark, level + 1, order=order, show_root=True))
             else:
-                bookmarks.extend(bookmark_node_string_helper(bookmark, level))
+                bookmarks.extend(bookmark_node_string_helper(bookmark, level, order=order, show_root=True))
 
         for bookmark in listings:
             if not bookmark_node_is_root:
-                bookmarks.extend(bookmark_node_string_helper(bookmark, level + 1))
+                bookmarks.extend(bookmark_node_string_helper(bookmark, level + 1, order=order, show_root=True))
             else:
-                bookmarks.extend(bookmark_node_string_helper(bookmark, level))
+                bookmarks.extend(bookmark_node_string_helper(bookmark, level, order=order, show_root=True))
 
         return bookmarks
     elif isinstance(bookmark_node, BookmarkListing):
@@ -323,11 +330,16 @@ class BookmarkNode(object):
     def set_parent(self, bookmark_node):
         self.parent = bookmark_node
 
+    def clone(self):
+        # TODO: True Clone of objects.  should include id, listing_id
+        shorten_data = bookmark_node_string_helper(self)
+        return _bookmark_node_parse_shorthand(shorten_data)
+
     def __str__(self):
         return '\n'.join(bookmark_node_string_helper(self))
 
-    def shorten_data(self, include_root=True):
-        return bookmark_node_string_helper(self)
+    def shorten_data(self, include_root=True, order=False, show_root=True):
+        return bookmark_node_string_helper(self, order=order, show_root=show_root)
 
     def hidden(self, is_hidden=False):
         self.is_hidden = is_hidden
@@ -486,9 +498,9 @@ class BookmarkFolder(BookmarkNode):
             return False
 
         # src_bookmark.delete()
-        # TODO: Do true clone
-        dest_bookmark.add_bookmark_object(src_bookmark)
-
+        src_bookmark_clone = src_bookmark.clone()
+        for current_bookmark_object in src_bookmark_clone.bookmark_objects:
+            dest_bookmark.add_bookmark_object(current_bookmark_object)
         return True
 
     @staticmethod

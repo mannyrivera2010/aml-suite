@@ -19,18 +19,6 @@ from ozpcenter.utils import shorthand_types
 from ozpcenter.utils import shorthand_dict
 
 
-def _compare_library(test_case_instance, username, expected_bookmark_list):
-    """
-    Compare Library for a list of username:bookmark pairs
-    """
-    url = '/api/self/library/'
-    response = APITestHelper.request(test_case_instance, url, 'GET', username=username, status_code=200)
-    actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
-    actual_library_shorten = actual_library.shorten_data()
-    test_case_instance.assertEqual(expected_bookmark_list, actual_library_shorten, 'Checking for {}'.format(username))
-    return actual_library
-
-
 def _create_notification(test_case_instance, from_user, folder, to_user):
     # Recreate the notification to send to Julia to share the folder
     now = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=5)
@@ -77,6 +65,23 @@ def _library_move_listing_to_folder(test_case_instance, username, listing_name, 
     test_case_instance.assertIsNotNone(response)
 
 
+def _compare_library(test_case_instance, expected_library_object):
+    usernames = [bookmark.title for bookmark in expected_library_object.bookmark_objects]
+
+    root_folder = BookmarkFolder(None)
+
+    for username in usernames:
+        user_folder_bookmark = root_folder.add_folder_bookmark(username)
+
+        url = '/api/self/library/'
+        response = APITestHelper.request(test_case_instance, url, 'GET', username=username, status_code=200)
+        actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
+        user_folder_bookmark.add_bookmark_object(actual_library)
+    # import pprint; pprint.pprint(root_folder.shorten_data(order=True))
+    test_case_instance.assertEqual(root_folder.shorten_data(order=True), expected_library_object.shorten_data(order=True))
+    return root_folder
+
+
 @override_settings(ES_ENABLED=False)
 class LibraryApiTest(APITestCase):
 
@@ -86,22 +91,59 @@ class LibraryApiTest(APITestCase):
         """
         self.maxDiff = None
 
-        self.wsmith_library = [
-            '(F) old',
-            ' (L) Air Mail',
+        self.library = [
+            '(F) bigbrother',
+            ' (F) Weather',
+            '  (L) Tornado',
+            '  (L) Lightning',
+            '  (L) Snow',
+            ' (F) Animals',
+            '  (L) Wolf Finder',
+            '  (L) Killer Whale',
+            '  (L) Lion Finder',
+            '  (L) Monkey Finder',
+            '  (L) Parrotlet',
+            '  (L) White Horse',
+            ' (F) Instruments',
+            '  (L) Electric Guitar',
+            '  (L) Acoustic Guitar',
+            '  (L) Sound Mixer',
+            '  (L) Electric Piano',
+            '  (L) Piano',
+            '  (L) Violin',
             ' (L) Bread Basket',
-            '(F) heros',
-            ' (L) Iron Man',
-            ' (L) Jean Grey',
-            ' (L) Mallrats',
-            '(F) planets',
-            ' (L) Azeroth',
-            ' (L) Saturn',
-            '(L) Diamond',
-            '(L) Grandfather clock',
-            '(L) Baltimore Ravens',
+            ' (L) Informational Book',
+            ' (L) Stop sign',
+            ' (L) Chain boat navigation',
+            ' (L) Gallery of Maps',
+            ' (L) Chart Course',
+            '(F) bigbrother2',
+            ' (F) InstrumentSharing',
+            '  (L) Acoustic Guitar',
+            ' (L) Alingano Maisu',
+            '(F) julia',
+            ' (L) Astrology software',
+            '(F) wsmith',
+            ' (F) old',
+            '  (L) Air Mail',
+            '  (L) Bread Basket',
+            ' (F) heros',
+            '  (L) Iron Man',
+            '  (L) Jean Grey',
+            '  (L) Mallrats',
+            ' (F) planets',
+            '  (L) Azeroth',
+            '  (L) Saturn',
+            ' (L) Diamond',
+            ' (L) Grandfather clock',
+            ' (L) Baltimore Ravens'
         ]
 
+        self.library_object = BookmarkFolder.parse_shorthand_list(self.library)
+        self.wsmith_library = self.library_object.search('/wsmith/').shorten_data(show_root=False, order=True)
+        self.bigbrother_bookmark2 = self.library_object.search('/bigbrother/').shorten_data(show_root=False, order=True)
+        self.julia_bookmark2 = self.library_object.search('/julia/').shorten_data(show_root=False, order=True)
+        #
         self.wsmith_bookmarks_web_app = [
             '(F) old',
             ' (L) Air Mail',
@@ -110,44 +152,44 @@ class LibraryApiTest(APITestCase):
             ' (L) Azeroth',
             ' (L) Saturn'
         ]
-
-        self.bigbrother_bookmark2 = [
-            '(F) Weather',
-            ' (L) Tornado',
-            ' (L) Lightning',
-            ' (L) Snow',
-            '(F) Animals',
-            ' (L) Wolf Finder',
-            ' (L) Killer Whale',
-            ' (L) Lion Finder',
-            ' (L) Monkey Finder',
-            ' (L) Parrotlet',
-            ' (L) White Horse',
-            '(F) Instruments',
-            ' (L) Electric Guitar',
-            ' (L) Acoustic Guitar',
-            ' (L) Sound Mixer',
-            ' (L) Electric Piano',
-            ' (L) Piano',
-            ' (L) Violin',
-            '(L) Bread Basket',
-            '(L) Informational Book',
-            '(L) Stop sign',
-            '(L) Chain boat navigation',
-            '(L) Gallery of Maps',
-            '(L) Chart Course'
-        ]
-
-        self.julia_bookmark2 = [
-            '(L) Astrology software',
-        ]
-
-        self.julia_bookmark2_weather_folder = [
-            '(F) Weather',
-            ' (L) Tornado',
-            ' (L) Lightning',
-            ' (L) Snow',
-        ]
+        #
+        # self.bigbrother_bookmark2 = [
+        #     '(F) Weather',
+        #     ' (L) Tornado',
+        #     ' (L) Lightning',
+        #     ' (L) Snow',
+        #     '(F) Animals',
+        #     ' (L) Wolf Finder',
+        #     ' (L) Killer Whale',
+        #     ' (L) Lion Finder',
+        #     ' (L) Monkey Finder',
+        #     ' (L) Parrotlet',
+        #     ' (L) White Horse',
+        #     '(F) Instruments',
+        #     ' (L) Electric Guitar',
+        #     ' (L) Acoustic Guitar',
+        #     ' (L) Sound Mixer',
+        #     ' (L) Electric Piano',
+        #     ' (L) Piano',
+        #     ' (L) Violin',
+        #     '(L) Bread Basket',
+        #     '(L) Informational Book',
+        #     '(L) Stop sign',
+        #     '(L) Chain boat navigation',
+        #     '(L) Gallery of Maps',
+        #     '(L) Chart Course'
+        # ]
+        #
+        # self.julia_bookmark2 = [
+        #     '(L) Astrology software',
+        # ]
+        #
+        # self.julia_bookmark2_weather_folder = [
+        #     '(F) Weather',
+        #     ' (L) Tornado',
+        #     ' (L) Lightning',
+        #     ' (L) Snow',
+        # ]
 
     @classmethod
     def setUpTestData(cls):
@@ -185,7 +227,7 @@ class LibraryApiTest(APITestCase):
         url = '/api/self/library/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
-        actual_library_shorten = actual_library.shorten_data()
+        actual_library_shorten = actual_library.shorten_data(order=True)
         self.assertEqual(self.wsmith_library, actual_library_shorten, 'Comparing bookmarks')
 
     def test_get_library_self_when_listing_disabled_enabled(self):
@@ -194,19 +236,19 @@ class LibraryApiTest(APITestCase):
         actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
         first_listing = actual_library.first_listing_bookmark()
         first_listing_id = first_listing.listing_id
-        actual_library_shorten = actual_library.shorten_data()
+        actual_library_shorten = actual_library.shorten_data(order=True)
         self.assertEqual(self.wsmith_library, actual_library_shorten, 'Comparing bookmarks #1')
 
         # Disable Listing
         APITestHelper.edit_listing(self, first_listing_id, {'is_enabled': False})
         first_listing.hidden(True)
-        expected_library_shorten = actual_library.shorten_data()
+        expected_library_shorten = actual_library.shorten_data(order=True)
 
         # Get Library for current user after listing was disabled
         url = '/api/self/library/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
-        actual_library_shorten = actual_library.shorten_data()
+        actual_library_shorten = actual_library.shorten_data(order=True)
 
         self.assertEqual(expected_library_shorten, actual_library_shorten, 'Comparing bookmarks #2')
 
@@ -218,14 +260,14 @@ class LibraryApiTest(APITestCase):
         url = '/api/self/library/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
-        actual_library_shorten = actual_library.shorten_data()
+        actual_library_shorten = actual_library.shorten_data(order=True)
         self.assertEqual(self.wsmith_library, actual_library_shorten, 'Comparing bookmarks #3')
 
     def test_get_library_list_listing_type(self):
         url = '/api/self/library/?type=Web Application'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
         actual_library = BookmarkFolder.parse_legacy_bookmark(response.data)
-        actual_library_shorten = actual_library.shorten_data()
+        actual_library_shorten = actual_library.shorten_data(order=True)
         self.assertEqual(self.wsmith_bookmarks_web_app, actual_library_shorten, 'Comparing bookmarks')
 
     def test_get_library_list_listing_type_empty(self):
@@ -274,31 +316,29 @@ class LibraryApiTest(APITestCase):
         Test import
         """
         # Compare Library for users
-        _compare_library(self, 'bigbrother', self.bigbrother_bookmark2)
-        _compare_library(self, 'julia', self.julia_bookmark2)
+        _compare_library(self, self.library_object)
 
         # Create notification to share Weather folder from Bigbrother to Julia
         response = _create_notification(self, 'bigbrother', 'Weather', 'julia')
         bookmark_notification1_id = response.data['id']
 
         # Compare Library for users
-        _compare_library(self, 'bigbrother', self.bigbrother_bookmark2)
-        _compare_library(self, 'julia', self.julia_bookmark2)
+        _compare_library(self, self.library_object)
 
         # Import Bookmarks
         results = APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
 
+        self.library_object.copy('/bigbrother/Weather/', '/julia/')
         # Add self.julia_bookmark2_weather_folder to self.julia_bookmark2 and compare library
-        self.julia_bookmark2 = self.julia_bookmark2_weather_folder + self.julia_bookmark2
 
-        bigbrother_actual_library = _compare_library(self, 'bigbrother', self.bigbrother_bookmark2)
-        julia_actual_library = _compare_library(self, 'julia', self.julia_bookmark2)
+        # Compare Library for users
+        _compare_library(self, self.library_object)
 
         # Modify Bigbrother's library to add another listing to the weather library
         response = _library_move_listing_to_folder(self, 'bigbrother', 'Chart Course', 'Weather')
 
         # Modify Memory version of bigbrother bookmarks
-        bigbrother_actual_library.move('/Chart Course', '/Weather/')
+        self.library_object.move('/bigbrother/Chart Course', '/bigbrother/Weather/')
 
         response = _create_notification(self, 'bigbrother', 'Weather', 'julia')
         bookmark_notification1_id = response.data['id']
@@ -307,7 +347,7 @@ class LibraryApiTest(APITestCase):
         results = APITestHelper._import_bookmarks(self, 'julia', bookmark_notification1_id, status_code=201)
         # Adding a folder should not duplicate the same listing bookmark in the same folder
         # Compare Library for users
-        julia_actual_library.search('/Weather/').add_listing_bookmark('Chart Course')
 
-        _compare_library(self, 'bigbrother', bigbrother_actual_library.shorten_data())
-        _compare_library(self, 'julia', julia_actual_library.shorten_data())
+        self.library_object.search('/julia/Weather/').add_listing_bookmark('Chart Course')
+
+        _compare_library(self, self.library_object)
