@@ -1029,6 +1029,67 @@ class Profile(models.Model):
         return p
 
 
+class StorefrontCustomizationManager(models.Manager):
+    """
+    Use a custom manager to control access to storefront customizations
+    """
+    def apply_select_related(self, queryset):
+        queryset = queryset.select_related('profile')
+        queryset = queryset.select_related('profile__user')
+
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(StorefrontCustomizationManager, self).get_queryset()
+
+        return self.apply_select_related(queryset)
+
+    def for_user(self, username):
+        profile_instance = Profile.objects.get(user__username=username)
+        objects = self.get_queryset()
+        objects = objects.filter(profile=profile_instance)
+
+        return objects
+
+
+class StorefrontCustomization(models.Model):
+    """
+    Customization of storefront sections for individual profiles
+    """
+    FEATURED = 'FEATURED'
+    RECOMMENDED = 'RECOMMENDED'
+    RECENTLY_ADDED = 'RECENTLY_ADDED'
+    MOST_POPULAR = 'MOST_POPULAR'
+    FREQUENTLY_VISITED = 'FREQUENTLY_VISITED'
+    UPDATES = 'UPDATES'
+    MY_LISTINGS = 'MY_LISTINGS'
+    SECTION_CHOICES = (
+        (FEATURED, FEATURED),
+        (RECOMMENDED, RECOMMENDED),
+        (RECENTLY_ADDED, RECENTLY_ADDED),
+        (MOST_POPULAR, MOST_POPULAR),
+        (FREQUENTLY_VISITED, FREQUENTLY_VISITED),
+        (UPDATES, UPDATES),
+        (MY_LISTINGS, MY_LISTINGS),
+    )
+
+    profile = models.ForeignKey('Profile', related_name='storefront_customizations')
+    section = models.CharField(max_length=50, choices=SECTION_CHOICES)
+    position = models.PositiveIntegerField(default=0)
+    is_hidden = models.BooleanField(default=False)
+
+    objects = StorefrontCustomizationManager()
+
+    def __str__(self):
+        return '{0!s}:{1!s}:{2!s}:{3!s}'.format(self.profile.user.username, self.section, self.position, self.is_hidden)
+
+    def __repr__(self):
+        return '{0!s}:{1!s}:{2!s}:{3!s}'.format(self.profile.user.username, self.section, self.position, self.is_hidden)
+
+    class Meta:
+        unique_together = (("profile", "section"),)
+
+
 class AccessControlListingManager(models.Manager):
     """
     Use a custom manager to control access to Listings
