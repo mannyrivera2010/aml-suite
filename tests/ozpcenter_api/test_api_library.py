@@ -152,44 +152,6 @@ class LibraryApiTest(APITestCase):
             ' (L) Azeroth',
             ' (L) Saturn'
         ]
-        #
-        # self.bigbrother_bookmark2 = [
-        #     '(F) Weather',
-        #     ' (L) Tornado',
-        #     ' (L) Lightning',
-        #     ' (L) Snow',
-        #     '(F) Animals',
-        #     ' (L) Wolf Finder',
-        #     ' (L) Killer Whale',
-        #     ' (L) Lion Finder',
-        #     ' (L) Monkey Finder',
-        #     ' (L) Parrotlet',
-        #     ' (L) White Horse',
-        #     '(F) Instruments',
-        #     ' (L) Electric Guitar',
-        #     ' (L) Acoustic Guitar',
-        #     ' (L) Sound Mixer',
-        #     ' (L) Electric Piano',
-        #     ' (L) Piano',
-        #     ' (L) Violin',
-        #     '(L) Bread Basket',
-        #     '(L) Informational Book',
-        #     '(L) Stop sign',
-        #     '(L) Chain boat navigation',
-        #     '(L) Gallery of Maps',
-        #     '(L) Chart Course'
-        # ]
-        #
-        # self.julia_bookmark2 = [
-        #     '(L) Astrology software',
-        # ]
-        #
-        # self.julia_bookmark2_weather_folder = [
-        #     '(F) Weather',
-        #     ' (L) Tornado',
-        #     ' (L) Lightning',
-        #     ' (L) Snow',
-        # ]
 
     @classmethod
     def setUpTestData(cls):

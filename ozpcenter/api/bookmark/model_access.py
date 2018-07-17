@@ -356,7 +356,7 @@ def create_get_user_root_bookmark_folder(request_profile):
         return bookmark_entry
 
 
-def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_entry_folder=None, bookmark_children=None):
+def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_entry_folder=None, bookmark_children=None, listing_object=None):
     """
     Create Folder Bookmark for profile
 
@@ -386,14 +386,15 @@ def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_en
         target_user_type=models.BookmarkPermission.OWNER
     )
 
-    print(bookmark_children)
-
     for bookmark_child in bookmark_children:
         update_bookmark_entry_for_profile(
             request_profile,
             get_bookmark_entry_by_id(request_profile, bookmark_child),
             bookmark_folder_entry,
             None)
+
+    if listing_object:
+        create_listing_bookmark_for_profile(request_profile, listing_object, bookmark_folder_entry)
 
     return bookmark_folder_entry
 

@@ -286,17 +286,14 @@ class BookmarkSerializer(serializers.ModelSerializer):
             * `listing id` if type is LISTING
             * `title` if type is folder
         """
-        print(validated_data)
-
         username = self.context['request'].user.username
         request_profile = self.context['request'].user.profile
         bookmark_parent_object = validated_data.get('bookmark_parent_object')
         type = validated_data.get('type')
         bookmark_children = validated_data.get('bookmark_children')
+        listing_id = validated_data.get('listing', {}).get('id')
 
         if type == model_access.LISTING_TYPE:
-            listing_id = validated_data.get('listing', {}).get('id')
-
             if not listing_id:
                 raise errors.ValidationException('Listing id entry not found')
 
@@ -314,11 +311,19 @@ class BookmarkSerializer(serializers.ModelSerializer):
             if 'title' not in validated_data:
                 raise errors.ValidationException('No title provided')
 
+            listing = None
+            if listing_id:
+                listing = listing_model_access.get_listing_by_id(username, listing_id)
+
+                if not listing:
+                    raise errors.ValidationException('Listing id entry not found')
+
             return model_access.create_folder_bookmark_for_profile(
                 request_profile,
                 validated_data['title'],
                 bookmark_parent_object,
-                bookmark_children)
+                bookmark_children,
+                listing)
         else:
             raise errors.ValidationException('No valid type provided')
 

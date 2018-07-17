@@ -1184,6 +1184,7 @@ class StorefrontCustomizationManager(models.Manager):
     """
     Use a custom manager to control access to storefront customizations
     """
+
     def apply_select_related(self, queryset):
         queryset = queryset.select_related('profile')
         queryset = queryset.select_related('profile__user')
