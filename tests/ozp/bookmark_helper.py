@@ -111,11 +111,11 @@ def _bookmark_node_parse_shorthand_commands(data):
             0 - L -  Diamond
             0 - L -  Grandfather clock
 
-            CREATE_FOLDER_PUSH_PEEK-heros
-            CREATE_LISTING_PEEK-Iron Man
-            CREATE_LISTING_PEEK-Jean Grey
-            CREATE_LISTING_PEEK-Mallrats
-            CREATE_FOLDER_POP_PUSH_PEEK-old
+    Returns:
+        [{'action': 'CREATE_FOLDER',
+          'level_diff': 0,
+          'record_title': 'bigbrother',
+          'stack_action': 'PUSH_PEEK'},...]
     """
     commands = []
 
@@ -203,7 +203,7 @@ def _bookmark_node_parse_shorthand_commands(data):
             previous_is_folder = record_is_folder
             continue
 
-        commands.append('{}-{}-{}-{}'.format(action, record_title, stack_action, level_diff))
+        commands.append({'action': action, 'record_title': record_title, 'stack_action': stack_action, 'level_diff': level_diff})  # '{}-{}-{}-{}'.format(action, record_title, stack_action, level_diff))
         # print("{}({}) {}".format(action, level_diff, record_title))
         # set previous level
         previous_level = record_level
@@ -256,12 +256,11 @@ def _bookmark_node_parse_shorthand(data):
     folder_stack = [root_folder]
     commands = _bookmark_node_parse_shorthand_commands(data)
     # import pprint; pprint.pprint(commands)
-    for command in commands:
-        command_split = command.split('-')
-        action_raw = command_split[0]
-        record_title = command_split[1]
-        stack_action = command_split[2]
-        level_diff = int(command_split[3])
+    for command_dict in commands:
+        action_raw = command_dict['action']
+        record_title = command_dict['record_title']
+        stack_action = command_dict['stack_action']
+        level_diff = int(command_dict['level_diff'])
 
         action = '{}_{}'.format(action_raw, stack_action)
 
