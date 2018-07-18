@@ -89,6 +89,9 @@ FAST_MODE = bool(os.getenv('FAST_MODE', False))
 
 ES_ENABLED = settings.ES_ENABLED
 
+# Create AML 3.0 Bookmarks
+AML_BOOKMARK_FLAG = True
+
 
 def time_ms():
     return time.time() * 1000.0
@@ -171,7 +174,6 @@ def create_library_entries(library_entries, object_cache):
     """
     Create Bookmarks for users
         version 2.0 (ApplicationLibraryEntry)
-        version 3.0 (BookmarkEntry)
 
     Args:
         library_entries:
@@ -180,9 +182,7 @@ def create_library_entries(library_entries, object_cache):
     """
     # Creating 2.0 bookmarks
     for current_entry in library_entries:
-
         print(current_entry)
-
         current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
         current_listing = current_entry['listing_obj']
         library_entry = models.ApplicationLibraryEntry(
@@ -193,6 +193,18 @@ def create_library_entries(library_entries, object_cache):
         library_entry.save()
 
         # print('--[{}] creating bookmark for listing [{}]'.format(current_profile.user.username, current_listing.title))
+
+
+def create_bookmark_entries(library_entries, object_cache):
+    """
+    Create Bookmarks for users
+        version 3.0 (BookmarkEntry)
+
+    Args:
+        library_entries:
+            [{'folder': None, 'listing_id': 8, 'owner': 'wsmith', 'position': 0},
+             {'folder': None, 'listing_id': 5, 'owner': 'hodor', 'position': 0},...]
+    """
 
     # Creating 3.0 bookmarks
     for current_entry in library_entries:
@@ -874,11 +886,20 @@ def run():
     ############################################################################
     #                           Library (bookmark listings)
     ############################################################################
-    print('--Creating Library')
+    ordered_library_entries = sorted(library_entries, key=lambda k: (k['owner'], k['folder'] if k['folder'] else ''))
+
+    print('--Creating Library 2.0')
     section_start_time = time_ms()
     with transaction.atomic():
-        ordered_library_entries = sorted(library_entries, key=lambda k: (k['owner'], k['folder'] if k['folder'] else ''))
         create_library_entries(ordered_library_entries, object_cache)
+
+    print('-----Took: {} ms'.format(time_ms() - section_start_time))
+    print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
+
+    print('--Creating Library 3.0')
+    section_start_time = time_ms()
+    with transaction.atomic():
+        create_bookmark_entries(ordered_library_entries, object_cache)
 
     print('-----Took: {} ms'.format(time_ms() - section_start_time))
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
@@ -886,7 +907,7 @@ def run():
     ############################################################################
     #                           Library (bookmark listings)
     ############################################################################
-    print('--Creating Library Sharing')
+    print('--Creating Library 3.0 Sharing')
     section_start_time = time_ms()
 
     with transaction.atomic():

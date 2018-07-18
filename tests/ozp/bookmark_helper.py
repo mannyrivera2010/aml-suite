@@ -478,6 +478,7 @@ class BookmarkNode(object):
 
 
 class BookmarkFolder(BookmarkNode):
+    prefix = 'F'
 
     def __init__(self, title, id=None, is_shared=False):
         super().__init__(id, title, 'FOLDER', is_shared)
@@ -621,17 +622,13 @@ class BookmarkFolder(BookmarkNode):
         bookmark_objects = self.bookmark_objects
         id = self.id
         title = self.title
-        prefix = ''
 
-        if self.is_shared:
-            prefix = 'SF'
-        else:
-            prefix = 'F'
-
-        return '{}({}, {}, {}, {})'.format(prefix, id, title, self.parent.title if self.parent else 'None', len(bookmark_objects))
+        return '{}({}, {}, {}, {})'.format(self.prefix, id, title, self.parent.title if self.parent else 'None', len(bookmark_objects))
 
 
 class BookmarkSharedFolder(BookmarkFolder):
+    prefix = 'SF'
+
     def __init__(self, title, id=None):
         super().__init__(title, id=id, is_shared=True)
 
