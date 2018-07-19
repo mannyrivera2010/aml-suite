@@ -181,7 +181,21 @@ class BookmarkApiTest(APITestCase):
         """
         Check for bookmarks when listing owner disables listing, it should not be visable
         """
-        pass
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        bigbrother_listing = new_library_object.search('/bigbrother/').first_listing_bookmark()
+        # Disable Listing
+        APITestHelper.edit_listing(self, bigbrother_listing.listing_id, {'is_enabled': False}, 'bigbrother')
+
+        bigbrother_listing.hidden(True)
+
+        _compare_bookmarks(self, new_library_object)
+
+        APITestHelper.edit_listing(self, bigbrother_listing.listing_id, {'is_enabled': True}, 'bigbrother')
+
+        bigbrother_listing.hidden(False)
+
+        _compare_bookmarks(self, new_library_object)
 
     def test_listing_bookmark_owner_create_delete(self):
         """

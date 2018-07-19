@@ -1,0 +1,12 @@
+- message: System will be going down for approximately 30 minutes on X/Y at 1100Z
+  time: next_week
+  username: wsmith
+- message: System will be functioning in a degredaded state between 1800Z-0400Z on A/B
+  time: next_week
+  username: julia
+- message: System will be going down for approximately 30 minutes on C/D at 1700Z
+  time: last_week
+  username: wsmith
+- message: System will be functioning in a degredaded state between 2100Z-0430Z on F/G
+  time: last_week
+  username: julia

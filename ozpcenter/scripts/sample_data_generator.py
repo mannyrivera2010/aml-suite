@@ -441,6 +441,14 @@ def load_yaml_file(filename):
             raise exc
 
 
+def save_to_yaml(filename, data, default_flow_style=None):
+    """
+    Save Data to Yaml file
+    """
+    with open(filename, 'w') as file_stream:
+        yaml.dump(data, file_stream, indent=2, default_flow_style=default_flow_style)
+
+
 def parse_sqlite_dump(filename):
     sql_statement = open(os.path.join(TEST_DATA_PATH, filename), 'r').readlines()
     all_sql = []
@@ -534,36 +542,7 @@ def run():
     listings_data = load_yaml_file('listings.yaml')
     listing_types = load_yaml_file('listing_types.yaml')
     image_types = load_yaml_file('image_types.yaml')
-
-    agency_data = [
-        {'short_name': 'Minitrue',
-         'title': 'Ministry of Truth',
-         'icon.filename': 'ministry_of_truth.jpg'},
-        {'short_name': 'Minipax',
-        'title': 'Ministry of Peace',
-        'icon.filename': 'ministry_of_peace.png'},
-        {'short_name': 'Miniluv',
-        'title': 'Ministry of Love',
-        'icon.filename': 'ministry_of_love.jpeg'},
-        {'short_name': 'Miniplen',
-        'title': 'Ministry of Plenty',
-        'icon.filename': 'ministry_of_plenty.png'},
-        {'short_name': 'Test',
-        'title': 'Test',
-        'icon.filename': 'ministry_of_plenty.png'},
-        {'short_name': 'Test 1',
-        'title': 'Test 1',
-        'icon.filename': 'ministry_of_plenty.png'},
-        {'short_name': 'Test2',
-        'title': 'Test 2',
-        'icon.filename': 'ministry_of_plenty.png'},
-        {'short_name': 'Test 3',
-        'title': 'Test 3',
-        'icon.filename': 'ministry_of_plenty.png'},
-        {'short_name': 'Test 4',
-        'title': 'Test 4',
-        'icon.filename': 'ministry_of_plenty.png'}
-    ]
+    agency_data = load_yaml_file('agency.yaml')
 
     print('-----Took: {} ms'.format(time_ms() - section_file_start_time))
 
@@ -769,25 +748,21 @@ def run():
         next_week = datetime.datetime.now() + datetime.timedelta(days=7)
         eastern = pytz.timezone('US/Eastern')
         next_week = eastern.localize(next_week)
-        n1 = notification_model_access.create_notification(object_cache['Profile.{}'.format('wsmith')],  # noqa: F841
-                                                           next_week,
-                                                           'System will be going down for approximately 30 minutes on X/Y at 1100Z')
 
-        n2 = notification_model_access.create_notification(object_cache['Profile.{}'.format('julia')],  # noqa: F841
-                                                           next_week,
-                                                           'System will be functioning in a degredaded state between 1800Z-0400Z on A/B')
-
-        # create some expired notifications
         last_week = datetime.datetime.now() - datetime.timedelta(days=7)
         last_week = eastern.localize(last_week)
 
-        n1 = notification_model_access.create_notification(object_cache['Profile.{}'.format('wsmith')],  # noqa: F841
-                                                           last_week,
-                                                           'System will be going down for approximately 30 minutes on C/D at 1700Z')
+        time_dict = {
+            'next_week': next_week,
+            'last_week': last_week
+        }
 
-        n2 = notification_model_access.create_notification(object_cache['Profile.{}'.format('julia')],  # noqa: F841
-                                                           last_week,
-                                                           'System will be functioning in a degredaded state between 2100Z-0430Z on F/G')
+        system_notification_data = load_yaml_file('system_notification.yaml')
+
+        for system_notification in system_notification_data:
+            notification_model_access.create_notification(object_cache['Profile.{}'.format(system_notification['username'])],  # noqa: F841
+                                                               time_dict[system_notification['time']],
+                                                               system_notification['message'])
 
     print('-----Took: {} ms'.format(time_ms() - section_start_time))
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
@@ -884,7 +859,7 @@ def run():
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
-    #                           Library (bookmark listings)
+    #                           Library 2.0 (bookmark listings)
     ############################################################################
     ordered_library_entries = sorted(library_entries, key=lambda k: (k['owner'], k['folder'] if k['folder'] else ''))
 
@@ -896,6 +871,10 @@ def run():
     print('-----Took: {} ms'.format(time_ms() - section_start_time))
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
+    ############################################################################
+    #                           Library 3.0 (bookmark listings)
+    ############################################################################
+
     print('--Creating Library 3.0')
     section_start_time = time_ms()
     with transaction.atomic():
@@ -905,7 +884,7 @@ def run():
     print('---Database Calls: {}'.format(show_db_calls(db_connection, False)))
 
     ############################################################################
-    #                           Library (bookmark listings)
+    #                           Library 3.0 Sharing (bookmark listings)
     ############################################################################
     print('--Creating Library 3.0 Sharing')
     section_start_time = time_ms()
@@ -949,11 +928,8 @@ def run():
     # ['bigbrother', 'bigbrother2', 'khaleesi', 'wsmith', 'julia', 'obrien', 'aaronson',
     #  'pmurt', 'hodor', 'jones', 'tammy', 'rutherford', 'noah', 'syme', 'abe',
     #  'tparsons', 'jsnow', 'charrington', 'johnson']
+    subscription_data = load_yaml_file('subscriptions.yaml')  # flake8: noqa
 
-    subscriptions = [  # flake8: noqa
-        ['bigbrother', 'category', 'Books and Reference'],
-        ['bigbrother', 'category', 'Business']
-    ]
     ############################################################################
     #                           Recommendations
     ############################################################################

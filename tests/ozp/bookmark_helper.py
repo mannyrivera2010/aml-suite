@@ -336,8 +336,9 @@ def _bookmark_node_parse(bookmark_folder, data):
         for listing in listings:
             bookmark_id = listing.get('id')
             listing_title = listing.get('listing', {}).get('title')
+            listing_id = listing.get('listing', {}).get('id')
             if listing_title:
-                bookmark_listing = BookmarkListing(listing_title, id=bookmark_id)
+                bookmark_listing = BookmarkListing(listing_title, id=bookmark_id, listing_id=listing_id)
                 bookmark_folder.add_bookmark_object(bookmark_listing)
                 bookmark_listing.set_parent(bookmark_folder)
 
