@@ -2,12 +2,6 @@
 Test bookmark
 
 TEST_MODE=True pytest tests/ozpcenter_api/test_api_bookmark.py
-
-Nodes()
-    .parse(data)
-    .move('/Animals/Killer Whale')
-    .to('/')
-    .search('/Killer Whale').id()
 """
 from django.test import override_settings
 from tests.ozp.cases import APITestCase
@@ -19,23 +13,24 @@ from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 
 
-def _get_bookmarks_and_check_for_user(testcase_instance, username, expected_results):
-    """
-    Helper Function to get bookmarks for user and check bookmarks against expected_results
-    """
-    url = '/api/bookmark/'
-    response = APITestHelper.request(testcase_instance, url, 'GET', username=username, status_code=200)
-    bookmark_folder = BookmarkFolder.parse_endpoint(response.data)
-    shorten_data = bookmark_folder.shorten_data()
-    # sorted by type, created_date
-    # import pprint
-    # print('--shorten_data--:{}'.format(username))
-    # pprint.pprint(shorten_data)
-    # print('--expected_results--:{}'.format(username))
-    # pprint.pprint(expected_results)
-    # print('===========')
-    testcase_instance.assertEqual(shorten_data, expected_results, 'username:{}'.format(username))
-    return response.data
+def _compare_bookmarks(test_case_instance, expected_library_object):
+    usernames = [bookmark.title for bookmark in expected_library_object.bookmark_objects]
+
+    root_folder = BookmarkFolder(None)
+
+    for username in usernames:
+        user_folder_bookmark = root_folder.add_folder_bookmark(username)
+
+        url = '/api/bookmark/'
+        response = APITestHelper.request(test_case_instance, url, 'GET', username=username, status_code=200)
+        actual_library = BookmarkFolder.parse_endpoint(response.data)
+        user_folder_bookmark.add_bookmark_object(actual_library)
+
+    actual_bookmarks = root_folder.shorten_data(order=False)
+    expected_bookmarks = expected_library_object.shorten_data(order=False)
+
+    test_case_instance.assertEqual(actual_bookmarks, expected_bookmarks)
+    return root_folder
 
 
 def _get_folder_permission(testcase_instance, username, folder_id, permission_shorthand_expected, status_code=200):
@@ -53,11 +48,39 @@ def _get_folder_permission(testcase_instance, username, folder_id, permission_sh
         testcase_instance.assertEqual(response.data.get('error_code'), 'permission_denied')
 
 
+def _create_bookmark_folder(testcase_instance, username, folder_title, listing_id=None, shared_folder_id=None):
+    """
+    Create Listing bookmark under shared_folder_bookmark
+
+    CREATE [LISTING/FOLDER] BOOKMARK FOR USER {username} WHERE LISTING = {listing_id}
+    """
+    url = '/api/bookmark/'
+    data = {"type": "FOLDER", "title": folder_title}
+
+    if listing_id:
+        data['listing'] = {}
+        data['listing']['id'] = listing_id
+
+    if shared_folder_id:
+        data['bookmark_parent'] = [{"id": shared_folder_id}]
+
+    response = APITestHelper.request(testcase_instance, url, 'POST', data=data, username=username, status_code=201)
+
+    shorten_data = shorthand_dict(response.data, include_keys=['is_shared', 'type', 'title'])
+    expected_results = "(is_shared:False,title:{},type:FOLDER)".format(folder_title)
+    testcase_instance.assertEqual(shorten_data, expected_results)
+    return response
+
+
 def _create_bookmark_listing(testcase_instance, username, listing_id, listing_title, shared_folder_id=None):
-    # Create Listing bookmark under shared_folder_bookmark
+    """
+    Create Listing bookmark under shared_folder_bookmark
+
+    CREATE [LISTING/FOLDER] BOOKMARK FOR USER {username} WHERE LISTING = {listing_id}
+    """
     url = '/api/bookmark/'
     # TODO: How to elimate listing id from call
-    data = {"type": "LISTING", "listing": {"id": 2}}
+    data = {"type": "LISTING", "listing": {"id": listing_id}}
 
     if shared_folder_id:
         data['bookmark_parent'] = [{"id": shared_folder_id}]
@@ -86,63 +109,60 @@ class BookmarkApiTest(APITestCase):
         """
         self.maxDiff = None
 
-        self.bigbrother_expected_bookmarks = [
-            '(F) Animals',
-            ' (L) Killer Whale',
-            ' (L) Lion Finder',
-            ' (L) Monkey Finder',
-            ' (L) Parrotlet',
-            ' (L) White Horse',
-            ' (L) Wolf Finder',
-            '(F) Instruments',
-            ' (L) Acoustic Guitar',
-            ' (L) Electric Guitar',
-            ' (L) Electric Piano',
-            ' (L) Piano',
-            ' (L) Sound Mixer',
-            ' (L) Violin',
-            '(F) Weather',
-            ' (L) Lightning',
-            ' (L) Snow',
-            ' (L) Tornado',
-            '(L) Bread Basket',
-            '(L) Chain boat navigation',
-            '(L) Chart Course',
-            '(L) Gallery of Maps',
-            '(L) Informational Book',
-            '(L) Stop sign',
-            # '(L) Stop 1'
-        ]
-
-        self.wsmith_expected_bookmarks = [
-            '(F) heros',
-            ' (L) Iron Man',
-            ' (L) Jean Grey',
-            ' (L) Mallrats',
-            '(F) old',
-            ' (L) Air Mail',
+        self.library = [
+            '(F) bigbrother',
+            ' (F) Animals',
+            '  (L) Killer Whale',
+            '  (L) Lion Finder',
+            '  (L) Monkey Finder',
+            '  (L) Parrotlet',
+            '  (L) White Horse',
+            '  (L) Wolf Finder',
+            ' (F) Instruments',
+            '  (L) Acoustic Guitar',
+            '  (L) Electric Guitar',
+            '  (L) Electric Piano',
+            '  (L) Piano',
+            '  (L) Sound Mixer',
+            '  (L) Violin',
+            ' (F) Weather',
+            '  (L) Lightning',
+            '  (L) Snow',
+            '  (L) Tornado',
             ' (L) Bread Basket',
-            '(F) planets',
-            ' (L) Azeroth',
-            ' (L) Saturn',
-            '(L) Baltimore Ravens',
-            '(L) Diamond',
-            '(L) Grandfather clock'
+            ' (L) Chain boat navigation',
+            ' (L) Chart Course',
+            ' (L) Gallery of Maps',
+            ' (L) Informational Book',
+            ' (L) Stop sign',
+            '(F) bigbrother2',
+            ' (SF) InstrumentSharing',
+            '  (L) Acoustic Guitar',
+            ' (L) Alingano Maisu',
+            '(F) julia',
+            ' (SF) InstrumentSharing',
+            '  (L) Acoustic Guitar',
+            ' (L) Astrology software',
+            '(F) johnson',
+            ' (SF) InstrumentSharing',
+            '  (L) Acoustic Guitar',
+            ' (L) Applied Ethics Inc.',
+            '(F) wsmith',
+            ' (F) heros',
+            '  (L) Iron Man',
+            '  (L) Jean Grey',
+            '  (L) Mallrats',
+            ' (F) old',
+            '  (L) Air Mail',
+            '  (L) Bread Basket',
+            ' (F) planets',
+            '  (L) Azeroth',
+            '  (L) Saturn',
+            ' (L) Baltimore Ravens',
+            ' (L) Diamond',
+            ' (L) Grandfather clock'
         ]
-
-        self.one_listing_expected_bookmarks = [
-            '(L) Hello'
-        ]
-
-        self.nested_expected_bookmarks = [
-            '(F) Folder 1',
-            ' (SF) Folder 1.1',
-            ' (F) Folder 1.2',
-            ' (F) Folder 1.3',
-            '  (L) Listing 1.3.1',
-            ' (L) Listing 1.1.1',
-            '(F) Folder 2'
-        ]
+        self.library_object = BookmarkFolder.parse_shorthand_list(self.library)
 
     @classmethod
     def setUpTestData(cls):
@@ -151,94 +171,134 @@ class BookmarkApiTest(APITestCase):
         """
         data_gen.run()
 
-    def test_bookmark_folder_parse_shorthand(self):
+    def test_bookmark_list_all_users(self):
         """
-        Testing parse_shorthand_list method
+        Check bookmarks for all users under library_object
         """
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(self.bigbrother_expected_bookmarks)
-        self.assertEqual(bookmark_folder.shorten_data(), self.bigbrother_expected_bookmarks)
-
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(self.wsmith_expected_bookmarks)
-        self.assertEqual(bookmark_folder.shorten_data(), self.wsmith_expected_bookmarks)
-
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(self.one_listing_expected_bookmarks)
-        self.assertEqual(bookmark_folder.shorten_data(), self.one_listing_expected_bookmarks)
-
-    def test_bookmark_folder_parse_shorthand_complex(self):
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(self.nested_expected_bookmarks)
-        self.assertEqual(bookmark_folder.shorten_data(), self.nested_expected_bookmarks)
+        _compare_bookmarks(self, self.library_object)
 
     def test_get_bookmark_list_admin_disable_listing(self):
         """
         Check for bookmarks when listing owner disables listing, it should not be visable
         """
-        pass
+        new_library_object = _compare_bookmarks(self, self.library_object)
 
-    def test_bookmark_list_admin(self):
-        """
-        Check bookmarks for admin (bigbrother)
-        """
-        _get_bookmarks_and_check_for_user(self, 'bigbrother', self.bigbrother_expected_bookmarks)
+        bigbrother_listing = new_library_object.search('/bigbrother/').first_listing_bookmark()
+        # Disable Listing
+        APITestHelper.edit_listing(self, bigbrother_listing.listing_id, {'is_enabled': False}, 'bigbrother')
 
-    def test_bookmark_list_steward(self):
-        """
-        Test for checking bookmarks for wsmith user
-        """
-        _get_bookmarks_and_check_for_user(self, 'wsmith', self.wsmith_expected_bookmarks)
+        bigbrother_listing.hidden(True)
 
-    def test_get_bookmark_list_shared_folder(self):
+        _compare_bookmarks(self, new_library_object)
+
+        APITestHelper.edit_listing(self, bigbrother_listing.listing_id, {'is_enabled': True}, 'bigbrother')
+
+        bigbrother_listing.hidden(False)
+
+        _compare_bookmarks(self, new_library_object)
+
+    def test_listing_bookmark_owner_create_delete(self):
+        """
+        Test for creating listing bookmark under a non-shared folder and deleting same bookmark
+
+        Steps:
+            1. Validate existing bookmarks for bigbrother
+            2. Add a listing bookmark under root folder for bigbrother
+            3. Validate existing
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        response = _create_bookmark_listing(self, 'bigbrother', 2, 'Air Mail')
+        # Verify bookmarks
+        new_library_object.search('/bigbrother/').add_listing_bookmark('Air Mail')
+
+        new_library_object = _compare_bookmarks(self, new_library_object)
+
+        username = 'bigbrother'
+        url = '/api/bookmark/{}/'.format(response.data['id'])
+        response = APITestHelper.request(self, url, 'DELETE', username=username, status_code=204)
+
+        new_library_object.search_delete('/bigbrother/Air Mail')
+
+        new_library_object = _compare_bookmarks(self, new_library_object)
+
+    def test_folder_bookmark_owner_create_delete(self):
+        """
+        Test for creating listing bookmark under a non-shared folder and deleting same bookmark
+
+        Steps:
+            1. Validate existing bookmarks for bigbrother
+            2. Add a listing bookmark under root folder for bigbrother
+            3. Validate existing
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        response = _create_bookmark_folder(self, 'bigbrother', 'Test Folder 1')
+        # Verify bookmarks
+        new_library_object.search('/bigbrother/').add_folder_bookmark('Test Folder 1')
+
+        new_library_object = _compare_bookmarks(self, new_library_object)
+
+        username = 'bigbrother'
+        url = '/api/bookmark/{}/'.format(response.data['id'])
+        response = APITestHelper.request(self, url, 'DELETE', username=username, status_code=204)
+
+        new_library_object.search_delete('/bigbrother/Test Folder 1/')
+
+        new_library_object = _compare_bookmarks(self, new_library_object)
+
+    def test_folder_bookmark_listing_owner_create_delete(self):
+        """
+        Test for creating listing bookmark under a non-shared folder and deleting same bookmark
+
+        Steps:
+            1. Validate existing bookmarks for bigbrother
+            2. Add a listing bookmark under root folder for bigbrother
+            3. Validate existing
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        response = _create_bookmark_folder(self, 'bigbrother', 'Test Folder 2', listing_id=2)
+        # Verify bookmarks
+        new_library_object.search('/bigbrother/').add_folder_bookmark('Test Folder 2')
+        new_library_object.search('/bigbrother/Test Folder 2/').add_listing_bookmark('Air Mail')
+
+        new_library_object = _compare_bookmarks(self, new_library_object)
+
+        username = 'bigbrother'
+        url = '/api/bookmark/{}/'.format(response.data['id'])
+        response = APITestHelper.request(self, url, 'DELETE', username=username, status_code=204)
+
+        new_library_object.search_delete('/bigbrother/Test Folder 2/')
+
+        new_library_object = _compare_bookmarks(self, new_library_object)
+
+    def test_get_shared_folder_list_create_delete(self):
         """
         test_get_bookmark_list_shared_folder
 
         test checks for shared folders (InstrumentSharing)
         """
-        shared_folder_bookmarks = [
-            '(SF) InstrumentSharing',
-            ' (L) Acoustic Guitar',
-        ]
-
-        bigbrother2_expected_bookmarks = shared_folder_bookmarks + [
-            '(L) Alingano Maisu'
-        ]
-
-        julia_expected_bookmarks = shared_folder_bookmarks + [
-            '(L) Astrology software'
-        ]
-
-        johnson_expected_bookmarks = shared_folder_bookmarks + [
-            '(L) Applied Ethics Inc.'
-        ]
-
-        bigbrother2_bookmarks = _get_bookmarks_and_check_for_user(self, 'bigbrother2', bigbrother2_expected_bookmarks)  # OWNER
-        julia_bookmarks = _get_bookmarks_and_check_for_user(self, 'julia', julia_expected_bookmarks)  # OWNER
-        johnson_bookmarks = _get_bookmarks_and_check_for_user(self, 'johnson', johnson_expected_bookmarks)  # VIEWER
-
-        # Getting the id of the first shared folder
-        shared_folder_id = BookmarkFolder.parse_endpoint(bigbrother2_bookmarks).first_shared_folder().id
+        new_library_object = _compare_bookmarks(self, self.library_object)
+        shared_folder_id = new_library_object.search('/bigbrother2/').first_shared_folder().id
 
         response = _create_bookmark_listing(self, 'bigbrother2', 2, 'Air Mail', shared_folder_id)
-        # Add recently added bookmark to folder
-        shorten_shared_data = [' {}'.format(r) for r in BookmarkListing.parse_endpoint(response.data).shorten_data()]
-        shared_folder_bookmarks.extend(shorten_shared_data)
 
-        bigbrother2_expected_bookmarks = shared_folder_bookmarks + [
-            '(L) Alingano Maisu'
-        ]
+        new_library_object.search('/bigbrother2/').first_shared_folder().add_listing_bookmark('Air Mail')
+        new_library_object.search('/julia/').first_shared_folder().add_listing_bookmark('Air Mail')
+        new_library_object.search('/johnson/').first_shared_folder().add_listing_bookmark('Air Mail')
 
-        julia_expected_bookmarks = shared_folder_bookmarks + [
-            '(L) Astrology software'
-        ]
+        new_library_object = _compare_bookmarks(self, new_library_object)
 
-        johnson_expected_bookmarks = shared_folder_bookmarks + [
-            '(L) Applied Ethics Inc.'
-        ]
+        username = 'bigbrother2'
+        url = '/api/bookmark/{}/'.format(response.data['id'])
+        response = APITestHelper.request(self, url, 'DELETE', username=username, status_code=204)
 
-        # All users should be able to see the recently added bookmark under shared folder
-        bigbrother2_bookmarks = _get_bookmarks_and_check_for_user(self, 'bigbrother2', bigbrother2_expected_bookmarks)  # OWNER
-        julia_bookmarks = _get_bookmarks_and_check_for_user(self, 'julia', julia_expected_bookmarks)  # OWNER
-        johnson_bookmarks = _get_bookmarks_and_check_for_user(self, 'johnson', johnson_expected_bookmarks)  # VIEWER
+        new_library_object.search_delete('/bigbrother2/InstrumentSharing/Air Mail')
+        new_library_object.search_delete('/julia/InstrumentSharing/Air Mail')
+        new_library_object.search_delete('/johnson/InstrumentSharing/Air Mail')
 
-        # TODO: Delete recently added bookmark
+        _compare_bookmarks(self, new_library_object)
 
     def test_get_bookmark_list_shared_folder_permissions(self):
         """
@@ -265,21 +325,3 @@ class BookmarkApiTest(APITestCase):
         _get_folder_permission(self, 'johnson', shared_folder_id, bigbrother2_permission_shorthand_expected, status_code=403)
         # Check OTHER permission
         _get_folder_permission(self, 'bigbrother', shared_folder_id, bigbrother2_permission_shorthand_expected, status_code=403)
-
-    def test_listing_bookmark_owner_create_delete(self):
-        """
-        Test for creating listing bookmark under a non-shared folder and deleting same bookmark
-
-        Steps:
-            1. Validate existing bookmarks for bigbrother
-            2. Add a listing bookmark under root folder for bigbrother
-            3. Validate existing
-        """
-        # Verify bookmarks
-        _get_bookmarks_and_check_for_user(self, 'bigbrother', self.bigbrother_expected_bookmarks)
-
-        response = _create_bookmark_listing(self, 'bigbrother', 2, 'Air Mail')
-        # Verify bookmarks
-        shorten_shared_data = BookmarkListing.parse_endpoint(response.data).shorten_data()
-        expected_results = self.bigbrother_expected_bookmarks + shorten_shared_data
-        _get_bookmarks_and_check_for_user(self, 'bigbrother', expected_results)
