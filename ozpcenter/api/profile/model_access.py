@@ -130,7 +130,7 @@ def get_frequently_visited_listings(current_request_username, profile_id):
     return listings
 
 
-def create_or_update_storefront_customization(profile, section, position=None, is_hidden=None):
+def create_or_update_storefront_customization(profile, section, position=None, is_hidden=None, size=None):
     """
     Updates the storefront customization settings for a given profile and section,
     or creates a new one if it doesn't exist
@@ -146,6 +146,8 @@ def create_or_update_storefront_customization(profile, section, position=None, i
         customization.position = position
     if is_hidden is not None:
         customization.is_hidden = is_hidden
+    if size is not None:
+        customization.size = size
 
     return customization.save()
 
