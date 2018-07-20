@@ -10,6 +10,7 @@ from django.test import override_settings
 from rest_framework import status
 from tests.ozp.cases import APITestCase
 from ozpcenter.utils import shorthand_dict
+from ozpcenter.utils import shorthand_types
 
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter import model_access as generic_model_access
@@ -38,32 +39,43 @@ def _compare_library(test_case_instance, expected_library_object):
     return root_folder
 
 
+def _parse_notification_to_bookmark_nodes(data):
+    user_folder_bookmark = BookmarkFolder(None)
+
+    for entry in data:
+        notification_id = entry['id']
+        notification_type = entry['notification_type']
+        notification_author = entry['author']['user']['username']
+
+        type_folder = user_folder_bookmark.search('/{}/'.format(notification_type))
+
+        if type_folder is None:
+            type_folder = user_folder_bookmark.add_folder_bookmark('{}'.format(notification_type))
+
+        author_folder = user_folder_bookmark.search('/{}/{}/'.format(notification_type, notification_author))
+
+        if author_folder is None:
+            author_folder = user_folder_bookmark.search('/{}/'.format(notification_type)).add_folder_bookmark('{}'.format(notification_author))
+
+        notification_message = ''.join(entry.get('message').split())
+        author_folder.add_listing_bookmark(notification_message, notification_id)
+
+    return user_folder_bookmark
+
+
 def _compare_user_notification(test_case_instance, expected_notification_object):
     """
     Compare User Notification
     """
     usernames = [bookmark.title for bookmark in expected_notification_object.bookmark_objects]
-
     root_folder = BookmarkFolder(None)
 
     for username in usernames:
         user_folder_bookmark = root_folder.add_folder_bookmark(username)
-
         url = '/api/self/notification/'
         response = APITestHelper.request(test_case_instance, url, 'GET', username=username, status_code=200)
-        # shorthand_dict(response.data, include_keys=['notification_type', 'message', 'author', 'author.user', 'author.user.username'])
-        for entry in response.data:
-            notification_id = entry.get('id')
-            notification_type = entry.get('notification_type')
-
-            type_folder = user_folder_bookmark.search('/{}/{}/'.format(username, notification_type))
-
-            if type_folder is None:
-                type_folder = user_folder_bookmark.search('/{}/'.format(username)).add_folder_bookmark('{}'.format(notification_type))
-
-            notification_message = ''.join(entry.get('message').split())
-            type_folder.add_listing_bookmark(notification_message, notification_id)
-    #
+        response_folder = _parse_notification_to_bookmark_nodes(response.data)
+        user_folder_bookmark.add_bookmark_object(response_folder)
     # import pprint; pprint.pprint(root_folder.shorten_data(order=True))
     test_case_instance.assertEqual(root_folder.shorten_data(order=True), expected_notification_object.shorten_data(order=True))
     return root_folder
@@ -115,12 +127,16 @@ def _create_peer_bookmark(test_case_instance, username, to_username, folder_name
 
     notification_id = response.data['id']
     notification_type = response.data['notification_type']
+    notification_author = response.data['author']['user']['username']
     notification_message = ''.join(response.data['message'].split())
 
     if notifications_object.search('/{}/{}/'.format(to_username, notification_type)) is None:
         notifications_object.search('/{}/'.format(to_username)).add_folder_bookmark('{}'.format(notification_type), prepend=True)
 
-    notifications_object.search('/{}/{}/'.format(to_username, notification_type)).add_listing_bookmark(notification_message, bookmark_id=notification_id)  # prepend=True)
+    if notifications_object.search('/{}/{}/{}/'.format(to_username, notification_type, notification_author)) is None:
+        notifications_object.search('/{}/{}/'.format(to_username, notification_type)).add_folder_bookmark('{}'.format(notification_author), prepend=True)
+
+    notifications_object.search('/{}/{}/{}/'.format(to_username, notification_type, notification_author)).add_listing_bookmark(notification_message, bookmark_id=notification_id)  # prepend=True)
 
     _compare_user_notification(test_case_instance, notifications_object)
 
@@ -187,268 +203,320 @@ class NotificationApiTest(APITestCase):
         self.notifications = [
             '(F) bigbrother',
             ' (F) listing',
-            '  (L) WolfFinderupdatenextweek',
-            '  (L) WolfFinderupdatenextweek',
-            '  (L) WhiteHorseupdatenextweek',
-            '  (L) Violinupdatenextweek',
-            '  (L) Tornadoupdatenextweek',
-            '  (L) Stopsignupdatenextweek',
-            '  (L) SoundMixerupdatenextweek',
-            '  (L) Snowupdatenextweek',
-            '  (L) Pianoupdatenextweek',
-            '  (L) Parrotletupdatenextweek',
-            '  (L) MonkeyFinderupdatenextweek',
-            '  (L) LionFinderupdatenextweek',
-            '  (L) Lightningupdatenextweek',
-            '  (L) KillerWhaleupdatenextweek',
-            '  (L) KillerWhaleupdatenextweek',
-            '  (L) InformationalBookupdatenextweek',
-            '  (L) GalleryofMapsupdatenextweek',
-            '  (L) ElectricPianoupdatenextweek',
-            '  (L) ElectricGuitarupdatenextweek',
-            '  (L) ChartCourseupdatenextweek',
-            '  (L) ChartCourseupdatenextweek',
-            '  (L) Chainboatnavigationupdatenextweek',
-            '  (L) BreadBasketupdatenextweek',
-            '  (L) BreadBasketupdatenextweek',
-            '  (L) AcousticGuitarupdatenextweek',
-            '  (L) AcousticGuitarupdatenextweek',
-            '  (L) Auserhasratedlisting<b>WolfFinder</b>4stars',
-            '  (L) Auserhasratedlisting<b>WolfFinder</b>5stars',
-            '  (L) Auserhasratedlisting<b>WhiteHorse</b>4stars',
-            '  (L) Auserhasratedlisting<b>Tornado</b>1star',
-            '  (L) Auserhasratedlisting<b>Tornado</b>1star',
-            '  (L) Auserhasratedlisting<b>Tornado</b>1star',
-            '  (L) Auserhasratedlisting<b>SailboatRacing</b>3stars',
-            '  (L) Auserhasratedlisting<b>NetworkSwitch</b>4stars',
-            '  (L) Auserhasratedlisting<b>MonkeyFinder</b>1star',
-            '  (L) Auserhasratedlisting<b>MonkeyFinder</b>1star',
-            '  (L) Auserhasratedlisting<b>LionFinder</b>1star',
-            '  (L) Auserhasratedlisting<b>KillerWhale</b>3stars',
-            '  (L) Auserhasratedlisting<b>KillerWhale</b>4stars',
-            '  (L) Auserhasratedlisting<b>JarofFlies</b>3stars',
-            '  (L) Auserhasratedlisting<b>InformationalBook</b>5stars',
-            '  (L) Auserhasratedlisting<b>HouseStark</b>4stars',
-            '  (L) Auserhasratedlisting<b>HouseStark</b>1star',
-            '  (L) Auserhasratedlisting<b>HouseLannister</b>1star',
-            '  (L) Auserhasratedlisting<b>Greatwhiteshark</b>3stars',
-            '  (L) Auserhasratedlisting<b>Greatwhiteshark</b>5stars',
-            '  (L) Auserhasratedlisting<b>AcousticGuitar</b>3stars',
-            '  (L) Auserhasratedlisting<b>AcousticGuitar</b>5stars',
-            '  (L) Auserhasratedlisting<b>AcousticGuitar</b>1star',
-            '  (L) Auserhasratedlisting<b>AcousticGuitar</b>3stars',
+            '  (F) aaronson',
+            '   (L) Snowupdatenextweek',
+            '  (F) betaraybill',
+            '   (L) Auserhasratedlisting<b>HouseStark</b>1star',
+            '  (F) bettafish',
+            '   (L) Auserhasratedlisting<b>Tornado</b>1star',
+            '   (L) Stopsignupdatenextweek',
+            '  (F) bigbrother',
+            '   (L) AcousticGuitarupdatenextweek',
+            '   (L) AcousticGuitarupdatenextweek',
+            '   (L) Auserhasratedlisting<b>AcousticGuitar</b>3stars',
+            '   (L) Auserhasratedlisting<b>NetworkSwitch</b>4stars',
+            '   (L) Auserhasratedlisting<b>Tornado</b>1star',
+            '   (L) ElectricGuitarupdatenextweek',
+            '   (L) ElectricPianoupdatenextweek',
+            '   (L) InformationalBookupdatenextweek',
+            '   (L) KillerWhaleupdatenextweek',
+            '   (L) KillerWhaleupdatenextweek',
+            '   (L) Lightningupdatenextweek',
+            '   (L) LionFinderupdatenextweek',
+            '   (L) MonkeyFinderupdatenextweek',
+            '   (L) Pianoupdatenextweek',
+            '   (L) SoundMixerupdatenextweek',
+            '   (L) Tornadoupdatenextweek',
+            '   (L) Violinupdatenextweek',
+            '   (L) WhiteHorseupdatenextweek',
+            '   (L) WolfFinderupdatenextweek',
+            '   (L) WolfFinderupdatenextweek',
+            '  (F) charrington',
+            '   (L) Auserhasratedlisting<b>AcousticGuitar</b>3stars',
+            '  (F) jones',
+            '   (L) Auserhasratedlisting<b>KillerWhale</b>4stars',
+            '   (L) Auserhasratedlisting<b>MonkeyFinder</b>1star',
+            '   (L) Parrotletupdatenextweek',
+            '  (F) julia',
+            '   (L) BreadBasketupdatenextweek',
+            '   (L) BreadBasketupdatenextweek',
+            '  (F) khaleesi',
+            '   (L) Auserhasratedlisting<b>HouseLannister</b>1star',
+            '   (L) Auserhasratedlisting<b>HouseStark</b>4stars',
+            '   (L) Auserhasratedlisting<b>LionFinder</b>1star',
+            '   (L) Auserhasratedlisting<b>MonkeyFinder</b>1star',
+            '   (L) Auserhasratedlisting<b>Tornado</b>1star',
+            '   (L) Auserhasratedlisting<b>WhiteHorse</b>4stars',
+            '   (L) Auserhasratedlisting<b>WolfFinder</b>4stars',
+            '  (F) rutherford',
+            '   (L) Auserhasratedlisting<b>Greatwhiteshark</b>3stars',
+            '   (L) Auserhasratedlisting<b>JarofFlies</b>3stars',
+            '   (L) Auserhasratedlisting<b>KillerWhale</b>3stars',
+            '   (L) Auserhasratedlisting<b>WolfFinder</b>5stars',
+            '   (L) Chainboatnavigationupdatenextweek',
+            '   (L) GalleryofMapsupdatenextweek',
+            '  (F) syme',
+            '   (L) Auserhasratedlisting<b>AcousticGuitar</b>5stars',
+            '   (L) Auserhasratedlisting<b>Greatwhiteshark</b>5stars',
+            '   (L) Auserhasratedlisting<b>InformationalBook</b>5stars',
+            '  (F) wsmith',
+            '   (L) Auserhasratedlisting<b>AcousticGuitar</b>1star',
+            '   (L) Auserhasratedlisting<b>SailboatRacing</b>3stars',
+            '   (L) ChartCourseupdatenextweek',
+            '   (L) ChartCourseupdatenextweek',
             ' (F) system',
-            '  (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
-            '  (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z',
+            '  (F) julia',
+            '   (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
+            '  (F) wsmith',
+            '   (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z',
             '(F) jones',
             ' (F) listing',
-            '  (L) Lagerupdatenextweek',
-            '  (L) KillerWhaleupdatenextweek',
-            '  (L) KillerWhaleupdatenextweek',
-            '  (L) BassFishingupdatenextweek',
-            '  (L) Auserhasratedlisting<b>Strokeplay</b>3stars',
-            '  (L) Auserhasratedlisting<b>ProjectManagement</b>1star',
-            '  (L) Auserhasratedlisting<b>ProjectManagement</b>2stars',
-            '  (L) Auserhasratedlisting<b>Moonshine</b>2stars',
-            '  (L) Auserhasratedlisting<b>Moonshine</b>5stars',
-            '  (L) Auserhasratedlisting<b>Harley-DavidsonCVO</b>3stars',
-            '  (L) Auserhasratedlisting<b>BassFishing</b>4stars',
-            '  (L) Auserhasratedlisting<b>Barbecue</b>5stars',
+            '  (F) bettafish',
+            '   (L) Auserhasratedlisting<b>ProjectManagement</b>1star',
+            '   (L) BassFishingupdatenextweek',
+            '   (L) Lagerupdatenextweek',
+            '  (F) bigbrother',
+            '   (L) KillerWhaleupdatenextweek',
+            '   (L) KillerWhaleupdatenextweek',
+            '  (F) jones',
+            '   (L) Auserhasratedlisting<b>BassFishing</b>4stars',
+            '  (F) khaleesi',
+            '   (L) Auserhasratedlisting<b>Barbecue</b>5stars',
+            '   (L) Auserhasratedlisting<b>Moonshine</b>5stars',
+            '   (L) Auserhasratedlisting<b>ProjectManagement</b>2stars',
+            '  (F) rutherford',
+            '   (L) Auserhasratedlisting<b>Moonshine</b>2stars',
+            '  (F) wsmith',
+            '   (L) Auserhasratedlisting<b>Harley-DavidsonCVO</b>3stars',
+            '   (L) Auserhasratedlisting<b>Strokeplay</b>3stars',
             ' (F) system',
-            '  (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
-            '  (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z',
+            '  (F) julia',
+            '   (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
+            '  (F) wsmith',
+            '   (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z',
             '(F) julia',
             ' (F) listing',
-            '  (L) Astrologysoftwareupdatenextweek',
-            '  (L) Auserhasratedlisting<b>Venus</b>1star',
-            '  (L) Auserhasratedlisting<b>Venus</b>4stars',
-            '  (L) Auserhasratedlisting<b>Uranus</b>2stars',
-            '  (L) Auserhasratedlisting<b>Uranus</b>5stars',
-            '  (L) Auserhasratedlisting<b>Ten</b>3stars',
-            '  (L) Auserhasratedlisting<b>Ten</b>5stars',
-            '  (L) Auserhasratedlisting<b>Ten</b>4stars',
-            '  (L) Auserhasratedlisting<b>Sun</b>5stars',
-            '  (L) Auserhasratedlisting<b>Sun</b>5stars',
-            '  (L) Auserhasratedlisting<b>Strokeplay</b>3stars',
-            '  (L) Auserhasratedlisting<b>Stopsign</b>5stars',
-            '  (L) Auserhasratedlisting<b>Stopsign</b>5stars',
-            '  (L) Auserhasratedlisting<b>Saturn</b>5stars',
-            '  (L) Auserhasratedlisting<b>Saturn</b>3stars',
-            '  (L) Auserhasratedlisting<b>Ruby</b>5stars',
-            '  (L) Auserhasratedlisting<b>ProjectManagement</b>1star',
-            '  (L) Auserhasratedlisting<b>ProjectManagement</b>2stars',
-            '  (L) Auserhasratedlisting<b>Pluto(Notaplanet)</b>5stars',
-            '  (L) Auserhasratedlisting<b>Pluto(Notaplanet)</b>1star',
-            '  (L) Auserhasratedlisting<b>Neptune</b>1star',
-            '  (L) Auserhasratedlisting<b>Neptune</b>5stars',
-            '  (L) Auserhasratedlisting<b>MotorcycleHelmet</b>5stars',
-            '  (L) Auserhasratedlisting<b>Moonshine</b>2stars',
-            '  (L) Auserhasratedlisting<b>Moonshine</b>5stars',
-            '  (L) Auserhasratedlisting<b>MixingConsole</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>5stars',
-            '  (L) Auserhasratedlisting<b>MiniDachshund</b>5stars',
-            '  (L) Auserhasratedlisting<b>Minesweeper</b>2stars',
-            '  (L) Auserhasratedlisting<b>Minesweeper</b>5stars',
-            '  (L) Auserhasratedlisting<b>LocationLister</b>4stars',
-            '  (L) Auserhasratedlisting<b>Lager</b>2stars',
-            '  (L) Auserhasratedlisting<b>Lager</b>5stars',
-            '  (L) Auserhasratedlisting<b>LITRANCH</b>5stars',
-            '  (L) Auserhasratedlisting<b>LITRANCH</b>5stars',
-            '  (L) Auserhasratedlisting<b>LITRANCH</b>1star',
-            '  (L) Auserhasratedlisting<b>KomodoDragon</b>1star',
-            '  (L) Auserhasratedlisting<b>Jupiter</b>3stars',
-            '  (L) Auserhasratedlisting<b>Jupiter</b>5stars',
-            '  (L) Auserhasratedlisting<b>JotSpot</b>4stars',
-            '  (L) Auserhasratedlisting<b>Jasoom</b>2stars',
-            '  (L) Auserhasratedlisting<b>Jasoom</b>5stars',
-            '  (L) Auserhasratedlisting<b>JarofFlies</b>3stars',
-            '  (L) Auserhasratedlisting<b>HouseTargaryen</b>5stars',
-            '  (L) Auserhasratedlisting<b>HouseStark</b>4stars',
-            '  (L) Auserhasratedlisting<b>HouseStark</b>1star',
-            '  (L) Auserhasratedlisting<b>Harley-DavidsonCVO</b>3stars',
-            '  (L) Auserhasratedlisting<b>Greatwhiteshark</b>3stars',
-            '  (L) Auserhasratedlisting<b>Greatwhiteshark</b>5stars',
-            '  (L) Auserhasratedlisting<b>FightClub</b>3stars',
-            '  (L) Auserhasratedlisting<b>ClerksII</b>3stars',
-            '  (L) Auserhasratedlisting<b>Clerks</b>3stars',
-            '  (L) Auserhasratedlisting<b>ChartCourse</b>5stars',
-            '  (L) Auserhasratedlisting<b>ChartCourse</b>2stars',
-            '  (L) Auserhasratedlisting<b>BusinessManagementSystem</b>2stars',
-            '  (L) Auserhasratedlisting<b>BusinessManagementSystem</b>4stars',
-            '  (L) Auserhasratedlisting<b>BusinessManagementSystem</b>3stars',
-            '  (L) Auserhasratedlisting<b>BreadBasket</b>5stars',
-            '  (L) Auserhasratedlisting<b>BreadBasket</b>2stars',
-            '  (L) Auserhasratedlisting<b>Bleach</b>5stars',
-            '  (L) Auserhasratedlisting<b>Bleach</b>4stars',
-            '  (L) Auserhasratedlisting<b>BassFishing</b>4stars',
-            '  (L) Auserhasratedlisting<b>Basketball</b>5stars',
-            '  (L) Auserhasratedlisting<b>Basketball</b>2stars',
-            '  (L) Auserhasratedlisting<b>Barsoom</b>5stars',
-            '  (L) Auserhasratedlisting<b>Barsoom</b>3stars',
-            '  (L) Auserhasratedlisting<b>Barsoom</b>5stars',
-            '  (L) Auserhasratedlisting<b>Barbecue</b>5stars',
-            '  (L) Auserhasratedlisting<b>BaltimoreRavens</b>5stars',
-            '  (L) Auserhasratedlisting<b>Azeroth</b>5stars',
-            '  (L) Auserhasratedlisting<b>Azeroth</b>3stars',
-            '  (L) Auserhasratedlisting<b>Azeroth</b>3stars',
-            '  (L) Auserhasratedlisting<b>Azeroth</b>5stars',
-            '  (L) Auserhasratedlisting<b>Azeroth</b>5stars',
-            '  (L) Auserhasratedlisting<b>AirMail</b>4stars',
-            '  (L) Auserhasratedlisting<b>AirMail</b>1star',
-            '  (L) Auserhasratedlisting<b>AirMail</b>3stars',
-            '  (L) Auserhasratedlisting<b>AirMail</b>5stars',
+            '  (F) aaronson',
+            '   (L) Auserhasratedlisting<b>Basketball</b>2stars',
+            '   (L) Auserhasratedlisting<b>LITRANCH</b>1star',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>5stars',
+            '  (F) betaraybill',
+            '   (L) Auserhasratedlisting<b>Azeroth</b>5stars',
+            '   (L) Auserhasratedlisting<b>Barsoom</b>5stars',
+            '   (L) Auserhasratedlisting<b>HouseStark</b>1star',
+            '   (L) Auserhasratedlisting<b>Jasoom</b>5stars',
+            '   (L) Auserhasratedlisting<b>Jupiter</b>5stars',
+            '   (L) Auserhasratedlisting<b>Neptune</b>5stars',
+            '   (L) Auserhasratedlisting<b>Pluto(Notaplanet)</b>1star',
+            '   (L) Auserhasratedlisting<b>Saturn</b>3stars',
+            '   (L) Auserhasratedlisting<b>Sun</b>5stars',
+            '   (L) Auserhasratedlisting<b>Venus</b>4stars',
+            '  (F) bettafish',
+            '   (L) Astrologysoftwareupdatenextweek',
+            '   (L) Auserhasratedlisting<b>Azeroth</b>5stars',
+            '   (L) Auserhasratedlisting<b>BaltimoreRavens</b>5stars',
+            '   (L) Auserhasratedlisting<b>Barsoom</b>5stars',
+            '   (L) Auserhasratedlisting<b>BusinessManagementSystem</b>4stars',
+            '   (L) Auserhasratedlisting<b>FightClub</b>3stars',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '   (L) Auserhasratedlisting<b>ProjectManagement</b>1star',
+            '  (F) bigbrother',
+            '   (L) Auserhasratedlisting<b>BusinessManagementSystem</b>3stars',
+            '   (L) Auserhasratedlisting<b>ChartCourse</b>5stars',
+            '   (L) Auserhasratedlisting<b>KomodoDragon</b>1star',
+            '   (L) Auserhasratedlisting<b>Minesweeper</b>5stars',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>5stars',
+            '   (L) Auserhasratedlisting<b>MixingConsole</b>1star',
+            '   (L) Auserhasratedlisting<b>MotorcycleHelmet</b>5stars',
+            '   (L) Auserhasratedlisting<b>Stopsign</b>5stars',
+            '   (L) Auserhasratedlisting<b>Ten</b>5stars',
+            '  (F) bigbrother2',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '  (F) charrington',
+            '   (L) Auserhasratedlisting<b>AirMail</b>5stars',
+            '   (L) Auserhasratedlisting<b>JotSpot</b>4stars',
+            '   (L) Auserhasratedlisting<b>LocationLister</b>4stars',
+            '  (F) david',
+            '   (L) Auserhasratedlisting<b>LITRANCH</b>5stars',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '   (L) Auserhasratedlisting<b>Ten</b>3stars',
+            '  (F) jones',
+            '   (L) Auserhasratedlisting<b>BassFishing</b>4stars',
+            '   (L) Auserhasratedlisting<b>BreadBasket</b>2stars',
+            '   (L) Auserhasratedlisting<b>Lager</b>5stars',
+            '   (L) Auserhasratedlisting<b>Uranus</b>2stars',
+            '  (F) julia',
+            '   (L) Auserhasratedlisting<b>BreadBasket</b>5stars',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '  (F) khaleesi',
+            '   (L) Auserhasratedlisting<b>AirMail</b>4stars',
+            '   (L) Auserhasratedlisting<b>Azeroth</b>3stars',
+            '   (L) Auserhasratedlisting<b>Barbecue</b>5stars',
+            '   (L) Auserhasratedlisting<b>HouseStark</b>4stars',
+            '   (L) Auserhasratedlisting<b>HouseTargaryen</b>5stars',
+            '   (L) Auserhasratedlisting<b>LITRANCH</b>5stars',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '   (L) Auserhasratedlisting<b>Moonshine</b>5stars',
+            '   (L) Auserhasratedlisting<b>ProjectManagement</b>2stars',
+            '   (L) Auserhasratedlisting<b>Ruby</b>5stars',
+            '  (F) obrien',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '  (F) rutherford',
+            '   (L) Auserhasratedlisting<b>Bleach</b>4stars',
+            '   (L) Auserhasratedlisting<b>Clerks</b>3stars',
+            '   (L) Auserhasratedlisting<b>ClerksII</b>3stars',
+            '   (L) Auserhasratedlisting<b>Greatwhiteshark</b>3stars',
+            '   (L) Auserhasratedlisting<b>JarofFlies</b>3stars',
+            '   (L) Auserhasratedlisting<b>Minesweeper</b>2stars',
+            '   (L) Auserhasratedlisting<b>Moonshine</b>2stars',
+            '   (L) Auserhasratedlisting<b>Stopsign</b>5stars',
+            '   (L) Auserhasratedlisting<b>Ten</b>4stars',
+            '  (F) syme',
+            '   (L) Auserhasratedlisting<b>AirMail</b>1star',
+            '   (L) Auserhasratedlisting<b>Azeroth</b>5stars',
+            '   (L) Auserhasratedlisting<b>Barsoom</b>3stars',
+            '   (L) Auserhasratedlisting<b>Basketball</b>5stars',
+            '   (L) Auserhasratedlisting<b>Bleach</b>5stars',
+            '   (L) Auserhasratedlisting<b>BusinessManagementSystem</b>2stars',
+            '   (L) Auserhasratedlisting<b>Greatwhiteshark</b>5stars',
+            '   (L) Auserhasratedlisting<b>Jasoom</b>2stars',
+            '   (L) Auserhasratedlisting<b>Jupiter</b>3stars',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '   (L) Auserhasratedlisting<b>Neptune</b>1star',
+            '   (L) Auserhasratedlisting<b>Pluto(Notaplanet)</b>5stars',
+            '   (L) Auserhasratedlisting<b>Saturn</b>5stars',
+            '   (L) Auserhasratedlisting<b>Sun</b>5stars',
+            '   (L) Auserhasratedlisting<b>Uranus</b>5stars',
+            '   (L) Auserhasratedlisting<b>Venus</b>1star',
+            '  (F) tparsons',
+            '   (L) Auserhasratedlisting<b>AirMail</b>3stars',
+            '  (F) wsmith',
+            '   (L) Auserhasratedlisting<b>Azeroth</b>3stars',
+            '   (L) Auserhasratedlisting<b>ChartCourse</b>2stars',
+            '   (L) Auserhasratedlisting<b>Harley-DavidsonCVO</b>3stars',
+            '   (L) Auserhasratedlisting<b>Lager</b>2stars',
+            '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
+            '   (L) Auserhasratedlisting<b>Strokeplay</b>3stars',
             ' (F) system',
-            '  (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
-            '  (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z',
+            '  (F) julia',
+            '   (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
+            '  (F) wsmith',
+            '   (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z',
             '(F) wsmith',
             ' (F) listing',
-            '  (L) Saturnupdatenextweek',
-            '  (L) Mallratsupdatenextweek',
-            '  (L) Mallratsupdatenextweek',
-            '  (L) JeanGreyupdatenextweek',
-            '  (L) IronManupdatenextweek',
-            '  (L) Grandfatherclockupdatenextweek',
-            '  (L) Diamondupdatenextweek',
-            '  (L) BreadBasketupdatenextweek',
-            '  (L) BreadBasketupdatenextweek',
-            '  (L) BaltimoreRavensupdatenextweek',
-            '  (L) BaltimoreRavensupdatenextweek',
-            '  (L) Azerothupdatenextweek',
-            '  (L) Azerothupdatenextweek',
-            '  (L) AirMailupdatenextweek',
-            '  (L) AirMailupdatenextweek',
-            '  (L) Auserhasratedlisting<b>Strokeplay</b>3stars',
-            '  (L) Auserhasratedlisting<b>Ruby</b>5stars',
-            '  (L) Auserhasratedlisting<b>ProjectManagement</b>1star',
-            '  (L) Auserhasratedlisting<b>ProjectManagement</b>2stars',
-            '  (L) Auserhasratedlisting<b>Moonshine</b>2stars',
-            '  (L) Auserhasratedlisting<b>Moonshine</b>5stars',
-            '  (L) Auserhasratedlisting<b>LocationLister</b>4stars',
-            '  (L) Auserhasratedlisting<b>Lager</b>2stars',
-            '  (L) Auserhasratedlisting<b>Lager</b>5stars',
-            '  (L) Auserhasratedlisting<b>KomodoDragon</b>1star',
-            '  (L) Auserhasratedlisting<b>JotSpot</b>4stars',
-            '  (L) Auserhasratedlisting<b>HouseTargaryen</b>5stars',
-            '  (L) Auserhasratedlisting<b>HouseStark</b>4stars',
-            '  (L) Auserhasratedlisting<b>HouseStark</b>1star',
-            '  (L) Auserhasratedlisting<b>Harley-DavidsonCVO</b>3stars',
-            '  (L) Auserhasratedlisting<b>ChartCourse</b>5stars',
-            '  (L) Auserhasratedlisting<b>ChartCourse</b>2stars',
-            '  (L) Auserhasratedlisting<b>BusinessManagementSystem</b>2stars',
-            '  (L) Auserhasratedlisting<b>BusinessManagementSystem</b>4stars',
-            '  (L) Auserhasratedlisting<b>BusinessManagementSystem</b>3stars',
-            '  (L) Auserhasratedlisting<b>BreadBasket</b>5stars',
-            '  (L) Auserhasratedlisting<b>BreadBasket</b>2stars',
-            '  (L) Auserhasratedlisting<b>Bleach</b>5stars',
-            '  (L) Auserhasratedlisting<b>Bleach</b>4stars',
-            '  (L) Auserhasratedlisting<b>BassFishing</b>4stars',
-            '  (L) Auserhasratedlisting<b>Barbecue</b>5stars',
-            '  (L) Auserhasratedlisting<b>AirMail</b>4stars',
-            '  (L) Auserhasratedlisting<b>AirMail</b>1star',
-            '  (L) Auserhasratedlisting<b>AirMail</b>3stars',
-            '  (L) Auserhasratedlisting<b>AirMail</b>5stars',
+            '  (F) betaraybill',
+            '   (L) Auserhasratedlisting<b>HouseStark</b>1star',
+            '   (L) Azerothupdatenextweek',
+            '   (L) Azerothupdatenextweek',
+            '   (L) Saturnupdatenextweek',
+            '  (F) bettafish',
+            '   (L) Auserhasratedlisting<b>BusinessManagementSystem</b>4stars',
+            '   (L) Auserhasratedlisting<b>ProjectManagement</b>1star',
+            '   (L) BaltimoreRavensupdatenextweek',
+            '   (L) BaltimoreRavensupdatenextweek',
+            '   (L) Grandfatherclockupdatenextweek',
+            '   (L) Mallratsupdatenextweek',
+            '   (L) Mallratsupdatenextweek',
+            '  (F) bigbrother',
+            '   (L) Auserhasratedlisting<b>BusinessManagementSystem</b>3stars',
+            '   (L) Auserhasratedlisting<b>ChartCourse</b>5stars',
+            '   (L) Auserhasratedlisting<b>KomodoDragon</b>1star',
+            '  (F) charrington',
+            '   (L) Auserhasratedlisting<b>AirMail</b>5stars',
+            '   (L) Auserhasratedlisting<b>JotSpot</b>4stars',
+            '   (L) Auserhasratedlisting<b>LocationLister</b>4stars',
+            '  (F) jones',
+            '   (L) Auserhasratedlisting<b>BassFishing</b>4stars',
+            '   (L) Auserhasratedlisting<b>BreadBasket</b>2stars',
+            '   (L) Auserhasratedlisting<b>Lager</b>5stars',
+            '  (F) julia',
+            '   (L) Auserhasratedlisting<b>BreadBasket</b>5stars',
+            '   (L) BreadBasketupdatenextweek',
+            '   (L) BreadBasketupdatenextweek',
+            '  (F) khaleesi',
+            '   (L) Auserhasratedlisting<b>AirMail</b>4stars',
+            '   (L) Auserhasratedlisting<b>Barbecue</b>5stars',
+            '   (L) Auserhasratedlisting<b>HouseStark</b>4stars',
+            '   (L) Auserhasratedlisting<b>HouseTargaryen</b>5stars',
+            '   (L) Auserhasratedlisting<b>Moonshine</b>5stars',
+            '   (L) Auserhasratedlisting<b>ProjectManagement</b>2stars',
+            '   (L) Auserhasratedlisting<b>Ruby</b>5stars',
+            '  (F) rutherford',
+            '   (L) Auserhasratedlisting<b>Bleach</b>4stars',
+            '   (L) Auserhasratedlisting<b>Moonshine</b>2stars',
+            '  (F) syme',
+            '   (L) Auserhasratedlisting<b>AirMail</b>1star',
+            '   (L) Auserhasratedlisting<b>Bleach</b>5stars',
+            '   (L) Auserhasratedlisting<b>BusinessManagementSystem</b>2stars',
+            '   (L) IronManupdatenextweek',
+            '   (L) JeanGreyupdatenextweek',
+            '  (F) tparsons',
+            '   (L) Auserhasratedlisting<b>AirMail</b>3stars',
+            '  (F) wsmith',
+            '   (L) AirMailupdatenextweek',
+            '   (L) AirMailupdatenextweek',
+            '   (L) Auserhasratedlisting<b>ChartCourse</b>2stars',
+            '   (L) Auserhasratedlisting<b>Harley-DavidsonCVO</b>3stars',
+            '   (L) Auserhasratedlisting<b>Lager</b>2stars',
+            '   (L) Auserhasratedlisting<b>Strokeplay</b>3stars',
+            '   (L) Diamondupdatenextweek',
             ' (F) system',
-            '  (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
-            '  (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z'
+            '  (F) julia',
+            '   (L) Systemwillbefunctioninginadegredadedstatebetween1800Z-0400ZonA/B',
+            '  (F) wsmith',
+            '   (L) Systemwillbegoingdownforapproximately30minutesonX/Yat1100Z'
         ]
+
         self.notifications_object = BookmarkFolder.parse_shorthand_list(self.notifications)
 
         self.self_notifications_wsmith = [
-            "(author:(user:(username:betaraybill)),message:Saturn update next week,notification_type:listing)",
-            "(author:(user:(username:bettafish)),message:Mallrats update next week,notification_type:listing)",
-            "(author:(user:(username:bettafish)),message:Mallrats update next week,notification_type:listing)",
-            "(author:(user:(username:syme)),message:Jean Grey update next week,notification_type:listing)",
-            "(author:(user:(username:syme)),message:Iron Man update next week,notification_type:listing)",
-            "(author:(user:(username:bettafish)),message:Grandfather clock update next week,notification_type:listing)",
-            "(author:(user:(username:wsmith)),message:Diamond update next week,notification_type:listing)",
-            "(author:(user:(username:julia)),message:Bread Basket update next week,notification_type:listing)",
-            "(author:(user:(username:julia)),message:Bread Basket update next week,notification_type:listing)",
-            "(author:(user:(username:bettafish)),message:Baltimore Ravens update next week,notification_type:listing)",
-            "(author:(user:(username:bettafish)),message:Baltimore Ravens update next week,notification_type:listing)",
-            "(author:(user:(username:betaraybill)),message:Azeroth update next week,notification_type:listing)",
-            "(author:(user:(username:betaraybill)),message:Azeroth update next week,notification_type:listing)",
-            "(author:(user:(username:wsmith)),message:Air Mail update next week,notification_type:listing)",
-            "(author:(user:(username:wsmith)),message:Air Mail update next week,notification_type:listing)",
-            "(author:(user:(username:wsmith)),message:A user has rated listing <b>Stroke play</b> 3 stars,notification_type:listing)",
-            "(author:(user:(username:khaleesi)),message:A user has rated listing <b>Ruby</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:bettafish)),message:A user has rated listing <b>Project Management</b> 1 star,notification_type:listing)",
-            "(author:(user:(username:khaleesi)),message:A user has rated listing <b>Project Management</b> 2 stars,notification_type:listing)",
-            "(author:(user:(username:rutherford)),message:A user has rated listing <b>Moonshine</b> 2 stars,notification_type:listing)",
-            "(author:(user:(username:khaleesi)),message:A user has rated listing <b>Moonshine</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:charrington)),message:A user has rated listing <b>LocationLister</b> 4 stars,notification_type:listing)",
-            "(author:(user:(username:wsmith)),message:A user has rated listing <b>Lager</b> 2 stars,notification_type:listing)",
-            "(author:(user:(username:jones)),message:A user has rated listing <b>Lager</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:bigbrother)),message:A user has rated listing <b>Komodo Dragon</b> 1 star,notification_type:listing)",
-            "(author:(user:(username:charrington)),message:A user has rated listing <b>JotSpot</b> 4 stars,notification_type:listing)",
-            "(author:(user:(username:khaleesi)),message:A user has rated listing <b>House Targaryen</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:khaleesi)),message:A user has rated listing <b>House Stark</b> 4 stars,notification_type:listing)",
-            "(author:(user:(username:betaraybill)),message:A user has rated listing <b>House Stark</b> 1 star,notification_type:listing)",
-            "(author:(user:(username:wsmith)),message:A user has rated listing <b>Harley-Davidson CVO</b> 3 stars,notification_type:listing)",
-            "(author:(user:(username:bigbrother)),message:A user has rated listing <b>Chart Course</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:wsmith)),message:A user has rated listing <b>Chart Course</b> 2 stars,notification_type:listing)",
-            "(author:(user:(username:syme)),message:A user has rated listing <b>Business Management System</b> 2 stars,notification_type:listing)",
-            "(author:(user:(username:bettafish)),message:A user has rated listing <b>Business Management System</b> 4 stars,notification_type:listing)",
-            "(author:(user:(username:bigbrother)),message:A user has rated listing <b>Business Management System</b> 3 stars,notification_type:listing)",
-            "(author:(user:(username:julia)),message:A user has rated listing <b>Bread Basket</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:jones)),message:A user has rated listing <b>Bread Basket</b> 2 stars,notification_type:listing)",
-            "(author:(user:(username:syme)),message:A user has rated listing <b>Bleach</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:rutherford)),message:A user has rated listing <b>Bleach</b> 4 stars,notification_type:listing)",
-            "(author:(user:(username:jones)),message:A user has rated listing <b>Bass Fishing</b> 4 stars,notification_type:listing)",
-            "(author:(user:(username:khaleesi)),message:A user has rated listing <b>Barbecue</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:khaleesi)),message:A user has rated listing <b>Air Mail</b> 4 stars,notification_type:listing)",
-            "(author:(user:(username:syme)),message:A user has rated listing <b>Air Mail</b> 1 star,notification_type:listing)",
-            "(author:(user:(username:tparsons)),message:A user has rated listing <b>Air Mail</b> 3 stars,notification_type:listing)",
-            "(author:(user:(username:charrington)),message:A user has rated listing <b>Air Mail</b> 5 stars,notification_type:listing)",
-            "(author:(user:(username:julia)),message:System will be functioning in a degredaded state between 1800Z-0400Z on A/B,notification_type:system)",
-            "(author:(user:(username:wsmith)),message:System will be going down for approximately 30 minutes on X/Y at 1100Z,notification_type:system)"
+            "(message:Saturn update next week,notification_type:listing)",
+            "(message:Mallrats update next week,notification_type:listing)",
+            "(message:Mallrats update next week,notification_type:listing)",
+            "(message:Jean Grey update next week,notification_type:listing)",
+            "(message:Iron Man update next week,notification_type:listing)",
+            "(message:Grandfather clock update next week,notification_type:listing)",
+            "(message:Diamond update next week,notification_type:listing)",
+            "(message:Bread Basket update next week,notification_type:listing)",
+            "(message:Bread Basket update next week,notification_type:listing)",
+            "(message:Baltimore Ravens update next week,notification_type:listing)",
+            "(message:Baltimore Ravens update next week,notification_type:listing)",
+            "(message:Azeroth update next week,notification_type:listing)",
+            "(message:Azeroth update next week,notification_type:listing)",
+            "(message:Air Mail update next week,notification_type:listing)",
+            "(message:Air Mail update next week,notification_type:listing)",
+            "(message:A user has rated listing <b>Stroke play</b> 3 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Ruby</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Project Management</b> 1 star,notification_type:listing)",
+            "(message:A user has rated listing <b>Project Management</b> 2 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Moonshine</b> 2 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Moonshine</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>LocationLister</b> 4 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Lager</b> 2 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Lager</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Komodo Dragon</b> 1 star,notification_type:listing)",
+            "(message:A user has rated listing <b>JotSpot</b> 4 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>House Targaryen</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>House Stark</b> 4 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>House Stark</b> 1 star,notification_type:listing)",
+            "(message:A user has rated listing <b>Harley-Davidson CVO</b> 3 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Chart Course</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Chart Course</b> 2 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Business Management System</b> 2 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Business Management System</b> 4 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Business Management System</b> 3 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Bread Basket</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Bread Basket</b> 2 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Bleach</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Bleach</b> 4 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Bass Fishing</b> 4 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Barbecue</b> 5 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Air Mail</b> 4 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Air Mail</b> 1 star,notification_type:listing)",
+            "(message:A user has rated listing <b>Air Mail</b> 3 stars,notification_type:listing)",
+            "(message:A user has rated listing <b>Air Mail</b> 5 stars,notification_type:listing)",
+            "(message:System will be functioning in a degredaded state between 1800Z-0400Z on A/B,notification_type:system)",
+            "(message:System will be going down for approximately 30 minutes on X/Y at 1100Z,notification_type:system)"
         ]
 
     @classmethod
@@ -482,42 +550,48 @@ class NotificationApiTest(APITestCase):
     def test_get_self_notification_ordering(self):
         url = '/api/self/notification/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message', 'author', 'author.user', 'author.user.username'])
+        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message'])
 
         self.assertListEqual(notification_list, self.self_notifications_wsmith)
 
         # Get reversed order
         url = '/api/self/notification/?ordering=-notification__created_date'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message', 'author', 'author.user', 'author.user.username'])
+        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message'])
 
         self.assertEqual(notification_list, self.self_notifications_wsmith)
 
         # Get ascending order
         url = '/api/self/notification/?ordering=notification__created_date'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message', 'author', 'author.user', 'author.user.username'])
+        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message'])
 
         self.assertEqual(notification_list, list(reversed(self.self_notifications_wsmith)))
 
     def test_dismiss_self_notification(self):
         url = '/api/self/notification/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message', 'author', 'author.user', 'author.user.username'])
-        mailbox_ids = [notification['id'] for notification in response.data]
 
-        self.assertListEqual(notification_list, self.self_notifications_wsmith)
+        actual_notifications = _parse_notification_to_bookmark_nodes(response.data)
+        expected_notifications = self.notifications_object.search('/wsmith/').clone(show_root=False)
+
+        self.assertListEqual(actual_notifications.shorten_data(order=True), expected_notifications.shorten_data(order=True))
+        expected_notifications = actual_notifications
+
+        dismiss_notification_object = expected_notifications.first_listing_bookmark()
 
         # now dismiss the first notification
-        url = '{}{}/'.format(url, mailbox_ids[0])
+        url = '{}{}/'.format(url, dismiss_notification_object.id)
         response = APITestHelper.request(self, url, 'DELETE', username='wsmith', status_code=204)
 
         # now get our notifications again, make sure the one was removed
         url = '/api/self/notification/'
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-        notification_list = shorthand_dict(response.data, include_keys=['notification_type', 'message', 'author', 'author.user', 'author.user.username'])
+        actual_notifications = _parse_notification_to_bookmark_nodes(response.data)
 
-        self.assertEqual(self.self_notifications_wsmith[1:], notification_list)
+        dismiss_notification_object.hidden(True)
+
+        self.assertListEqual(actual_notifications.shorten_data(order=True), expected_notifications.shorten_data(order=True))
 
     def test_get_pending_notifications(self):
         url = '/api/notifications/pending/'
