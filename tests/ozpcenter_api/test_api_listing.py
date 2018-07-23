@@ -145,7 +145,7 @@ class ListingApiTest(APITestCase):
             {'key': 'contacts', 'exclude': ['id', 'organization']},
             {'key': 'categories', 'exclude': ['id', 'description']},
             {'key': 'tags', 'exclude': ['id']},
-            {'key': 'owners', 'exclude': ['id', 'display_name']},
+            {'key': 'owners', 'exclude': ['id', 'display_name', 'avatar']},
             {'key': 'intents', 'exclude': ['id', 'icon', 'label', 'media_type']},
             {'key': 'doc_urls', 'exclude': ['id']},
             {'key': 'screenshots', 'exclude': ['small_image.security_marking', 'large_image.security_marking', 'small_image.url', 'large_image.url', 'order', 'description']},
@@ -361,7 +361,7 @@ class ListingApiTest(APITestCase):
             {'key': 'contacts', 'exclude': ['id', 'organization']},
             {'key': 'categories', 'exclude': ['id', 'description']},
             {'key': 'tags', 'exclude': ['id']},
-            {'key': 'owners', 'exclude': ['id', 'display_name']},
+            {'key': 'owners', 'exclude': ['id', 'display_name', 'avatar']},
             {'key': 'intents', 'exclude': ['id', 'icon', 'label', 'media_type']},
             {'key': 'doc_urls', 'exclude': ['id']},
             {'key': 'screenshots', 'exclude': ['small_image.security_marking', 'large_image.security_marking', 'small_image.url', 'large_image.url', 'order']},
@@ -649,6 +649,7 @@ class ListingApiTest(APITestCase):
           "owners": [
             {
               "display_name": "Big Brother",
+              "avatar": None,
               "id": 4,
               "user": {
                 "username": "bigbrother"

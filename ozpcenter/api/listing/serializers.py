@@ -190,11 +190,12 @@ class CreateListingUserSerializer(serializers.ModelSerializer):
 
 class CreateListingProfileSerializer(serializers.ModelSerializer):
     user = CreateListingUserSerializer()
+    avatar = image_serializers.ImageSerializer(allow_null=True)
 
     class Meta:
         model = models.Profile
-        fields = ('id', 'user', 'display_name')
-        read_only = ('id', 'display_name')
+        fields = ('id', 'user', 'display_name', 'avatar')
+        read_only = ('id', 'display_name', 'avatar')
 
         extra_kwargs = {
             "id": {
