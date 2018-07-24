@@ -135,7 +135,7 @@ class StorefrontApiTest(APITestCase):
         desired_keys = ['id', 'title', 'agency', 'avg_rate',
             'total_reviews', 'feedback_score', 'is_private', 'is_bookmarked',
             'feedback', 'description_short', 'security_marking',
-            'usage_requirements', 'system_requirements', 'launch_url',
+            'usage_requirements', 'system_requirements', 'launch_url', 'listing_type',
             'large_banner_icon', 'banner_icon', 'unique_name', 'is_enabled', 'owners']
         desired_keys += additional_keys
         desired_keys = sorted(desired_keys)

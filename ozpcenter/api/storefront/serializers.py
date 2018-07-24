@@ -20,6 +20,7 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
     large_banner_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
     banner_icon = image_serializers.ImageSerializer(required=False, allow_null=True)
     owners = listing_serializers.CreateListingProfileSerializer(required=False, allow_null=True, many=True)
+    listing_type = listing_serializers.ListingTypeSerializer(required=False, allow_null=True)
 
     class Meta:
         model = models.Listing
@@ -41,7 +42,8 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'banner_icon',
                   'owners',
                   'unique_name',
-                  'is_enabled')
+                  'is_enabled',
+                  'listing_type')
 
     def _is_bookmarked(self, request_user, request_listing):
         # TODO: put in listing model_access.py call from there > creative name for method

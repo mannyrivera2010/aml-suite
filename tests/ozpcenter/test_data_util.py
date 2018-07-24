@@ -24,11 +24,11 @@ class DataUtilTest(TestCase):
         query = data_util.FileQuery()
         query = query.load_yaml_file()
 
-        self.assertEqual(188, query.count())
+        self.assertEqual(189, query.count())
 
     def test_file_query_load_yaml_key(self):
         query = data_util.FileQuery().load_yaml_file().key('listing').key('title')
 
         listing_title = query.to_list()
 
-        self.assertEqual(188, len(listing_title))
+        self.assertEqual(189, len(listing_title))

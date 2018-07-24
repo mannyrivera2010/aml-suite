@@ -165,7 +165,7 @@ class ListingESSearchApiTest(APITestCase):
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
 
         titles = sorted([i['title'] for i in response.data['results']])
-        expected_listing = ['Air Mail', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
+        expected_listing = ['Air Mail', 'Application programming interface', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
             'Deadpool', 'Desktop Virtualization', 'Diamond', 'Dinosaur', 'Dragons', 'FrameIt',
             'Harley-Davidson CVO', 'Hatch Latch', 'JotSpot', 'LocationAnalyzer', 'LocationLister',
             'LocationViewer', 'Mini Dachshund', 'Monkey Finder', 'Personal Computer', 'Ruby on Rails',

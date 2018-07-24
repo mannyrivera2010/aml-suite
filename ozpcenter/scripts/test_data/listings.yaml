@@ -13847,7 +13847,7 @@
     large_banner_icon: {filename: Writing_large_banner_icon.jpeg, security_marking: UNCLASSIFIED}
     large_icon: {filename: Writing_large_icon.jpeg, security_marking: UNCLASSIFIED}
     launch_url: https://en.wikipedia.org/wiki/Writing
-    listing_type: Web Application
+    listing_type: API
     owners: [bigbrother]
     screenshots:
     - description: Writing down on a piece of paper
@@ -13863,6 +13863,92 @@
     usage_requirements: A pen and paper
     version_name: '15.05'
     what_is_new: It is possible to also write using a laptop
+  listing_activity:
+  - {action: CREATED, author: bigbrother, description: null}
+  - {action: SUBMITTED, author: bigbrother, description: null}
+  - {action: APPROVED_ORG, author: bigbrother, description: null}
+  - {action: APPROVED, author: bigbrother, description: null}
+  listing_review_batch: []
+  listing_visit_count:
+  - {count: 1, profile: betaraybill}
+  - {count: 2, profile: bigbrother}
+  - {count: 3, profile: rutherford}
+  - {count: 4, profile: julia}
+  - {count: 4, profile: noah}
+  - {count: 5, profile: aaronson}
+  - {count: 5, profile: johnson}
+  - {count: 6, profile: charrington}
+  - {count: 6, profile: wsmith}
+  - {count: 7, profile: jsnow}
+  - {count: 8, profile: bettafish}
+  - {count: 8, profile: syme}
+  - {count: 9, profile: abe}
+  - {count: 9, profile: khaleesi}
+  - {count: 9, profile: david}
+  - {count: 9, profile: obrien}
+- library_entries: []
+  library_sharing: []
+  listing:
+    agency: Minipax
+    banner_icon: {filename: Writing_banner_icon.jpeg, security_marking: UNCLASSIFIED}
+    categories: [Communication, Tools]
+    contacts: []
+    description: Web APIs are the defined interfaces through which interactions
+      happen between an enterprise and applications that use its assets, which also is
+      a Service Level Agreement (SLA) to specify the functional provider and expose the
+      service path or URL for its API users, An API approach is an architectural
+      approach that revolves around providing a program interface to a set of services
+      to different applications serving different types of consumers.[17] When used in
+      the context of web development, an API is typically defined a set of
+      specifications , such as Hypertext Transfer Protocol (HTTP) request messages,
+      along with a definition of the structure of response messages, which is usually
+      in an Extensible Markup Language (XML) or JavaScript Object Notation (JSON)
+      format. An example might be a shipping company API that can be added to an
+      eCommerce-focused website, to facilitate ordering shipping services and
+      automatically include current shipping rates, without the site developer having
+      to enter the shipper's rate table into a web database. While "web API"
+      historically has been virtually synonymous for web service, the recent trend
+      (so-called Web 2.0) has been moving away from Simple Object Access Protocol
+      (SOAP) based web services and service-oriented architecture (SOA) towards more
+      direct representational state transfer (REST) style web resources and
+      resource-oriented architecture (ROA).[18] Part of this trend is related to the
+      Semantic Web movement toward Resource Description Framework (RDF), a concept to
+      promote web-based ontology engineering technologies. Web APIs allow the
+      combination of multiple APIs into new applications known as mashups.[19] In the
+      social media space, web APIs have allowed web communities to facilitate sharing
+      content and data between communities and applications. In this way, content that
+      is created in one place can be dynamically posted and updated in multiple
+      locations on the web.[20] For example, Twitter's REST API allows developers to
+      access core Twitter data and the Search API provides methods for developers to
+      interact with Twitter Search and trends data.
+    description_short: In computer programming, an application programming interface
+      (API) is a set of subroutine definitions, protocols, and tools for building
+      software
+    doc_urls: []
+    iframe_compatible: false
+    is_deleted: false
+    is_enabled: true
+    is_featured: false
+    is_private: false
+    large_banner_icon: {filename: Writing_large_banner_icon.jpeg, security_marking: UNCLASSIFIED}
+    large_icon: {filename: Writing_large_icon.jpeg, security_marking: UNCLASSIFIED}
+    launch_url: https://en.wikipedia.org/wiki/Application_programming_interface
+    listing_type: API
+    owners: [bigbrother]
+    screenshots:
+    - description: Writing down on a piece of paper
+      large_image: {filename: Writing_0_large_screenshot.jpeg, security_marking: UNCLASSIFIED}
+      order: 0
+      small_image: {filename: Writing_0_small_screenshot.jpeg, security_marking: UNCLASSIFIED}
+    security_marking: UNCLASSIFIED//FOR OFFICIAL USE ONLY
+    small_icon: {filename: Writing_small_icon.jpeg, security_marking: UNCLASSIFIED}
+    system_requirements: None
+    tags: [computer, IT, development, code]
+    title: Application programming interface
+    unique_name: Application programming interface
+    usage_requirements: A computer
+    version_name: '42'
+    what_is_new: Oracle America, Inc. v. Google, Inc.
   listing_activity:
   - {action: CREATED, author: bigbrother, description: null}
   - {action: SUBMITTED, author: bigbrother, description: null}

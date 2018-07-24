@@ -61,6 +61,7 @@ class ListingSimilarApiTest(APITestCase):
         titles = ['{}'.format(i['title']) for i in response.data]
 
         expected_results = ['Air Mail',
+                            'Application programming interface',
                             'Barsoom',
                             'Bass Fishing',
                             'BeiDou Navigation Satellite System',
@@ -68,7 +69,6 @@ class ListingSimilarApiTest(APITestCase):
                             'Bourbon',
                             'Cable ferry',
                             'Chain boat navigation',
-                            'Chatter Box',
-                            'Desktop Virtualization']
+                            'Chatter Box']
 
         self.assertListEqual(titles, expected_results)
