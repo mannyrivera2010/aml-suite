@@ -288,6 +288,7 @@ class ProfileApiTest(APITestCase):
                 "section": item['section'],
                 "position": item['position'] if 'position' in item else 0,
                 "is_hidden": item['is_hidden'] if 'is_hidden' in item else False,
+                "size": item['size'] if 'size' in item else None,
             }
             expected_results.append(expected_item)
         results = sorted(response.data.get('storefront_customizations'), key=lambda x: x['section'])
