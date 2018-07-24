@@ -6,7 +6,7 @@ TEST_MODE=True pytest tests/ozpcenter_api/test_api_bookmark.py
 from django.test import override_settings
 from tests.ozp.cases import APITestCase
 
-from tests.ozp.bookmark_helper import BookmarkFolder, BookmarkListing, shorthand_permissions
+from ozpcenter.bookmark_helper import BookmarkFolder, BookmarkListing, shorthand_permissions
 from tests.ozpcenter.helper import APITestHelper
 from ozpcenter.utils import shorthand_dict
 from tests.ozpcenter.helper import ExceptionUnitTestHelper
@@ -194,6 +194,47 @@ class BookmarkApiTest(APITestCase):
         APITestHelper.edit_listing(self, bigbrother_listing.listing_id, {'is_enabled': True}, 'bigbrother')
 
         bigbrother_listing.hidden(False)
+
+        _compare_bookmarks(self, new_library_object)
+
+    def test_get_bookmark_list_copy_folder(self):
+        """
+        Check for bookmarks when copying
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        bigbrother_listing = new_library_object.search('/bigbrother/').first_folder_bookmark()
+
+        username = 'bigbrother'
+        url = '/api/bookmark/{}/copy/'.format(bigbrother_listing.id)
+        response = APITestHelper.request(self, url, 'POST', data={}, username=username, status_code=200)
+        # TODO: check response
+
+        new_library_object.copy(
+            '/bigbrother/{}/'.format(bigbrother_listing.title),
+            '/bigbrother/',
+            '{}(COPY)'.format(bigbrother_listing.title)
+        )
+
+        _compare_bookmarks(self, new_library_object)
+
+    def test_get_bookmark_list_copy_listing(self):
+        """
+        Check for bookmarks when copying
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        bigbrother_listing = new_library_object.search('/bigbrother/').first_listing_bookmark()
+
+        username = 'bigbrother'
+        url = '/api/bookmark/{}/copy/'.format(bigbrother_listing.id)
+        response = APITestHelper.request(self, url, 'POST', data={}, username=username, status_code=200)
+        # TODO: check response
+
+        # TODO: Get PWD / bigbrother_listing.pwd() = '/bigbrother/Animals/{}'.format(bigbrother_listing.title)
+        new_library_object.copy(
+            '/bigbrother/Animals/{}'.format(bigbrother_listing.title),
+            '/bigbrother/')
 
         _compare_bookmarks(self, new_library_object)
 

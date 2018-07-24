@@ -1,10 +1,31 @@
 """
-Utils tests
+Bookmark Helper tests
 """
 from django.test import TestCase
 from django.conf import settings
 
-from tests.ozp.bookmark_helper import BookmarkFolder, BookmarkListing, shorthand_permissions, _build_filesystem_structure
+from ozpcenter import bookmark_helper
+
+
+def shorthand_commands(data):
+    output = []
+
+    for record in data:
+
+        if not record['stack_action']:
+            record['level_diff'] = ''
+
+        record['record_title'] = record['record_title'].replace('"', '/"')
+
+        output.append('{} {} {} {} "{}"'.format(
+            record['stack_action'],
+            record['level_diff'],
+            record['action'],
+            record['class_type'],
+            record['record_title'],
+            # record['post_stack_action']
+            ).strip())
+    return output
 
 
 class BookmarkHelperTest(TestCase):
@@ -44,12 +65,40 @@ class BookmarkHelperTest(TestCase):
             '(L) Gallery of Maps',
             '(L) Informational Book',
             '(L) Stop sign',
-            # '(L) Stop 1'
         ]
 
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(bigbrother_expected_bookmarks)
+        bookmark_folder = bookmark_helper.BookmarkFolder.parse_shorthand_list(bigbrother_expected_bookmarks)
         self.assertEqual(bookmark_folder.shorten_data(), bigbrother_expected_bookmarks)
         self.assertEqual(bookmark_folder.clone().shorten_data(), bigbrother_expected_bookmarks)
+
+        actual_commands = shorthand_commands(bookmark_helper._bookmark_node_parse_shorthand_commands(bigbrother_expected_bookmarks))
+        expected_commands = [
+            'CREATE FOLDER "Animals"',
+            'CREATE LISTING "Killer Whale"',
+            'CREATE LISTING "Lion Finder"',
+            'CREATE LISTING "Monkey Finder"',
+            'CREATE LISTING "Parrotlet"',
+            'CREATE LISTING "White Horse"',
+            'CREATE LISTING "Wolf Finder"',
+            'POP 1 CREATE FOLDER "Instruments"',
+            'CREATE LISTING "Acoustic Guitar"',
+            'CREATE LISTING "Electric Guitar"',
+            'CREATE LISTING "Electric Piano"',
+            'CREATE LISTING "Piano"',
+            'CREATE LISTING "Sound Mixer"',
+            'CREATE LISTING "Violin"',
+            'POP 1 CREATE FOLDER "Weather"',
+            'CREATE LISTING "Lightning"',
+            'CREATE LISTING "Snow"',
+            'CREATE LISTING "Tornado"',
+            'POP 1 CREATE LISTING "Bread Basket"',
+            'CREATE LISTING "Chain boat navigation"',
+            'CREATE LISTING "Chart Course"',
+            'CREATE LISTING "Gallery of Maps"',
+            'CREATE LISTING "Informational Book"',
+            'CREATE LISTING "Stop sign"'
+        ]
+        self.assertEqual(actual_commands, expected_commands)
 
     def test_bookmark_folder_parse_shorthand_wsmith(self):
         """
@@ -71,11 +120,11 @@ class BookmarkHelperTest(TestCase):
             '(L) Grandfather clock'
         ]
 
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(wsmith_expected_bookmarks)
+        bookmark_folder = bookmark_helper.BookmarkFolder.parse_shorthand_list(wsmith_expected_bookmarks)
         self.assertEqual(bookmark_folder.shorten_data(), wsmith_expected_bookmarks)
         self.assertEqual(bookmark_folder.clone().shorten_data(), wsmith_expected_bookmarks)
 
-        stucture_list = [record[0] for record in _build_filesystem_structure(bookmark_folder)]
+        stucture_list = [record[0] for record in bookmark_helper._build_filesystem_structure(bookmark_folder)]
         expected_stucture_list = [
             '/',
             '/heros/',
@@ -106,8 +155,65 @@ class BookmarkHelperTest(TestCase):
             '(L) Hello'
         ]
 
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(one_listing_expected_bookmarks)
+        bookmark_folder = bookmark_helper.BookmarkFolder.parse_shorthand_list(one_listing_expected_bookmarks)
         self.assertEqual(bookmark_folder.shorten_data(), one_listing_expected_bookmarks)
+
+    def test_bookmark_folder_parse_shorthand_complex_multi_level(self):
+        """
+        Test parse_shorthand_list method for nested parsing
+        """
+        nested_expected_bookmarks = [
+            '(F) 1',
+            ' (SF) 1.1',
+            '  (L) 1.1-1',
+            ' (F) 1.2',
+            '  (F) 1.2.1',
+            '   (F) 1.2.1.1',
+            '    (L) X',
+            '   (L) 1.2.1-1',
+            ' (F) 1.3',
+            '  (L) 1.3.1',
+            ' (F) 1.4',
+            ' (L) 1-1',
+            '(F) 2',
+            ' (F) 2.1',
+            '  (F) 2.1.1',
+            '   (F) 2.1.1.1',
+            '    (F) 2.1.1.1.1',
+            '     (L) 2.1.1.1.1-1',  # Make it work without this line
+            '(F) 3'
+        ]
+
+        actual_commands = shorthand_commands(bookmark_helper._bookmark_node_parse_shorthand_commands(nested_expected_bookmarks))
+        import pprint
+        pprint.pprint(actual_commands)
+        expected_commands = [
+            'CREATE FOLDER "1"',
+            'CREATE SHARED_FOLDER "1.1"',
+            'CREATE LISTING "1.1-1"',
+            'POP 1 CREATE FOLDER "1.2"',
+            'CREATE FOLDER "1.2.1"',
+            'CREATE FOLDER "1.2.1.1"',
+            'CREATE LISTING "X"',
+            'POP 1 CREATE LISTING "1.2.1-1"',
+            'POP 2 CREATE FOLDER "1.3"',
+            'CREATE LISTING "1.3.1"',
+            'POP 1 CREATE FOLDER "1.4"',
+            'POP 1 CREATE LISTING "1-1"',
+            'POP 1 CREATE FOLDER "2"',
+            'CREATE FOLDER "2.1"',
+            'CREATE FOLDER "2.1.1"',
+            'CREATE FOLDER "2.1.1.1"',
+            'CREATE FOLDER "2.1.1.1.1"',
+            'CREATE LISTING "2.1.1.1.1-1"',  # TODO: Make it work without this line
+            'POP 5 CREATE FOLDER "3"'
+        ]
+        self.assertEqual(actual_commands, expected_commands)
+
+        bookmark_folder = bookmark_helper.BookmarkFolder.parse_shorthand_list(nested_expected_bookmarks)
+        # import pprint;pprint.pprint(bookmark_folder.shorten_data())
+        self.assertEqual(bookmark_folder.shorten_data(), nested_expected_bookmarks)
+        self.assertEqual(bookmark_folder.clone().shorten_data(), nested_expected_bookmarks)
 
     def test_bookmark_folder_parse_shorthand_complex(self):
         """
@@ -120,15 +226,32 @@ class BookmarkHelperTest(TestCase):
             ' (F) Folder 1.2',
             ' (F) Folder 1.3',
             '  (L) Listing 1.3.1',
-            ' (F) Folder 1.4',
+            ' (F) Folder "1.4"',
             ' (L) Listing 1.1.1',
             '(F) Folder 2'
         ]
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(nested_expected_bookmarks)
+
+        bookmark_folder = bookmark_helper.BookmarkFolder.parse_shorthand_list(nested_expected_bookmarks)
+        # import pprint;pprint.pprint(bookmark_folder.shorten_data())
         self.assertEqual(bookmark_folder.shorten_data(), nested_expected_bookmarks)
         self.assertEqual(bookmark_folder.clone().shorten_data(), nested_expected_bookmarks)
 
-        stucture_list = [record[0] for record in _build_filesystem_structure(bookmark_folder)]
+        actual_commands = shorthand_commands(bookmark_helper._bookmark_node_parse_shorthand_commands(nested_expected_bookmarks))
+        expected_commands = [
+            'CREATE FOLDER "Folder 1"',
+            'CREATE SHARED_FOLDER "Folder 1.1"',
+            'CREATE LISTING "Listing 1.1.2"',
+            'POP 1 CREATE FOLDER "Folder 1.2"',
+            'POP 1 CREATE FOLDER "Folder 1.3"',
+            'CREATE LISTING "Listing 1.3.1"',
+            'POP 1 CREATE FOLDER "Folder /"1.4/""',
+            'POP 1 CREATE LISTING "Listing 1.1.1"',
+            'POP 1 CREATE FOLDER "Folder 2"'
+        ]
+
+        self.assertEqual(actual_commands, expected_commands)
+
+        stucture_list = [record[0] for record in bookmark_helper._build_filesystem_structure(bookmark_folder)]
         expected_stucture_list = [
             '/',
             '/Folder 1/',
@@ -137,7 +260,7 @@ class BookmarkHelperTest(TestCase):
             '/Folder 1/Folder 1.2/',
             '/Folder 1/Folder 1.3/',
             '/Folder 1/Folder 1.3/Listing 1.3.1',
-            '/Folder 1/Folder 1.4/',
+            '/Folder 1/Folder "1.4"/',
             '/Folder 1/Listing 1.1.1',
             '/Folder 2/'
         ]
@@ -199,11 +322,68 @@ class BookmarkHelperTest(TestCase):
             ' (L) Grandfather clock'
         ]
 
-        bookmark_folder = BookmarkFolder.parse_shorthand_list(library)
+        bookmark_folder = bookmark_helper.BookmarkFolder.parse_shorthand_list(library)
         self.assertEqual(bookmark_folder.shorten_data(), library)
         self.assertEqual(bookmark_folder.clone().shorten_data(), library)
 
-        stucture_list = [record[0] for record in _build_filesystem_structure(bookmark_folder)]
+        actual_commands = shorthand_commands(bookmark_helper._bookmark_node_parse_shorthand_commands(library))
+        # import pprint;pprint.pprint(actual_commands)
+        expected_commands = [
+            'CREATE FOLDER "bigbrother"',
+            'CREATE FOLDER "Animals"',
+            'CREATE LISTING "Killer Whale"',
+            'CREATE LISTING "Lion Finder"',
+            'CREATE LISTING "Monkey Finder"',
+            'CREATE LISTING "Parrotlet"',
+            'CREATE LISTING "White Horse"',
+            'CREATE LISTING "Wolf Finder"',
+            'POP 1 CREATE FOLDER "Instruments"',
+            'CREATE LISTING "Acoustic Guitar"',
+            'CREATE LISTING "Electric Guitar"',
+            'CREATE LISTING "Electric Piano"',
+            'CREATE LISTING "Piano"',
+            'CREATE LISTING "Sound Mixer"',
+            'CREATE LISTING "Violin"',
+            'POP 1 CREATE FOLDER "Weather"',
+            'CREATE LISTING "Lightning"',
+            'CREATE LISTING "Snow"',
+            'CREATE LISTING "Tornado"',
+            'POP 1 CREATE LISTING "Bread Basket"',
+            'CREATE LISTING "Chain boat navigation"',
+            'CREATE LISTING "Chart Course"',
+            'CREATE LISTING "Gallery of Maps"',
+            'CREATE LISTING "Informational Book"',
+            'CREATE LISTING "Stop sign"',
+            'POP 1 CREATE FOLDER "bigbrother2"',
+            'CREATE SHARED_FOLDER "InstrumentSharing"',
+            'CREATE LISTING "Acoustic Guitar"',
+            'POP 1 CREATE LISTING "Alingano Maisu"',
+            'POP 1 CREATE FOLDER "julia"',
+            'CREATE SHARED_FOLDER "InstrumentSharing"',
+            'CREATE LISTING "Acoustic Guitar"',
+            'POP 1 CREATE LISTING "Astrology software"',
+            'POP 1 CREATE FOLDER "johnson"',
+            'CREATE SHARED_FOLDER "InstrumentSharing"',
+            'CREATE LISTING "Acoustic Guitar"',
+            'POP 1 CREATE LISTING "Applied Ethics Inc."',
+            'POP 1 CREATE FOLDER "wsmith"',
+            'CREATE FOLDER "heros"',
+            'CREATE LISTING "Iron Man"',
+            'CREATE LISTING "Jean Grey"',
+            'CREATE LISTING "Mallrats"',
+            'POP 1 CREATE FOLDER "old"',
+            'CREATE LISTING "Air Mail"',
+            'CREATE LISTING "Bread Basket"',
+            'POP 1 CREATE FOLDER "planets"',
+            'CREATE LISTING "Azeroth"',
+            'CREATE LISTING "Saturn"',
+            'POP 1 CREATE LISTING "Baltimore Ravens"',
+            'CREATE LISTING "Diamond"',
+            'CREATE LISTING "Grandfather clock"'
+        ]
+        self.assertEqual(actual_commands, expected_commands)
+
+        stucture_list = [record[0] for record in bookmark_helper._build_filesystem_structure(bookmark_folder)]
         expected_stucture_list = [
             '/',
             '/bigbrother/',

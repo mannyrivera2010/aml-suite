@@ -5,6 +5,7 @@ https://aml-development.github.io/ozp-backend/features/shared_folders_2018/
 """
 import logging
 
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 from rest_framework import viewsets
@@ -17,6 +18,9 @@ from ozpcenter import permissions
 from ozpcenter.utils import str_to_bool
 import ozpcenter.api.bookmark.model_access as model_access
 import ozpcenter.api.bookmark.serializers as serializers
+
+from ozpcenter.bookmark_helper import BookmarkFolder
+
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
 
@@ -47,7 +51,8 @@ class BookmarkViewSet(viewsets.ViewSet):
 
         ordering_fields = [str(record) for record in request.query_params.getlist('order', [])]
 
-        data = serializers.get_bookmark_tree(current_request_profile, request=request, ordering_fields=ordering_fields)
+        data = model_access.get_bookmark_tree(current_request_profile, request=request, ordering_fields=ordering_fields, serializer_class=serializers.BookmarkSerializer)
+        # data = BookmarkFolder.parse_endpoint(data).shorten_data()
         return Response(data)
 
     def retrieve(self, request, pk=None):
@@ -59,8 +64,8 @@ class BookmarkViewSet(viewsets.ViewSet):
         ordering_fields = [str(record) for record in request.query_params.getlist('order', [])]
 
         entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
-        data = serializers.get_bookmark_tree(current_request_profile, request=request,
-            folder_bookmark_entry=entry, is_parent=True, ordering_fields=ordering_fields)
+        data = model_access.get_bookmark_tree(current_request_profile, request=request,
+            folder_bookmark_entry=entry, is_parent=True, ordering_fields=ordering_fields, serializer_class=serializers.BookmarkSerializer)
         return Response(data)
 
     def create(self, request):
@@ -124,6 +129,44 @@ class BookmarkViewSet(viewsets.ViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @detail_route(methods=['post'], permission_classes=[permissions.IsUser])
+    # @list_route(methods=['post'], permission_classes=[permissions.IsUser])
+    def copy(self, request, pk=None):
+        """
+        Copy Bookmarks
+
+        API:
+            - Copy Folder Bookmark
+            - Copy Listing Bookmark
+            ```
+            POST /api/bookmark/{bookmark_id}/copy/
+            {}
+            # Future: Custom Folder Name
+            # {
+            #     "title": "Folder 1",
+            # }
+            ```
+        """
+        current_request_profile = request.user.profile
+        ordering_fields = [str(record) for record in request.query_params.getlist('order', [])]
+
+        bookmark_entry_to_copy = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
+        # bookmark_entry_to_copy = model_access.create_get_user_root_bookmark_folder(current_request_profile)
+
+        bookmark_entry = model_access.duplicate_bookmark_entry_for_profile(
+            current_request_profile,
+            bookmark_entry_to_copy
+        )
+
+        data = model_access.get_bookmark_tree(current_request_profile,
+            request=request,
+            folder_bookmark_entry=bookmark_entry,
+            is_parent=True,
+            ordering_fields=ordering_fields,
+            serializer_class=serializers.BookmarkSerializer)
+
+        return Response(data)
 
     def update(self, request, pk=None):
         """

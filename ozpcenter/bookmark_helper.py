@@ -63,21 +63,34 @@ def _parse_legacy_bookmark(data):
     return root_folder
 
 
+def _parse_bookmark_line(current_record):
+    current_record_re = re.search('(^[ ]*)\(([\w]+)\)(.*$)', current_record)
+    record_level = len(current_record_re.group(1))
+    record_type = current_record_re.group(2)
+    record_title = str(current_record_re.group(3)).strip()
+
+    return {
+        'record_level': record_level,
+        'record_type': record_type,
+        'record_title': record_title
+    }
+
+
 def _bookmark_node_parse_shorthand_commands(data):
     """
     Convert Shorthand Data into Commands
 
-    Actions: (BOOKMARK CLASS _ FOLDER STACK ACTION)
-        CF_PU: CREATE_FOLDER_PUSH_PEEK
+    Actions: (STACK ACTION)(Level Diff)(ACTION)(CLASS_TYPE)(STACK ACTION)
+        CF_PU: (PEEK)(0)(CREATE)(FOLDER)(PUSH)
             0-F   0-None
             1-F   0-F
-        CF_PO: CREATE_FOLDER_POP_PUSH_PEEK
+        CF_PO: (POP PEEK)(1)(CREATE)(FOLDER)(PUSH)
             0-F   1-L
             0-F   0-F
-        CL_PE: CREATE_LISTING_PEEK
+        CL_PE: (PEEK)(0)(CREATE)(LISTING)
             1-F   0-L    0-NONE
             2-L   0-L    0-L
-        CL_PO: CREATE_LISTING_POP_PEEK
+        CL_PO: (POP PEEK)(1)(CREATE)(LISTING)
             1-L   1-F
             0-L   0-L
 
@@ -115,7 +128,7 @@ def _bookmark_node_parse_shorthand_commands(data):
         [{'action': 'CREATE_FOLDER',
           'level_diff': 0,
           'record_title': 'bigbrother',
-          'stack_action': 'PUSH_PEEK'},...]
+          'stack_action': 'PEEK_PUSH'},...]
     """
     commands = []
 
@@ -123,33 +136,37 @@ def _bookmark_node_parse_shorthand_commands(data):
     previous_is_folder = False
 
     for current_record in data:
-        current_record_re = re.search('(^[ ]*)\(([\w]+)\)(.*$)', current_record)
+        parsed_dict = _parse_bookmark_line(current_record)
+        record_level = parsed_dict['record_level']
+        record_type = parsed_dict['record_type']
+        record_title = parsed_dict['record_title']
 
-        record_level = len(current_record_re.group(1))
-        record_type = current_record_re.group(2)
-        record_title = str(current_record_re.group(3)).strip()
-        record_is_folder = False
+        record_type_mapping = {
+            'F': {
+                'class_type': 'FOLDER',
+                'record_is_folder': True
+            },
+            'SF': {
+                'class_type': 'SHARED_FOLDER',
+                'record_is_folder': True
+            },
+            'L': {
+                'class_type': 'LISTING',
+                'record_is_folder': False
+            },
+            'SL': {
+                'class_type': 'LISTING',
+                'record_is_folder': False
+            }
+        }
 
-        folder_type = 'FOLDER'
+        current_record_mapping = record_type_mapping.get(record_type)
 
-        if record_type == 'F' or record_type == 'SF':
-            record_is_folder = True
-
-        if record_type == 'SF':
-            folder_type = 'SHARED_FOLDER'
-
-        # print('-'*10)
-        # print('previous_level: {} - previous_is_folder: {} - record_level: {} - record_type: {} - record_title: {}'.format(previous_level, previous_is_folder, record_level, record_type, record_title))
-
-        bookmark_class = False
-
-        if record_type in ['F', 'SF', 'L', 'SL']:
-            bookmark_class = True
-
-        if not bookmark_class:
-            previous_level = record_level
-            previous_is_folder = record_is_folder
+        if not current_record_mapping:
             continue
+
+        class_type = current_record_mapping['class_type']
+        record_is_folder = current_record_mapping['record_is_folder']
 
         level_action = 'LEVEL_ERROR'
         level_diff = 0
@@ -163,47 +180,47 @@ def _bookmark_node_parse_shorthand_commands(data):
         elif record_level == previous_level:
             level_action = 'LEVEL_SAME'
 
-        action = None
         stack_action = None
+        action = 'CREATE'
 
         if record_is_folder:
-            if level_action == 'LEVEL_UP' and previous_is_folder is True:
-                action = 'CREATE_{}'.format(folder_type)
-                stack_action = 'PUSH_PEEK'
-            elif level_action == 'LEVEL_SAME' and previous_is_folder is True:
-                action = 'CREATE_{}'.format(folder_type)
-                stack_action = 'POP_PUSH_PEEK'
+            post_stack_action = 'PUSH'
+            stack_action = ''
+
+            if level_action == 'LEVEL_SAME' and previous_is_folder is True:
+                stack_action = 'POP'
                 level_diff = 1 if level_diff == 0 else level_diff
+                # level_diff = level_diff + 1
             elif level_action == 'LEVEL_SAME' and previous_is_folder is False:
-                action = 'CREATE_{}'.format(folder_type)
-                stack_action = 'PUSH_PEEK'
-            elif level_action == 'LEVEL_DOWN':
-                action = 'CREATE_{}'.format(folder_type)
-                stack_action = 'POP_PUSH_PEEK'
-                level_diff = 1 if level_diff == 0 else level_diff
+                stack_action = ''
+            elif level_action == 'LEVEL_DOWN' and previous_is_folder is True:
+                stack_action = 'POP'
+            elif level_action == 'LEVEL_DOWN' and previous_is_folder is False:
+                stack_action = 'POP'
+
+                # level_diff = 1 if level_diff == 0 else level_diff
+                # level_diff = level_diff + 1
         else:
-            if level_action == 'LEVEL_UP' and previous_is_folder is True:
-                action = 'CREATE_LISTING'
-                stack_action = 'PEEK'
-            elif level_action == 'LEVEL_SAME' and previous_is_folder is True:
-                action = 'CREATE_LISTING'
-                stack_action = 'POP_PEEK'
+            post_stack_action = ''
+            stack_action = ''
+
+            if level_action == 'LEVEL_SAME' and previous_is_folder is True:
+                stack_action = 'POP'
                 level_diff = 1 if level_diff == 0 else level_diff
-            elif level_action == 'LEVEL_SAME' and previous_is_folder is False:
-                action = 'CREATE_LISTING'
-                stack_action = 'POP_PEEK'
             elif level_action == 'LEVEL_DOWN':
-                action = 'CREATE_LISTING'
-                stack_action = 'POP_PEEK'
+                stack_action = 'POP'
 
         # print('level_action: {} - action: {}, level_diff:{}'.format(level_action, action, level_diff, record_level))
+        commands.append({
+            'action': action,
+            'class_type': class_type,
+            'record_title': record_title,
+            'stack_action': stack_action,
+            'post_stack_action': post_stack_action,
+            'level_diff': level_diff,
+            '_parsed_dict': parsed_dict})
 
-        if not action or not stack_action:
-            previous_level = record_level
-            previous_is_folder = record_is_folder
-            continue
-
-        commands.append({'action': action, 'record_title': record_title, 'stack_action': stack_action, 'level_diff': level_diff})  # '{}-{}-{}-{}'.format(action, record_title, stack_action, level_diff))
+        # '{}-{}-{}-{}'.format(action, record_title, stack_action, level_diff))
         # print("{}({}) {}".format(action, level_diff, record_title))
         # set previous level
         previous_level = record_level
@@ -215,20 +232,6 @@ def _bookmark_node_parse_shorthand_commands(data):
 def _bookmark_node_parse_shorthand(data):
     """
     Convert Shorthand Data into BookmarkFolder
-
-    Actions: (BOOKMARK CLASS _ FOLDER STACK ACTION)
-        CF_PU: CREATE_FOLDER_PUSH_PEEK
-            0-F   0-None
-            1-F   0-F
-        CF_PO: CREATE_FOLDER_POP_PUSH_PEEK
-            0-F   1-L
-            0-F   0-F
-        CL_PE: CREATE_LISTING_PEEK
-            1-F   0-L    0-NONE
-            2-L   0-L    0-L
-        CL_PO: CREATE_LISTING_POP_PEEK
-            1-L   1-F
-            0-L   0-L
 
     Args:
         data:
@@ -258,54 +261,38 @@ def _bookmark_node_parse_shorthand(data):
     # import pprint; pprint.pprint(commands)
     for command_dict in commands:
         action_raw = command_dict['action']
+        class_type = command_dict['class_type']
         record_title = command_dict['record_title']
         stack_action = command_dict['stack_action']
+        post_stack_action = command_dict['post_stack_action']
         level_diff = int(command_dict['level_diff'])
 
-        action = '{}_{}'.format(action_raw, stack_action)
+        action = '_'.join([x for x in [action_raw, class_type] if (x)])
+        # print('-----------')
+        # import pprint
+        # pprint.pprint(command_dict)
+        if stack_action in ['POP']:
+            for i in range(0, level_diff):
+                if len(folder_stack) > 1:
+                    folder_stack.pop()
 
-        if action == 'CREATE_FOLDER_PUSH_PEEK':
-            current_root_folder = folder_stack[-1]
+        current_root_folder = folder_stack[-1]
+
+        folder_type = False
+
+        if action == 'CREATE_FOLDER':
             next_root_folder = BookmarkFolder(record_title)
             current_root_folder.add_bookmark_object(next_root_folder)
-            folder_stack.append(next_root_folder)
-
-        elif action == 'CREATE_FOLDER_POP_PUSH_PEEK':
-            for i in range(0, level_diff):
-                if len(folder_stack) > 1:
-                    folder_stack.pop()
-
-            current_root_folder = folder_stack[-1]
-            next_root_folder = BookmarkFolder(record_title)
-            current_root_folder.add_bookmark_object(next_root_folder)
-            folder_stack.append(next_root_folder)
-
-        elif action == 'CREATE_SHARED_FOLDER_PUSH_PEEK':
-            current_root_folder = folder_stack[-1]
+            folder_type = True
+        elif action == 'CREATE_SHARED_FOLDER':
             next_root_folder = BookmarkSharedFolder(record_title)
             current_root_folder.add_bookmark_object(next_root_folder)
-            folder_stack.append(next_root_folder)
-
-        elif action == 'CREATE_SHARED_FOLDER_POP_PUSH_PEEK':
-            for i in range(0, level_diff):
-                if len(folder_stack) > 1:
-                    folder_stack.pop()
-
-            current_root_folder = folder_stack[-1]
-            next_root_folder = BookmarkSharedFolder(record_title)
-            current_root_folder.add_bookmark_object(next_root_folder)
-            folder_stack.append(next_root_folder)
-
-        elif action == 'CREATE_LISTING_PEEK':
-            current_root_folder = folder_stack[-1]
+            folder_type = True
+        elif action == 'CREATE_LISTING':
             current_root_folder.add_bookmark_object(BookmarkListing(record_title))
 
-        elif action == 'CREATE_LISTING_POP_PEEK':
-            for i in range(0, level_diff):
-                if len(folder_stack) > 1:
-                    folder_stack.pop()
-            current_root_folder = folder_stack[-1]
-            current_root_folder.add_bookmark_object(BookmarkListing(record_title))
+        if post_stack_action in ['PUSH'] and folder_type:
+            folder_stack.append(next_root_folder)
 
     return root_folder
 
@@ -455,9 +442,9 @@ class BookmarkNode(object):
     def set_parent(self, bookmark_node):
         self.parent = bookmark_node
 
-    def clone(self):
+    def clone(self, show_root=True):
         # TODO: True Clone of objects.  should include id, listing_id
-        shorten_data = self.shorten_data()
+        shorten_data = self.shorten_data(show_root=show_root)
         return _bookmark_node_parse_shorthand(shorten_data)
 
     def __str__(self):
@@ -533,6 +520,15 @@ class BookmarkFolder(BookmarkNode):
 
         return None
 
+    def first_folder_bookmark(self, current_level=None):
+        current_level = current_level if current_level else self
+
+        for bookmark in current_level.bookmark_objects:
+            if isinstance(bookmark, BookmarkFolder):
+                return bookmark
+
+        return None
+
     def search(self, name, directory_tuples=None):
         """
         Search function
@@ -572,7 +568,7 @@ class BookmarkFolder(BookmarkNode):
 
         return True
 
-    def copy(self, src_name, dest_name):
+    def copy(self, src_name, dest_name, rename_dest_name=None):
         directory_tuples = _build_filesystem_structure(self)
 
         src_bookmark = self.search(src_name, directory_tuples)
@@ -587,10 +583,14 @@ class BookmarkFolder(BookmarkNode):
         if isinstance(dest_bookmark, BookmarkListing):
             return False
 
+        org_rename_src_name = src_bookmark.title
+
+        if rename_dest_name:
+            src_bookmark.title = rename_dest_name
         # src_bookmark.delete()
         src_bookmark_clone = src_bookmark.clone()
-        for current_bookmark_object in src_bookmark_clone.bookmark_objects:
-            dest_bookmark.add_bookmark_object(current_bookmark_object)
+        src_bookmark.title = org_rename_src_name
+        dest_bookmark.add_bookmark_object(src_bookmark_clone)
         return True
 
     @staticmethod
