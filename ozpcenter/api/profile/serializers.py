@@ -285,11 +285,12 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class ShortProfileSerializer(serializers.ModelSerializer):
+    avatar = ImageSerializer(allow_null=True)
     user = ShortUserSerializer()
 
     class Meta:
         model = models.Profile
-        fields = ('id', 'user', 'display_name', 'dn')
+        fields = ('id', 'user', 'display_name', 'dn', 'avatar')
 
     def to_representation(self, data):
         access_control_instance = plugin_manager.get_system_access_control_plugin()
