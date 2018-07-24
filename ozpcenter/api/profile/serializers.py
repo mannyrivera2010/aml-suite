@@ -55,7 +55,7 @@ class StorefrontCustomizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.StorefrontCustomization
-        fields = ('section', 'position', 'is_hidden')
+        fields = ('section', 'position', 'is_hidden', 'size')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -277,6 +277,7 @@ class ProfileSerializer(serializers.ModelSerializer):
                     customization['section'],
                     customization['position'] if 'position' in customization else None,
                     customization['is_hidden'] if 'is_hidden' in customization else None,
+                    customization['size'] if 'size' in customization else None,
                 )
 
         profile_instance.save()

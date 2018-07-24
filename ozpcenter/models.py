@@ -1225,18 +1225,26 @@ class StorefrontCustomization(models.Model):
         (MY_LISTINGS, MY_LISTINGS),
     )
 
+    LARGE = 'LARGE'
+    SMALL = 'SMALL'
+    SIZES = (
+        (LARGE, LARGE),
+        (SMALL, SMALL)
+    )
+
     profile = models.ForeignKey('Profile', related_name='storefront_customizations')
     section = models.CharField(max_length=50, choices=SECTION_CHOICES)
     position = models.PositiveIntegerField(default=0)
     is_hidden = models.BooleanField(default=False)
+    size = models.CharField(max_length=50, choices=SIZES, null=True, blank=True)
 
     objects = StorefrontCustomizationManager()
 
     def __str__(self):
-        return '{0!s}:{1!s}:{2!s}:{3!s}'.format(self.profile.user.username, self.section, self.position, self.is_hidden)
+        return '{0!s}:{1!s}:{2!s}:{3!s}:{4!s}'.format(self.profile.user.username, self.section, self.position, self.is_hidden, self.size)
 
     def __repr__(self):
-        return '{0!s}:{1!s}:{2!s}:{3!s}'.format(self.profile.user.username, self.section, self.position, self.is_hidden)
+        return '{0!s}:{1!s}:{2!s}:{3!s}:{4!s}'.format(self.profile.user.username, self.section, self.position, self.is_hidden, self.size)
 
     class Meta:
         unique_together = (("profile", "section"),)
