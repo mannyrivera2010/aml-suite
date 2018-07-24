@@ -529,9 +529,9 @@ class BookmarkEntry(models.Model):
     manager = models.Manager()
 
     def __repr__(self):
-        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
-            # self.bookmark_parent if self.bookmark_parent else 'None',
+        return 'BookmarkEntry({}, bookmark_parent:{},title:{},type:{},is_root:{},listing:{})'.format(
             self.id,
+            [parent.title for parent in self.bookmark_parent.all()] if self.bookmark_parent else 'None',
             self.title,
             self.type,
             self.is_root,
@@ -539,9 +539,9 @@ class BookmarkEntry(models.Model):
         )
 
     def __str__(self):
-        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
-            # self.bookmark_parent if self.bookmark_parent else 'None',
+        return 'BookmarkEntry({}, bookmark_parent:{},title:{},type:{},is_root:{},listing:{})'.format(
             self.id,
+            [parent.title for parent in self.bookmark_parent.all()] if self.bookmark_parent else 'None',
             self.title,
             self.type,
             self.is_root,
@@ -1184,6 +1184,7 @@ class StorefrontCustomizationManager(models.Manager):
     """
     Use a custom manager to control access to storefront customizations
     """
+
     def apply_select_related(self, queryset):
         queryset = queryset.select_related('profile')
         queryset = queryset.select_related('profile__user')
