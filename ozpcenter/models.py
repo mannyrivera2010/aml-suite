@@ -529,9 +529,9 @@ class BookmarkEntry(models.Model):
     manager = models.Manager()
 
     def __repr__(self):
-        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
-            # self.bookmark_parent if self.bookmark_parent else 'None',
+        return 'BookmarkEntry({}, bookmark_parent:{},title:{},type:{},is_root:{},listing:{})'.format(
             self.id,
+            [parent.title for parent in self.bookmark_parent.all()] if self.bookmark_parent else 'None',
             self.title,
             self.type,
             self.is_root,
@@ -539,9 +539,9 @@ class BookmarkEntry(models.Model):
         )
 
     def __str__(self):
-        return 'BookmarkEntry({}, bookmark_parent,title:{},type:{},is_root:{},listing:{})'.format(
-            # self.bookmark_parent if self.bookmark_parent else 'None',
+        return 'BookmarkEntry({}, bookmark_parent:{},title:{},type:{},is_root:{},listing:{})'.format(
             self.id,
+            [parent.title for parent in self.bookmark_parent.all()] if self.bookmark_parent else 'None',
             self.title,
             self.type,
             self.is_root,

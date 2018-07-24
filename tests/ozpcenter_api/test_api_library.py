@@ -10,7 +10,7 @@ from django.test import override_settings
 from rest_framework import status
 from tests.ozp.cases import APITestCase
 
-from tests.ozp.bookmark_helper import BookmarkFolder, BookmarkListing
+from ozpcenter.bookmark_helper import BookmarkFolder, BookmarkListing
 
 from ozpcenter import model_access as generic_model_access
 from ozpcenter.scripts import sample_data_generator as data_gen

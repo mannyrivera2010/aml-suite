@@ -18,7 +18,7 @@ from ozpcenter.scripts import sample_data_generator as data_gen
 
 from tests.ozpcenter.helper import APITestHelper
 
-from tests.ozp.bookmark_helper import BookmarkFolder, BookmarkListing
+from ozpcenter.bookmark_helper import BookmarkFolder, BookmarkListing
 
 
 def _compare_library(test_case_instance, expected_library_object):

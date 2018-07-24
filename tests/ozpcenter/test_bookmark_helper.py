@@ -1,10 +1,10 @@
 """
-Utils tests
+Bookmark Helper tests
 """
 from django.test import TestCase
 from django.conf import settings
 
-from tests.ozp import bookmark_helper
+from ozpcenter import bookmark_helper
 
 
 def shorthand_commands(data):

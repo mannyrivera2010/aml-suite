@@ -268,11 +268,9 @@ def _bookmark_node_parse_shorthand(data):
         level_diff = int(command_dict['level_diff'])
 
         action = '_'.join([x for x in [action_raw, class_type] if (x)])
-
-        print('-----------')
-        import pprint
-        pprint.pprint(command_dict)
-
+        # print('-----------')
+        # import pprint
+        # pprint.pprint(command_dict)
         if stack_action in ['POP']:
             for i in range(0, level_diff):
                 if len(folder_stack) > 1:
@@ -522,6 +520,15 @@ class BookmarkFolder(BookmarkNode):
 
         return None
 
+    def first_folder_bookmark(self, current_level=None):
+        current_level = current_level if current_level else self
+
+        for bookmark in current_level.bookmark_objects:
+            if isinstance(bookmark, BookmarkFolder):
+                return bookmark
+
+        return None
+
     def search(self, name, directory_tuples=None):
         """
         Search function
@@ -561,7 +568,7 @@ class BookmarkFolder(BookmarkNode):
 
         return True
 
-    def copy(self, src_name, dest_name):
+    def copy(self, src_name, dest_name, rename_dest_name=None):
         directory_tuples = _build_filesystem_structure(self)
 
         src_bookmark = self.search(src_name, directory_tuples)
@@ -576,8 +583,13 @@ class BookmarkFolder(BookmarkNode):
         if isinstance(dest_bookmark, BookmarkListing):
             return False
 
+        org_rename_src_name = src_bookmark.title
+
+        if rename_dest_name:
+            src_bookmark.title = rename_dest_name
         # src_bookmark.delete()
         src_bookmark_clone = src_bookmark.clone()
+        src_bookmark.title = org_rename_src_name
         dest_bookmark.add_bookmark_object(src_bookmark_clone)
         return True
 

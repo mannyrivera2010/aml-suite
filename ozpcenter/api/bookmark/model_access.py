@@ -45,6 +45,10 @@ import ozpcenter.models as models
 from ozpcenter.pubsub import dispatcher
 from ozpcenter import errors
 
+from ozpcenter.pipe import pipes
+from ozpcenter.pipe import pipeline
+from ozpcenter.recommend import recommend_utils
+
 
 FOLDER_TYPE = models.BookmarkEntry.FOLDER
 LISTING_TYPE = models.BookmarkEntry.LISTING
@@ -386,6 +390,7 @@ def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_en
         target_user_type=models.BookmarkPermission.OWNER
     )
 
+    # TODO: What is this doing?
     for bookmark_child in bookmark_children:
         update_bookmark_entry_for_profile(
             request_profile,
@@ -480,19 +485,174 @@ def update_bookmark_entry_for_profile(request_profile, bookmark_entry_instance, 
     return bookmark_entry_instance
 
 
-def build_folder_queries_recursive_flatten(request_profile, bookmark_entry_instance, is_start=True):
+def build_copy_tree_recursive(request_profile, bookmark_entry_instance):
+    """
+    Build Tree with Folder Title and Listings to make copies of recursively
+
+    Args:
+        request_profile
+        bookmark_entry_instance
+    Returns:
+        {'bookmark_folder': 'Animals',
+         'bookmark_listing': None,
+         'folders': [],
+         'listings': [{'bookmark_listing': (killer_whale-['bigbrother'])},
+                      {'bookmark_listing': (lion_finder-['bigbrother'])},
+                      {'bookmark_listing': (monkey_finder-['bigbrother'])},
+                      {'bookmark_listing': (parrotlet-['jones'])},
+                      {'bookmark_listing': (white_horse-['bigbrother'])},
+                      {'bookmark_listing': (wolf_finder-['bigbrother'])}]}
+    """
+    output = {
+        'bookmark_folder_name': None,
+        'bookmark_listing': None,
+        'folders': [],
+        'listings': [],
+    }
+    if bookmark_entry_instance.type == FOLDER_TYPE:
+        folder_name = bookmark_entry_instance.title
+        if not bookmark_entry_instance.is_root:
+            folder_name = '{}(COPY)'.format(folder_name)
+            output['bookmark_folder_name'] = folder_name
+
+        folder_query = models.BookmarkEntry.manager.filter(
+            type=FOLDER_TYPE,
+            bookmark_parent__bookmark_permission__profile=request_profile,
+            bookmark_parent=bookmark_entry_instance
+        )
+
+        listing_query = models.BookmarkEntry.manager.filter(
+            type=LISTING_TYPE,
+            bookmark_parent__bookmark_permission__profile=request_profile,
+            bookmark_parent=bookmark_entry_instance
+        )
+
+        for current_bookmark_folder in folder_query:
+            output['folders'].append(build_copy_tree_recursive(request_profile, current_bookmark_folder))
+
+        for current_bookmark_listing in listing_query:
+            current_bookmark_listing = {
+                'bookmark_listing': current_bookmark_listing.listing,
+            }
+            output['listings'].append(current_bookmark_listing)
+    elif bookmark_entry_instance.type == LISTING_TYPE:
+        output['bookmark_listing'] = bookmark_entry_instance.listing
+    return output
+
+
+def copy_tree_recursive(request_profile, copy_tree_dict, bookmark_folder_instance):
+    """
+    Create Copy recursively
+    Args:
+        request_profile:
+        copy_tree_dict: takes in dictionary structure created by build_copy_tree_recursive method
+        bookmark_folder_instance
+
+    Returns:
+        {'bookmark_folder_instance': BookmarkEntry(79, bookmark_parent:['ROOT'],title:Animals,type:FOLDER,is_root:False,listing:None),
+         'bookmark_listing_instance': None,
+         'folder_instances': [],
+         'listing_instances': [
+            BookmarkEntry(80, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(killer_whale-['bigbrother'])),
+            BookmarkEntry(81, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(lion_finder-['bigbrother'])),
+            BookmarkEntry(82, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(monkey_finder-['bigbrother'])),
+            BookmarkEntry(83, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(parrotlet-['jones'])),
+            BookmarkEntry(84, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(white_horse-['bigbrother'])),
+            BookmarkEntry(85, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(wolf_finder-['bigbrother']))]}
+    """
+    output = {
+        'bookmark_folder_instance': None,
+        'bookmark_listing_instance': None,
+        'folder_instances': [],
+        'listing_instances': [],
+    }
+
+    bookmark_listing = copy_tree_dict['bookmark_listing']
+
+    if bookmark_listing:
+        output['bookmark_listing_instance'] = create_listing_bookmark_for_profile(
+            request_profile,
+            bookmark_listing,
+            bookmark_entry_folder=bookmark_folder_instance
+        )
+
+    bookmark_folder_copied_instance = bookmark_folder_instance
+    bookmark_folder_name = copy_tree_dict['bookmark_folder_name']
+    if bookmark_folder_name:
+        bookmark_folder_copied_instance = create_folder_bookmark_for_profile(
+            request_profile,
+            bookmark_folder_name,
+            bookmark_entry_folder=bookmark_folder_instance
+        )
+        output['bookmark_folder_instance'] = bookmark_folder_copied_instance
+
+    folders = copy_tree_dict['folders']
+    for current_copy_tree_dict in folders:
+        internal_copy_tree = copy_tree_recursive(request_profile, current_copy_tree_dict, bookmark_folder_copied_instance)
+        output['folder_instances'].append(internal_copy_tree)
+
+    listings = copy_tree_dict['listings']
+    for current_listing_record in listings:
+        current_bookmark_listing = current_listing_record['bookmark_listing']
+
+        output['listing_instances'].append(create_listing_bookmark_for_profile(
+            request_profile,
+            current_bookmark_listing,
+            bookmark_entry_folder=bookmark_folder_copied_instance
+        ))
+    return output
+
+
+def duplicate_bookmark_entry_for_profile(request_profile, bookmark_entry_to_copy, dest_bookmark_folder=None):
+    """
+    Duplicate Bookmark Entry for profile
+    """
+    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_to_copy)
+    copy_tree_dict = build_copy_tree_recursive(request_profile, bookmark_entry_to_copy)
+
+    dest_bookmark_folder = dest_bookmark_folder if dest_bookmark_folder else create_get_user_root_bookmark_folder(request_profile)
+    copy_tree = copy_tree_recursive(request_profile, copy_tree_dict, dest_bookmark_folder)
+
+    bookmark_folder_instance = copy_tree.get('bookmark_folder_instance')
+    bookmark_listing_instance = copy_tree.get('bookmark_listing_instance')
+
+    if bookmark_folder_instance:
+        return bookmark_folder_instance
+    elif bookmark_listing_instance:
+        return bookmark_listing_instance
+    else:
+        return dest_bookmark_folder
+
+
+def build_folder_queries_recursive_flatten(request_profile, bookmark_entry_instance, is_start=True, expand=False):
     """
     Build Queries to get all folder and listing queries under a bookmark_entry folder bookmark recursively
+
+    shell usage:
+        from ozpcenter.api.bookmark.model_access import build_folder_queries_recursive_flatten
+        b = BookmarkEntry.objects.first()
+        p = BookmarkEntry.objects.first().bookmark_permission.first().profile
+        build_folder_queries_recursive_flatten(p, b)
 
     Args:
         request_profile
         bookmark_entry_instance
         is_start
+
+    Returns:
+        [
+            listing_query(Root),
+            listing_query(Folder2),
+            BookmarkEntry(Folder2),
+            listing_query(Folder1),
+            BookmarkEntry(Folder1),
+            BookmarkEntry(Root)
+        ]
     """
     output = []
 
-    folder_query = models.BookmarkEntry.manager.filter(type=models.BookmarkEntry.FOLDER)
-    listing_query = models.BookmarkEntry.manager.filter(type=models.BookmarkEntry.LISTING)
+    folder_query = models.BookmarkEntry.manager.filter(type=FOLDER_TYPE)
+    listing_query = models.BookmarkEntry.manager.filter(type=LISTING_TYPE)
 
     if is_start:
         folder_query = folder_query.filter(bookmark_parent__bookmark_permission__profile=request_profile)  # Validate to make sure user can see folder
@@ -501,7 +661,11 @@ def build_folder_queries_recursive_flatten(request_profile, bookmark_entry_insta
     folder_query = folder_query.filter(bookmark_parent=bookmark_entry_instance)
     listing_query = listing_query.filter(bookmark_parent=bookmark_entry_instance)
 
-    output.append(listing_query)
+    if expand is True:
+        for current_listing in listing_query:
+            output.append(current_listing)
+    else:
+        output.append(listing_query)
 
     for folder_entry in folder_query:
         output.extend(build_folder_queries_recursive_flatten(request_profile, folder_entry, is_start=False))
@@ -543,3 +707,103 @@ def delete_bookmark_entry_for_profile(request_profile, bookmark_entry_instance):
     elif bookmark_entry_instance.type == LISTING_TYPE:
         # If bookmark_entry_instance type is LISTING_TYPE then just delete
         bookmark_entry_instance.delete()
+
+
+def _create_folder_listing_queries_and_serialized(request_profile, request, folder_bookmark_entry, is_parent=None, ordering_fields=None, serializer_class=None):
+    """
+    Create queries to get folder and listing data
+
+    Args:
+        request_profile:
+            used to filter profile bookmarks
+        request:
+            used for serializer to create urls
+        folder_bookmark_entry:
+        is_parent:
+        ordering_fields:
+    """
+    is_parent = is_parent if is_parent else False
+    ordering_fields = ordering_fields if ordering_fields else ['created_date']
+
+    folder_query = models.BookmarkEntry.objects.filter(
+        type=FOLDER_TYPE,
+        bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder
+    )
+
+    # for_profile should do `private listing` check for listing
+    listing_query = models.BookmarkEntry.objects.for_profile_minus_security_marking(request_profile).filter(
+        type=LISTING_TYPE,
+        bookmark_parent__bookmark_permission__profile=request_profile  # Validate to make sure user can see folder,
+    )
+
+    folder_order_fields = []
+    listing_order_fields = []
+
+    for ordering_field in ordering_fields:
+        if ordering_field in FOLDER_QUERY_ORDER_MAPPING:
+            folder_order_fields.append(FOLDER_QUERY_ORDER_MAPPING[ordering_field])
+
+        if ordering_field in LISTING_QUERY_ORDER_MAPPING:
+            listing_order_fields.append(LISTING_QUERY_ORDER_MAPPING[ordering_field])
+
+    folder_query = folder_query.order_by(*folder_order_fields)
+    listing_query = listing_query.order_by(*listing_order_fields)
+
+    if is_parent:
+        folder_query = folder_query.filter(id=folder_bookmark_entry.id)
+        listing_query = listing_query.filter(id=folder_bookmark_entry.id)
+    else:
+        folder_query = folder_query.filter(bookmark_parent=folder_bookmark_entry)
+        listing_query = listing_query.filter(bookmark_parent=folder_bookmark_entry)
+
+    folder_data = serializer_class(folder_query, many=True, context={'request': request}).data
+    listing_data = serializer_class(listing_query, many=True, context={'request': request}).data
+
+    # Filter out all listings that request_profile does not have access to
+    listing_data_after_filter = pipeline.Pipeline(recommend_utils.ListIterator(listing_data),
+                                    [pipes.BookmarkListingDictPostSecurityMarkingCheckPipe(request_profile.user.username)]).to_list()
+
+    return {"folder_data": folder_data,
+            "listing_data_after_filter": listing_data_after_filter}
+
+
+def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_parent=None, ordering_fields=None, serializer_class=None):
+    """
+    Helper Function to get all nested bookmark
+
+    Args:
+        request_profile
+        request
+        folder_bookmark_entry
+        is_parent
+    """
+    folder_bookmark_entry = folder_bookmark_entry if folder_bookmark_entry else create_get_user_root_bookmark_folder(request_profile)
+    is_parent = is_parent if is_parent is not None else False
+
+    bookmarks_dict = _create_folder_listing_queries_and_serialized(
+        request_profile, request, folder_bookmark_entry, is_parent, ordering_fields=ordering_fields, serializer_class=serializer_class)
+
+    return {
+        "folders": _get_nested_bookmarks_tree(request_profile, bookmarks_dict['folder_data'], request=request, ordering_fields=ordering_fields, serializer_class=serializer_class),
+        # "folders": bookmarks_dict['folder_data'],
+        "listings": bookmarks_dict['listing_data_after_filter']
+    }
+
+
+def _get_nested_bookmarks_tree(request_profile, data, serialized=False, request=None, ordering_fields=None, serializer_class=None):
+    """
+    Recursive function to get all the nested folder and listings
+    """
+    output = []
+    for current_record in data:
+        if current_record.get('type') == 'FOLDER':
+            bookmarks_dict = _create_folder_listing_queries_and_serialized(
+                request_profile, request, current_record['id'], ordering_fields=ordering_fields, serializer_class=serializer_class)
+
+            current_record['children'] = {
+                "folders": _get_nested_bookmarks_tree(request_profile, bookmarks_dict['folder_data'], request=request, ordering_fields=ordering_fields, serializer_class=serializer_class),
+                "listings": bookmarks_dict['listing_data_after_filter']
+            }
+
+        output.append(current_record)
+    return output
