@@ -72,6 +72,7 @@ from django.conf import settings
 from django.db import transaction
 from django.core.management import call_command
 
+from ozpcenter.utils import str_to_bool
 from ozpcenter import models
 from ozpcenter.api.notification import model_access as notification_model_access
 from ozpcenter.recommend.recommend import RecommenderDirectory
@@ -85,12 +86,25 @@ TEST_IMG_PATH = os.path.join(TEST_BASE_PATH, 'test_images') + '/'
 TEST_DATA_PATH = os.path.join(TEST_BASE_PATH, 'test_data')
 DEMO_APP_ROOT = settings.OZP['DEMO_APP_ROOT']
 
-FAST_MODE = bool(os.getenv('FAST_MODE', False))
+FAST_MODE = str_to_bool(os.getenv('FAST_MODE', False))
 
 ES_ENABLED = settings.ES_ENABLED
 
 # Create AML 3.0 Bookmarks
-AML_BOOKMARK_FLAG = True
+AML_BOOKMARK_FLAG = str_to_bool(os.getenv('AML_BOOKMARK_FLAG', True))
+
+
+def print_settings():
+    print('Local Settings')
+    print('-' * 10)
+    print('TEST_BASE_PATH: {}'.format(TEST_BASE_PATH))
+    print('TEST_IMG_PATH: {}'.format(TEST_IMG_PATH))
+    print('TEST_DATA_PATH: {}'.format(TEST_BASE_PATH))
+    print('DEMO_APP_ROOT: {}'.format(DEMO_APP_ROOT))
+
+    print('FAST_MODE: {}'.format(FAST_MODE))
+    print('ES_ENABLED: {}'.format(ES_ENABLED))
+    print('AML_BOOKMARK_FLAG: {}'.format(AML_BOOKMARK_FLAG))
 
 
 def time_ms():
@@ -182,7 +196,7 @@ def create_library_entries(library_entries, object_cache):
     """
     # Creating 2.0 bookmarks
     for current_entry in library_entries:
-        print(current_entry)
+        # print(current_entry)
         current_profile = object_cache['Profile.{}'.format(current_entry['owner'])]
         current_listing = current_entry['listing_obj']
         library_entry = models.ApplicationLibraryEntry(
@@ -254,7 +268,7 @@ def create_bookmark_entries(library_entries, object_cache):
         # print('-- END Detected Folder in entry -- ')
         # print('')
         bookmark_entry = bookmark_model_access.create_listing_bookmark_for_profile(current_profile, current_listing, current_entry_root_folder)
-        print('CREATED {}'.format(bookmark_entry))
+        # print('CREATED {}'.format(bookmark_entry))
         # print('---------END----------')
         # print('')
 
@@ -492,6 +506,8 @@ def run():
     """
     Creates basic sample data
     """
+    print_settings()
+
     total_start_time = time_ms()
 
     db_connection = transaction.get_connection()

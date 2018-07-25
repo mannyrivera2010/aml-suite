@@ -64,7 +64,7 @@ LISTING_QUERY_ORDER_MAPPING['title'] = 'listing__title'
 LISTING_QUERY_ORDER_MAPPING['-title'] = '-listing__title'
 
 
-def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
+def check_permission_for_bookmark_entry(request_profile, bookmark_entry, allow_owner=True, allow_viewer=False):
     """
     Check Permission for bookmark entry
 
@@ -91,10 +91,11 @@ def check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry):
     if not profile_bookmark_permission:
         raise errors.PermissionDenied('request profile does not have permission to view permissions')
     elif profile_bookmark_permission.user_type == models.BookmarkPermission.VIEWER:
-        raise errors.PermissionDenied('request profile does not have permission to view permissions because of user_type')
+        if allow_viewer is False:
+            raise errors.PermissionDenied('request profile does not have permission to view permissions because of user_type')
     elif profile_bookmark_permission.user_type == models.BookmarkPermission.OWNER:
-        pass
-        # Owners are allowed to do view/edit/delete
+        if allow_owner is False:
+            raise errors.PermissionDenied('request profile does not have permission to view permissions because of user_type')
     else:
         raise errors.PermissionDenied('request profile does not have permission')
 
@@ -184,7 +185,7 @@ def get_user_permissions_for_bookmark_entry(request_profile, bookmark_entry):
 
     Access Control handle by get_bookmark_entry_by_id
     """
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry)
 
     if bookmark_entry.type != FOLDER_TYPE:
         raise errors.PermissionDenied('Can only check permissions for folder bookmarks')
@@ -222,7 +223,7 @@ def add_profile_permission_for_bookmark_entry(request_profile, bookmark_entry_fo
 
     Defaults the target_user_type to BookmarkPermission.VIEWER
     """
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share)
     target_user_type = target_user_type if target_user_type else models.BookmarkPermission.VIEWER
 
     # Add Bookmark entry to bookmark_entry_folder_to_share folder, add behaves like a set
@@ -267,7 +268,7 @@ def share_bookmark_entry(request_profile, bookmark_entry_folder_to_share, target
 
     Defaults the target_user_type to BookmarkPermission.VIEWER
     """
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry_folder_to_share)
     target_user_type = target_user_type if target_user_type else models.BookmarkPermission.VIEWER
 
     if bookmark_entry_folder_to_share.type != FOLDER_TYPE:
@@ -321,7 +322,7 @@ def remove_profile_permission_for_bookmark_entry(request_profile, target_profile
     """
     Remove profile from bookmark
     """
-    check_owner_permissions_for_bookmark_entry(request_profile, target_bookmark)
+    check_permission_for_bookmark_entry(request_profile, target_bookmark)
 
     profile_bookmark_permission = models.BookmarkPermission.objects.filter(profile=target_profile, bookmark=target_bookmark).first()
 
@@ -377,7 +378,7 @@ def create_folder_bookmark_for_profile(request_profile, folder_name, bookmark_en
         raise errors.PermissionDenied('bookmark_entry needs to be a folder type')
 
     # Only owners of bookmark_entry_folder should be able to add to folder
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry_folder)
 
     bookmark_folder_entry = create_bookmark_entry(request_profile, FOLDER_TYPE, folder_title=folder_name, is_root=False)
 
@@ -414,7 +415,7 @@ def create_listing_bookmark_for_profile(request_profile, listing, bookmark_entry
         raise errors.PermissionDenied('bookmark_entry needs to be a folder type')
 
     # Only owners of bookmark_entry_folder should be able to add to folder
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_folder)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry_folder)
 
     bookmark_entry = create_bookmark_entry(request_profile, LISTING_TYPE, listing=listing)
 
@@ -449,7 +450,7 @@ def update_bookmark_entry_for_profile(request_profile, bookmark_entry_instance, 
         raise errors.PermissionDenied('Need at least the bookmark_parent or title field')
     # Check to see if request profile has access to bookmark_entry_instance
     # (bookmark_entry_instance can be folder or listing bookmark)
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_instance)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry_instance)
 
     folder_title_changed = False
     bookmark_entry_moved = False
@@ -458,7 +459,7 @@ def update_bookmark_entry_for_profile(request_profile, bookmark_entry_instance, 
         if bookmark_parent_object.type != FOLDER_TYPE:
             raise errors.PermissionDenied('bookmark_parent_object needs to be a folder type')
         # make sure user has owner access on bookmark_parent_object
-        check_owner_permissions_for_bookmark_entry(request_profile, bookmark_parent_object)
+        check_permission_for_bookmark_entry(request_profile, bookmark_parent_object)
 
         # get bookmark entries to folder relationships for request_profile
         bookmark_entry_folder_relationships = bookmark_entry_instance.bookmark_parent.filter(
@@ -560,6 +561,8 @@ def copy_tree_recursive(request_profile, copy_tree_dict, bookmark_folder_instanc
             BookmarkEntry(84, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(white_horse-['bigbrother'])),
             BookmarkEntry(85, bookmark_parent:['Animals'],title:,type:LISTING,is_root:False,listing:(wolf_finder-['bigbrother']))]}
     """
+    bookmark_folder_instance = bookmark_folder_instance if bookmark_folder_instance else create_get_user_root_bookmark_folder(request_profile)
+
     output = {
         'bookmark_folder_instance': None,
         'bookmark_listing_instance': None,
@@ -607,7 +610,7 @@ def duplicate_bookmark_entry_for_profile(request_profile, bookmark_entry_to_copy
     """
     Duplicate Bookmark Entry for profile
     """
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_to_copy)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry_to_copy, allow_viewer=True)
     copy_tree_dict = build_copy_tree_recursive(request_profile, bookmark_entry_to_copy)
 
     dest_bookmark_folder = dest_bookmark_folder if dest_bookmark_folder else create_get_user_root_bookmark_folder(request_profile)
@@ -693,7 +696,7 @@ def delete_bookmark_entry_for_profile(request_profile, bookmark_entry_instance):
           'ozpcenter.BookmarkEntry_bookmark_parent': 3,
           'ozpcenter.BookmarkPermission': 1})
     """
-    check_owner_permissions_for_bookmark_entry(request_profile, bookmark_entry_instance)
+    check_permission_for_bookmark_entry(request_profile, bookmark_entry_instance)
 
     if bookmark_entry_instance.type == FOLDER_TYPE:
         # root_folder = create_get_user_root_bookmark_folder(request_profile)
