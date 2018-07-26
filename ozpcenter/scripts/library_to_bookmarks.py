@@ -18,14 +18,17 @@ from ozpcenter.api.bookmark.model_access import copy_tree_recursive, get_bookmar
 import ozpcenter.api.bookmark.serializers as serializers
 
 
-def _parse_legacy_bookmark_query(application_library_entry_query):
+def _parse_legacy_bookmark_query(application_library_entry_query, current_bookmarks_paths=None):
     """
     parse library endpoint bookmarks
 
     Args:
         application_library_entry_query: ApplicationLibraryEntry Query
+        previous_path_data: ['/',
+                            '/heros/',
+                            '/heros/Iron Man'...]
     Returns:
-        {'bookmark_folder': 'Hello',
+        {'bookmark_folder': None,
          'bookmark_listing': None,
          'folders': [],
          'listings': [{'bookmark_listing': (killer_whale-['bigbrother'])},
@@ -35,9 +38,11 @@ def _parse_legacy_bookmark_query(application_library_entry_query):
                       {'bookmark_listing': (white_horse-['bigbrother'])},
                       {'bookmark_listing': (wolf_finder-['bigbrother'])}]}
     """
+    current_bookmarks_paths = current_bookmarks_paths if current_bookmarks_paths else []
     output = {
         'bookmark_folder_name': None,
         'bookmark_listing': None,
+        'path': '/',
         'folders': [],
         'listings': []
     }
@@ -50,16 +55,40 @@ def _parse_legacy_bookmark_query(application_library_entry_query):
         listing = application_library_entry.listing
 
         if folder_name:
-            if folder_name in folder_mapping:
-                folder_mapping[folder_name]['listings'].append({'bookmark_listing': listing})
+            folder_listing_path = '/{}/{}'.format(folder_name, listing.title)
+            folder_path = '/{}/'.format(folder_name)
 
+            if folder_path in current_bookmarks_paths:
+                print('skip folder bookmark: {}'.format(folder_path))
+                continue
+
+            if folder_listing_path in current_bookmarks_paths:
+                print('skip listing bookmark: {}'.format(folder_listing_path))
+                continue
+
+            if folder_name in folder_mapping:
+                folder_mapping[folder_name]['listings'].append({
+                    'bookmark_listing': listing,
+                    'path': folder_listing_path})
             else:
                 folder_mapping[folder_name] = copy.deepcopy(output_template)
                 folder_mapping[folder_name]['bookmark_folder_name'] = folder_name
-                folder_mapping[folder_name]['listings'].append({'bookmark_listing': listing})
+                folder_mapping[folder_name]['path'] = folder_path
+
+                folder_mapping[folder_name]['listings'].append({
+                    'bookmark_listing': listing,
+                    'path': folder_listing_path})
                 output['folders'].append(folder_mapping[folder_name])
         else:
-            output['listings'].append({'bookmark_listing': listing})
+            folder_listing_path = '/{}'.format(listing.title)
+
+            if folder_listing_path in current_bookmarks_paths:
+                print('skip listing bookmark: {}'.format(folder_listing_path))
+                continue
+
+            output['listings'].append({
+                'bookmark_listing': listing,
+                'path': folder_listing_path})
 
     return output
 
@@ -75,23 +104,31 @@ def run():
     """
     Convert ApplicationLibraryEntry (2.0) to BookmarkEntry (3.0)
     """
-    # DELETE_BOOKMARKS = False
-    # if DELETE_BOOKMARKS:
-    #     print('Deleting BookmarkEntry records')
-    #     print(models.BookmarkEntry.objects.all().delete())
+    DELETE_BOOKMARKS = False
+
     for current_profile in models.Profile.objects.iterator():
-        print('Processing Username: {}'.format(current_profile.user.username))
+        print('--Processing Username: {}'.format(current_profile.user.username))
+        mocked_request = MockRequest(current_profile)
+
+        if DELETE_BOOKMARKS:
+            print('Deleting BookmarkEntry records for user, WARNING: it might also delete shared folders')
+            print(models.BookmarkEntry.objects.filter(creator_profile=current_profile).delete())
+
         current_profile_library_query = models.ApplicationLibraryEntry.objects.filter(owner=current_profile)
 
-        copy_tree = _parse_legacy_bookmark_query(current_profile_library_query)
+        # Getting Current Bookmarks
+        current_bookmarks = get_bookmark_tree(current_profile, request=mocked_request, serializer_class=serializers.BookmarkSerializer)
+        current_bookmarks_paths = BookmarkFolder.parse_endpoint(current_bookmarks).filesystem_structure_list()
+
+        # Creating Copy Tree
+        copy_tree = _parse_legacy_bookmark_query(current_profile_library_query, current_bookmarks_paths)
         # import pprint; pprint.pprint(copy_tree)
         copy_tree_objects = copy_tree_recursive(current_profile, copy_tree, None)
         # import pprint; pprint.pprint(copy_tree_objects)
 
-        mocked_request = MockRequest(current_profile)
-
+        print('--Bookmarks for Username: {}'.format(current_profile.user.username))
         data = get_bookmark_tree(current_profile, request=mocked_request, serializer_class=serializers.BookmarkSerializer)
-        data = BookmarkFolder.parse_endpoint(data).shorten_data()
+        data = BookmarkFolder.parse_endpoint(data).filesystem_structure_list()
 
         import pprint
         pprint.pprint(data)
