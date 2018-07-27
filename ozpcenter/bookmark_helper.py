@@ -619,11 +619,18 @@ class BookmarkFolder(BookmarkNode):
     def parse_legacy_bookmark(data):
         return _parse_legacy_bookmark(data)
 
+    def filesystem_structure_list(self):
+        """
+        Display file system format
+        """
+        directory_tuples = _build_filesystem_structure(self)
+        output_list = [record[0] for record in directory_tuples]
+        return output_list
+
     def __repr__(self):
         bookmark_objects = self.bookmark_objects
         id = self.id
         title = self.title
-
         return '{}({}, {}, {}, {})'.format(self.prefix, id, title, self.parent.title if self.parent else 'None', len(bookmark_objects))
 
 
