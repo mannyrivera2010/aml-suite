@@ -62,15 +62,15 @@ class ElasticsearchBaseRecommenderTest(APITestCase):
 
         expected_result = [
             '(_score:(Elasticsearch Content Filtering:(raw_score:8.762,weight:0.9),_sort_score:7.886),title:Wolverine)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.315,weight:0.9),_sort_score:7.483),title:Beast)',
+            '(_score:(Elasticsearch Content Filtering:(raw_score:8.316,weight:0.9),_sort_score:7.484),title:Beast)',
             '(_score:(Elasticsearch Content Filtering:(raw_score:8.268,weight:0.9),_sort_score:7.441),title:Magneto)',
             '(_score:(Elasticsearch Content Filtering:(raw_score:8.213,weight:0.9),_sort_score:7.392),title:Jupiter)',
             '(_score:(Elasticsearch Content Filtering:(raw_score:8.112,weight:0.9),_sort_score:7.301),title:Pokemon Ruby and Sapphire)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.096,weight:0.9),_sort_score:7.286),title:Cyclops)',
+            '(_score:(Elasticsearch Content Filtering:(raw_score:8.097,weight:0.9),_sort_score:7.287),title:Cyclops)',
             '(_score:(Elasticsearch Content Filtering:(raw_score:8.094,weight:0.9),_sort_score:7.285),title:Barsoom)',
             '(_score:(Elasticsearch Content Filtering:(raw_score:8.088,weight:0.9),_sort_score:7.279),title:Blink)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.08,weight:0.9),_sort_score:7.272),title:Clerks)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:7.999,weight:0.9),_sort_score:7.199),title:Rogue)'
+            '(_score:(Elasticsearch Content Filtering:(raw_score:8.082,weight:0.9),_sort_score:7.274),title:Clerks)',
+            '(_score:(Elasticsearch Content Filtering:(raw_score:7.998,weight:0.9),_sort_score:7.198),title:Rogue)'
         ]
 
         # import json; print(json.dumps(title_scores, indent=4))

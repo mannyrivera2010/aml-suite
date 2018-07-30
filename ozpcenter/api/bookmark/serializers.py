@@ -27,13 +27,14 @@ class LibraryListingSerializer(serializers.HyperlinkedModelSerializer):
     large_icon = image_serializers.ImageSerializer(required=False)
     banner_icon = image_serializers.ImageSerializer(required=False)
     owners = listing_serializers.CreateListingProfileSerializer(required=False, allow_null=True, many=True)
+    listing_type = listing_serializers.ListingTypeSerializer(required=False, allow_null=True)
 
     class Meta:
         model = models.Listing
         fields = ('id', 'title', 'unique_name', 'launch_url', 'small_icon',
-            'large_icon', 'banner_icon', 'owners', 'security_marking', 'is_enabled')
+            'large_icon', 'banner_icon', 'owners', 'security_marking', 'is_enabled', 'listing_type')
         read_only_fields = ('title', 'unique_name', 'launch_url', 'small_icon',
-            'large_icon', 'banner_icon', 'owners', 'security_marking', 'is_enabled')
+            'large_icon', 'banner_icon', 'owners', 'security_marking', 'is_enabled', 'listing_type')
         # Any AutoFields on your model (which is what the automatically
         # generated id key is) are set to read-only by default when Django
         # REST Framework is creating fields in the background. read-only fields

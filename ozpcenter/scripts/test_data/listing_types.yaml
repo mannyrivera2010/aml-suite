@@ -9,3 +9,5 @@ listing_types:
   title: Web Services
 - description: widget things
   title: Widget
+- description: external apis
+  title: API

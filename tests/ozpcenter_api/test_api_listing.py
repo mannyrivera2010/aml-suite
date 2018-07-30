@@ -768,17 +768,17 @@ class ListingApiTest(APITestCase):
         last_item = data[-1]
 
         expected_item = {"counts": {
-            "APPROVED": 176,
+            "APPROVED": 177,
             "APPROVED_ORG": 1,
             "DELETED": 0,
             "IN_PROGRESS": 0,
             "PENDING": 10,
             "PENDING_DELETION": 0,
-            "enabled": 183,
+            "enabled": 184,
             "REJECTED": 0,
             "organizations": {
               "1": 44,
-              "2": 42,
+              "2": 43,
               "3": 49,
               "4": 37,
               "5": 5,
@@ -787,7 +787,7 @@ class ListingApiTest(APITestCase):
               "8": 3,
               "9": 2
             },
-            "total": 187
+            "total": 188
           }
         }
         self.assertEqual(last_item, expected_item)

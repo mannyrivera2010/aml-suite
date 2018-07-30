@@ -27,7 +27,7 @@ class GraphTest(TestCase):
 
     def test_load_db_into_graph(self):
         graph = GraphFactory.load_db_into_graph()
-        self.assertEqual(str(graph), 'Graph(vertices: 222, edges: 533)')
+        self.assertEqual(str(graph), 'Graph(vertices: 223, edges: 536)')
 
         bigbrother_dict = graph.query().v('p-1').to_dict().next()
         expected_dict = {'highest_role': 'APPS_MALL_STEWARD', 'username': 'bigbrother'}
