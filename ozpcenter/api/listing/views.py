@@ -377,7 +377,7 @@ class ListingActivitiesViewSet(viewsets.ModelViewSet):
     Response:
         200 - Successful operation - ListingActivitySerializer
     """
-    permission_classes = (permissions.IsOrgSteward,)
+    permission_classes = (permissions.IsUser,)
     serializer_class = serializers.ListingActivitySerializer
 
     def get_queryset(self):

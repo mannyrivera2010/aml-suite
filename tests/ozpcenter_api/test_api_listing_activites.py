@@ -132,7 +132,9 @@ class ListingActivitiesApiTest(APITestCase):
         expected_titles = ['Air Mail', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard']
 
         # Ensure that Standard Users can not access /api/listing/activity
-        APITestHelper.request(self, url, 'GET', username='jones', status_code=403)
+        # APITestHelper.request(self, url, 'GET', username='jones', status_code=403)
+        # (July 30 2018) AMLOS-712 Filter listing updates per user
+        APITestHelper.request(self, url, 'GET', username='jones', status_code=200)
 
         # Ensure that ORG_STEWARDS can access endpoint
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
