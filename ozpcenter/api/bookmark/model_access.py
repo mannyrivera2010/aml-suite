@@ -712,7 +712,7 @@ def delete_bookmark_entry_for_profile(request_profile, bookmark_entry_instance):
         bookmark_entry_instance.delete()
 
 
-def _create_folder_listing_queries_and_serialized(request_profile, request, folder_bookmark_entry, is_parent=None, ordering_fields=None, serializer_class=None):
+def _create_folder_listing_queries_and_serialized(request_profile, folder_bookmark_entry, is_parent=None, ordering_fields=None, serializer_class=None, request=None):
     """
     Create queries to get folder and listing data
 
@@ -770,7 +770,7 @@ def _create_folder_listing_queries_and_serialized(request_profile, request, fold
             "listing_data_after_filter": listing_data_after_filter}
 
 
-def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_parent=None, ordering_fields=None, serializer_class=None):
+def get_bookmark_tree(request_profile, folder_bookmark_entry=None, is_parent=None, serializer_class=None, request=None, ordering_fields=None, is_shared=None):
     """
     Helper Function to get all nested bookmark
 
@@ -784,29 +784,76 @@ def get_bookmark_tree(request_profile, request, folder_bookmark_entry=None, is_p
     is_parent = is_parent if is_parent is not None else False
 
     bookmarks_dict = _create_folder_listing_queries_and_serialized(
-        request_profile, request, folder_bookmark_entry, is_parent, ordering_fields=ordering_fields, serializer_class=serializer_class)
+        request_profile,
+        folder_bookmark_entry,
+        is_parent,
+        serializer_class=serializer_class,
+        request=request,
+        ordering_fields=ordering_fields,
+    )
+
+    nested_folder_tree = _get_nested_bookmarks_tree(
+        request_profile,
+        bookmarks_dict['folder_data'],
+        serializer_class=serializer_class,
+        request=request,
+        ordering_fields=ordering_fields,
+        is_shared=is_shared
+    )
 
     return {
-        "folders": _get_nested_bookmarks_tree(request_profile, bookmarks_dict['folder_data'], request=request, ordering_fields=ordering_fields, serializer_class=serializer_class),
+        "folders": nested_folder_tree,
         # "folders": bookmarks_dict['folder_data'],
-        "listings": bookmarks_dict['listing_data_after_filter']
+        "listings": bookmarks_dict['listing_data_after_filter'] if (is_shared is False or is_shared is None) else []
     }
 
 
-def _get_nested_bookmarks_tree(request_profile, data, serialized=False, request=None, ordering_fields=None, serializer_class=None):
+def _get_nested_bookmarks_tree(request_profile, data, serializer_class=None, request=None, ordering_fields=None, is_shared=None):
     """
     Recursive function to get all the nested folder and listings
+
+    Args:
+        data: a list of serialized data in python objects using serializer_class
     """
     output = []
     for current_record in data:
+        append_record = False
+
         if current_record.get('type') == 'FOLDER':
-            bookmarks_dict = _create_folder_listing_queries_and_serialized(
-                request_profile, request, current_record['id'], ordering_fields=ordering_fields, serializer_class=serializer_class)
+            current_record_is_shared = current_record.get('is_shared')
 
-            current_record['children'] = {
-                "folders": _get_nested_bookmarks_tree(request_profile, bookmarks_dict['folder_data'], request=request, ordering_fields=ordering_fields, serializer_class=serializer_class),
-                "listings": bookmarks_dict['listing_data_after_filter']
-            }
+            if is_shared is current_record_is_shared and is_shared is True:
+                append_record = True
+            elif is_shared is current_record_is_shared and is_shared is False:
+                append_record = True
+            elif is_shared is None:
+                append_record = True
 
-        output.append(current_record)
+            if append_record is True:
+                bookmarks_dict = _create_folder_listing_queries_and_serialized(
+                    request_profile,
+                    current_record['id'],
+                    serializer_class=serializer_class,
+                    request=request,
+                    ordering_fields=ordering_fields,
+                )
+
+                nested_folder_tree = _get_nested_bookmarks_tree(
+                    request_profile,
+                    bookmarks_dict['folder_data'],
+                    serializer_class=serializer_class,
+                    request=request,
+                    ordering_fields=ordering_fields,
+                    is_shared=is_shared
+                )
+
+                current_record['children'] = {
+                    "folders": nested_folder_tree,
+                    "listings": bookmarks_dict['listing_data_after_filter']
+                }
+        else:
+            append_record = True
+
+        if append_record is True:
+            output.append(current_record)
     return output

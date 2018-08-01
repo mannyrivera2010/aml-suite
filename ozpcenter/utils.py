@@ -30,8 +30,10 @@ def str_to_bool(user_input):
     else:
         if '{}'.format(user_input).lower() in ['1', 'true']:
             return True
-        else:
+        elif '{}'.format(user_input).lower() in ['0', 'false']:
             return False
+        else:
+            return None
 
 
 def interactive_migration():

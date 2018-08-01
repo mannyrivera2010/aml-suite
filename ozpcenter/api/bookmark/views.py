@@ -42,16 +42,55 @@ class BookmarkViewSet(viewsets.ViewSet):
         """
         Get All Bookmarks for request profile
 
+        Acceptance Criteria:
+            The bookmark endpoint allows a user to filter the bookmarks seen by
+            * shared / not-shared bookmark folders
+            * allow sorting by title and created_date
+
         API:
-            Order bookmark by title - `GET /api/bookmark/?order=title`
-            Reverse Order bookmark by title - `GET /api/bookmark/?order=-title`
-            Secondary Sort - `/api/bookmark/?order=-created_date&order=-title`
+            Order bookmark by title
+            ```
+            GET /api/bookmark/?order=title
+            ```
+
+            Reverse Order bookmark by title
+            ```
+            GET /api/bookmark/?order=-title
+            ```
+
+            Secondary Sort
+            ```
+            GET /api/bookmark/?order=-created_date&order=-title
+            ```
+
+            Show Shared Bookmarks
+            ```
+            GET /api/bookmark/?is_shared=true
+            ```
+
+            Show Non-Shared Bookmarks
+            ```
+            GET /api/bookmark/?is_shared=false
+            ```
+
+            Show Shared and Non-Shared Bookmarks
+            ```
+            GET /api/bookmark/?is_shared=none
+            GET /api/bookmark/
+            ```
         """
         current_request_profile = request.user.profile
 
+        is_shared = str_to_bool(request.query_params.get('is_shared', None))
         ordering_fields = [str(record) for record in request.query_params.getlist('order', [])]
 
-        data = model_access.get_bookmark_tree(current_request_profile, request=request, ordering_fields=ordering_fields, serializer_class=serializers.BookmarkSerializer)
+        data = model_access.get_bookmark_tree(
+            current_request_profile,
+            serializer_class=serializers.BookmarkSerializer,
+            request=request,
+            ordering_fields=ordering_fields,
+            is_shared=is_shared
+        )
         # data = BookmarkFolder.parse_endpoint(data).shorten_data()
         return Response(data)
 
@@ -64,8 +103,14 @@ class BookmarkViewSet(viewsets.ViewSet):
         ordering_fields = [str(record) for record in request.query_params.getlist('order', [])]
 
         entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
-        data = model_access.get_bookmark_tree(current_request_profile, request=request,
-            folder_bookmark_entry=entry, is_parent=True, ordering_fields=ordering_fields, serializer_class=serializers.BookmarkSerializer)
+        data = model_access.get_bookmark_tree(
+            current_request_profile,
+            request=request,
+            folder_bookmark_entry=entry,
+            is_parent=True,
+            ordering_fields=ordering_fields,
+            serializer_class=serializers.BookmarkSerializer
+        )
         return Response(data)
 
     def create(self, request):
@@ -159,12 +204,14 @@ class BookmarkViewSet(viewsets.ViewSet):
             bookmark_entry_to_copy
         )
 
-        data = model_access.get_bookmark_tree(current_request_profile,
+        data = model_access.get_bookmark_tree(
+            current_request_profile,
             request=request,
             folder_bookmark_entry=bookmark_entry,
             is_parent=True,
             ordering_fields=ordering_fields,
-            serializer_class=serializers.BookmarkSerializer)
+            serializer_class=serializers.BookmarkSerializer
+        )
 
         return Response(data)
 

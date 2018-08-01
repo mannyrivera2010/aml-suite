@@ -13,8 +13,12 @@ from tests.ozpcenter.helper import ExceptionUnitTestHelper
 from ozpcenter.scripts import sample_data_generator as data_gen
 
 
-def _compare_bookmarks(test_case_instance, expected_library_object):
+def _compare_bookmarks(test_case_instance, expected_library_object, params_tuples=None):
+    """
+    Compare Bookmarks Helper
+    """
     usernames = [bookmark.title for bookmark in expected_library_object.bookmark_objects]
+    params_tuples = params_tuples if params_tuples else []
 
     root_folder = BookmarkFolder(None)
 
@@ -22,6 +26,11 @@ def _compare_bookmarks(test_case_instance, expected_library_object):
         user_folder_bookmark = root_folder.add_folder_bookmark(username)
 
         url = '/api/bookmark/'
+
+        if params_tuples:
+            params_string = '&'.join(['{}={}'.format(current_tuple[0], current_tuple[1]) for current_tuple in params_tuples])
+            url = '{}?{}'.format(url, params_string)
+
         response = APITestHelper.request(test_case_instance, url, 'GET', username=username, status_code=200)
         actual_library = BookmarkFolder.parse_endpoint(response.data)
         user_folder_bookmark.add_bookmark_object(actual_library)
@@ -176,6 +185,59 @@ class BookmarkApiTest(APITestCase):
         Check bookmarks for all users under library_object
         """
         _compare_bookmarks(self, self.library_object)
+
+    def test_bookmark_list_all_users_filter_shared_none(self):
+        """
+        Check bookmarks for all users under library_object filter for shared and non shared
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+        new_library_object = _compare_bookmarks(self, new_library_object, [('is_shared', 'none')])
+
+    def test_bookmark_list_all_users_filter_shared_false(self):
+        """
+        Check bookmarks for all users under library_object filter for non shared
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        new_library_object.search('/bigbrother2/InstrumentSharing/').hidden(True)
+        new_library_object.search('/julia/InstrumentSharing/').hidden(True)
+        new_library_object.search('/johnson/InstrumentSharing/').hidden(True)
+
+        new_library_object = _compare_bookmarks(self, new_library_object, [('is_shared', 'false')])
+
+    def test_bookmark_list_all_users_filter_shared_true(self):
+        """
+        Check bookmarks for all users under library_object filter for non shared
+        """
+        new_library_object = _compare_bookmarks(self, self.library_object)
+
+        new_library_object.search('/bigbrother/Animals/').hidden(True)
+        new_library_object.search('/bigbrother/Instruments/').hidden(True)
+        new_library_object.search('/bigbrother/Weather/').hidden(True)
+        new_library_object.search('/bigbrother/Bread Basket').hidden(True)
+        new_library_object.search('/bigbrother/Chain boat navigation').hidden(True)
+        new_library_object.search('/bigbrother/Chart Course').hidden(True)
+        new_library_object.search('/bigbrother/Gallery of Maps').hidden(True)
+        new_library_object.search('/bigbrother/Informational Book').hidden(True)
+        new_library_object.search('/bigbrother/Stop sign').hidden(True)
+
+        new_library_object.search('/bigbrother2/InstrumentSharing/').hidden(False)
+        new_library_object.search('/bigbrother2/Alingano Maisu').hidden(True)
+
+        new_library_object.search('/julia/InstrumentSharing/').hidden(False)
+        new_library_object.search('/julia/Astrology software').hidden(True)
+
+        new_library_object.search('/johnson/InstrumentSharing/').hidden(False)
+        new_library_object.search('/johnson/Applied Ethics Inc.').hidden(True)
+
+        new_library_object.search('/wsmith/heros/').hidden(True)
+        new_library_object.search('/wsmith/old/').hidden(True)
+        new_library_object.search('/wsmith/planets/').hidden(True)
+        new_library_object.search('/wsmith/Baltimore Ravens').hidden(True)
+        new_library_object.search('/wsmith/Diamond').hidden(True)
+        new_library_object.search('/wsmith/Grandfather clock').hidden(True)
+
+        new_library_object = _compare_bookmarks(self, new_library_object, [('is_shared', 'true')])
 
     def test_get_bookmark_list_admin_disable_listing(self):
         """
