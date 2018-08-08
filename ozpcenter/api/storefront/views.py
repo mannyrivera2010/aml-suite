@@ -75,8 +75,11 @@ class StorefrontViewSet(viewsets.ViewSet):
         serializer: ozpcenter.api.storefront.serializers.StorefrontSerializer
         """
         debug_recommendations = str_to_bool(request.query_params.get('debug_recommendations', False))
+        ordering = request.query_params.get('ordering', None)
+        if ordering:
+            ordering = [s.strip() for s in ordering.split(',')]
 
-        data, extra_data = model_access.get_storefront(request, True)
+        data, extra_data = model_access.get_storefront(request, True, ordering=ordering)
         serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data
@@ -86,8 +89,11 @@ class StorefrontViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         debug_recommendations = str_to_bool(request.query_params.get('debug_recommendations', False))
+        ordering = request.query_params.get('ordering', None)
+        if ordering:
+            ordering = [s.strip() for s in ordering.split(',')]
 
-        data, extra_data = model_access.get_storefront(request, True, pk)
+        data, extra_data = model_access.get_storefront(request, True, pk, ordering=ordering)
         serializer = serializers.StorefrontSerializer(data, context={'request': request})
 
         serialized_data = serializer.data

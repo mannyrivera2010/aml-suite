@@ -28,6 +28,7 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'title',
                   'agency',
                   'avg_rate',
+                  'total_votes',
                   'total_reviews',
                   'feedback_score',
                   'is_private',
@@ -43,7 +44,9 @@ class StorefrontListingSerializer(serializers.HyperlinkedModelSerializer):
                   'owners',
                   'unique_name',
                   'is_enabled',
-                  'listing_type')
+                  'listing_type',
+                  'edited_date',
+                  'approved_date')
 
     def _is_bookmarked(self, request_user, request_listing):
         # TODO: put in listing model_access.py call from there > creative name for method
