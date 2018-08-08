@@ -3,6 +3,7 @@ Elasticsearch Utils
 --------------------------
 Contains Elasticsearch common functions
 
+=====
 Code was developed to work with Elasticsearch 2.4.*
 
 Reference
@@ -15,6 +16,18 @@ Reference
         https://www.elastic.co/guide/en/elasticsearch/reference/2.4/analyzer.html
     completion
         https://qbox.io/blog/quick-and-dirty-autocomplete-with-elasticsearch-completion-suggest
+=====
+Code was developed to work with Elasticsearch 6.3.x
+
+Mapping
+    https://www.elastic.co/guide/en/elasticsearch/reference/6.3/mapping.html#mapping-limit-settings
+Analyzer:
+    https://www.elastic.co/guide/en/elasticsearch/reference/6.3/search-analyzer.html
+
+Field Types:
+    Keyword - A field to index structured content such as email addresses, hostnames, status codes, zip codes or tags.
+    They are typically used for filtering (Find me all blog posts where status is published), for sorting, and for aggregations. Keyword fields are only searchable by their exact value.
+    Text - If you need to index full text content such as email bodies or product descriptions, it is likely that you should rather use a text field.
 """
 import json
 import logging
@@ -112,6 +125,439 @@ class ElasticsearchFactory(object):
 elasticsearch_factory = ElasticsearchFactory()
 
 
+def get_listing_mapping():
+    """
+    Creates ElasticSearch Mapping for Listing(models.Model)
+
+    Fields:
+        Full Text
+            title (text)
+            description (text)
+            description_short (text)
+            tags (text)
+
+        Filtering
+            tags:
+            categories:
+            agencies:
+            listing_types:
+            is_508_compliant (boolean)
+
+        Default Filtering
+            is_deleted (boolean): 0
+            is_enabled (boolean): 1
+            approval_status (String): "APPROVED"
+
+    Returns:
+        Python Dictionary with ElasticSearch Mapping
+    """
+    return {
+      # dynamic option is strict to prevent any unknown field from automatically being index
+      "dynamic": "strict",
+      "properties": {
+        # Title is used for searching
+        # Title.keyword_lowercase is used for ordering
+        "title": {
+          "type": "text",
+          "analyzer": "autocomplete",
+          "search_analyzer": "autocomplete",
+          "fields": {
+              "keyword_lowercase": {
+                  "type": "text",
+                  "analyzer": "keyword_lowercase_analyzer"
+                }
+            }
+        },
+        # description is used for searching
+        "description": {
+          "type": "text",
+          "analyzer": "autocomplete",
+          "search_analyzer": "autocomplete"
+        },
+        # description_short is used for searching
+        "description_short": {
+          "type": "text",
+          "analyzer": "autocomplete",
+          "search_analyzer": "autocomplete"
+        },
+        # = Filtering fields =
+        # categories is used for Filtering
+        "categories": {
+          "type": "nested",
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "id": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "text",
+              "analyzer": "keyword_lowercase_analyzer"
+            }
+          }
+        },
+        # agency_short_name is used for filtering (include/exclude)
+        "agency_short_name": {
+          "type": "text",
+          "analyzer": "keyword_lowercase_analyzer"
+        },
+        # approval_status is used for filtering
+        "approval_status": {
+          "type": "text",
+          "analyzer": "keyword_lowercase_analyzer"
+        },
+        # is_deleted is used for filtering
+        "is_deleted": {
+          "type": "boolean"
+        },
+        # is_enabled is used for filtering
+        "is_enabled": {
+          "type": "boolean"
+        },
+        # is_private is used for filtering, used to filter out private apps for different organizations
+        "is_private": {
+          "type": "boolean"
+        },
+        # is_508_compliant is used for filtering
+        "is_508_compliant": {
+          "type": "boolean"
+        },
+        # listing_type_title is used for filtering , ex: ['Web Application', 'Web Services', 'Widget'..]
+        "listing_type_title": {
+          "type": "text",
+          "analyzer": "keyword_lowercase_analyzer"
+        },
+        # tags used for searching
+        # tags[].name used for searching
+        # tags[].name_string used for filtering
+        "tags": {
+          "type": "nested",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "text",
+              "analyzer": "autocomplete",
+              "search_analyzer": "autocomplete"
+            },
+            "name_string": {
+              "type": "text",
+              "analyzer": "keyword_lowercase_analyzer"
+            }
+          }
+        },
+        # is_featured could be used for filtering
+        "is_featured": {
+          "type": "boolean"
+        },
+        # = metadata fields =
+        # Index Option - Should the field be searchable? False
+        # id is metadata (displaying)
+        "id": {
+          "type": "integer",
+          # "index": False
+        },
+        # unique_name used for metadata (displaying)
+        "unique_name": {
+          "type": "text",
+          "index": False
+        },
+        # owners used for metadata (displaying)
+        "owners": {
+          "properties": {
+            "display_name": {
+              "type": "text",
+              "index": False
+            },
+            "id": {
+              "type": "integer",
+              "index": False
+            },
+            "user": {
+              "properties": {
+                "username": {
+                  "type": "text",
+                  "index": False
+                },
+              }
+            }
+          },
+        },
+        # approved_date used for metadata (displaying)
+        "approved_date": {
+          "type": "date",
+        },
+        # agency_id is metadata (displaying)
+        "agency_id": {
+          "type": "integer"
+        },
+        # agency_title is metadata (displaying)
+        "agency_title": {
+          "type": "keyword",
+        },
+        # security_marking used to enforce security check for listing before showing to user
+        "security_marking": {
+          "type": "keyword",
+        },
+        # listing_type_id is metadata
+        "listing_type_id": {
+          "type": "integer"
+        },
+        # listing_type_description is metadata
+        "listing_type_description": {
+          "type": "text"
+        },
+        # launch_url is metadata
+        "launch_url": {
+          "type": "text",
+          "index": False
+        },
+        # metadata
+        "banner_icon": {
+          "properties": {
+            "file_extension": {
+              "type": "text",
+              "index": False
+            },
+            "id": {
+              "type": "integer",
+              "index": False
+            },
+            "security_marking": {
+              "type": "text",
+              "index": False
+            }
+          }
+        },
+        # metadata
+        "large_banner_icon": {
+          "properties": {
+            "file_extension": {
+              "type": "text",
+              "index": False
+            },
+            "id": {
+              "type": "integer",
+              "index": False
+            },
+            "security_marking": {
+              "type": "text",
+              "index": False
+            }
+          }
+        },
+        # large_icon is used for metadata
+        "large_icon": {
+          "properties": {
+            "file_extension": {
+              "type": "text",
+              "index": False
+            },
+            "id": {
+              "type": "integer",
+              "index": False
+            },
+            "security_marking": {
+              "type": "text",
+              "index": False
+            }
+          }
+        },
+        # small_icon is used for metadata
+        "small_icon": {
+          "properties": {
+            "file_extension": {
+              "type": "text",
+              "index": False
+            },
+            "id": {
+              "type": "integer",
+              "index": False
+            },
+            "security_marking": {
+              "type": "text",
+              "index": False
+            }
+          }
+        },
+        # used for metadata
+        "total_rate1": {
+          "type": "integer"
+        },
+        # used for metadata
+        "total_rate2": {
+          "type": "integer"
+        },
+        # used for metadata
+        "total_rate3": {
+          "type": "integer"
+        },
+        # used for metadata
+        "total_rate4": {
+          "type": "integer"
+        },
+        # used for metadata
+        "total_rate5": {
+          "type": "integer"
+        },
+        # used for metadata
+        "total_reviews": {
+          "type": "integer"
+        },
+        # used for metadata
+        "total_review_responses": {
+          "type": "integer"
+        },
+        # used for metadata
+        "total_votes": {
+          "type": "integer"
+        },
+        # used for metadata
+        "avg_rate": {
+          "type": "double"
+        },
+        # used for metadata
+        "usage_requirements": {
+          "type": "text",
+          "index": False
+        },
+        # used for metadata
+        "system_requirements": {
+          "type": "text",
+          "index": False
+        }
+      }
+    }
+
+
+def prepare_clean_listing_record(listing_serializer_record):
+    """
+    Clean Record
+    Sample Record (record_json) after clean
+
+    {
+      "id": 316,
+      "title": "JotSpot 28",
+      "description": "Jot things down",
+      "unique_name": "ozp.test.jotspot.28",
+      "description_short": "Jot stuff down",
+      "approval_status": "APPROVED",
+      "is_enabled": true,
+      "is_featured": true,
+      "is_deleted": false,
+      "avg_rate": 4,
+      "total_votes": 1,
+      "total_rate5": 0,
+      "total_rate4": 1,
+      "total_rate3": 0,
+      "total_rate2": 0,
+      "total_rate1": 0,
+      "total_reviews": 1,
+      "security_marking": "UNCLASSIFIED",
+      "is_private": false,
+      "agency": {
+        "id": 1,
+        "title": "Ministry of Truth",
+        "short_name": "Minitrue"
+      },
+      "listing_type": {
+        "id": 1,
+        "title": "web application",
+        "description": "web applications"
+      },
+      "categories": [
+        {
+          "id": 4,
+          "title": "Education",
+          "description": "Educational in nature"
+        },
+        {
+          "id": 14,
+          "title": "Tools",
+          "description": "Tools and Utilities"
+        }
+      ],
+      "tags": [
+        {
+          "id": 1,
+          "name": "demo"
+        }
+      ]
+    }
+
+    Args:
+        record: One record of ReadOnlyListingSerializer
+    """
+    keys_to_remove = ['contacts',
+                      'last_activity',
+                      'required_listings',
+                      'current_rejection',
+                      'what_is_new',
+                      'iframe_compatible',
+                      'edited_date',
+                      'featured_date',
+                      'version_name',
+                      'feedback_score',
+                      'intents']
+
+    # Clean Record
+    for key in keys_to_remove:
+        if key in listing_serializer_record:
+            del listing_serializer_record[key]
+
+    image_keys_to_clean = ['large_icon',
+                           'small_icon',
+                           'banner_icon',
+                           'large_banner_icon']
+
+    # Clean Large_icon
+    for image_key in image_keys_to_clean:
+        if listing_serializer_record.get(image_key):
+            del listing_serializer_record[image_key]['image_type']
+            del listing_serializer_record[image_key]['uuid']
+    del listing_serializer_record['agency']['icon']
+
+    owners = []
+    for owner in listing_serializer_record['owners']:
+        current_owner = {}
+        current_owner['id'] = owner['id']
+        current_owner['display_name'] = owner['display_name']
+        current_owner['user'] = {}
+        current_owner['user']['username'] = owner['user']['username']
+
+        owners.append(current_owner)
+    listing_serializer_record['owners'] = owners
+
+    record_clean_obj = json.loads(json.dumps(listing_serializer_record))
+
+    # title_suggest = {"input": [ record_clean_obj['title'] ] }
+    # record_clean_obj['title_suggest'] =title_suggest
+
+    # Flatten Agency Obj - Makes the search query easier
+    record_clean_obj['agency_id'] = record_clean_obj['agency']['id']
+    record_clean_obj['agency_short_name'] = record_clean_obj['agency']['short_name']
+    record_clean_obj['agency_title'] = record_clean_obj['agency']['title']
+    del record_clean_obj['agency']
+
+    # Flatten listing_type Obj - - Makes the search query easier
+    record_clean_obj['listing_type_id'] = record_clean_obj['listing_type']['id']
+    record_clean_obj['listing_type_description'] = record_clean_obj['listing_type']['description']
+    record_clean_obj['listing_type_title'] = record_clean_obj['listing_type']['title']
+    del record_clean_obj['listing_type']
+
+    tags = []
+
+    for tag_entry in record_clean_obj['tags']:
+        tag_entry['name_string'] = tag_entry['name']
+        tags.append(tag_entry)
+
+    record_clean_obj['tags'] = tags
+
+    return record_clean_obj
+
+
 def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
     """
     This method creates the elasticsearch mapping object
@@ -158,242 +604,7 @@ def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
         }
       },
       "mappings": {
-        "listings": {
-          # dynamic option is strict to prevent any unknown field from automatically being index
-          "dynamic": "strict",
-          "properties": {
-            # id, unique_name  is metadata
-            "id": {
-              "type": "long"
-            },
-            "unique_name": {
-              "type": "string"
-            },
-            # Title is used for searching
-            # Title.keyword_lowercase is used for ordering
-            "title": {
-              "type": "string",
-              "analyzer": "autocomplete",
-              "search_analyzer": "autocomplete",
-              "fields": {
-                  "keyword_lowercase": {
-                      "type": "string",
-                      "analyzer": "keyword_lowercase_analyzer"
-                    }
-                }
-            },
-            # description is used for searching
-            "description": {
-              "type": "string",
-              "analyzer": "autocomplete",
-              "search_analyzer": "autocomplete"
-            },
-            # description_short is used for searching
-            "description_short": {
-              "type": "string",
-              "analyzer": "autocomplete",
-              "search_analyzer": "autocomplete"
-            },
-            "owners": {
-              "properties": {
-                "display_name": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "long"
-                },
-                "user": {
-                  "properties": {
-                    "username": {
-                      "type": "string"
-                    },
-                  }
-                }
-              }
-            },
-            # categories is used for Filtering
-            "categories": {
-              "type": "nested",
-              "properties": {
-                "description": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "long"
-                },
-                "title": {
-                  "type": "string",
-                  "analyzer": "keyword_lowercase_analyzer"
-                }
-              }
-            },
-            # agency_short_name is used for Filtering (include/exclude)
-            "agency_short_name": {
-              "type": "string",
-              "analyzer": "keyword_lowercase_analyzer"
-            },
-            "approved_date": {
-              "type": "date",
-            },
-            # agency_id, agency_title is metadata
-            "agency_id": {
-              "type": "long"
-            },
-            "agency_title": {
-              "type": "string",
-              "index": "not_analyzed"
-            },
-            # tags used for searching
-            # tags[].name used for searching
-            # tags[].name_string used for filtering
-            "tags": {
-              "type": "nested",
-              "properties": {
-                "id": {
-                  "type": "long"
-                },
-                "name": {
-                  "type": "string",
-                  "analyzer": "autocomplete",
-                  "search_analyzer": "autocomplete"
-                },
-                "name_string": {
-                  "type": "string",
-                  "analyzer": "keyword_lowercase_analyzer"
-                }
-              }
-            },
-            # security_marking used to enforce security check for listing before showing to user
-            "security_marking": {
-              "type": "string",
-              "index": "not_analyzed"
-            },
-            # approval_status is used for filtering
-            "approval_status": {
-              "type": "string",
-              "analyzer": "keyword_lowercase_analyzer"
-            },
-            # is_deleted is used for filtering
-            "is_deleted": {
-              "type": "boolean"
-            },
-            # is_enabled is used for filtering
-            "is_enabled": {
-              "type": "boolean"
-            },
-            # is_private is used for filtering, used to filter out private apps for different organizations
-            "is_private": {
-              "type": "boolean"
-            },
-            "is_508_compliant": {
-              "type": "boolean"
-            },
-            # listing_type_title is used for filtering , ex: ['Web Application', 'Web Services', 'Widget'..]
-            "listing_type_title": {
-              "type": "string",
-              "analyzer": "keyword_lowercase_analyzer"
-            },
-            # listing_type_description, listing_type_id is metadata
-            "listing_type_description": {
-              "type": "string"
-            },
-            "listing_type_id": {
-              "type": "long"
-            },
-            # TODO: Description for each var
-            "launch_url": {
-              "type": "string"
-            },
-            "is_featured": {
-              "type": "boolean"
-            },
-            "banner_icon": {
-              "properties": {
-                "file_extension": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "long"
-                },
-                "security_marking": {
-                  "type": "string"
-                }
-              }
-            },
-            "large_banner_icon": {
-              "properties": {
-                "file_extension": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "long"
-                },
-                "security_marking": {
-                  "type": "string"
-                }
-              }
-            },
-            "large_icon": {
-              "properties": {
-                "file_extension": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "long"
-                },
-                "security_marking": {
-                  "type": "string"
-                }
-              }
-            },
-            "small_icon": {
-              "properties": {
-                "file_extension": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "long"
-                },
-                "security_marking": {
-                  "type": "string"
-                }
-              }
-            },
-            "total_rate1": {
-              "type": "long"
-            },
-            "total_rate2": {
-              "type": "long"
-            },
-            "total_rate3": {
-              "type": "long"
-            },
-            "total_rate4": {
-              "type": "long"
-            },
-            "total_rate5": {
-              "type": "long"
-            },
-            "total_reviews": {
-              "type": "long"
-            },
-            "total_review_responses": {
-              "type": "long"
-            },
-            "total_votes": {
-              "type": "long"
-            },
-            "avg_rate": {
-              "type": "double"
-            },
-            "usage_requirements": {
-              "type": "string"
-            },
-            "system_requirements": {
-              "type": "string"
-            }
-          }
-        }
+        "listings": get_listing_mapping()
       }
     }
     return data
@@ -401,7 +612,20 @@ def get_mapping_setting_obj(number_of_shards=None, number_of_replicas=None):
 
 def update_es_listing(current_listing_id, record, is_new):
     """
-    Update Listing Record in Elasticsearch
+    Update             "term": {
+              "is_deleted": 0
+            }
+        },
+        {
+            "term": {
+              "is_enabled": 1
+            }
+        },
+        {
+            "match": {
+              "approval_status": "APPROVED"
+            }
+        }Listing Record in Elasticsearch
 
     Args:
         current_listing_id: Lisitng Id
@@ -547,12 +771,12 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
     filter_data = [
         {
             "term": {
-              "is_deleted": 0
+              "is_deleted": False
             }
         },
         {
             "term": {
-              "is_enabled": 1
+              "is_enabled": True
             }
         },
         {
@@ -565,13 +789,13 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
     if is_508_compliant is True:
         filter_data.append({
             "term": {
-                "is_508_compliant": 1
+                "is_508_compliant": True
             }
         })
     elif is_508_compliant is False:
         filter_data.append({
             "term": {
-                "is_508_compliant": 0
+                "is_508_compliant": False
             }
         })
 
@@ -588,11 +812,9 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
             agencies_temp.append(current_agency_data)
 
         agencies_data = {
-            "query": {
-                "bool": {
-                    "should": agencies_temp
-                    }
-                }
+            "bool": {
+                "should": agencies_temp
+            }
         }
 
         filter_data.append(agencies_data)
@@ -612,7 +834,7 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
                   },
                   {
                     "match": {
-                      "is_private": 1
+                      "is_private": True
                     }
                   }
                 ]
@@ -622,10 +844,8 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
             exclude_agencies_temp.append(temp_filter)
 
         agencies_query_data = {
-            "query": {
-                "bool": {
-                    "must_not": exclude_agencies_temp
-                }
+            "bool": {
+                "must_not": exclude_agencies_temp
             }
         }
 
@@ -644,10 +864,8 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
             listing_types_temp.append(current_listing_type_data)
 
         listing_type_data = {
-            "query": {
-                "bool": {
-                    "should": listing_types_temp
-                }
+            "bool": {
+                "should": listing_types_temp
             }
         }
         filter_data.append(listing_type_data)
@@ -791,129 +1009,3 @@ def make_search_query_obj(search_param_parser, exclude_agencies=None):
     if user_offset:
         search_query['from'] = user_offset
     return search_query
-
-
-def prepare_clean_listing_record(listing_serializer_record):
-    """
-    Clean Record
-    Sample Record (record_json) after clean
-
-    {
-      "id": 316,
-      "title": "JotSpot 28",
-      "description": "Jot things down",
-      "unique_name": "ozp.test.jotspot.28",
-      "description_short": "Jot stuff down",
-      "approval_status": "APPROVED",
-      "is_enabled": true,
-      "is_featured": true,
-      "is_deleted": false,
-      "avg_rate": 4,
-      "total_votes": 1,
-      "total_rate5": 0,
-      "total_rate4": 1,
-      "total_rate3": 0,
-      "total_rate2": 0,
-      "total_rate1": 0,
-      "total_reviews": 1,
-      "security_marking": "UNCLASSIFIED",
-      "is_private": false,
-      "agency": {
-        "id": 1,
-        "title": "Ministry of Truth",
-        "short_name": "Minitrue"
-      },
-      "listing_type": {
-        "id": 1,
-        "title": "web application",
-        "description": "web applications"
-      },
-      "categories": [
-        {
-          "id": 4,
-          "title": "Education",
-          "description": "Educational in nature"
-        },
-        {
-          "id": 14,
-          "title": "Tools",
-          "description": "Tools and Utilities"
-        }
-      ],
-      "tags": [
-        {
-          "id": 1,
-          "name": "demo"
-        }
-      ]
-    }
-
-    Args:
-        record: One record of ReadOnlyListingSerializer
-    """
-    keys_to_remove = ['contacts',
-                      'last_activity',
-                      'required_listings',
-                      'current_rejection',
-                      'what_is_new',
-                      'iframe_compatible',
-                      'edited_date',
-                      'featured_date',
-                      'version_name',
-                      'feedback_score',
-                      'intents']
-
-    # Clean Record
-    for key in keys_to_remove:
-        if key in listing_serializer_record:
-            del listing_serializer_record[key]
-
-    image_keys_to_clean = ['large_icon',
-                           'small_icon',
-                           'banner_icon',
-                           'large_banner_icon']
-
-    # Clean Large_icon
-    for image_key in image_keys_to_clean:
-        if listing_serializer_record.get(image_key):
-            del listing_serializer_record[image_key]['image_type']
-            del listing_serializer_record[image_key]['uuid']
-    del listing_serializer_record['agency']['icon']
-
-    owners = []
-    for owner in listing_serializer_record['owners']:
-        current_owner = {}
-        current_owner['id'] = owner['id']
-        current_owner['display_name'] = owner['display_name']
-        current_owner['user'] = {}
-        current_owner['user']['username'] = owner['user']['username']
-
-        owners.append(current_owner)
-    listing_serializer_record['owners'] = owners
-
-    record_clean_obj = json.loads(json.dumps(listing_serializer_record))
-
-    # title_suggest = {"input": [ record_clean_obj['title'] ] }
-    # record_clean_obj['title_suggest'] =title_suggest
-
-    # Flatten Agency Obj - Makes the search query easier
-    record_clean_obj['agency_id'] = record_clean_obj['agency']['id']
-    record_clean_obj['agency_short_name'] = record_clean_obj['agency']['short_name']
-    record_clean_obj['agency_title'] = record_clean_obj['agency']['title']
-    del record_clean_obj['agency']
-
-    # Flatten listing_type Obj - - Makes the search query easier
-    record_clean_obj['listing_type_id'] = record_clean_obj['listing_type']['id']
-    record_clean_obj['listing_type_description'] = record_clean_obj['listing_type']['description']
-    record_clean_obj['listing_type_title'] = record_clean_obj['listing_type']['title']
-    del record_clean_obj['listing_type']
-
-    tags = []
-
-    for tag_entry in record_clean_obj['tags']:
-        tag_entry['name_string'] = tag_entry['name']
-        tags.append(tag_entry)
-
-    record_clean_obj['tags'] = tags
-
-    return record_clean_obj

@@ -1,11 +1,17 @@
+"""
+Recommendation for elasticsearch
+"""
 import logging
 import time
+import datetime
 
 import msgpack
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
 from django.db import transaction
 from django.conf import settings
+
+import elasticsearch
 
 from ozpcenter import models
 from ozpcenter.recommend import recommend_utils
@@ -14,6 +20,10 @@ from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 
 
 logger = logging.getLogger('ozp-center.' + str(__name__))
+
+
+def get_epochtime_ms():
+    return round(datetime.datetime.utcnow().timestamp() * 1000)
 
 
 class ElasticsearchRecommender(object):
@@ -28,67 +38,35 @@ class ElasticsearchRecommender(object):
     # Static Contstant to get ratings greater than this value entered into ES User Profile Table:
     MIN_ES_RATING = 3.5
     WAIT_TIME = 30  # Wait time in Minutes before running recreation of index
-    TIMESTAMP_INDEX_TYPE = 'custom_meta'
-
-    @staticmethod
-    def set_timestamp_record():
-        """
-        Method to set timestamp for creation and last update of ES Recommendation Table data
-        """
-        es_client = elasticsearch_factory.get_client()
-
-        index_name = settings.ES_RECOMMEND_USER
-        timestamp = time.time()
-        result_es = None
-
-        if es_client.indices.exists(index_name):
-            result_es = es_client.create(
-                index=settings.ES_RECOMMEND_USER,
-                doc_type=ElasticsearchRecommender.TIMESTAMP_INDEX_TYPE,
-                id=0,
-                refresh=True,
-                body={
-                    "lastupdated": timestamp
-                }
-            )
-
-        return result_es
+    RECOMMEND_INDEX = settings.ES_RECOMMEND_USER
 
     @staticmethod
     def is_data_old():
         """
         Method to determine if the ES Recommendation Table data is out of date and needs to be recreated
         """
-        # time.time() returns time in seconds since epoch.  To convert wait time to seconds need to multiply
-        # by 60.  REF: https://docs.python.org/3/library/time.html
-        trigger_recreate = ElasticsearchRecommender.WAIT_TIME * 60
         es_client = elasticsearch_factory.get_client()
 
-        query_es_date = {
-            "query": {
-                "term": {
-                    "_type": "custom_meta"
-                }
-            }
-        }
-
-        if es_client.indices.exists(settings.ES_RECOMMEND_USER):
-            result_es = es_client.search(
-                index=settings.ES_RECOMMEND_USER,
-                body=query_es_date
-            )
-        else:
-            # There is no index created and need to create one, return True to do so:
-            logger.debug("== ES Table Does not exist, create a new one ==")
+        try:
+            recommend_index_object = es_client.indices.get(ElasticsearchRecommender.RECOMMEND_INDEX)
+            recommend_index_creation_date = int(recommend_index_object[ElasticsearchRecommender.RECOMMEND_INDEX]['settings']['index']['creation_date'])
+            epochtime_ms = get_epochtime_ms()
+        except elasticsearch.exceptions.NotFoundError as err:
             return True
-
-        if result_es['hits']['total'] == 0:
-            lastupdate = 0
-        else:
-            lastupdate = result_es['hits']['hits'][0]['_source']['lastupdated']
-        currenttime = time.time()
-        logger.debug("== ES Table Last Update: {}, Current Time: {}, Recreate Index: {} ==".format(currenttime, lastupdate, ((currenttime - lastupdate) > trigger_recreate)))
-        if (currenttime - lastupdate) > trigger_recreate:
+        # time.time() returns time in seconds since epoch.  To convert wait time to seconds need to multiply
+        # by 60.  REF: https://docs.python.org/3/library/time.html
+        trigger_recreate = ElasticsearchRecommender.WAIT_TIME * 60 * 1000
+        time_diff = epochtime_ms - recommend_index_creation_date
+        time_diff_trigger = time_diff > trigger_recreate
+        override_time_diff = False
+        # override_time_diff = True
+        # print('recommend_index_creation_date: {:,}'.format(recommend_index_creation_date))
+        # print('epochtime_ms: {:,}'.format(epochtime_ms))
+        # print('time_diff: {:,}'.format(time_diff))
+        # print('trigger_recreate: {:,}'.format(trigger_recreate))
+        # print('time_diff_trigger: {}'.format(time_diff_trigger))
+        # print('override_time_diff: {}'.format(override_time_diff))
+        if time_diff_trigger or override_time_diff:
             return True
         else:
             return False
@@ -116,14 +94,6 @@ class ElasticsearchRecommender(object):
                 }
             },
             "mappings": {
-                "custom_meta": {
-                    "dynamic": "strict",
-                    "properties": {
-                        "lastupdated": {
-                            "type": "long"
-                        }
-                    }
-                },
                 "recommend": {
                     "dynamic": "strict",
                     "properties": {
@@ -131,29 +101,29 @@ class ElasticsearchRecommender(object):
                             "type": "long"
                         },
                         "author": {
-                            "type": "string",
+                            "type": "text",
                             "analyzer": "english"
                         },
                         "titles": {
-                            "type": "string",
+                            "type": "text",
                             "analyzer": "english"
                         },
                         "descriptions": {
-                            "type": "string",
+                            "type": "text",
                             "analyzer": "english"
                         },
                         "description_shorts": {
-                            "type": "string",
+                            "type": "text",
                             "analyzer": "english"
                         },
                         "agency_name_list": {
-                            "type": "string"
+                            "type": "text"
                         },
                         "tags_list": {
-                            "type": "string"
+                            "type": "text"
                         },
                         "categories_text": {
-                            "type": "string",
+                            "type": "text",
                             "analyzer": "keyword_lowercase_analyzer"
                         },
                         "ratings": {
@@ -167,7 +137,7 @@ class ElasticsearchRecommender(object):
                                     "boost": 1
                                 },
                                 "listing_categories": {
-                                    "type": "string",
+                                    "type": "text",
                                     "analyzer": "keyword_lowercase_analyzer"
                                 },
                                 "category_ids": {
@@ -185,6 +155,7 @@ class ElasticsearchRecommender(object):
                 }
             }
         }
+        # import json; print(json.dumps(index_mapping, indent=2))
         return index_mapping
 
     def initiate(self):
@@ -193,9 +164,10 @@ class ElasticsearchRecommender(object):
         Making profiles for Elasticsearch Recommendations
         """
         elasticsearch_factory.check_elasticsearch()
+        is_data_old = ElasticsearchRecommender.is_data_old()
 
-        if ElasticsearchRecommender.is_data_old():
-            elasticsearch_factory.recreate_index_mapping(settings.ES_RECOMMEND_USER, ElasticsearchRecommender.get_index_mapping())
+        if is_data_old:
+            elasticsearch_factory.recreate_index_mapping(ElasticsearchRecommender.RECOMMEND_INDEX, ElasticsearchRecommender.get_index_mapping())
             ElasticsearchRecommender.load_data_into_es_table()
 
     @staticmethod
@@ -209,8 +181,6 @@ class ElasticsearchRecommender(object):
                 Add information to Elasticsearch Table for profile
         - Set timestamp for data creation
         """
-        es_client = elasticsearch_factory.get_client()
-
         all_profiles = models.Profile.objects.all()
 
         data_to_bulk_index = []
@@ -295,6 +265,7 @@ class ElasticsearchRecommender(object):
             bulk_data.append(op_dict)
             bulk_data.append(record)
 
+        es_client = elasticsearch_factory.get_client()
         # Bulk index the data
         logger.debug('Bulk indexing Users...')
         res = es_client.bulk(index=settings.ES_RECOMMEND_USER, body=bulk_data, refresh=True)
@@ -304,8 +275,6 @@ class ElasticsearchRecommender(object):
             logger.debug('Bulk Recommendation Indexing Successful')
 
         logger.debug("Done Indexing")
-
-        ElasticsearchRecommender.set_timestamp_record()
 
 
 class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
@@ -367,19 +336,27 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
 
         query_object = []
 
-        agency_text_query = str(each_profile_source['agency_name_list']).strip('[').strip(']')
-        # TODO: Figure out if agency_text_query should be below results, str(?)
-        # agency_text_query = 'Minitrue' / 'Minitrue', 'Minipax', 'Miniluv'
-        agency_to_query = {
-            "query": {
-                "bool": {
-                    "should": [
-                        {"match": {"agency_short_name": agency_text_query}}
-                    ]
+        agencies = each_profile_source['agency_name_list']
+
+        if agencies:
+            agencies_temp = []
+
+            for agency_short_name in agencies:
+                current_agency_data = {
+                    "match": {
+                        "agency_short_name": agency_short_name
+                    }
                 }
+                agencies_temp.append(current_agency_data)
+
+            agencies_data = {
+                "bool": {
+                    "should": agencies_temp
+                    }
             }
-        }
-        query_object.append(agency_to_query)
+
+            query_object.append(agencies_data)
+
         # TODO: Figure out if each_profile_source['categories_id'] should be below results
         # each_profile_source['categories_id'] = [3, 4, 5, 6, 8, 10, 12, 14, 15, 16] / [6] / []
         categories_to_query = {
@@ -394,7 +371,8 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
                 }
             }
         }
-        query_object.append(categories_to_query)
+        query_object.append(categories_to_query)  # TODO uncomment
+
         # TODO: Figure out if each_profile_source['tags_list'] should be below results
         # each_profile_source['tags_list'] = [] / ['tag_0', 'demo', 'demo_tag', 'example']
         tags_to_query = {
@@ -409,7 +387,7 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
                 }
             }
         }
-        query_object.append(tags_to_query)
+        query_object.append(tags_to_query)   # TODO uncomment
 
         title_list = {}
         for items in each_profile_source['titles']:
@@ -448,6 +426,8 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             query_object.append(description_short_list)
 
         rated_apps_list = list([rate['listing_id'] for rate in each_profile_source['ratings']])
+        # id is the id of the listing when it searches the listings:
+        combined_listing_ids_exclude = sorted(list(set(rated_apps_list).union(set(each_profile_source['bookmark_ids']))))
 
         query_compare = {
             "size": result_size,
@@ -455,9 +435,7 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
             "query": {
                 "bool": {
                     "must_not": [
-                        # id is the id of the listing when it searches the listings:
-                        {"terms": {"id": each_profile_source['bookmark_ids']}},
-                        {"terms": {"id": rated_apps_list}}
+                        {"terms": {"id": combined_listing_ids_exclude}}
                     ],
                     "should": [
                         query_object
@@ -465,12 +443,11 @@ class ElasticsearchContentBaseRecommender(ElasticsearchRecommender):
                 }
             }
         }
-
+        # print('----------');import json; print(json.dumps(query_compare, indent=2));print('----------')
         es_query_result = es_client.search(
             index=settings.ES_INDEX_NAME,
             body=query_compare
         )
-
         # es_query_result = {'took':9,'timed_out':False,'hits':{ 'max_score':6.6793613, 'hits':[
         #  {'_type':'listings',
         #     '_source':{ 'title':'LocationAnalyzer','id':95},'_index':'appsmall', '_id':'95',
