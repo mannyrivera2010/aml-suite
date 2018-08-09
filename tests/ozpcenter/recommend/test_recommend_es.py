@@ -25,6 +25,7 @@ class ElasticsearchBaseRecommenderTest(APITestCase):
         """
         setUp is invoked before each test method
         """
+        self.maxDiff = None
         self.error_string = None
         self.es_failed = False
         try:
@@ -61,19 +62,20 @@ class ElasticsearchBaseRecommenderTest(APITestCase):
         title_scores = shorthand_dict(title_scores)
 
         expected_result = [
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.762,weight:0.9),_sort_score:7.886),title:Wolverine)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.316,weight:0.9),_sort_score:7.484),title:Beast)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.268,weight:0.9),_sort_score:7.441),title:Magneto)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.213,weight:0.9),_sort_score:7.392),title:Jupiter)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.112,weight:0.9),_sort_score:7.301),title:Pokemon Ruby and Sapphire)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.097,weight:0.9),_sort_score:7.287),title:Cyclops)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.094,weight:0.9),_sort_score:7.285),title:Barsoom)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.088,weight:0.9),_sort_score:7.279),title:Blink)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:8.082,weight:0.9),_sort_score:7.274),title:Clerks)',
-            '(_score:(Elasticsearch Content Filtering:(raw_score:7.998,weight:0.9),_sort_score:7.198),title:Rogue)'
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.762,weight:0.9),_sort_score:7.886),title:BeiDou Navigation Satellite System)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.677,weight:0.9),_sort_score:7.809),title:Rogue)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.572,weight:0.9),_sort_score:7.715),title:Wolverine)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.544,weight:0.9),_sort_score:7.69),title:Navigation using Maps)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.475,weight:0.9),_sort_score:7.627),title:Neptune)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.439,weight:0.9),_sort_score:7.595),title:Komodo Dragon)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.303,weight:0.9),_sort_score:7.473),title:Magneto)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.283,weight:0.9),_sort_score:7.455),title:Jupiter)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.273,weight:0.9),_sort_score:7.446),title:Uranus)",
+            "(_score:(Elasticsearch Content Filtering:(raw_score:8.261,weight:0.9),_sort_score:7.435),title:Cyclops)"
         ]
 
-        # import json; print(json.dumps(title_scores, indent=4))
+        import json
+        print(json.dumps(title_scores, indent=4))
         self.assertEquals(expected_result, title_scores)
 
     @override_settings(ES_ENABLED=True)

@@ -19,6 +19,19 @@ from ozpcenter.api.listing import model_access_es
 from ozpcenter.api.listing.elasticsearch_util import elasticsearch_factory
 
 
+def _format_essearch_endpoint(data):
+    titles_ids = [{
+        'id': record.get('id'),
+        'title': record.get('title'),
+        'categories': sorted([category.get('title') for category in record.get('categories')]),
+        'tags': sorted([tag.get('name') for tag in record.get('tags')]),
+        'listing_type': record.get('listing_type_title'),
+        }
+        for record in data['results']]
+    return sorted(titles_ids, key=lambda kv: kv['title'])
+    # return sorted(['{}({}, {}, {})'.format(i['title'], i['categorie_set'], i['tag_set'], i['listing_type']) for i in titles_ids])
+
+
 @override_settings(ES_ENABLED=False)
 class ListingESSearchApiTest(APITestCase):
 
@@ -27,6 +40,7 @@ class ListingESSearchApiTest(APITestCase):
         """
         setUp is invoked before each test method
         """
+        self.maxDiff = None
         self.error_string = None
         self.es_failed = False
         try:
@@ -157,23 +171,6 @@ class ListingESSearchApiTest(APITestCase):
         self.assertEqual(titles, sorted_listings_from_file)
 
     @override_settings(ES_ENABLED=True)
-    def test_essearch_tags(self):
-        if self.es_failed:
-            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
-
-        url = '/api/listings/essearch/?search=demo_tag'
-        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-
-        titles = sorted([i['title'] for i in response.data['results']])
-        expected_listing = ['Air Mail', 'Application programming interface', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
-            'Deadpool', 'Desktop Virtualization', 'Diamond', 'Dinosaur', 'Dragons', 'FrameIt',
-            'Harley-Davidson CVO', 'Hatch Latch', 'JotSpot', 'LocationAnalyzer', 'LocationLister',
-            'LocationViewer', 'Mini Dachshund', 'Monkey Finder', 'Personal Computer', 'Ruby on Rails',
-            'Skybox', 'Smart Phone', 'Taxonomy Classifier']
-
-        self.assertEqual(titles, expected_listing)
-
-    @override_settings(ES_ENABLED=True)
     def test_essearch_filter_tag(self):
         if self.es_failed:
             self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
@@ -201,58 +198,6 @@ class ListingESSearchApiTest(APITestCase):
     #     self.assertTrue(len(titles) == 1)
     #     for listing_map in response.data:
     #         self.assertEqual(validate_listing_map_keys(listing_map), [])
-    #
-    @override_settings(ES_ENABLED=True)
-    def test_essearch_is_enable(self):
-        """
-        test_essearch_is_enable
-
-        Elasticsearch Search should be independent from database(sqlite/postgresql)
-        """
-        if self.es_failed:
-            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
-
-        url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
-        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-
-        titles_ids = [{'title': record.get('title'), 'id': record.get('id')} for record in response.data['results']]
-        titles = sorted([i['title'] for i in titles_ids])
-        expected_titles = ['Air Mail', 'Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
-            'FrameIt', 'Hatch Latch', 'JotSpot', 'LocationAnalyzer', 'LocationLister',
-            'LocationViewer', 'Monkey Finder', 'Skybox', 'Smart Phone', 'Taxonomy Classifier']
-
-        self.assertEqual(titles, expected_titles)
-
-        owners = [{'owners': record.get('owners')} for record in response.data['results']]
-        usage_requirements = [{'usage_requirements': record.get('usage_requirements')} for record in response.data['results']]
-        system_requirements = [{'system_requirements': record.get('system_requirements')} for record in response.data['results']]
-
-        self.assertIsNotNone(owners)
-        self.assertIsNotNone(usage_requirements)
-        self.assertIsNotNone(system_requirements)
-
-        first_record = titles_ids[0]
-        id_to_disable = first_record['id']
-
-        replace_dict = {'title': '{}_disabled'.format(first_record['title']),
-                        'is_enabled': False}
-
-        # Disable one app
-        APITestHelper.edit_listing(self, id_to_disable, replace_dict, 'bigbrother')
-
-        elasticsearch_factory.wait_for_yellow_cluster_heath()
-
-        # Check
-        url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
-        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-
-        titles_ids = [{'title': record.get('title'), 'id': record.get('id')} for record in response.data['results']]
-        titles = sorted([i['title'] for i in titles_ids])
-        expected_titles = ['Bread Basket', 'Chart Course', 'Chatter Box', 'Clipboard',
-            'FrameIt', 'Hatch Latch', 'JotSpot', 'LocationAnalyzer', 'LocationLister',
-            'LocationViewer', 'Monkey Finder', 'Skybox', 'Smart Phone', 'Taxonomy Classifier']
-
-        self.assertEqual(titles, expected_titles)
     #
     # def test_search_agency(self):
     #     user = generic_model_access.get_profile('wsmith').user
@@ -367,3 +312,142 @@ class ListingESSearchApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_501_NOT_IMPLEMENTED)
         self.assertEqual(response.data['error_code'].lower(), 'not_implemented')
         self.assertEqual(response.data['detail'].lower(), 'http verb not supported')
+
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_tags(self):
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/?search=demo_tag'
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+
+        titles = sorted([i['title'] for i in response.data['results']])
+        expected_listing = [
+            "Air Mail",
+            "Application programming interface",
+            "Bourbon",
+            "Bread Basket",
+            "Chart Course",
+            "Chatter Box",
+            "Clipboard",
+            "Deadpool",
+            "Desktop Virtualization",
+            "Diamond",
+            "Dinosaur",
+            "Double Heroides",
+            "Dragons",
+            "E-ZPass",
+            "Fight Club",
+            "Floppy Disk",
+            "FrameIt",
+            "Harley-Davidson CVO",
+            "Hatch Latch",
+            "House Stark",
+            "House Targaryen",
+            "JotSpot",
+            "Komodo Dragon",
+            "Lightning",
+            "LocationAnalyzer",
+            "LocationLister",
+            "LocationViewer",
+            "Mini Dachshund",
+            "Monkey Finder",
+            "Personal Computer",
+            "Ruby on Rails",
+            "Skybox",
+            "Smart Phone",
+            "Taxonomy Classifier",
+            "Tornado",
+            "Transport Direct Portal"
+        ]
+
+        self.assertEqual(titles, expected_listing)
+
+    @override_settings(ES_ENABLED=True)
+    def test_essearch_is_enable(self):
+        """
+        test_essearch_is_enable
+
+        Elasticsearch Search should be independent from database(sqlite/postgresql)
+        """
+        if self.es_failed:
+            self.skipTest('Elasticsearch is not currently up: {}'.format(self.error_string))
+
+        url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+
+        titles_ids = _format_essearch_endpoint(response.data)
+        titles = [record['title'] for record in titles_ids]
+
+        expected_titles = [
+            "Air Mail",
+            "Bread Basket",
+            "Chart Course",
+            "Chatter Box",
+            "Clipboard",
+            "Double Heroides",
+            "Floppy Disk",
+            "FrameIt",
+            "Hatch Latch",
+            "House Stark",
+            "JotSpot",
+            "Lightning",
+            "LocationAnalyzer",
+            "LocationLister",
+            "LocationViewer",
+            "Monkey Finder",
+            "Skybox",
+            "Smart Phone",
+            "Taxonomy Classifier",
+            "Tornado"
+        ]
+        self.assertEqual(titles, expected_titles)
+
+        owners = [{'owners': record.get('owners')} for record in response.data['results']]
+        usage_requirements = [{'usage_requirements': record.get('usage_requirements')} for record in response.data['results']]
+        system_requirements = [{'system_requirements': record.get('system_requirements')} for record in response.data['results']]
+
+        self.assertIsNotNone(owners)
+        self.assertIsNotNone(usage_requirements)
+        self.assertIsNotNone(system_requirements)
+
+        first_record = titles_ids[0]
+        id_to_disable = first_record['id']
+
+        replace_dict = {'title': '{}_disabled'.format(first_record['title']),
+                        'is_enabled': False}
+
+        # Disable one app
+        APITestHelper.edit_listing(self, id_to_disable, replace_dict, 'bigbrother')
+
+        elasticsearch_factory.wait_for_yellow_cluster_heath()
+
+        # Check
+        url = '/api/listings/essearch/?search=demo_tag&type=Web Application'
+        response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
+
+        titles_ids = [{'title': record.get('title'), 'id': record.get('id')} for record in response.data['results']]
+        titles = sorted([i['title'] for i in titles_ids])
+        # import json; print(json.dumps(titles, indent=2))
+        expected_titles = [
+            "Bread Basket",
+            "Chart Course",
+            "Chatter Box",
+            "Clipboard",
+            "Double Heroides",
+            "Floppy Disk",
+            "FrameIt",
+            "Hatch Latch",
+            "House Stark",
+            "JotSpot",
+            "Lightning",
+            "LocationAnalyzer",
+            "LocationLister",
+            "LocationViewer",
+            "Monkey Finder",
+            "Skybox",
+            "Smart Phone",
+            "Taxonomy Classifier",
+            "Tornado"
+        ]
+        self.assertEqual(titles, expected_titles)

@@ -5,8 +5,10 @@ settings.py/or this file?
 -----
 recommendation_engines = ['ElasticsearchUserBaseRecommender', 'ElasticsearchContentBaseRecommender', 'CrabUserBaseRecommender']
 ----
-
 os.getenv('RECOMMENDATION_ENGINE')
+
+
+ES_ENABLED=True RECOMMENDATION_ENGINE=elasticsearch_content_base python manage.py runscript recommend
 
 ************************************WARNING************************************
 Running this script will delete existing Recommendations in database
