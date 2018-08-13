@@ -147,14 +147,18 @@ class ProfileListingViewSet(viewsets.ModelViewSet):
 
     permission_classes = (permissions.IsUser,)
     serializer_class = listing_serializers.ListingSerializer
+    filter_backends = (filters.OrderingFilter,)
+    ordering_fields = ('id', 'title', 'avg_rate', 'total_votes', 'edited_date',
+        'approved_date', 'approval_status')
+    ordering = ('approval_status')
 
     def get_queryset(self, profile_pk=None, listing_pk=None):
         current_request_username = self.request.user.username
+        ordering = self.request.query_params.get('ordering', None)
+        if ordering:
+            ordering = [s.strip() for s in ordering.split(',')]
 
-        if listing_pk:
-            queryset = model_access.get_all_listings_for_profile_by_id(current_request_username, profile_pk, listing_pk)
-        else:
-            queryset = model_access.get_all_listings_for_profile_by_id(current_request_username, profile_pk)
+        queryset = model_access.get_all_listings_for_profile_by_id(current_request_username, profile_pk, listing_pk, ordering)
         return queryset
 
     def list(self, request, profile_pk=None):
@@ -281,13 +285,16 @@ class ProfileListingVisitCountViewSet(viewsets.ModelViewSet):
         Retrieves frequently visited listings for a specific profile
         """
         current_request_username = request.user.username
+        ordering = request.query_params.get('ordering', None)
+        if ordering:
+            ordering = [s.strip() for s in ordering.split(',')]
         # Used to anonymize usernames
         anonymize_identifiable_data = system_anonymize_identifiable_data(current_request_username)
 
         if anonymize_identifiable_data:
             return Response([])
 
-        queryset = model_access.get_frequently_visited_listings(current_request_username, profile_pk)
+        queryset = model_access.get_frequently_visited_listings(current_request_username, profile_pk, ordering)
         page = self.paginate_queryset(queryset)
 
         if page is not None:

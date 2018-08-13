@@ -117,13 +117,14 @@ class RecommenderProfileResultSet(object):
         self.recommender_result_set = {}
 
     @staticmethod
-    def from_profile_instance(profile_instance, randomize_recommended=True):
+    def from_profile_instance(profile_instance, randomize_recommended=True, ordering=None):
         """
         Factory Method to create a RecommenderProfileResultSet from the database
         """
         recommender_profile_result_set = RecommenderProfileResultSet(profile_instance.id)
         recommender_profile_result_set.profile_instance = profile_instance
         recommender_profile_result_set.randomize_recommended = randomize_recommended
+        recommender_profile_result_set.ordering = ordering
 
         # Get Recommended Listings for owner
         target_profile_recommended_entry = models.RecommendationsEntry.objects.filter(target_profile=profile_instance).first()
@@ -236,19 +237,27 @@ class RecommenderProfileResultSet(object):
                                                       approval_status=models.Listing.APPROVED,
                                                       is_enabled=True,
                                                       is_deleted=False)
-                                         .exclude(id__in=self.filter_listing_ids)
-                                         .all())
+                                              .exclude(id__in=self.filter_listing_ids))
+        if self.ordering:
+            self.recommended_listings_queryset = self.recommended_listings_queryset.order_by(*self.ordering)
+        self.recommended_listings_queryset = self.recommended_listings_queryset.all()
 
     def _fix_recommendation_order(self):
-        # Fix Order of Recommendations based of score
-        listing_id_object_mapper = {}
-        for listing_object in self.recommended_listings_queryset:
-            listing_id_object_mapper[listing_object.id] = listing_object
+        if self.ordering:
+            # Use same ordering as the queryset
+            self.recommended_listings_raw = []
+            for listing_object in self.recommended_listings_queryset:
+                self.recommended_listings_raw.append(listing_object)
+        else:
+            # Fix Order of Recommendations based of score
+            listing_id_object_mapper = {}
+            for listing_object in self.recommended_listings_queryset:
+                listing_id_object_mapper[listing_object.id] = listing_object
 
-        self.recommended_listings_raw = []
-        for listing_id in self.sorted_recommendation_listing_ids:
-            if listing_id in listing_id_object_mapper:
-                self.recommended_listings_raw.append(listing_id_object_mapper[listing_id])
+            self.recommended_listings_raw = []
+            for listing_id in self.sorted_recommendation_listing_ids:
+                if listing_id in listing_id_object_mapper:
+                    self.recommended_listings_raw.append(listing_id_object_mapper[listing_id])
 
     def _get_recommended_listings(self):
         profile_username = self.profile_instance.user.username

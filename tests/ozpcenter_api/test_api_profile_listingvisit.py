@@ -41,6 +41,17 @@ class ProfileListingVisitApiTest(APITestCase):
                 self.assertTrue(visit_counts[id] <= curr_count)
             curr_count = visit_counts[id]
 
+    def test_frequently_visited_listings_with_ordering(self):
+        url = '/api/profile/self/listingvisits/frequent/?ordering=-title'
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+        data = response.data
+
+        url = '/api/profile/self/listingvisits/frequent/?ordering=title'
+        response = APITestHelper.request(self, url, 'GET', username='bigbrother', status_code=200)
+        reverse_data = response.data
+
+        self.assertEqual(data, reverse_data[::-1])
+
     def test_increment_visit(self):
         # assumes bigbrother has at least one listing visit
         url = '/api/profile/self/listingvisits/'

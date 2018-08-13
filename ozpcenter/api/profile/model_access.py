@@ -46,7 +46,7 @@ def get_profile_by_id(profile_id):
         return None
 
 
-def get_all_listings_for_profile_by_id(current_request_username, profile_id, listing_id=None):
+def get_all_listings_for_profile_by_id(current_request_username, profile_id, listing_id=None, ordering=None):
     """
     Get all Listing for a profile by profile_id and listing_id
 
@@ -54,19 +54,23 @@ def get_all_listings_for_profile_by_id(current_request_username, profile_id, lis
         current_request_username
         profile_id
         listing_id
+        ordering
 
     Raises:
         models.Profile.DoesNotExist
         models.Listing.DoesNotExist
-
-
     """
-    if profile_id == 'self':
+    if not ordering:
+        ordering = ['approval_status']
+
+    if not profile_id or profile_id == 'self':
         profile_instance = models.Profile.objects.get(user__username=current_request_username)
     else:
         profile_instance = models.Profile.objects.get(id=profile_id)
 
-    listings = models.Listing.objects.for_user(current_request_username).filter(owners__in=[profile_instance.id]).filter(is_deleted=False).order_by('approval_status')
+    listings = (models.Listing.objects.for_user(current_request_username)
+        .filter(owners__in=[profile_instance.id])
+        .filter(is_deleted=False).order_by(*ordering))
 
     if listing_id:
         listings = listings.get(id=listing_id)
@@ -96,7 +100,8 @@ def get_listing_visit_counts_for_profile(current_request_username, profile_id, l
         models.Profile.DoesNotExist
         models.Listing.DoesNotExist
     """
-    if profile_id == 'self':
+
+    if not profile_id or profile_id == 'self':
         profile_instance = models.Profile.objects.get(user__username=current_request_username)
     else:
         profile_instance = models.Profile.objects.get(id=profile_id)
@@ -108,24 +113,33 @@ def get_listing_visit_counts_for_profile(current_request_username, profile_id, l
     return visit_counts.order_by('-count')
 
 
-def get_frequently_visited_listings(current_request_username, profile_id):
+def get_frequently_visited_listings(current_request_username, profile_id, ordering=None):
     """
     Get frequently visited Listing objects for a profile by profile_id
 
     Args:
         current_request_username
         profile_id
+        ordering
 
     Raises:
         models.Profile.DoesNotExist
     """
-    if profile_id == 'self':
+
+    if not profile_id or profile_id == 'self':
         profile_instance = models.Profile.objects.get(user__username=current_request_username)
     else:
         profile_instance = models.Profile.objects.get(id=profile_id)
 
-    visit_counts = models.ListingVisitCount.objects.select_related('listing').filter(profile=profile_instance, count__gt=0, listing__is_deleted=False, listing__is_enabled=True).order_by('-count', 'listing__title')
-    listings = [vc.listing for vc in visit_counts]
+    visit_counts = (models.ListingVisitCount.objects.select_related('listing')
+        .filter(profile=profile_instance, count__gt=0, listing__is_deleted=False, listing__is_enabled=True)
+        .order_by('-count', 'listing__title'))
+
+    if not ordering:
+        listings = [vc.listing for vc in visit_counts]
+    else:
+        listing_ids = [vc.listing.id for vc in visit_counts]
+        listings = models.Listing.objects.filter(id__in=listing_ids).order_by(*ordering)
 
     return listings
 

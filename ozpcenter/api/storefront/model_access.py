@@ -294,7 +294,7 @@ logger = logging.getLogger('ozp-center.' + str(__name__))
 #     return data, extra_data
 
 
-def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recommended=True, ):
+def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recommended=True, ordering=None):
     """
     Get Recommended Listings for storefront
 
@@ -304,7 +304,7 @@ def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recomm
     listing_ids_list = [1,5,6,7]
     request_profile = Profile.objects.first()
     """
-    recommender_profile_result_set = RecommenderProfileResultSet.from_profile_instance(request_profile, randomize_recommended)
+    recommender_profile_result_set = RecommenderProfileResultSet.from_profile_instance(request_profile, randomize_recommended, ordering)
     recommender_profile_result_set.process()
     recommended_listings = recommender_profile_result_set.recommended_listings
 
@@ -313,7 +313,7 @@ def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recomm
     return recommended_listings, extra_data
 
 
-def get_storefront_featured(request_profile, pre_fetch=True):
+def get_storefront_featured(request_profile, pre_fetch=True, ordering=None):
     """
     Get Featured Listings for storefront
     """
@@ -324,21 +324,27 @@ def get_storefront_featured(request_profile, pre_fetch=True):
             is_featured=True,
             approval_status=models.Listing.APPROVED,
             is_enabled=True,
-            is_deleted=False).order_by(F('featured_date').desc(nulls_last=True))
+            is_deleted=False)
+    if ordering:
+        featured_listings_raw = featured_listings_raw.order_by(*ordering)
+    else:
+        featured_listings_raw = featured_listings_raw.order_by(F('featured_date').desc(nulls_last=True))
 
     featured_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in featured_listings_raw]),
                            [pipes.ListingPostSecurityMarkingCheckPipe(username)]).to_list()
     return featured_listings
 
 
-def get_storefront_recent(request_profile, pre_fetch=True):
+def get_storefront_recent(request_profile, pre_fetch=True, ordering=None):
     """
     Get Recent Listings for storefront
     """
     username = request_profile.user.username
     # Get Recent Listings
+    if not ordering:
+        ordering = ['-approved_date']
     recent_listings_raw = models.Listing.objects.for_user_organization_minus_security_markings(
-        username).order_by('-approved_date').filter(
+        username).order_by(*ordering).filter(
         approval_status=models.Listing.APPROVED,
         is_enabled=True,
         is_deleted=False)
@@ -349,17 +355,19 @@ def get_storefront_recent(request_profile, pre_fetch=True):
     return recent_listings
 
 
-def get_storefront_most_popular(request_profile, pre_fetch=True):
+def get_storefront_most_popular(request_profile, pre_fetch=True, ordering=None):
     """
     Get Most Popular Listings for storefront
     """
     username = request_profile.user.username
     # Get most popular listings via a weighted average
+    if not ordering:
+        ordering = ['-avg_rate', '-total_reviews']
     most_popular_listings_raw = models.Listing.objects.for_user_organization_minus_security_markings(
         username).filter(
             approval_status=models.Listing.APPROVED,
             is_enabled=True,
-            is_deleted=False).order_by('-avg_rate', '-total_reviews')
+            is_deleted=False).order_by(*ordering)
 
     most_popular_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in most_popular_listings_raw]),
                                       [pipes.ListingPostSecurityMarkingCheckPipe(username),
@@ -367,7 +375,7 @@ def get_storefront_most_popular(request_profile, pre_fetch=True):
     return most_popular_listings
 
 
-def get_storefront(request, pre_fetch=False, section=None):
+def get_storefront(request, pre_fetch=False, section=None, ordering=None):
     """
     Returns data for /storefront api invocation including:
         * recommended listings (max=10)
@@ -403,23 +411,30 @@ def get_storefront(request, pre_fetch=False, section=None):
         if section == 'all' or section == 'recommended':
             recommended_listings, extra_data = get_storefront_recommended(request_profile,
                                                                           pre_fetch,
-                                                                          randomize_recommended)
+                                                                          randomize_recommended,
+                                                                          ordering)
             data['recommended'] = recommended_listings
         else:
             data['recommended'] = []
 
         if section == 'all' or section == 'featured':
-            data['featured'] = get_storefront_featured(request_profile, pre_fetch)
+            data['featured'] = get_storefront_featured(request_profile,
+                                                       pre_fetch,
+                                                       ordering)
         else:
             data['featured'] = []
 
         if section == 'all' or section == 'recent':
-            data['recent'] = get_storefront_recent(request_profile, pre_fetch)
+            data['recent'] = get_storefront_recent(request_profile,
+                                                   pre_fetch,
+                                                   ordering)
         else:
             data['recent'] = []
 
         if section == 'all' or section == 'most_popular':
-            data['most_popular'] = get_storefront_most_popular(request_profile, pre_fetch)
+            data['most_popular'] = get_storefront_most_popular(request_profile,
+                                                               pre_fetch,
+                                                               ordering)
         else:
             data['most_popular'] = []
 

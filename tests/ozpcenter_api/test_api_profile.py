@@ -75,16 +75,23 @@ class ProfileApiTest(APITestCase):
         settings.OZP['USE_AUTH_SERVER'] = False
         self._all_listing_for_self_profile()
 
-    def _all_listing_for_self_profile(self):
-        url = '/api/profile/self/listing/'  # 2/7/18/26/27
+    @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
+    def test_all_listing_for_self_profile_auth_enabled_with_ordering(self, mock_request):
+        settings.OZP['USE_AUTH_SERVER'] = True
+        self._all_listing_for_self_profile(True)
+
+    def _all_listing_for_self_profile(self, with_ordering=False):
+        # Tests rely on sorting by title (asc) so an easy check for ordering is
+        # sort by title (desc).  Eventually, this test should be more robust.
+        url = '/api/profile/self/listing/' + ('?ordering=-title' if with_ordering else '')  # 2/7/18/26/27
         response = APITestHelper.request(self, url, 'GET', username='wsmith', status_code=200)
-        titles = sorted([i['title'] for i in response.data])
+        titles = sorted([i['title'] for i in response.data], reverse=with_ordering)
         expected_listing = ['Air Mail', 'Applied Ethics Inc.', 'Bleach', 'Business Insurance Risk',
             'Business Management System', 'Chart Course', 'Clipboard', 'Desktop Virtualization',
             'Diamond', 'FrameIt', 'Hatch Latch', 'Intelligence Unleashed', 'JotSpot',
             'LocationAnalyzer', 'LocationLister', 'LocationViewer', 'Project Management',
             'Ruby', 'Ruby Miner', 'Sapphire', 'Wikipedia']
-        self.assertEqual(expected_listing, titles)
+        self.assertEqual(expected_listing[::-1] if with_ordering else expected_listing, titles)
 
     @patch('plugins.plugin_manager.requests.get', side_effect=helper.mocked_requests_get)
     def test_one_listing_for_self_profile_auth_enabled(self, mock_request):
