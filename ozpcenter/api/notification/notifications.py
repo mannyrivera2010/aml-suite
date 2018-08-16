@@ -68,6 +68,7 @@ from ozpcenter.models import Profile
 from ozpcenter.models import Agency
 from ozpcenter.models import Listing
 from ozpcenter.models import ApplicationLibraryEntry
+from ozpcenter.models import BookmarkEntry
 from ozpcenter.models import Subscription
 
 import ozpcenter.model_access as generic_model_access
@@ -149,6 +150,54 @@ permission_dict = {
         'delete_subscription_notification'
         ]
 }
+
+
+def get_owners_for_bookmark_entry(listing):
+    """
+    Get profile for Bookmark Entry
+
+    Returns:
+        List of integers of profile ids
+    """
+    owner_id_list = (BookmarkEntry.objects
+        .filter(
+            listing__in=[listing],
+            listing__isnull=False,
+            listing__approval_status=Listing.APPROVED,
+            # listing__is_enabled=True,
+            listing__is_deleted=False)
+        .values_list('bookmark_parent__bookmark_permission__profile', flat=True)
+        .distinct())
+
+    return list(owner_id_list)
+
+
+def get_owners_for_application_library_entry(listing):
+    """
+    Get profile for Application Library Entry
+
+    Returns:
+        List of integers of profile ids
+    """
+    owner_id_list = (ApplicationLibraryEntry.objects
+        .filter(
+            listing__in=[listing],
+            listing__isnull=False,
+            listing__approval_status=Listing.APPROVED,
+            # listing__is_enabled=True,
+            listing__is_deleted=False)
+        .values_list('owner', flat=True)
+        .distinct())
+    return list(owner_id_list)
+
+
+def get_owners_for_bookmark_3_2(listing):
+    """
+    Get a list of profiles for bookmarks (ApplicationLibraryEntry and BookmarkEntry)
+    """
+    bookmark_entry_owners = set(get_owners_for_bookmark_entry(listing))
+    application_library_entry_owners = set(get_owners_for_application_library_entry(listing))
+    return list(bookmark_entry_owners.union(application_library_entry_owners))
 
 
 # Method is decorated with @transaction.atomic to ensure all logic is executed in a single transaction
@@ -393,11 +442,9 @@ class ListingNotification(NotificationBase):
         return self.entity_dict['listing'].id
 
     def get_target_list(self):
-        owner_id_list = ApplicationLibraryEntry.objects.filter(listing__in=[self.entity_dict['listing']],
-                                                               listing__isnull=False,
-                                                               listing__approval_status=Listing.APPROVED,
-                                                               listing__is_deleted=False).values_list('owner', flat=True).distinct()
-        return Profile.objects.filter(id__in=owner_id_list, listing_notification_flag=True).all()
+        owner_id_list = get_owners_for_bookmark_3_2(self.entity_dict['listing'])
+        profile_list = Profile.objects.filter(id__in=owner_id_list, listing_notification_flag=True).all()
+        return profile_list
 
     def check_local_permission(self, entity):
         if self.sender_profile.highest_role() in ['APPS_MALL_STEWARD', 'ORG_STEWARD']:
@@ -437,7 +484,6 @@ class PeerNotification(NotificationBase):
     def get_target_list(self):
         # entity: 'peer_profile': peer_profile,
         # metadata: 'peer': peer,
-
         entities_id = [entity.id for entity in [self.entity_dict['peer_profile']]]
         return Profile.objects.filter(id__in=entities_id).all()
 
@@ -627,11 +673,7 @@ class ListingPrivateStatusNotification(NotificationBase):
         return Notification.LISTING_PRIVATE_STATUS
 
     def get_target_list(self):
-        owner_id_list = ApplicationLibraryEntry.objects.filter(listing__in=[self.entity_dict['listing']],
-                                                               listing__isnull=False,
-                                                               listing__approval_status=Listing.APPROVED,
-                                                               listing__is_enabled=True,
-                                                               listing__is_deleted=False).values_list('owner', flat=True).distinct()
+        owner_id_list = get_owners_for_bookmark_3_2(self.entity_dict['listing'])
         return Profile.objects.filter(id__in=owner_id_list, listing_notification_flag=True).all()
 
     def check_local_permission(self, entity):
