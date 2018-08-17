@@ -8,6 +8,7 @@ from ozpcenter import models
 from ozpcenter import utils
 from django.contrib import auth
 import ozpcenter.model_access as generic_model_access
+import ozpcenter.api.storefront.model_access as storefront_model_access
 
 from plugins import plugin_manager
 system_has_access_control = plugin_manager.system_has_access_control
@@ -60,8 +61,6 @@ def get_all_listings_for_profile_by_id(current_request_username, profile_id, lis
         models.Profile.DoesNotExist
         models.Listing.DoesNotExist
     """
-    if not ordering:
-        ordering = ['approval_status']
 
     if not profile_id or profile_id == 'self':
         profile_instance = models.Profile.objects.get(user__username=current_request_username)
@@ -70,12 +69,12 @@ def get_all_listings_for_profile_by_id(current_request_username, profile_id, lis
 
     listings = (models.Listing.objects.for_user(current_request_username)
         .filter(owners__in=[profile_instance.id])
-        .filter(is_deleted=False).order_by(*ordering))
+        .filter(is_deleted=False).order_by('approval_status'))
 
     if listing_id:
         listings = listings.get(id=listing_id)
     else:
-        listings = listings.all()
+        listings = storefront_model_access.custom_sort_listings(listings.all(), ordering)
 
     return listings
 
@@ -134,12 +133,8 @@ def get_frequently_visited_listings(current_request_username, profile_id, orderi
     visit_counts = (models.ListingVisitCount.objects.select_related('listing')
         .filter(profile=profile_instance, count__gt=0, listing__is_deleted=False, listing__is_enabled=True)
         .order_by('-count', 'listing__title'))
-
-    if not ordering:
-        listings = [vc.listing for vc in visit_counts]
-    else:
-        listing_ids = [vc.listing.id for vc in visit_counts]
-        listings = models.Listing.objects.filter(id__in=listing_ids).order_by(*ordering)
+    listings = [vc.listing for vc in visit_counts]
+    listings = storefront_model_access.custom_sort_listings(listings, ordering)
 
     return listings
 

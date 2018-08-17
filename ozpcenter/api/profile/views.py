@@ -155,8 +155,6 @@ class ProfileListingViewSet(viewsets.ModelViewSet):
     def get_queryset(self, profile_pk=None, listing_pk=None):
         current_request_username = self.request.user.username
         ordering = self.request.query_params.get('ordering', None)
-        if ordering:
-            ordering = [s.strip() for s in ordering.split(',')]
 
         queryset = model_access.get_all_listings_for_profile_by_id(current_request_username, profile_pk, listing_pk, ordering)
         return queryset
@@ -286,8 +284,7 @@ class ProfileListingVisitCountViewSet(viewsets.ModelViewSet):
         """
         current_request_username = request.user.username
         ordering = request.query_params.get('ordering', None)
-        if ordering:
-            ordering = [s.strip() for s in ordering.split(',')]
+
         # Used to anonymize usernames
         anonymize_identifiable_data = system_anonymize_identifiable_data(current_request_username)
 
