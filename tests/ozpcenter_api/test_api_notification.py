@@ -321,6 +321,8 @@ class NotificationApiTest(APITestCase):
             '   (L) Auserhasratedlisting<b>MiniDachshund</b>1star',
             '   (L) Auserhasratedlisting<b>ProjectManagement</b>1star',
             '  (F) bigbrother',
+            '   (L) AcousticGuitarupdatenextweek',
+            '   (L) AcousticGuitarupdatenextweek',
             '   (L) Auserhasratedlisting<b>BusinessManagementSystem</b>3stars',
             '   (L) Auserhasratedlisting<b>ChartCourse</b>5stars',
             '   (L) Auserhasratedlisting<b>KomodoDragon</b>1star',

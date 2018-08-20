@@ -336,7 +336,6 @@ class ListingObserver(Observer):
             is_private: boolean value
         """
         username = profile.user.username
-
         message = None
 
         if is_private:
@@ -353,8 +352,6 @@ class ListingObserver(Observer):
 
     def listing_enabled_status_changed(self, listing=None, profile=None, is_enabled=None):
         """
-
-
         Args:
             listing: Listing instance
             profile(Profile Instance): Profile that triggered a change
