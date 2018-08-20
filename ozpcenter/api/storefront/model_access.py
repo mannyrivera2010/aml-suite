@@ -304,13 +304,16 @@ def get_storefront_recommended(request_profile, pre_fetch=True, randomize_recomm
     listing_ids_list = [1,5,6,7]
     request_profile = Profile.objects.first()
     """
-    recommender_profile_result_set = RecommenderProfileResultSet.from_profile_instance(request_profile, randomize_recommended, ordering)
+    recommender_profile_result_set = RecommenderProfileResultSet.from_profile_instance(request_profile, randomize_recommended)
     recommender_profile_result_set.process()
     recommended_listings = recommender_profile_result_set.recommended_listings
 
     extra_data = {}
     extra_data['recommender_profile_result_set'] = recommender_profile_result_set
-    return recommended_listings, extra_data
+
+    sorted_recommended_listings = custom_sort_listings(recommended_listings, ordering)
+
+    return sorted_recommended_listings, extra_data
 
 
 def get_storefront_featured(request_profile, pre_fetch=True, ordering=None):
@@ -324,15 +327,14 @@ def get_storefront_featured(request_profile, pre_fetch=True, ordering=None):
             is_featured=True,
             approval_status=models.Listing.APPROVED,
             is_enabled=True,
-            is_deleted=False)
-    if ordering:
-        featured_listings_raw = featured_listings_raw.order_by(*ordering)
-    else:
-        featured_listings_raw = featured_listings_raw.order_by(F('featured_date').desc(nulls_last=True))
+            is_deleted=False).order_by(F('featured_date').desc(nulls_last=True))
 
     featured_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in featured_listings_raw]),
                            [pipes.ListingPostSecurityMarkingCheckPipe(username)]).to_list()
-    return featured_listings
+
+    sorted_featured_listings = custom_sort_listings(featured_listings, ordering)
+
+    return sorted_featured_listings
 
 
 def get_storefront_recent(request_profile, pre_fetch=True, ordering=None):
@@ -342,9 +344,9 @@ def get_storefront_recent(request_profile, pre_fetch=True, ordering=None):
     username = request_profile.user.username
     # Get Recent Listings
     if not ordering:
-        ordering = ['-approved_date']
+        ordering = []
     recent_listings_raw = models.Listing.objects.for_user_organization_minus_security_markings(
-        username).order_by(*ordering).filter(
+        username).order_by('-approved_date').filter(
         approval_status=models.Listing.APPROVED,
         is_enabled=True,
         is_deleted=False)
@@ -352,7 +354,10 @@ def get_storefront_recent(request_profile, pre_fetch=True, ordering=None):
     recent_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in recent_listings_raw]),
                                       [pipes.ListingPostSecurityMarkingCheckPipe(username),
                                        pipes.LimitPipe(24)]).to_list()
-    return recent_listings
+
+    sorted_recent_listings = custom_sort_listings(recent_listings, ordering)
+
+    return sorted_recent_listings
 
 
 def get_storefront_most_popular(request_profile, pre_fetch=True, ordering=None):
@@ -361,18 +366,19 @@ def get_storefront_most_popular(request_profile, pre_fetch=True, ordering=None):
     """
     username = request_profile.user.username
     # Get most popular listings via a weighted average
-    if not ordering:
-        ordering = ['-avg_rate', '-total_reviews']
     most_popular_listings_raw = models.Listing.objects.for_user_organization_minus_security_markings(
         username).filter(
             approval_status=models.Listing.APPROVED,
             is_enabled=True,
-            is_deleted=False).order_by(*ordering)
+            is_deleted=False).order_by('-avg_rate', '-total_reviews')
 
     most_popular_listings = pipeline.Pipeline(recommend_utils.ListIterator([listing for listing in most_popular_listings_raw]),
                                       [pipes.ListingPostSecurityMarkingCheckPipe(username),
                                        pipes.LimitPipe(36)]).to_list()
-    return most_popular_listings
+
+    sorted_most_popular_listings = custom_sort_listings(most_popular_listings, ordering)
+
+    return sorted_most_popular_listings
 
 
 def get_storefront(request, pre_fetch=False, section=None, ordering=None):
@@ -442,6 +448,17 @@ def get_storefront(request, pre_fetch=False, section=None, ordering=None):
         # raise Exception({'error': True, 'msg': 'Error getting storefront: {0!s}'.format(str(e))})
         raise  # Should be catch in the django framwork
     return data, extra_data
+
+
+def custom_sort_listings(listings, ordering_str):
+    if not ordering_str:
+        return listings
+
+    ordering = [s.strip() for s in ordering_str.split(',')]
+    listing_ids = [x.id for x in listings]
+    sorted_listings = models.Listing.objects.filter(id__in=listing_ids).order_by(*ordering)
+
+    return sorted_listings
 
 
 def values_query_set_to_dict(vqs):
