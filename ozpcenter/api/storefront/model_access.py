@@ -456,9 +456,18 @@ def custom_sort_listings(listings, ordering_str):
 
     ordering = [s.strip() for s in ordering_str.split(',')]
     listing_ids = [x.id for x in listings]
-    sorted_listings = models.Listing.objects.filter(id__in=listing_ids).order_by(*ordering)
+    sorted_listings = models.Listing.objects.filter(id__in=listing_ids)
+    for field in ordering:
+        if 'title' in field:
+            # case insensitive sort for title
+            if field.startswith('-'):
+                sorted_listings = sorted_listings.order_by(Lower(field[1:])).reverse()
+            else:
+                sorted_listings = sorted_listings.order_by(Lower(field))
+        else:
+            sorted_listings = sorted_listings.order_by(field)
 
-    return sorted_listings
+    return sorted_listings.all()
 
 
 def values_query_set_to_dict(vqs):
