@@ -22,16 +22,16 @@ class PluginManagerTest(TestCase):
         setUp is invoked before each test method
         """
         # Store the orginal value of USE_AUTH_SERVER
-        self.USE_AUTH_SERVER_ORGINAL = settings.OZP['USE_AUTH_SERVER']
+        self.USE_AUTH_SERVER_ORGINAL = settings.AML['USE_AUTH_SERVER']
         # Setting USE_AUTH_SERVER to True makes the test run
-        settings.OZP['USE_AUTH_SERVER'] = True
+        settings.AML['USE_AUTH_SERVER'] = True
 
     def tearDown(self):
         """
         tearDown is invoked after each test method
         """
         # Set the value of USE_AUTH_SERVER to the orginal value
-        settings.OZP['USE_AUTH_SERVER'] = self.USE_AUTH_SERVER_ORGINAL
+        settings.AML['USE_AUTH_SERVER'] = self.USE_AUTH_SERVER_ORGINAL
 
     @classmethod
     def setUpTestData(cls):

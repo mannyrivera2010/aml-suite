@@ -1,7 +1,7 @@
 """
 This is the plugin that accesses the Authorization Server
 
-Authorization for OZP using the DemoAuth service
+Authorization for AML using the DemoAuth service
 
 Checks models.Profile.auth_expires. If auth is expired, refresh it.
 
@@ -13,7 +13,7 @@ Checks models.Profile.auth_expires. If auth is expired, refresh it.
 """
 import logging
 
-logger = logging.getLogger('ozp-center.' + str(__name__))
+logger = logging.getLogger('aml-center.' + str(__name__))
 
 
 class PluginMain(object):
@@ -23,7 +23,7 @@ class PluginMain(object):
 
     def __init__(self, settings=None, requests=None):
         '''
-        Settings: Object reference to ozp settings
+        Settings: Object reference to aml settings
         '''
         self.settings = settings
         self.requests = requests

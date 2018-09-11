@@ -1,10 +1,10 @@
 ## Business Objective
-(From Ticket https://github.com/aml-development/ozp-backend/issues/192)
+(From Ticket https://github.com/aml-development/aml-backend/issues/192)
 
 Ability to do better search
-![](https://raw.githubusercontent.com/ozone-development/ozp-documentation/master/mockups/marketplace/Center_smartsearch_recommendation.PNG)
+![](https://raw.githubusercontent.com/aml-development/aml-documentation/master/mockups/marketplace/Center_smartsearch_recommendation.PNG)
 
-Requirement came from https://github.com/ozone-development/ozp-documentation/wiki/Iteration-53#uiux
+Requirement came from https://github.com/aml-development/aml-documentation/wiki/Iteration-53#uiux
 
 ## Researched Solutions
 We researched 3 possible solutions before deciding on Elasticsearch:    
@@ -36,7 +36,7 @@ Steps:
 * Filtered by category, agency, listing_types
 * Search is currently using Postgres to get search results (list of listings) from database.
 * For every call, it loops through every listing to make sure the user has access to listing using the security marking, the results of the call to see if user has access is cached.
-  * ````system_has_access_control(username, i.security_marking):```` in ozp/ozpcenter/models.py/AccessControlListingManager/for_user
+  * ````system_has_access_control(username, i.security_marking):```` in aml/amlcenter/models.py/AccessControlListingManager/for_user
 * It currently takes 0.8-2.5 Seconds to get results with warm Redis cache using dummy data.
 
 Example Calls:
@@ -78,7 +78,7 @@ router.register(r'listings/search', views.ListingSearchViewSet, base_name='listi
 As a member of the Apps Mall Team, I want to understand the requirements for the new search feature so that I can contribute to the project    
 
 **Acceptance Criteria:**
-Team member will review and comprehend wiki page documention - https://github.com/aml-development/ozp-documentation/wiki/Smart-Search-(2017)
+Team member will review and comprehend wiki page documention - https://github.com/aml-development/aml-documentation/wiki/Smart-Search-(2017)
 For each task, individual puts a thumbs up once completed
 
 **Tasks:**    
@@ -102,7 +102,7 @@ For each task, individual puts a thumbs up once completed
 As a user I want to be able to retrieve search results faster than the current bench marks.     
 
 **Acceptance Criteria:**
-Team member will review and comprehend wiki page documention - https://github.com/aml-development/ozp-documentation/wiki/Smart-Search-(2017)
+Team member will review and comprehend wiki page documention - https://github.com/aml-development/aml-documentation/wiki/Smart-Search-(2017)
 For each task, individual puts a thumbs up once completed
 
 **Tasks:**    
@@ -114,7 +114,7 @@ For each task, individual puts a thumbs up once completed
 As a user I want to see results ordered by relevance so that I can find the app I am looking for faster and easier.
 
 **Acceptance Criteria:**
-Team member will review and comprehend wiki page documention - https://github.com/aml-development/ozp-documentation/wiki/Smart-Search-(2017)
+Team member will review and comprehend wiki page documention - https://github.com/aml-development/aml-documentation/wiki/Smart-Search-(2017)
 For each task, individual puts a thumbs up once completed
 
 
@@ -129,7 +129,7 @@ For each task, individual puts a thumbs up once completed
 As a user I want to be able to see listings that are similar to what I searched for so that if I misspell a word I will still be able to easily find the application I was looking for
 
 **Acceptance Criteria:**
-Team member will review and comprehend wiki page documention - https://github.com/aml-development/ozp-documentation/wiki/Smart-Search-(2017)
+Team member will review and comprehend wiki page documention - https://github.com/aml-development/aml-documentation/wiki/Smart-Search-(2017)
 For each task, individual puts a thumbs up once completed
 
 **Tasks:**
@@ -150,9 +150,9 @@ For each task, individual puts a thumbs up once completed
 * When a change/delete happens to a listing the hooks in models.py can be use to update the documents.
 * Does Search response really need every field in the Serializer in the database
 
-**ozp-center search relevant code**
-https://github.com/aml-development/ozp-center/blob/master/app/js/webapi/Listing.js
-https://github.com/aml-development/ozp-center/blob/master/app/js/components/discovery/index.jsx
+**aml-center search relevant code**
+https://github.com/aml-development/aml-center/blob/master/app/js/webapi/Listing.js
+https://github.com/aml-development/aml-center/blob/master/app/js/components/discovery/index.jsx
 
 **models.py**
 ````python
@@ -302,7 +302,7 @@ Response:
           "dn": "Winston Smith wsmith"
         },
         "listing": {
-          "unique_name": "ozp.test.air_mail",
+          "unique_name": "aml.test.air_mail",
           "title": "Air Mail",
           "id": 1,
           "agency": {
@@ -324,7 +324,7 @@ Response:
       "description": "Sends mail via air",
       "launch_url": "https://localhost:8443/demo_apps/centerSampleListings/airMail/index.html",
       "version_name": "1.0.0",
-      "unique_name": "ozp.test.air_mail",
+      "unique_name": "aml.test.air_mail",
       "what_is_new": "Nothing really new here",
       "description_short": "Sends airmail",
       "requirements": "None",

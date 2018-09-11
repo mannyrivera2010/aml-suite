@@ -9,9 +9,9 @@ https://www.elastic.co/guide/en/elasticsearch/reference/6.3/search-analyzer.html
 
 ## Affected areas of code
 ```
-ozpcenter/api/listing/elasticsearch_util.py
-ozpcenter/api/listing/model_access_es.py
-ozpcenter/recommend/recommend_es.py
+amlcenter/api/listing/elasticsearch_util.py
+amlcenter/api/listing/model_access_es.py
+amlcenter/recommend/recommend_es.py
 ```
 
 ## Steps

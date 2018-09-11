@@ -10,7 +10,7 @@ AMLNG-XXX
 *Add how to test locally*   
 
 **Please Review**     
-@aml-development/ozp-backend-team    
+@aml-development/aml-backend-team    
 
 **Checklist**
 - [ ] Read CONTRIBUTING.md

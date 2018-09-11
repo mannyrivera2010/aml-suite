@@ -1,8 +1,8 @@
 import re
 from setuptools import setup, find_packages
-from ozp import version
+from aml import version
 
-PKG = "ozp_backend"
+PKG = "aml_backend"
 REQUIREMENT_FILE = "requirements.prod.txt"
 # TODO: REQUIREMENT_FILE = requirements.prod.txt ?
 

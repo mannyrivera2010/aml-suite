@@ -9,11 +9,11 @@ Developer should have knownledge of
 Example trace for a GET Request for getting a user's profile for an authenticated user     
 `GET /api/self/profile`
 
-* Entry Point for all REST Calls - ozp/urls.py. All /api/* calls get re-routed to ozpcenter/urls.py file    
-* ozpcenter/urls.py add REST access points for all the views for the resources (agency, category, etc...)    
-    * This line of code `url(r'', include('ozpcenter.api.profile.urls'))` adds endpoints related to profile REST Calls
-* ozpcenter/api/profile/user.py - 'self/profile/' route points to current user's profile (Using CurrentUserViewSet in ozpcenter/api/profile/views.py)
-* ozpcenter/api/profile/views.py - For GET Request for this route it will call the 'retrieve' method
+* Entry Point for all REST Calls - aml/urls.py. All /api/* calls get re-routed to amlcenter/urls.py file    
+* amlcenter/urls.py add REST access points for all the views for the resources (agency, category, etc...)    
+    * This line of code `url(r'', include('amlcenter.api.profile.urls'))` adds endpoints related to profile REST Calls
+* amlcenter/api/profile/user.py - 'self/profile/' route points to current user's profile (Using CurrentUserViewSet in amlcenter/api/profile/views.py)
+* amlcenter/api/profile/views.py - For GET Request for this route it will call the 'retrieve' method
     * Before allowing user to access the endpoint it will make sure user is authenticated and has the correct role using 'permission_classes = (permissions.IsUser,)'
 
 ## Performance Debugging
@@ -28,8 +28,7 @@ from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sessions.models import Session
-from ozpcenter.models import Agency, ApplicationLibraryEntry, Category, ChangeDetail, Contact, ContactType, DocUrl, Image, ImageType, Intent, Listing, ListingActivity, ListingType, Notification, Profile, Review, Screenshot, Tag
-from ozpiwc.models import DataResource
+from amlcenter.models import Agency, ApplicationLibraryEntry, Category, ChangeDetail, Contact, ContactType, DocUrl, Image, ImageType, Intent, Listing, ListingActivity, ListingType, Notification, Profile, Review, Screenshot, Tag
 # Shell Plus Django Imports
 from django.utils import timezone
 from django.conf import settings
@@ -47,7 +46,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## Getting all Profiles (without any optimizations)
 ````python
 >>> Profile.objects.all()
-QUERY = 'SELECT "ozpcenter_profile"."id", "ozpcenter_profile"."display_name", "ozpcenter_profile"."bio", "ozpcenter_profile"."center_tour_flag", "ozpcenter_profile"."hud_tour_flag", "ozpcenter_profile"."webtop_tour_flag", "ozpcenter_profile"."dn", "ozpcenter_profile"."issuer_dn", "ozpcenter_profile"."auth_expires", "ozpcenter_profile"."access_control", "ozpcenter_profile"."user_id" FROM "ozpcenter_profile" LIMIT 21' - PARAMS = ()
+QUERY = 'SELECT "amlcenter_profile"."id", "amlcenter_profile"."display_name", "amlcenter_profile"."bio", "amlcenter_profile"."center_tour_flag", "amlcenter_profile"."hud_tour_flag", "amlcenter_profile"."webtop_tour_flag", "amlcenter_profile"."dn", "amlcenter_profile"."issuer_dn", "amlcenter_profile"."auth_expires", "amlcenter_profile"."access_control", "amlcenter_profile"."user_id" FROM "amlcenter_profile" LIMIT 21' - PARAMS = ()
 
 Execution time: 0.000324s [Database: default]
 
@@ -104,7 +103,7 @@ Results:
 ## Getting all Profiles (with join)
 ````python
 >>> Profile.objects.all().select_related('user')
-QUERY = 'SELECT "ozpcenter_profile"."id", "ozpcenter_profile"."display_name", "ozpcenter_profile"."bio", "ozpcenter_profile"."center_tour_flag", "ozpcenter_profile"."hud_tour_flag", "ozpcenter_profile"."webtop_tour_flag", "ozpcenter_profile"."dn", "ozpcenter_profile"."issuer_dn", "ozpcenter_profile"."auth_expires", "ozpcenter_profile"."access_control", "ozpcenter_profile"."user_id", "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user"."username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user"."is_active", "auth_user"."date_joined" FROM "ozpcenter_profile" LEFT OUTER JOIN "auth_user" ON ( "ozpcenter_profile"."user_id" = "auth_user"."id" ) LIMIT 21' - PARAMS = ()
+QUERY = 'SELECT "amlcenter_profile"."id", "amlcenter_profile"."display_name", "amlcenter_profile"."bio", "amlcenter_profile"."center_tour_flag", "amlcenter_profile"."hud_tour_flag", "amlcenter_profile"."webtop_tour_flag", "amlcenter_profile"."dn", "amlcenter_profile"."issuer_dn", "amlcenter_profile"."auth_expires", "amlcenter_profile"."access_control", "amlcenter_profile"."user_id", "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user"."username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user"."is_active", "auth_user"."date_joined" FROM "amlcenter_profile" LEFT OUTER JOIN "auth_user" ON ( "amlcenter_profile"."user_id" = "auth_user"."id" ) LIMIT 21' - PARAMS = ()
 
 Execution time: 0.000472s [Database: default]
 
@@ -116,8 +115,8 @@ Results:
 ## Debugging Storefront Serializer
 ````python
 from rest_framework.response import Response
-import ozpcenter.api.storefront.model_access as ma
-import ozpcenter.api.storefront.serializers as se
+import amlcenter.api.storefront.model_access as ma
+import amlcenter.api.storefront.serializers as se
 import timeit
 from django.test.client import RequestFactory
 
@@ -445,7 +444,7 @@ show_db_calls()
 start_time = int(round(time.time() * 1000))
 
 
-from ozpcenter.api.listing.model_access import _update_rating
+from amlcenter.api.listing.model_access import _update_rating
 l = Listing.objects.all()
 [_update_rating('bigbrother', la) for la in l]
 
@@ -482,10 +481,10 @@ Postgresql
            {'rate': 1, 'rate_count': 1, 'review_parent_isnull': True}]>
 
 ```
-SELECT "ozpcenter_review"."rate",
-COUNT("ozpcenter_review"."rate") AS "rate_count",
+SELECT "amlcenter_review"."rate",
+COUNT("amlcenter_review"."rate") AS "rate_count",
 ("review_parent_id" is NULL ) AS "review_parent_isnull"
-FROM "ozpcenter_review"
-WHERE "ozpcenter_review"."listing_id" = 2
-GROUP BY "ozpcenter_review"."rate", ("review_parent_id" is NULL )
+FROM "amlcenter_review"
+WHERE "amlcenter_review"."listing_id" = 2
+GROUP BY "amlcenter_review"."rate", ("review_parent_id" is NULL )
 ```

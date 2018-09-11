@@ -6,7 +6,7 @@ import json
 from django.test import override_settings
 from django.test import TestCase
 
-from ozpcenter.scripts import sample_data_generator as data_gen
+from amlcenter.scripts import sample_data_generator as data_gen
 from plugins.default_access_control.main import PluginMain
 
 

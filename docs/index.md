@@ -1,7 +1,6 @@
 ## Background
-Django-based backend API for the OZONE Platform (OZP).    
-**ozp-backend** replaces [ozp-rest](https://github.com/ozone-development/ozp-rest)
-as the backend for Center, HUD, Webtop, and IWC.     
+Django-based backend API  
+**aml-backend** replaces [aml-rest](https://github.com/aml-development/aml-rest)
 
 Notable differences include:    
 
@@ -11,7 +10,7 @@ Notable differences include:
 
 ## 3rd Party Services
 Project relays on    
-Travis-CI  [![Build Status](https://travis-ci.org/aml-development/ozp-backend.svg?branch=master)](https://travis-ci.org/aml-development/ozp-backend)
+Travis-CI  [![Build Status](https://travis-ci.org/aml-development/aml-backend.svg?branch=master)](https://travis-ci.org/aml-development/aml-backend)
 
 ## Getting Started
 ### Development environment preparation
@@ -19,17 +18,17 @@ Travis-CI  [![Build Status](https://travis-ci.org/aml-development/ozp-backend.sv
 cd ~
 mkdir git
 cd git
-git clone git@github.com:aml-development/ozp-backend.git
-cd ozp-backend
+git clone git@github.com:aml-development/aml-backend.git
+cd aml-backend
 virtualenv env
 source env/bin/activate
 pip install -r requirements.txt
 ```
 If `virtualenv env` does not work it might be `python3 -m venv env` if the environment
 
-### Building and running the OZP backend
+### Building and running the AML backend
 ```
-cd ~/git/ozp-backend
+cd ~/git/aml-backend
 source env/bin/activate
 make dev
 ```
@@ -64,14 +63,14 @@ Command to install postgresql (on Debian-based OS)
 sudo apt-get install postgresql postgresql-contrib
 ```
 
-Commands to setup postgresql for ozp-backend
+Commands to setup postgresql for aml-backend
 ```
 sudo -i -u postgres
-createuser ozp_user
-psql -c 'ALTER USER ozp_user CREATEDB;'
-psql -c "ALTER USER "ozp_user" WITH PASSWORD 'password';"
-createdb ozp
-psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;'
+createuser aml_user
+psql -c 'ALTER USER aml_user CREATEDB;'
+psql -c "ALTER USER "aml_user" WITH PASSWORD 'password';"
+createdb aml
+psql -c 'GRANT ALL PRIVILEGES ON DATABASE aml TO aml_user;'
 ```
 
 ### Local development method (minimal)
@@ -82,9 +81,9 @@ do the following:
 2. Enable HTTP Basic Auth and disable PKI authentication. In settings.py,
 `REST_FRAMEWORK.DEFAULT_AUTHENTICATION_CLASSES` should be set to
 `'rest_framework.authentication.BasicAuthentication'`
-3. Disable the authorization service. In settings.py, set `OZP.USE_AUTH_SERVER`
+3. Disable the authorization service. In settings.py, set `AML.USE_AUTH_SERVER`
 to `False`
-4. In settings.py, set `OZP.DEMO_APP_ROOT` to `localhost:8000` (or wherever
+4. In settings.py, set `AML.DEMO_APP_ROOT` to `localhost:8000` (or wherever
 the django app will be served at)
 
 Then, do the following:
@@ -95,7 +94,7 @@ Then, do the following:
     for the `virtualenv` package
 2. Create a new python environment using python 3.4.x. First, create a new
     directory where this environment will live, for example, in
-    `~/python_envs/ozp`. Now create a new environment there:
+    `~/python_envs/aml`. Now create a new environment there:
     `python3.4 -m venv ENV` (where `ENV` is the path you used above)
 3. Active the new environment: `source ENV/bin/activate`
 4. Install the necessary dependencies into this python environment:
@@ -108,12 +107,12 @@ Use username `wsmith` password `password` when prompted for authentication info
 There's also the admin interface at `http://localhost:8000/admin`
 (username: `wsmith`, password: `password`)
 
-### ozp-ansible method
-For those who just want to get OZP (Center, HUD, Webtop, IWC) up and running, see the
-[quickstart](https://github.com/ozone-development/ozp-ansible#quickstart) of the [ozp-ansible](https://github.com/ozone-development/ozp-ansible) project.
+### aml-ansible method
+For those who just want to get AML up and running, see the
+[quickstart](https://github.com/aml-development/aml-ansible#quickstart) of the [aml-ansible](https://github.com/aml-development/aml-ansible) project.
 
 The recommended approach is to use the vagrant box referenced at the beginning
-of this README, which will create a production-esque deployment of OZP:
+of this README, which will create a production-esque deployment of AML:
 
 * Postgres (vs. SQLite)
 * PKI (vs. HTTP Basic Auth)
@@ -122,11 +121,11 @@ of this README, which will create a production-esque deployment of OZP:
 * Served via Gunicorn (vs. Django development server)
 
 ### Runing Elasticsearch for Search
-ozp/Settings.py file variable needs to be updated to `ES_ENABLED = True`    
-After installing Elasticsearch run `make reindex_es` and run `make run_es` in the ozp-backend folder while inside of your $env     
+aml/Settings.py file variable needs to be updated to `ES_ENABLED = True`    
+After installing Elasticsearch run `make reindex_es` and run `make run_es` in the aml-backend folder while inside of your $env     
 
 ### Installing and Running Elasticsearch    
-ozp-backend requires Elasticsearch 2.4.1    
+aml-backend requires Elasticsearch 2.4.1    
 [Installation Guide for 2.4.1](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
 
 The requirement for installing Elasticsearch is Java 7.    
@@ -229,7 +228,7 @@ themselves
 **Access Control Matrix**
 <table>
     <tr>
-        <th>ozp-center</th>
+        <th>aml-center</th>
         <th colspan="5">Access Control</th>
     </tr>
 
@@ -410,7 +409,7 @@ By default, HTTP Basic Authentication is used for login.
 This can be changed to PKI (client certificates) by changing `REST_FRAMEWORK.DEFAULT_AUTHENTICATION_CLASSES` in `settings.py`
 
 Below are usernames that are part of our sample data (defined in
-`ozp-backend/ozpcenter/scripts/sample_data_generator.py`) (password for all users is `password`):
+`aml-backend/amlcenter/scripts/sample_data_generator.py`) (password for all users is `password`):
 
 **Admins:**    
 

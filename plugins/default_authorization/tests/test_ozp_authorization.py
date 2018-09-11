@@ -8,23 +8,23 @@ from django.test import override_settings
 from django.conf import settings
 from django.test import TestCase
 
-from ozpcenter import errors
-from ozpcenter.scripts import sample_data_generator as data_gen
+from amlcenter import errors
+from amlcenter.scripts import sample_data_generator as data_gen
 from plugins.default_authorization.main import PluginMain
-import ozpcenter.model_access as model_access
+import amlcenter.model_access as model_access
 
 
 @override_settings(ES_ENABLED=False)
-class OzpAuthorizationTest(TestCase):
+class AmlAuthorizationTest(TestCase):
 
     def setUp(self):
         """
         setUp is invoked before each test method
         """
         # Store the orginal value of USE_AUTH_SERVER
-        self.USE_AUTH_SERVER_ORGINAL = settings.OZP['USE_AUTH_SERVER']
+        self.USE_AUTH_SERVER_ORGINAL = settings.AML['USE_AUTH_SERVER']
         # Setting USE_AUTH_SERVER to True makes the test run
-        settings.OZP['USE_AUTH_SERVER'] = True
+        settings.AML['USE_AUTH_SERVER'] = True
         self.auth = PluginMain()
 
     def tearDown(self):
@@ -32,7 +32,7 @@ class OzpAuthorizationTest(TestCase):
         tearDown is invoked after each test method
         """
         # Set the value of USE_AUTH_SERVER to the orginal value
-        settings.OZP['USE_AUTH_SERVER'] = self.USE_AUTH_SERVER_ORGINAL
+        settings.AML['USE_AUTH_SERVER'] = self.USE_AUTH_SERVER_ORGINAL
 
     @classmethod
     def setUpTestData(cls):
@@ -89,7 +89,7 @@ class OzpAuthorizationTest(TestCase):
         profile = model_access.get_profile('jones')
         auth_expires_in = profile.auth_expires - datetime.datetime.now(pytz.utc)
         # 86,400 seconds in a day
-        min_sec = int(settings.OZP['OZP_AUTHORIZATION']['SECONDS_TO_CACHE_DATA']) - 2
+        min_sec = int(settings.AML['AML_AUTHORIZATION']['SECONDS_TO_CACHE_DATA']) - 2
         self.assertTrue(min_sec < auth_expires_in.seconds < 86400)
 
         # TODO: test access_control

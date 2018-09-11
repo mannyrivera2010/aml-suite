@@ -4,7 +4,7 @@ This script is used to install plugins into the system
 
 python plugin.py install plugin_bundle.tar.gz
 
-python plugin.py dev_link ../ozp-backend-plugins/plugins/{plugin_name}
+python plugin.py dev_link ../aml-backend-plugins/plugins/{plugin_name}
 
 TODO: Uninstall Plugin
 '''

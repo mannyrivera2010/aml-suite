@@ -5,8 +5,8 @@
 
 concept of shared folder was to make a
 ## Implementation of Legacy Bookmarks
-* https://github.com/aml-development/ozp-backend/issues/7
-* https://github.com/aml-development/ozp-backend/pull/252
+* https://github.com/aml-development/aml-backend/issues/7
+* https://github.com/aml-development/aml-backend/pull/252
 
 
 ## API

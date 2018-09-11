@@ -5,10 +5,10 @@ https://stackoverflow.com/questions/16546652/why-does-django-run-everything-twic
 TODO: Fix this error (it seems to be a race condition)
 https://bugs.python.org/issue30891
 
-2018-06-21 16:02:16,631 - 16811 - INFO - plugin_manager - Success Loading Plugin: (<module 'plugins.default_access_control.main' from '/home/{}/git/ozp-backend/plugins/default_access_control/main.py'>,<class 'plugins.default_access_control.main.PluginMain'>,False)
+2018-06-21 16:02:16,631 - 16811 - INFO - plugin_manager - Success Loading Plugin: (<module 'plugins.default_access_control.main' from '/home/{}/git/aml-backend/plugins/default_access_control/main.py'>,<class 'plugins.default_access_control.main.PluginMain'>,False)
 Traceback (most recent call last):
-2018-06-21 16:02:16,632 - 16811 - INFO - plugin_manager - Success Loading Plugin: (<module 'plugins.default_authorization.main' from '/home/{}/git/ozp-backend/plugins/default_authorization/main.py'>,<class 'plugins.default_authorization.main.PluginMain'>,False)
-  File "/home/{}/git/ozp-backend/plugins/plugin_manager.py", line 101, in dynamic_importer
+2018-06-21 16:02:16,632 - 16811 - INFO - plugin_manager - Success Loading Plugin: (<module 'plugins.default_authorization.main' from '/home/{}/git/aml-backend/plugins/default_authorization/main.py'>,<class 'plugins.default_authorization.main.PluginMain'>,False)
+  File "/home/{}/git/aml-backend/plugins/plugin_manager.py", line 101, in dynamic_importer
     loaded_module = current_module.loader.load_module()
   File "<frozen importlib._bootstrap>", line 539, in _check_name_wrapper
   File "<frozen importlib._bootstrap>", line 1614, in load_module
@@ -17,7 +17,7 @@ Traceback (most recent call last):
 ImportError: module 'plugins.default_authorization.main' not in sys.modules
 2018-06-21 16:02:16,643 - 16811 - ERROR - errors - Input module [] not of type module, it is type: None
 Traceback (most recent call last):
-  File "/home/{}/git/ozp-backend/plugins/plugin_manager.py", line 101, in dynamic_importer
+  File "/home/{}/git/aml-backend/plugins/plugin_manager.py", line 101, in dynamic_importer
     loaded_module = current_module.loader.load_module()
   File "<frozen importlib._bootstrap>", line 539, in _check_name_wrapper
   File "<frozen importlib._bootstrap>", line 1614, in load_module
@@ -36,7 +36,7 @@ import traceback
 from django.conf import settings
 from django.core.cache import cache
 
-logger = logging.getLogger('ozp-center.' + str(__name__))
+logger = logging.getLogger('aml-center.' + str(__name__))
 
 BASE_PLUGIN_DIRECTORY = '{0}/{1}'.format(os.path.realpath(os.path.join(os.path.dirname(__file__), '../')), 'plugins')
 
@@ -240,7 +240,7 @@ logger.info('Initialized PluginManager: {}'.format(plugin_manager_instance))
 
 # Import helper for the mock services
 try:
-    from tests.ozp import helper  # flake8: noqa TODO: Find better way to import mock services
+    from tests.aml import helper  # flake8: noqa TODO: Find better way to import mock services
 except ImportError as err:
     print('Mock services is not available. message: {}'.format(err))
 

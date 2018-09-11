@@ -15,13 +15,13 @@ use_es:  ## - Use elasticsearch Database
 	$(eval use_elasticsearch_str := ES_ENABLED=True)
 
 use_gunicorn:  ## - Use gunicorn
-	$(eval use_runserver_str := gunicorn --workers=`nproc` ozp.wsgi -b 0.0.0.0:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid)
+	$(eval use_runserver_str := gunicorn --workers=`nproc` aml.wsgi -b 0.0.0.0:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid)
 
 clean: ## Clean Directory
 	rm -f db.sqlite3
 	rm -rf static/
 	rm -rf media/
-	rm -f ozp.log
+	rm -f aml.log
 
 create_static:  ## Collect static files
 	mkdir -p static
@@ -29,7 +29,7 @@ create_static:  ## Collect static files
 	mkdir -p media
 
 pre:
-	export DJANGO_SETTINGS_MODULE=ozp.settings
+	export DJANGO_SETTINGS_MODULE=aml.settings
 
 test: clean pre create_static  ## Run all tests
 	TEST_MODE=True pytest
@@ -62,34 +62,34 @@ kill_all:
 celery_worker:  ## Run the celery worker
 	# env/lib/python3.4/site-packages/watchdog/observers/__init__.py
 	# Change if platform.is_linux(): try: from .polling import PollingObserver as Observer
-	watchmedo auto-restart --directory . --patterns='*.py' --recursive --interval=5 -- celery worker -l info -A ozp
+	watchmedo auto-restart --directory . --patterns='*.py' --recursive --interval=5 -- celery worker -l info -A aml
 
 kill_celery_worker:
 	ps aux | grep "celery worker" | grep "Ss" | awk '{print $$2}' | xargs -I {} echo "{}" | xargs kill
 
 run_gunicorn_secure:   ## Run server using gunicorn on HTTPS (preq: clone dev-tools repo)
-	$(use_database) $(use_elasticsearch_str) gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
+	$(use_database) $(use_elasticsearch_str) gunicorn --workers=`nproc` aml.wsgi -b localhost:8001 \
 		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
 		--keyfile ~/certs/server_nopass.key \
 		--certfile ~/certs/server_nopass.crt \
 		--ca-certs ~/certs/ca_root.pem
 
-run_gunicorn_secure_ansible:     ## Run server using gunicorn on HTTPS (preq: clone ozp-ansible repo)
-	gunicorn --workers=`nproc` ozp.wsgi -b localhost:8001 \
+run_gunicorn_secure_ansible:     ## Run server using gunicorn on HTTPS (preq: clone aml-ansible repo)
+	gunicorn --workers=`nproc` aml.wsgi -b localhost:8001 \
 		--access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid \
-		--keyfile ~/git/ozp-ansible/roles/ssl_certs/files/server.key \
-		--certfile ~/git/ozp-ansible/roles/ssl_certs/files/server.crt \
-		--ca-certs ~/git/ozp-ansible/roles/ssl_certs/files/rootCA.pem
+		--keyfile ~/git/aml-ansible/roles/ssl_certs/files/server.key \
+		--certfile ~/git/aml-ansible/roles/ssl_certs/files/server.crt \
+		--ca-certs ~/git/aml-ansible/roles/ssl_certs/files/rootCA.pem
 
 codecheck: ## Run pycodestyle python linter on the code
-	pycodestyle ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
+	pycodestyle aml amlcenter plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
 
 autopep:  ## Run tool to fix python code
-	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
-	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
+	autopep8 aml amlcenter plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
+	autopep8 aml amlcenter plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --in-place
 
 autopepdiff:  ## Print out linter diff
-	autopep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
+	autopep8 aml amlcenter plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --recursive --diff
 
 reindex_es:  use_es  ## Reindex the data into Elasticsearch
 	$(use_database) $(use_elasticsearch_str) $(use_runscript_str) reindex_es
@@ -98,8 +98,7 @@ recommend:  ## Run Recommendations algorthims
 	$(use_database) $(use_elasticsearch_str) $(use_runscript_str) recommend
 
 db_migrate:  ## Db migrate
-	$(use_database) python manage.py makemigrations ozpcenter
-	$(use_database) python manage.py makemigrations ozpiwc
+	$(use_database) python manage.py makemigrations amlcenter
 	$(use_database) TEST_MODE=True python manage.py migrate
 
 dev: clean pre create_static install_git_hooks db_migrate  ## Set up development server with sample data
@@ -137,18 +136,18 @@ freeze_requirements:  ## freeze requirements
 	pip freeze > requirements.freeze.txt
 
 sqlite_dump: dev
-	sqlite3 db.sqlite3 .dump > ozpcenter/scripts/test_data/dump_sqlite3.sql
+	sqlite3 db.sqlite3 .dump > amlcenter/scripts/test_data/dump_sqlite3.sql
 
 sqlite_restore:
-	if [ -e 'db.sqlite3' ]; then rm db.sqlite3 ; fi && cat ozpcenter/scripts/test_data/dump_sqlite3.sql | sqlite3 db.sqlite3
+	if [ -e 'db.sqlite3' ]; then rm db.sqlite3 ; fi && cat amlcenter/scripts/test_data/dump_sqlite3.sql | sqlite3 db.sqlite3
 
 pgsql_dump: use_psql dev
-	pg_dump --username=ozp_user --host=localhost ozp > ozpcenter/scripts/test_data/dump_pgsql.sql
+	pg_dump --username=aml_user --host=localhost aml > amlcenter/scripts/test_data/dump_pgsql.sql
 
 pgsql_create_user:
-	if [ `psql -tA -c "SELECT 1 AS result FROM pg_database WHERE datname='ozp'" -U postgres --host=localhost` == '1' ] ; then psql -c 'DROP DATABASE ozp;' -U postgres --host=localhost ; fi
-	psql -c 'CREATE DATABASE ozp;' -U postgres --host=localhost
-	psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;' -U postgres --host=localhost
+	if [ `psql -tA -c "SELECT 1 AS result FROM pg_database WHERE datname='aml'" -U postgres --host=localhost` == '1' ] ; then psql -c 'DROP DATABASE aml;' -U postgres --host=localhost ; fi
+	psql -c 'CREATE DATABASE aml;' -U postgres --host=localhost
+	psql -c 'GRANT ALL PRIVILEGES ON DATABASE aml TO aml_user;' -U postgres --host=localhost
 
 pgsql_restore: pgsql_create_user
-	psql --username=ozp_user --host=localhost ozp < ozpcenter/scripts/test_data/dump_pgsql.sql
+	psql --username=aml_user --host=localhost aml < amlcenter/scripts/test_data/dump_pgsql.sql

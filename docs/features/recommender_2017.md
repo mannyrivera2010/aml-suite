@@ -1,7 +1,7 @@
 # Business Objective
 To recommend applications to users that they might find useful in their everyday objectives    
 
-Original Ticket: https://github.com/aml-development/ozp-backend/issues/193
+Original Ticket: https://github.com/aml-development/aml-backend/issues/193
 
 ## Requirements
 * Hardware and software requirements should not add cost or dependencies
@@ -92,13 +92,13 @@ Recommender systems in Python, can construct a customized recommender system fro
 * Single Machine Processing
 
 ## Mock up
-Requirement came from https://github.com/ozone-development/ozp-documentation/wiki/Iteration-53#uiux
+Requirement came from https://github.com/aml-development/aml-documentation/wiki/Iteration-53#uiux
 
 ### Center Front page
-![](https://raw.githubusercontent.com/ozone-development/ozp-documentation/master/mockups/marketplace/Center_Recommended.PNG)
+![](https://raw.githubusercontent.com/aml-development/aml-documentation/master/mockups/marketplace/Center_Recommended.PNG)
 
 ### Center Search page
-![](https://raw.githubusercontent.com/ozone-development/ozp-documentation/master/mockups/marketplace/Center_smartsearch_recommendation.PNG)
+![](https://raw.githubusercontent.com/aml-development/aml-documentation/master/mockups/marketplace/Center_smartsearch_recommendation.PNG)
 
 ## Recommendation Engine Principles
 http://people.cs.vt.edu/~ramakris/papers/receval.pdf    
@@ -145,10 +145,10 @@ class RecommendationsEntry(models.Model):
 - Add recommended listing to storefront endpoint (This endpoint is used to show the users the results of the computation of the recommendation script/program)
 
 ``` diff
-diff --git a/ozpcenter/api/storefront/model_access.py b/ozpcenter/api/storefront/model_access.py
+diff --git a/amlcenter/api/storefront/model_access.py b/amlcenter/api/storefront/model_access.py
 index 85418d1..277150b 100644
---- a/ozpcenter/api/storefront/model_access.py
-+++ b/ozpcenter/api/storefront/model_access.py
+--- a/amlcenter/api/storefront/model_access.py
++++ b/amlcenter/api/storefront/model_access.py
 @@ -21,8 +21,16 @@ def get_storefront(username):
 
      NOTE: think about adding Bookmark status to this later on
@@ -178,7 +178,7 @@ index 85418d1..277150b 100644
 ```
 - Have a process compute the recommendations for each user and write the results in the **RecommendationsEntry** table (maybe have two tables - active , inactive)
   - Write the script that computes recommendations, at the point connect to database, get datasets, run recommendation algorithm, and save results
-- After the recommendations have been saved to the table, the users will see recommendations when they hit the storefront endpoint, they could also refresh the page in ozp-center
+- After the recommendations have been saved to the table, the users will see recommendations when they hit the storefront endpoint, they could also refresh the page in aml-center
 
 
 ### Content based search information:
