@@ -1,7 +1,7 @@
 """
 This is the plugin that accesses the Authorization Server
 
-Authorization for OZP using the DemoAuth service
+Authorization for AML using the DemoAuth service
 
 Checks models.Profile.auth_expires. If auth is expired, refresh it.
 
@@ -19,13 +19,13 @@ import pytz
 from django.conf import settings
 from django.contrib.auth.models import Group
 
-from ozpcenter import errors
-from ozpcenter import models
-from ozpcenter import utils
-import ozpcenter.model_access as model_access
+from amlcenter import errors
+from amlcenter import models
+from amlcenter import utils
+import amlcenter.model_access as model_access
 
 
-logger = logging.getLogger('ozp-center.' + str(__name__))
+logger = logging.getLogger('aml-center.' + str(__name__))
 
 
 class PluginMain(object):
@@ -35,7 +35,7 @@ class PluginMain(object):
 
     def __init__(self, settings=None, requests=None):
         '''
-        Settings: Object reference to ozp settings
+        Settings: Object reference to aml settings
         '''
         self.settings = settings
         self.requests = requests
@@ -58,9 +58,9 @@ class PluginMain(object):
         """
         profile = model_access.get_profile(username)
         # get user's basic data
-        url = self.settings.OZP['OZP_AUTHORIZATION']['USER_INFO_URL'] % (profile.dn, profile.issuer_dn)
-        server_crt = self.settings.OZP['OZP_AUTHORIZATION']['SERVER_CRT']
-        server_key = self.settings.OZP['OZP_AUTHORIZATION']['SERVER_KEY']
+        url = self.settings.AML['AML_AUTHORIZATION']['USER_INFO_URL'] % (profile.dn, profile.issuer_dn)
+        server_crt = self.settings.AML['AML_AUTHORIZATION']['SERVER_CRT']
+        server_key = self.settings.AML['AML_AUTHORIZATION']['SERVER_KEY']
         r = self.requests.get(url, cert=(server_crt, server_key), verify=False)
         # logger.debug('hitting url %s for user with dn %s' % (url, profile.dn), extra={'request':request})
 
@@ -83,7 +83,7 @@ class PluginMain(object):
         user_data.pop('formalAccesses', None)
 
         # get groups for user
-        url = self.settings.OZP['OZP_AUTHORIZATION']['USER_GROUPS_URL'] % (profile.dn, self.settings.OZP['OZP_AUTHORIZATION']['PROJECT_NAME'])
+        url = self.settings.AML['AML_AUTHORIZATION']['USER_GROUPS_URL'] % (profile.dn, self.settings.AML['AML_AUTHORIZATION']['PROJECT_NAME'])
         # logger.debug('hitting url %s for user with dn %s for group info' % (url, profile.dn), extra={'request':request})
         r = self.requests.get(url, cert=(server_crt, server_key), verify=False)
         if r.status_code != 200:
@@ -101,13 +101,13 @@ class PluginMain(object):
         user_data['is_beta_user'] = False
 
         for g in groups:
-            if self.settings.OZP['OZP_AUTHORIZATION']['APPS_MALL_STEWARD_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
+            if self.settings.AML['AML_AUTHORIZATION']['APPS_MALL_STEWARD_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
                 user_data['is_apps_mall_steward'] = True
-            if self.settings.OZP['OZP_AUTHORIZATION']['ORG_STEWARD_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
+            if self.settings.AML['AML_AUTHORIZATION']['ORG_STEWARD_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
                 user_data['is_org_steward'] = True
-            if self.settings.OZP['OZP_AUTHORIZATION']['METRICS_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
+            if self.settings.AML['AML_AUTHORIZATION']['METRICS_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
                 user_data['is_org_steward'] = True
-            if self.settings.OZP['OZP_AUTHORIZATION']['BETA_USER_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
+            if self.settings.AML['AML_AUTHORIZATION']['BETA_USER_GROUP_NAME'] == utils.find_between(g, 'cn=', ','):
                 user_data['is_beta_user'] = True
         return user_data
 
@@ -123,7 +123,7 @@ class PluginMain(object):
 
         Return True if update succeeds, False otherwise
         """
-        if not settings.OZP['USE_AUTH_SERVER']:
+        if not settings.AML['USE_AUTH_SERVER']:
             return True
 
         profile = model_access.get_profile(username)
@@ -133,7 +133,7 @@ class PluginMain(object):
         # check profile.auth_expires. if auth_expires - now > 24 hours, raise an
         # exception (auth data should never be cached for more than 24 hours)
         now = datetime.datetime.now(pytz.utc)
-        seconds_to_cache_data = int(settings.OZP['OZP_AUTHORIZATION']['SECONDS_TO_CACHE_DATA'])
+        seconds_to_cache_data = int(settings.AML['AML_AUTHORIZATION']['SECONDS_TO_CACHE_DATA'])
         if seconds_to_cache_data > 24 * 3600:
             raise errors.AuthorizationFailure('Cannot cache data for more than 1 day')
 

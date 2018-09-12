@@ -1,15 +1,15 @@
 """
-Running this script will generate Wheels for the ozp-backend django app and its
+Running this script will generate Wheels for the aml-backend django app and its
 dependencies
 
 setuptools, wheel, and django libraries must be installed in the current python
 environment before running this script
 
-NOTE: It's not yet clear whether we want to install a Wheel for the ozp_backend
+NOTE: It's not yet clear whether we want to install a Wheel for the aml_backend
 application itself, or if it will be better to install wheels for all of the
-dependencies, then use the source of ozp_backend for running the app.
+dependencies, then use the source of aml_backend for running the app.
 
-Installing ozp_backend as a wheel will place it in <python_env>/lib/Python3.4.3/site-packages/,
+Installing aml_backend as a wheel will place it in <python_env>/lib/Python3.4.3/site-packages/,
 which might not be as convenient as running from source.
 
 After running this script, the application can be deployed "from source"
@@ -17,14 +17,14 @@ by doing:
 
 tar -xzf <release tarball>
 pip install --no-index --find-links=release/wheelhouse -r requirements.txt
-gunicorn ozp.wsgi ... (from the release directory referencing the local ozp package)
+gunicorn aml.wsgi ... (from the release directory referencing the local aml package)
 
 Alternatively, the wheel for the application can be installed in the python
 env and the source is no longer needed:
 
 tar -xzf <release tarball>
-pip install --no-index --find-links=release/wheelhouse ozp_backend==1.0
-gunicorn ozp.wsgi ... (ozp.wsgi is installed in site-packages, so it can be run
+pip install --no-index --find-links=release/wheelhouse aml_backend==1.0
+gunicorn aml.wsgi ... (aml.wsgi is installed in site-packages, so it can be run
     from anywhere)
 
 One problem with the latter method is that it will only include the python
@@ -39,9 +39,9 @@ import os
 import re
 import shutil
 from subprocess import call
-from ozp import version
+from aml import version
 
-PACKAGE = 'ozp_backend'
+PACKAGE = 'aml_backend'
 
 
 def get_date_time():
@@ -70,9 +70,8 @@ def create_release_dir():
     os.mkdir("release")
     shutil.copytree("wheelhouse", "release/wheelhouse")
     shutil.copytree("docs", "release/docs")
-    shutil.copytree("ozp", "release/ozp")
-    shutil.copytree("ozpcenter", "release/ozpcenter")
-    shutil.copytree("ozpiwc", "release/ozpiwc")
+    shutil.copytree("aml", "release/aml")
+    shutil.copytree("amlcenter", "release/amlcenter")
     shutil.copytree("static", "release/static")
     shutil.copytree("plugins", "release/plugins")
     shutil.copy("manage.py", "release")
@@ -100,7 +99,7 @@ def run():
     # make directory for wheelhouse
     call("mkdir -p wheelhouse", shell=True)
 
-    # build wheel for ozp_backend - creates wheel in dist/
+    # build wheel for aml_backend - creates wheel in dist/
     call("python setup.py bdist_wheel", shell=True)
 
     # build/collect wheels for dependencies (this will put wheels in
@@ -116,7 +115,7 @@ def run():
     call("cp wheelhouse/Pillow-4.2.1-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/Pillow-4.2.1-cp34-cp34m-linux_x86_64.whl", shell=True)
     call("cp wheelhouse/psycopg2-2.7.3.1-cp34-cp34m-manylinux1_x86_64.whl wheelhouse/psycopg2-2.7.3.1-cp34-cp34m-linux_x86_64.whl", shell=True)
     # create release directory including the wheelhouse (dependencies) and the
-    # relevant source for ozp_backend
+    # relevant source for aml_backend
     create_release_dir()
 
     # tar everything up

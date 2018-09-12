@@ -8,7 +8,7 @@
             "clearances": ["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP SECRET"],
             "formalAccesses": ["SIERRA", "TANGO"],
             "visas": ["NOVEMBER"],
-            "groups": ["cn=OZP_ORG_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
+            "groups": ["cn=AML_ORG_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
         },
         {
             "dn": "Julia Dixon jdixon",
@@ -16,7 +16,7 @@
             "clearances": ["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP SECRET"],
             "formalAccesses": ["SIERRA"],
             "visas": [],
-            "groups": ["cn=OZP_ORG_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
+            "groups": ["cn=AML_ORG_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
         },
         {
             "dn": "OBrien obrien",
@@ -24,7 +24,7 @@
             "clearances": ["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP SECRET"],
             "formalAccesses": ["SIERRA", "TANGO", "GOLF", "HOTEL"],
             "visas": ["NOVEMBER"],
-            "groups": ["cn=OZP_ORG_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
+            "groups": ["cn=AML_ORG_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
         },
         {
             "dn": "Big Brother bigbrother",
@@ -32,7 +32,7 @@
             "clearances": ["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP SECRET"],
             "formalAccesses": ["SIERRA", "TANGO", "GOLF", "HOTEL"],
             "visas": ["NOVEMBER"],
-            "groups": ["cn=OZP_APPS_MALL_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
+            "groups": ["cn=AML_APPS_MALL_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
         },
         {
             "dn": "Big Brother 2 bigbrother2",
@@ -40,7 +40,7 @@
             "clearances": ["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP SECRET"],
             "formalAccesses": ["SIERRA", "TANGO", "GOLF", "HOTEL"],
             "visas": ["NOVEMBER"],
-            "groups": ["cn=OZP_APPS_MALL_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
+            "groups": ["cn=AML_APPS_MALL_STEWARD,ou=ABC,ou=DEF,o=X.Y.Z"]
         },
         {
             "dn": "Aaronson aaronson",

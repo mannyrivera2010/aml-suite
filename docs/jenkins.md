@@ -61,12 +61,12 @@ There will be 4 jobs per git repo (release and latest)
 
 Git Repos and Jobs names
 
-* ozp-center
+* aml-center
     * center-latest-test
     * center-latest-build
     * center-release-test
     * center-release-build
-* ozp-backend
+* aml-backend
     * backend-latest-test
     * backend-latest-build
     * backend-release-test
@@ -74,9 +74,9 @@ Git Repos and Jobs names
 
 etc....
 
-### Setting up ozp folder on Jenkins CI
+### Setting up aml folder on Jenkins CI
 
-* Create a new folder called `ozp`
+* Create a new folder called `aml`
 
 ### Defaults for all jobs
 
@@ -86,7 +86,7 @@ etc....
     * Select `Throttle Concurrent Builds`
         * Set `Maximum Total Concurrent Builds` to `1`
         * Set `Maximum Concurrent Builds Per Node` to `1`
-        * Multi-Project Throttle Category [x] ozp-build , [ ] ozp-deploy
+        * Multi-Project Throttle Category [x] aml-build , [ ] aml-deploy
     * Select `Restrict where this project can be run`
         * Label Expression: `ci-jenkins.proj.domain.com`
     * Select `Github project`,
@@ -104,17 +104,17 @@ etc....
         * File to archive: `???`
     * Send build artifacts over ssh
         * SSH Server Name: `ci-latest.proj.domain.com`
-        * Exec command: `sudo /home/jenkins/ozp_deploy.sh ${JOB_NAME} ${BUILD_NUMBER}`
+        * Exec command: `sudo /home/jenkins/aml_deploy.sh ${JOB_NAME} ${BUILD_NUMBER}`
     * Delete workspace when build is done
 
-### Setting up ozp-center on Jenkins CI
+### Setting up aml-center on Jenkins CI
 * Create a new `freestyle project` called `build-center-latest` and `build-center-release`
 * Under `Build`
     * Execute Shell
 ```
 #!/usr/bin/env bash
-# use the develop branch of ozp-react-commons
-# sed -i -e "s/ozp-react-commons#master/ozp-react-commons#develop/g" package.json
+# use the develop branch of aml-react-commons
+# sed -i -e "s/aml-react-commons#master/aml-react-commons#develop/g" package.json
 # sed -i -e "s/\/icons/\/icons#1fc7aee3a2812042c421baaab67abb2bd9606b0d/g" package.json
 source /usr/local/node_versions/set_node_version.sh 5.3.0
 echo "node version: "
@@ -139,7 +139,7 @@ exit 1
 * Under `Post-build Actions`
     * `Archive the archive`,  File to archive: `center-*.tar.gz`
 
-### Setting up ozp-hud on Jenkins CI
+### Setting up aml-hud on Jenkins CI
 * Create a new `freestyle project` called `build-hud-latest` and `build-hud-release`
 * Under `Build`
     * Execute Shell
@@ -167,7 +167,7 @@ exit 1
     * `Archive the archive`,  File to archive: `hud-*.tar.gz`
 
 
-### Setting up ozp-webtop on Jenkins CI
+### Setting up aml-webtop on Jenkins CI
 * Create a new `freestyle project` called `build-webtop-latest` and `build-webtop-release`
 * Under `Build`
     * Execute Shell
@@ -184,7 +184,7 @@ npm run tarProdDate
 * Under `Post-build Actions`
     * `Archive the archive`,  File to archive: `webtop-*.tar.gz`
 
-### Setting up ozp-demo on Jenkins CI
+### Setting up aml-demo on Jenkins CI
 * Create a new `freestyle project` called `build-demo-latest` and `build-demo-release`
 * Under `Build`
     * Execute Shell
@@ -200,7 +200,7 @@ npm run tarDate
     * `Archive the archive`,  File to archive: `demo-apps-*.tar.gz`
 
 
-### Setting up ozp-iwc on Jenkins CI
+### Setting up aml-iwc on Jenkins CI
 * Create a new `freestyle project` called `iwc-latest-build` and `iwc-release-build`
 * Under `Build`
     * Execute Shell
@@ -215,8 +215,8 @@ npm run tarDate
 * Under `Post-build Actions`
     * `Archive the archive`,  File to archive: `iwc-*.tar.gz`
 
-### Setting up ozp-react-commons on Jenkins CI
-* Create a new `freestyle project` called `detect-ozp-react-commons-latest` and `detect-ozp-react-commons-release`
+### Setting up aml-react-commons on Jenkins CI
+* Create a new `freestyle project` called `detect-aml-react-commons-latest` and `detect-aml-react-commons-release`
 * Under `Build`
     * Execute Shell
 ```
@@ -232,8 +232,8 @@ npm run test
         * Projects to build: `build-center-release,build-hud-release`
         * Trigger only if build is stable
 
-### Setting up ozp-security on Jenkins CI
-* Create a new `freestyle project` called `OZP-Security-Plugin`
+### Setting up aml-security on Jenkins CI
+* Create a new `freestyle project` called `AML-Security-Plugin`
 * Under `Build`
     * Maven Version `Maven 3.0.5`
     * Root Pom `Root Pom`
@@ -243,7 +243,7 @@ npm run test
 * Under `Post-build Actions`
     * `Archive the archive`,  File to archive: `target\*.jar`
 
-### Setting up ozp-backend on Jenkins CI
+### Setting up aml-backend on Jenkins CI
 #### Build jobs
 * Create a new `freestyle project` called `backend-latest-build` and `backend-release-build`
 * Under `Build`
@@ -255,7 +255,7 @@ sh jenkins/build.sh
     * `Archive the archive`,  File to archive: `backend*.tar.gz`
     * Send build artifacts over ssh
         * SSH Server Name: `ci-latest.proj.domain.com`
-        * Exec command: `sudo /home/jenkins/ozp_deploy.sh ${JOB_NAME} ${BUILD_NUMBER} --es_enabled=True`
+        * Exec command: `sudo /home/jenkins/aml_deploy.sh ${JOB_NAME} ${BUILD_NUMBER} --es_enabled=True`
 
 #### Test jobs
 * Create a new `freestyle project` called `backend-latest-test` and `backend-release-test`
@@ -266,7 +266,7 @@ sh jenkins/test.sh
 ```
 
 * Under `Post-build Actions`
-    * `Archive the archive`,  File to archive: `ozp.log`
+    * `Archive the archive`,  File to archive: `aml.log`
     * `Build Other Projects`=`build-backend-latest`, Trigger only if build is stable
     * `Publish HTML Report`
         * `HTML directory to archive`: cover

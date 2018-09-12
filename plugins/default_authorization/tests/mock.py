@@ -1,8 +1,8 @@
 import json
 import os
 
-from tests.ozp.helper import MockResponse
-from tests.ozp.helper import Route
+from tests.aml.helper import MockResponse
+from tests.aml.helper import Route
 
 TEST_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

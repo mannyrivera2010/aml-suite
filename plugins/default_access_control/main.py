@@ -28,9 +28,9 @@ import time
 
 from . import tokens as all_tokens
 
-import ozpcenter.model_access as model_access
+import amlcenter.model_access as model_access
 
-logger = logging.getLogger('ozp-center.' + str(__name__))
+logger = logging.getLogger('aml-center.' + str(__name__))
 
 
 tokens_list = [
@@ -70,7 +70,7 @@ class PluginMain(object):
 
     def __init__(self, settings=None, requests=None):
         '''
-        Settings: Object reference to ozp settings
+        Settings: Object reference to aml settings
         '''
         self.settings = settings
         self.requests = requests

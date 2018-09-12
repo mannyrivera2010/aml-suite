@@ -2,7 +2,7 @@
 Notifications are system-provided messages that deploy to each relevant individual user. The intent is for Notifications to be available to be sent from the system, from any individual organization, or from an application.
 
 # Requirements
-Existing Issues in github:  https://github.com/aml-development/ozp-backend/issues?utf8=%E2%9C%93&q=is%3Aissue%20notification
+Existing Issues in github:  https://github.com/aml-development/aml-backend/issues?utf8=%E2%9C%93&q=is%3Aissue%20notification
 
 
 ## Notification types
@@ -135,7 +135,7 @@ Request Payload:
 * Only user authorized should be able to delete the notifications.
 
 **Related Issues:**
-https://github.com/aml-development/ozp-backend/issues/122
+https://github.com/aml-development/aml-backend/issues/122
 
 ## Protocol
   * Shall be possible to have notifications in JSON Formats and over HTTP/HTTPS transports
@@ -148,7 +148,7 @@ GET /api/self/notification/?ordering=-created_date   # Descending
 or
 GET /api/self/notification/?ordering=created_date  # Ascending
 ```
-https://github.com/aml-development/ozp-backend/issues/160
+https://github.com/aml-development/aml-backend/issues/160
 
 ## 2017 Redesign
 ### Goal
@@ -166,7 +166,7 @@ The notification system shall integrate with email system
 * When a listing notification occurs, it will make a list of all users that has a listing bookmark and put a message in the 'inbox'  of each user
 * When an agency-wide notification occurs, it will make a list of all user in that agency and put a message in the 'inbox' of each user
 * When a peer-to-peer bookmark notification occurs
-  * https://github.com/aml-development/ozp-backend/issues/129
+  * https://github.com/aml-development/aml-backend/issues/129
 * Pub/Sub Events system for system actions events (Category Notification)
 
 ## Research
@@ -593,5 +593,5 @@ def get_self_notifications(username):
 * What level of information about all the current notifications should Org Stewards have?
     * Should the get to see all the other orgs' notifications but not interact?
     * Should they only get to see notifications from their own org(s) and the listings associated with their org?
-    * Should they get to see OZONE Platform notifications?
+    * Should they get to see aml Platform notifications?
 * Can an owner cancel an approved notification?

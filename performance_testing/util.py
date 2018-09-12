@@ -3,8 +3,8 @@ from collections import OrderedDict
 import json
 
 
-from ozpcenter.utils import shorthand_types
-from ozpcenter.utils import shorthand_dict
+from amlcenter.utils import shorthand_types
+from amlcenter.utils import shorthand_dict
 
 
 

@@ -18,7 +18,7 @@ mkdir -p static
 TEST_MODE=True python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
-pycodestyle ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
+pycodestyle aml amlcenter plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402,E722 --show-source
 
 echo "Number of cores `nproc`"
 TEST_MODE=True pytest -n `nproc` --dist=loadscope

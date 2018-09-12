@@ -20,7 +20,7 @@ TODO Add documentation
 ### Pep8
 Pep8 is the Style Guide for Python Code
 ````
-pep8 ozp ozpcenter ozpiwc plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --exclude=ozpcenter/scripts/* --show-source
+pep8 aml amlcenter plugins tests --ignore=E501,E123,E128,E121,E124,E711,E402 --exclude=amlcenter/scripts/* --show-source
 autopep8 . -r --diff --ignore errors=E501,E123,E128,E121,E124  --max-line-length=5000
 ````
 
@@ -119,7 +119,7 @@ might be something to look at later on.
 
 ### URLs
 All resource endpoints are defined in the resource's respective `urls.py` in
-`ozpcenter/api/`. `ozpcenter.urls` collects all of these endpoints, where they
+`amlcenter/api/`. `amlcenter.urls` collects all of these endpoints, where they
 are given the `api/` prefix in the global `urls.py`
 
 DRF uses a browsable API, meaning that you can go to
@@ -191,7 +191,7 @@ querysets are used to ensure only the appropriate data is returned.
 #### Authentication
 The app currently supports two forms of authentication - HTTP Basic Auth and
 PKI (client SSL authentication). HTTP Basic Auth is used for development
-purposes only. PKI authentication is implemented in `ozpcenter/auth/pkiauth.py`.
+purposes only. PKI authentication is implemented in `amlcenter/auth/pkiauth.py`.
 The method of authentication to use is controlled by
 `REST_FRAMEWORK.DEFAULT_AUTHENTICATION_CLASSES` in settings.py
 
@@ -231,7 +231,7 @@ Postman was used extensively during the API's development, and perhaps someday
  a Postman Collection of requests will be added to this repo
 
 ### Logging
-Currently, a single logger (`ozp-center`) is used throughout the application.
+Currently, a single logger (`aml-center`) is used throughout the application.
 See `settings.py` for details
 
 ### Static and Media Files
