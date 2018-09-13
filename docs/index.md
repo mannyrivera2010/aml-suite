@@ -7,8 +7,8 @@ Travis-CI  [![Build Status](https://travis-ci.org/aml-development/aml-backend.sv
 
 ## Getting Started
 ### Software Versions
-`Elasticsearch` - 6.3.2
-`Python` - 3.4
+`Elasticsearch` - 6.3.2    
+`Python` - 3.4    
 
 ### Development environment preparation
 ```
@@ -33,41 +33,39 @@ make dev
 ### MakeFile
 There is a MakeFile in the project to run repetitive commands    
 
-*Flags*
-`use_psql`-Use Postgres Database
-`use_es`-Use elasticsearch Database
-`use_gunicorn`-Use gunicorn
-`clean`-Clean Directory
-`create_static`-Collect static files
-`test`-Run all tests
-`test_parallel`-Run all test in parallel (increase speed of unit tests)
-`test_soft`-Run all tests (without clean)
-`install_git_hooks`-Install Git Hooks
-`run`-Run the server locally
-`run_all`-Run server locally, celery_worker, Recommendations
-`celery_worker`-Run the celery worker
-`run_gunicorn_secure`-Run server using gunicorn on HTTPS (preq: clone dev-tools repo)
-`run_gunicorn_secure_ansible`-Run server using gunicorn on HTTPS (preq: clone aml-ansible repo)
-`codecheck`-Run pycodestyle python linter on the code
-`autopep`-Run tool to fix python code
-`autopepdiff`-Print out linter diff
-`reindex_es`-Reindex the data into Elasticsearch
-`recommend`-Run Recommendations algorthims
-`db_migrate`-Db migrate
-`dev`-Set up development server with sample data
-`email`-Send Notifications using email server
-`run_debug_email_server`-Run Debug Email Server
-`shell`-Launch python shell using sqlite
-`shell_psql`-Launch python shell using postgres
-`create_virtualenv`-Create Python Environment
-`pyenv`-Create Python Environment and install dependencies
-`pyenv_wheel`-Create Python Environment and install dependencies using wheelhouse
+**Flags**
+`use_psql`-Use Postgres Database    
+`use_es`-Use elasticsearch Database    
+`use_gunicorn`-Use gunicorn    
+`clean`-Clean Directory    
+`create_static`-Collect static files    
+`test`-Run all tests    
+`test_parallel`-Run all test in parallel (increase speed of unit tests)    
+`test_soft`-Run all tests (without clean)    
+`install_git_hooks`-Install Git Hooks    
+`run`-Run the server locally    
+`run_all`-Run server locally, celery_worker, Recommendations    
+`celery_worker`-Run the celery worker    
+`run_gunicorn_secure`-Run server using gunicorn on HTTPS (preq: clone dev-tools repo)    
+`run_gunicorn_secure_ansible`-Run server using gunicorn on HTTPS (preq: clone aml-ansible repo)    
+`codecheck`-Run pycodestyle python linter on the code    
+`autopep`-Run tool to fix python code    
+`autopepdiff`-Print out linter diff    
+`reindex_es`-Reindex the data into Elasticsearch    
+`recommend`-Run Recommendations algorthims    
+`db_migrate`-Db migrate    
+`dev`-Set up development server with sample data    
+`email`-Send Notifications using email server    
+`run_debug_email_server`-Run Debug Email Server    
+`shell`-Launch python shell using sqlite    
+`shell_psql`-Launch python shell using postgres    
+`create_virtualenv`-Create Python Environment    
+`pyenv`-Create Python Environment and install dependencies    
+`pyenv_wheel`-Create Python Environment and install dependencies using wheelhouse    
 
-*Requirements*
+**Requirements**
 `upgrade_requirements`-upgrade requirements
 `freeze_requirements`-freeze requirements
-
-
 
 ### Postgres Setup
 Command to install postgresql (on Debian-based OS)
