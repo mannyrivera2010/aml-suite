@@ -1,22 +1,27 @@
 # This is a make file to help with the commands
-## Help documentatin à la https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+# Help documentatin à la https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' ./Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^.*?## .*$$' ./Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+help_markdown:
+	@grep -E '^.*?## .*$$' ./Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "`%s`-%s\n", $$1, $$2}'
 
 use_database := MAIN_DATABASE=sqlite
 use_elasticsearch_str := ES_ENABLED=False
 use_runserver_str := python manage.py runserver 0.0.0.0:8001
 use_runscript_str := python manage.py runscript
 
-use_psql:  ## - Use Postgres Database
+## Flags
+use_psql:  ## Use Postgres Database
 	$(eval use_database := MAIN_DATABASE=psql)
 
-use_es:  ## - Use elasticsearch Database
+use_es:  ## Use elasticsearch Database
 	$(eval use_elasticsearch_str := ES_ENABLED=True)
 
-use_gunicorn:  ## - Use gunicorn
+use_gunicorn:  ## Use gunicorn
 	$(eval use_runserver_str := gunicorn --workers=`nproc` aml.wsgi -b 0.0.0.0:8001 --access-logfile logs.txt --error-logfile logs.txt -p gunicorn.pid)
 
+# Commands
 clean: ## Clean Directory
 	rm -f db.sqlite3
 	rm -rf static/
@@ -108,7 +113,7 @@ dev: clean pre create_static install_git_hooks db_migrate  ## Set up development
 dev_fast: clean pre create_static install_git_hooks
 	FAST_MODE=True $(use_database) $(use_runscript_str) sample_data_generator
 
-email:  ## Notification email server
+email:  ## Send Notifications using email server
 	$(use_runscript_str) notification_email
 
 run_debug_email_server:  ## Run Debug Email Server
@@ -129,6 +134,8 @@ pyenv: create_virtualenv  ## Create Python Environment and install dependencies
 pyenv_wheel: create_virtualenv  ## Create Python Environment and install dependencies using wheelhouse
 	(source env/bin/activate &&  pip install --no-index --find-links=wheelhouse -r requirements.txt)
 
+##
+## Requirements
 upgrade_requirements:  ## upgrade requirements
 	pip freeze | cut -d = -f 1 | xargs -n 1 pip install --upgrade
 
