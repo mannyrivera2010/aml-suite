@@ -10,30 +10,84 @@ Travis-CI  [![Build Status](https://travis-ci.org/aml-development/aml-backend.sv
 `Elasticsearch` - 6.3.2    
 `Python` - 3.4    
 
+### Postgres Setup (optional)
+Command to install postgresql (on Debian-based OS)    
+```
+sudo apt-get install postgresql postgresql-contrib
+```
+
+Commands to setup postgresql for aml-backend    
+```
+sudo -i -u postgres
+createuser aml_user
+psql -c 'ALTER USER aml_user CREATEDB;'
+psql -c "ALTER USER "aml_user" WITH PASSWORD 'password';"
+createdb aml
+psql -c 'GRANT ALL PRIVILEGES ON DATABASE aml TO aml_user;'
+```
+
+### Installing and Running Elasticsearch    
+aml-backend requires Elasticsearch 6.3.2   
+[Installation Guide for 6.3](https://www.elastic.co/guide/en/elasticsearch/reference/6.3/_installation.html)
+
+**Tip**    
+When installing Elasticsearch in production, you can choose to use the Debian or RPM packages provided on the downloads page.    
+You can also use the officially supported Puppet module, Chef cookbook, or Ansible.    
+
 ### Development environment preparation
+#### Cloning Repo
 ```
 cd ~
 mkdir git
 cd git
 git clone git@github.com:aml-development/aml-backend.git
-cd aml-backend
+```
+#### Creating Python Environment and Installing dependencies    
+**Using Commands**    
+```
+cd ~/git/aml-backend
 virtualenv env
 source env/bin/activate
 pip install -r requirements.txt
 ```
-If `virtualenv env` does not work it might be `python3 -m venv env` if the environment
+If `virtualenv env` does not work it might be `python3 -m venv env` if the environment    
+
+**Using MakeFile**    
+```
+cd ~/git/aml-backend
+make pyenv
+```
 
 ### Building and running the AML backend
 ```
 cd ~/git/aml-backend
+# activate python environment
 source env/bin/activate
+# Creating Database, Collecting Static Files, Running Sample Data Generator
 make dev
+# Running Backend
+make run
 ```
+
+**Using Elasticsearch**    
+```
+cd ~/git/aml-backend
+# activate python environment
+source env/bin/activate
+# Creating Database, Collecting Static Files, Running Sample Data Generator, indexing elasticsearch
+make dev reindex_es
+# Running backend with elasticsearch
+make use_es run
+```
+
+**Running Elasticsearch for Search using settings file**    
+aml/Settings.py file variable needs to be updated to `ES_ENABLED = True`    
+After installing Elasticsearch run `make reindex_es` and run `make use_es run` in the aml-backend folder while inside of your python environment    
 
 ### MakeFile
 There is a MakeFile in the project to run repetitive commands    
 
-**Flags**
+**Flags**    
 `use_psql`-Use Postgres Database    
 `use_es`-Use elasticsearch Database    
 `use_gunicorn`-Use gunicorn    
@@ -63,25 +117,10 @@ There is a MakeFile in the project to run repetitive commands
 `pyenv`-Create Python Environment and install dependencies    
 `pyenv_wheel`-Create Python Environment and install dependencies using wheelhouse    
 
-**Requirements**
-`upgrade_requirements`-upgrade requirements
-`freeze_requirements`-freeze requirements
+**Requirements**    
+`upgrade_requirements`-upgrade requirements    
+`freeze_requirements`-freeze requirements    
 
-### Postgres Setup
-Command to install postgresql (on Debian-based OS)
-```
-sudo apt-get install postgresql postgresql-contrib
-```
-
-Commands to setup postgresql for aml-backend
-```
-sudo -i -u postgres
-createuser aml_user
-psql -c 'ALTER USER aml_user CREATEDB;'
-psql -c "ALTER USER "aml_user" WITH PASSWORD 'password';"
-createdb aml
-psql -c 'GRANT ALL PRIVILEGES ON DATABASE aml TO aml_user;'
-```
 
 ### Local development method (minimal)
 To serve the application on your host machine with minimal external dependencies,
@@ -129,33 +168,6 @@ of this README, which will create a production-esque deployment of AML:
 * Use of external authorization service
 * Enable HTTPS (via nginx reverse proxy)
 * Served via Gunicorn (vs. Django development server)
-
-### Runing Elasticsearch for Search
-aml/Settings.py file variable needs to be updated to `ES_ENABLED = True`    
-After installing Elasticsearch run `make reindex_es` and run `make run_es` in the aml-backend folder while inside of your $env     
-
-### Installing and Running Elasticsearch    
-aml-backend requires Elasticsearch 2.4.1    
-[Installation Guide for 2.4.1](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
-
-The requirement for installing Elasticsearch is Java 7.    
-Preferably, you should install the latest version of the official Java from www.java.com.    
-
-You can get the Elasticsearch 2.4.1 from https://www.elastic.co/blog/elasticsearch-2-4-1-released.    
-To install Elasticsearch, download and extract the archive file for your platform.    
-Once you’ve extracted the archive file, Elasticsearch is ready to run.   
-
-Below are the commands:
-```
-wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.1/elasticsearch-2.4.1.tar.gz
-tar xvf elasticsearch-2.4.1.tar.gz
-cd elasticsearch-2.4.1
-./bin/elasticsearch
-```
-
-**Tip**    
-When installing Elasticsearch in production, you can choose to use the Debian or RPM packages provided on the downloads page.    
-You can also use the officially supported Puppet module, Chef cookbook, or Ansible.    
 
 ## Releasing
 Run `python release.py` to generate a tarball with Wheels for the application
