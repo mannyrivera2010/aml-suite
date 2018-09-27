@@ -1,31 +1,74 @@
 #!/usr/bin/env bash
-#
+<< ////
+Process:
+* dump db ozp
+* create db aml
+* restore ozp dump file to aml db
+* rename ozp tables to aml prefixes
+* drop iwc tables
+* drop django_migration db
+* create django_migration file with new values
 
-export DUMP_FILENAME="dump.sql"
+Preq:
+User for AML database has been created
+////
 
-export LEGACY_DB_HOST="localhost"
-export LEGACY_DB_NAME="ozp"
-export LEGACY_DB_USER="ozp_user"
+set_variables(){
+  echo '-- Setting variables -- '
+  export LEGACY_DUMP_FILENAME="ozp_dump.sql"
 
-export LEGACY_DUMP_OPTIONS="--data-only --disable-triggers --exclude-table=django_*"
-export LEGACY_DUMP_OPTIONS=$LEGACY_DUMP_OPTIONS" --exclude-table=auth_group"
-export LEGACY_DUMP_OPTIONS=$LEGACY_DUMP_OPTIONS" --exclude-table=auth_user_groups"
-export LEGACY_DUMP_OPTIONS=$LEGACY_DUMP_OPTIONS" --exclude-table=auth_permission"
-export LEGACY_DUMP_OPTIONS=$LEGACY_DUMP_OPTIONS" --exclude-table=auth_group_permissions"
-export LEGACY_DUMP_OPTIONS=$LEGACY_DUMP_OPTIONS" --exclude-table=auth_user_user_permissions"
+  export LEGACY_DB_HOST="localhost"
+  export LEGACY_DB_NAME="ozp"
+  export LEGACY_DB_USER="ozp_user"
+
+  export LEGACY_DUMP_OPTIONS=""
+
+  export AML_DB_HOST="localhost"
+  export AML_DB_NAME="aml"
+  export AML_DB_USER="aml_user"
+}
+
+clear_aml_db(){
+  if [ `psql -tA -c "SELECT 1 AS result FROM pg_database WHERE datname='$AML_DB_NAME'" -U postgres --host=localhost` == '1' ] ; then psql -c 'DROP DATABASE '$AML_DB_NAME';' -U postgres --host=localhost ; fi
+  psql -c 'CREATE DATABASE '$AML_DB_NAME';' -U postgres --host=localhost
+  psql -c 'GRANT ALL PRIVILEGES ON DATABASE '$AML_DB_NAME' TO '$AML_DB_USER';' -U postgres --host=localhost
+}
+
+dump_legacy_db(){
+  echo '-- Dumping '$LEGACY_DUMP_FILENAME' --'
+  pg_dump --username=$LEGACY_DB_USER --host=$LEGACY_DB_HOST $LEGACY_DB_NAME $LEGACY_DUMP_OPTIONS > $LEGACY_DUMP_FILENAME
+}
+
+# Replace ozp with aml, ozp_user with aml_user
+clean_dump_file(){
+
+}
+
+restore_legacy_db_aml(){
+  psql -h localhost -U aml_user aml < $LEGACY_DUMP_FILENAME
+}
+
+# ALTER
+alter_restored_db(){
+
+}
+
+
+set_variables
+
+dump_legacy_db
+
+clean_dump_file
+
+clear_aml_db
+
+restore_legacy_db_aml
+
+alter_restored_db
+
+
 
 # Dump Legacy Database Data
-pg_dump --username=$LEGACY_DB_USER --host=$LEGACY_DB_HOST $LEGACY_DB_NAME $LEGACY_DUMP_OPTIONS > $DUMP_FILENAME
 
-
-
-
-# Remove database for testing
-make pgsql_create_user
-make db_migrate
-
-
-
-
-
-psql -h localhost -U aml_user aml < dump.sql
+#
+# ALTER TABLE IF EXISTS ozpcenter_docurl RENAME TO amlcenter_docurl;
