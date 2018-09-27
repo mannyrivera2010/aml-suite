@@ -1,5 +1,6 @@
 .cache/
 
+db_migration/*dump.sql*
 *.pid
 
 db.sqlite3

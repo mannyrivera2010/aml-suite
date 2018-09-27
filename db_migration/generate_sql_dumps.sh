@@ -15,7 +15,7 @@ User for AML database has been created
 
 set_variables(){
   echo '-- Setting variables -- '
-  export LEGACY_DUMP_FILENAME="ozp_dump.sql"
+  export LEGACY_DUMP_FILENAME="ozp_dump.dump.sql"
 
   export LEGACY_DB_HOST="localhost"
   export LEGACY_DB_NAME="ozp"
@@ -35,13 +35,20 @@ clear_aml_db(){
 }
 
 dump_legacy_db(){
+  rm *.dump.sql* -f
   echo '-- Dumping '$LEGACY_DUMP_FILENAME' --'
   pg_dump --username=$LEGACY_DB_USER --host=$LEGACY_DB_HOST $LEGACY_DB_NAME $LEGACY_DUMP_OPTIONS > $LEGACY_DUMP_FILENAME
 }
 
 # Replace ozp with aml, ozp_user with aml_user
 clean_dump_file(){
-
+  echo '-- Cleaning Dump File --'
+  sed -i.org \
+    -e 's/_ozpcenter/_amlcenter/g' \
+    -e 's/ozpcenter_/amlcenter_/g' \
+    -e 's/'$LEGACY_DB_USER'/'$AML_DB_USER'/g' \
+    -e 's/leaving_ozp_warning_flag/leaving_aml_warning_flag/g' \
+    $LEGACY_DUMP_FILENAME
 }
 
 restore_legacy_db_aml(){
@@ -50,7 +57,7 @@ restore_legacy_db_aml(){
 
 # ALTER
 alter_restored_db(){
-
+  echo '-- alter_restored_db --'
 }
 
 
@@ -64,11 +71,8 @@ clear_aml_db
 
 restore_legacy_db_aml
 
-alter_restored_db
-
-
+#alter_restored_db
 
 # Dump Legacy Database Data
 
-#
 # ALTER TABLE IF EXISTS ozpcenter_docurl RENAME TO amlcenter_docurl;
