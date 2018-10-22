@@ -95,6 +95,36 @@ def _preprocess_dn(original_dn):
     return dn
 
 
+def _get_sid_from_dn(dn):
+    """
+    Formats username to return sid
+    """
+    if 'CN=' in dn:
+        cn = utils.find_between(dn, 'CN=', ',')
+    else:
+        cn = dn
+
+    # sanitize username
+    username = cn[0:30]
+    username = username.replace(' ', '_')  # no spaces
+    username = username.replace("'", "")  # no apostrophes
+    username = username.lower()  # all lowercase
+
+    username_last_underscore_index = username.rfind('_')
+    if username_last_underscore_index >= 0:
+        username = username[username_last_underscore_index + 1:]
+
+    # make sure this username doesn't exist
+    count = User.objects.filter(username=username).count()
+    if count != 0:
+        new_username = username[0:27]
+        count = User.objects.filter(username__startswith=new_username).count()
+        new_username = '{0!s}_{1!s}'.format(new_username, count + 1)
+        username = new_username
+
+    return username
+
+
 def _get_profile_by_dn(dn, issuer_dn='default issuer dn'):
     """
     Returns a user profile for a given DN
@@ -122,18 +152,7 @@ def _get_profile_by_dn(dn, issuer_dn='default issuer dn'):
 
         kwargs = {'display_name': cn, 'dn': dn, 'issuer_dn': issuer_dn}
         # sanitize username
-        username = cn[0:30]
-        username = username.replace(' ', '_')  # no spaces
-        username = username.replace("'", "")  # no apostrophes
-        username = username.lower()  # all lowercase
-        # make sure this username doesn't exist
-        count = User.objects.filter(username=username).count()
-        if count != 0:
-            new_username = username[0:27]
-            count = User.objects.filter(username__startswith=new_username).count()
-            new_username = '{0!s}_{1!s}'.format(new_username, count + 1)
-            username = new_username
-
+        username = _get_sid_from_dn(cn)
         # now check again - if this username exists, we have a problemce
         count = User.objects.filter(username=username).count()
         if count != 0:
