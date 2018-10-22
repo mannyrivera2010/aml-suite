@@ -118,7 +118,7 @@ def _get_sid_from_dn(dn):
     count = User.objects.filter(username=username).count()
     if count != 0:
         new_username = username[0:27]
-        count = User.objects.filter(username=new_username).count()  # __startswith
+        count = User.objects.filter(username__startswith=new_username).count()
         new_username = '{0!s}_{1!s}'.format(new_username, count + 1)
         username = new_username
 
