@@ -261,6 +261,24 @@ class BookmarkViewSet(viewsets.ViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @detail_route(methods=['delete'], permission_classes=[permissions.IsUser])
+    def self_remove_access(self, request, pk):
+        """
+        Remove Bookmark Permission for self for a bookmark entry
+
+        API:
+            Remove Bookmark Permission for self for a bookmark entry
+            ```
+            GET /api/bookmark/{bookmark_entry_id}/self_remove_access/
+            ```
+        """
+        current_request_profile = request.user.profile
+        bookmark_entry = model_access.get_bookmark_entry_by_id(current_request_profile, pk)
+
+        model_access.remove_profile_permission_for_bookmark_entry(current_request_profile, bookmark_entry)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def destroy(self, request, pk=None):
         """
         Delete/Remove Bookmark Entry from request_profile
