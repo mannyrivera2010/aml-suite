@@ -318,17 +318,23 @@ def update_profile_permission_for_bookmark_entry(request_profile, bookmark_permi
     return bookmark_permission_entry
 
 
-def remove_profile_permission_for_bookmark_entry(request_profile, target_profile, target_bookmark):
+def remove_profile_permission_for_bookmark_entry(request_profile, target_bookmark):
     """
     Remove profile from bookmark
     """
-    check_permission_for_bookmark_entry(request_profile, target_bookmark)
+    check_permission_for_bookmark_entry(request_profile, target_bookmark, allow_viewer=True)
 
-    profile_bookmark_permission = models.BookmarkPermission.objects.filter(profile=target_profile, bookmark=target_bookmark).first()
+    if target_bookmark.type != FOLDER_TYPE:
+        raise errors.PermissionDenied('Can only check permissions for folder bookmarks')
 
-    # if only owner:
-    # target_bookmark.delete()
-    # # TODO: Does this delete all re
+    bookmark_permission = models.BookmarkPermission.objects.filter(bookmark=target_bookmark)
+    bookmark_permission_length = len(bookmark_permission)
+
+    if bookmark_permission_length <= 1:
+        raise errors.PermissionDenied('Can only access delete if more than profile has access')
+
+    profile_bookmark_permission = models.BookmarkPermission.objects.filter(profile=request_profile, bookmark=target_bookmark)
+    profile_bookmark_permission.delete()
 
 
 def create_get_user_root_bookmark_folder(request_profile):
