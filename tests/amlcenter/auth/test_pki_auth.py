@@ -115,20 +115,21 @@ class PkiAuthenticationTest(TestCase):
 
         self.assertEquals(user_obj.username, 'user1')
 
-    def test_authenticate_full_with_cn_preprocess_dn_sid(self):
-        self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
-        self.meta_dict['HTTP_X_SSL_USER_DN'] = '/CN=Last First Mid Mid1 flast'
-        self.meta_dict['HTTP_X_SSL_ISSUER_DN'] = 'issuer'
-
-        results = self.pki_authentication.authenticate(self.request)
-
-        user_obj = results[0]
-        error_obj = results[1]
-
-        self.assertEquals(str(user_obj.__class__), "<class 'django.contrib.auth.models.User'>")
-        self.assertEquals(error_obj, None)
-
-        self.assertEquals(user_obj.username, 'flast')
+    # Comment out test cause since reverting back to old sid
+    # def test_authenticate_full_with_cn_preprocess_dn_sid(self):
+    #     self.meta_dict['HTTP_X_SSL_AUTHENTICATED'] = 'SUCCESS'
+    #     self.meta_dict['HTTP_X_SSL_USER_DN'] = '/CN=Last First Mid Mid1 flast'
+    #     self.meta_dict['HTTP_X_SSL_ISSUER_DN'] = 'issuer'
+    #
+    #     results = self.pki_authentication.authenticate(self.request)
+    #
+    #     user_obj = results[0]
+    #     error_obj = results[1]
+    #
+    #     self.assertEquals(str(user_obj.__class__), "<class 'django.contrib.auth.models.User'>")
+    #     self.assertEquals(error_obj, None)
+    #
+    #     self.assertEquals(user_obj.username, 'flast')
 
     def test_authenticate_full_with_cn_preprocess_dn_already_exist(self):
         self.skipTest('TODO: Disable preprocess dn')
@@ -184,7 +185,7 @@ class PkiAuthenticationTest(TestCase):
         # with name longer than 30 chars
         dn = 'This guy has a really really really long DN'
         profile = pkiauth._get_profile_by_dn(dn)
-        self.assertEqual(profile.user.username, 'r')
+        self.assertEqual(profile.user.username, 'this_guy_has_a_really_really_r')
 
     def test_duplicate_username(self):
         """
@@ -194,16 +195,16 @@ class PkiAuthenticationTest(TestCase):
         """
         # create a new user
         profile = pkiauth._get_profile_by_dn('Jones_jones')
-        self.assertEqual(profile.user.username, 'jones_2')
+        self.assertEqual(profile.user.username, 'jones_jones')
 
         # this dn has an "'" in it, but that gets stripped out before creating
         # the new user
         profile = pkiauth._get_profile_by_dn('jones jones\'')
-        self.assertEqual(profile.user.username, 'jones_3')
+        self.assertEqual(profile.user.username, 'jones_jones_2')
 
-        # Should get the first profile
-        profile = pkiauth._get_profile_by_dn('Jones_jones')
-        self.assertEqual(profile.user.username, 'jones_2')
+        # # Should get the first profile
+        # profile = pkiauth._get_profile_by_dn('Jones_jones')
+        # self.assertEqual(profile.user.username, 'jones_2')
 
     def test_case_username(self):
         # DN with mixed case should match
