@@ -152,7 +152,20 @@ def _get_profile_by_dn(dn, issuer_dn='default issuer dn'):
 
         kwargs = {'display_name': cn, 'dn': dn, 'issuer_dn': issuer_dn}
         # sanitize username
-        username = _get_sid_from_dn(cn)
+        username = cn[0:30]
+        username = username.replace(' ', '_')  # no spaces
+        username = username.replace("'", "")  # no apostrophes
+        username = username.lower()  # all lowercase
+        # make sure this username doesn't exist
+        count = User.objects.filter(username=username).count()
+        if count != 0:
+            new_username = username[0:27]
+            count = User.objects.filter(username__startswith=new_username).count()
+            new_username = '{0!s}_{1!s}'.format(new_username, count + 1)
+            username = new_username
+
+        # Reverting Manny's changes
+        # username = _get_sid_from_dn(cn)
         # now check again - if this username exists, we have a problemce
         count = User.objects.filter(username=username).count()
         if count != 0:
