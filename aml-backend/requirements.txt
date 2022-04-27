@@ -1,0 +1,5 @@
+# Dependencies used for deployment
+-r requirements.prod.txt
+
+# Dependencies used for development  
+-r requirements.dev.txt

@@ -1,0 +1,6 @@
+[run]
+omit =
+    amlcenter/migrations/*
+    amlcenter/scripts/*
+    aml/roles_draft.py
+    aml/wsgi.py
