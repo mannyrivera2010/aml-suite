@@ -1,0 +1,28 @@
+jenkins_username: "{{ vault_jenkins_username }}"
+jenkins_password: "{{ vault_jenkins_password }}"
+jenkins_host: "{{ vault_jenkins_host }}"
+# if offline is true, don't try to download anything. all files (dependencies,
+# ozp source, etc) must be available in the 'files' directory of the
+# offline role
+offline: false
+# this is where files downloaded from the internet (3rd party and ozp source)
+#  will be placed
+download_dir: "/usr/local/ozp/internet_files"
+# for vagrant boxes, this will be something like 4440 (or whatever port you
+# are forwarding from your host to guest port 4444). For ci or production
+# boxes, it will be the standard 443.
+site_port: 4440
+# port that gunicorn (for ozp-backend) runs on
+api_port: 4433
+# port that nginx runs on
+frontend_port: 4444
+# port that metrics nginx configuration runs on
+metrics_port: 4450
+# port that gunicorn (demo auth) runs on (not used in production)
+auth_port: 8081
+# if false, basic auth will be used
+pki_login: false
+# redis password
+redis_password: hF2KLXJhhmhDdZKzsG8edGbECKN9kMn26XKhmNAA
+# redis port
+redis_port: 6379

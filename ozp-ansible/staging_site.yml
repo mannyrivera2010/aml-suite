@@ -1,0 +1,82 @@
+---
+- hosts: all
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - common
+    - offline
+
+- hosts: loadbalancer
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - haproxy
+
+- hosts: imageserver
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - images
+
+- hosts: authserver
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - python_3
+    - ozp_authorization
+
+- hosts: dbserver
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - postgres_build
+    - postgres_run
+
+- hosts: redisserver
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - redis
+
+- hosts: staticserver
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - node
+    - ssl_certs
+    - nginx
+    - ozp_center
+    - ozp_hud
+    - ozp_webtop
+    - ozp_iwc
+    - ozp_demo_apps
+    - ozp_help
+    - ozp_config
+
+- hosts: apiserver
+  vars_files:
+    - group_vars/all/all.yml
+    - group_vars/all/vault.yml
+
+  roles:
+    - ssl_certs
+    # postgres doesn't need to run on this box, but it must be installed there
+    # so that the Python psycopg2 lib will install properly
+    - postgres_build
+    - python_3
+    - ozp_backend
+    #- db_migration

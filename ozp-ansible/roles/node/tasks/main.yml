@@ -1,0 +1,41 @@
+---
+- name: Create directory for node installs
+  file:
+    path: /usr/local/node_versions/
+    state: directory
+    mode: 0777
+    recurse: true
+  become: true
+
+- name: Copy custom node version manager
+  copy:
+    src: set_node_version.sh
+    dest: /usr/local/node_versions/set_node_version.sh
+    owner: root
+    mode: 0777
+  become: true
+
+- name: Download node
+  when: not offline
+  with_items: "{{node_versions}}"
+  get_url:
+    url: https://nodejs.org/dist/v{{ item }}/node-v{{ item }}-linux-x64.tar.gz
+    dest: "{{ download_dir }}"
+  become: true
+  become_user: ozp
+
+- name: Extract archive
+  with_items: "{{node_versions}}"
+  unarchive:
+    src: "{{ download_dir }}/node-v{{ item }}-linux-x64.tar.gz"
+    dest: /usr/local/node_versions
+    copy: no
+  become: true
+
+- name: Rename node directory
+  with_items: "{{node_versions}}"
+  shell: rm -rf /usr/local/node_versions/{{ item }}; mv /usr/local/node_versions/node-v{{ item }}-linux-x64 /usr/local/node_versions/{{ item }}
+  become: true
+
+
+# to use this version of node, `./set_node_versions.sh <version>

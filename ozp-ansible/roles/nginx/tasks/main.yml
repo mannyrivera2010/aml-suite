@@ -1,0 +1,97 @@
+---
+- name: Install prereqs for ssl module
+  yum: name={{ item }} state=present
+  with_items:
+    - pcre
+    - pcre-devel
+  become: true
+
+- name: Download nginx source
+  when: not offline
+  get_url:
+    url: http://nginx.org/download/nginx-{{ nginx_version }}.tar.gz
+    dest: "{{ download_dir }}/nginx-{{ nginx_version }}.tar.gz"
+  become: true
+  become_user: ozp
+
+- name: Extract archive
+  unarchive:
+    src: "{{ download_dir }}/nginx-{{ nginx_version }}.tar.gz"
+    dest: "{{ download_dir }}"
+    copy: no
+  become: true
+  become_user: ozp
+
+- name: Configure nginx
+  command: chdir={{ download_dir }}/nginx-{{ nginx_version }} ./configure --with-http_ssl_module
+  become: true
+  become_user: ozp
+
+- name: Make nginx
+  command: chdir={{ download_dir }}/nginx-{{ nginx_version }} make
+  become: true
+  become_user: ozp
+
+# Install nginx to /usr/local/nginx
+- name: Install nginx
+  command: chdir={{ download_dir }}/nginx-{{ nginx_version }} make install
+  become: true
+
+# This is being done in ssl_certs now
+#- name: Create nginx user
+#  user:
+#    name: nginx
+#    comment: "nginx"
+#    # group: nginx
+#    password: "password"
+#  become: true
+
+- name: Copy nginx.conf
+  template:
+    src: nginx.conf.j2
+    dest: /usr/local/nginx/conf/nginx.conf
+    owner: nginx
+    # group: nginx
+    mode: 0644
+  become: true
+
+- name: Copy ozp nginx conf
+  template:
+    src: ozp_nginx.conf.j2
+    dest: /usr/local/nginx/conf/ozp.conf
+    owner: nginx
+    # group: nginx
+    mode: 0644
+  become: true
+
+- name: Copy nginx init.d script
+  template:
+    src: nginx.initd.j2
+    dest: /etc/init.d/nginx
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Create directory for static file hosting
+  file:
+    path: /usr/local/ozp/frontend/django_static
+    state: directory
+    owner: nginx
+    # group: nginx
+    mode: 0775
+    recurse: true
+  become: true
+
+- name: Fix permissions in nginx directory
+  command: chown -R nginx /usr/local/nginx/
+  become: true
+
+# TODO: do we need this or does the above suffice?
+- name: Fix permissions of top level nginx dir
+  command: chown -R nginx /usr/local/nginx
+  become: true
+
+- name: Ensure nginx is running (and enable it at boot)
+  service: name=nginx state=restarted enabled=yes
+  become: true

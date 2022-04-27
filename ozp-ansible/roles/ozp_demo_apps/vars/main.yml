@@ -1,0 +1,14 @@
+---
+# valid choices are "jenkins", "github", or "local"
+download_from: "github"
+ # branch or tag name to checkout from git repo
+git_tag_or_branch_name: "master"
+# if jenkins, choose a project name and build number
+jenkins_project: "build-demo-latest"
+# enter a build number or "lastSuccessfulBuild" to get the latest artifact
+jenkins_build_number: "lastSuccessfulBuild"
+# for ozpIwc.conf.js
+api_root_url: "/api"
+# for OzoneConfig.js
+iwc_url: "https://{{ site_fqdn }}:{{ site_port }}/iwc"
+node_version: 0.12.7

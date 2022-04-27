@@ -1,0 +1,34 @@
+When we move ozp-ansible over to production, we make these changes:
+
+* create copies of hosts_staging.yml, staging_site.yml, and
+    staging_rolling_update.yml
+* group_vars/all/all.yml
+    * offline: true
+    * site_port: 443
+    * pki_login: true
+* hosts_staging
+    * set all fqdns and ip addresses
+* staging_site.yml
+    * remove ozp_authorization and ozp_demo_apps roles
+* ozp_backend/vars/main.yml
+    * offline: true
+    * reset_database: false
+* roles/ozp_*/vars/main.yml (center, hud, webtop, iwc, help)
+    * download_from: local
+* ssl_certs/files - will need to manually copy ssl certs to boxes, since each
+    box will have unique certs, which is not supported by these Ansible scripts
+* offline/files - put them all here (see README)
+* staging_rolling_updates.yml
+    * remove ozp_demo_apps, ozp_authorization roles
+* ozp_backend/templates/settings.py.j2
+    * USER_INFO_URL: https
+    * USER_GROUPS_URL: https
+    * ALLOWED_HOSTS
+    * APPS_MALL_STEWARD_GROUP_NAME
+    * ORG_STEWARD_GROUP_NAME
+    * METRICS_GROUP_NAME
+    * PROJECT_NAME
+    * PROJECT_NAME
+    * SECONDS_TO_CACHE_DATA
+* add db_migration role to apiservers, adding the `run_once` option
+* after everything has run, copy static files on api server /usr/local/ozp/backend/static to /usr/local/ozp/frontend/django_static on frontend server

@@ -1,0 +1,45 @@
+---
+# Add a line for each API server that will be connecting to the DB
+- name: Allow incoming database connections step one
+  when: db_fqdn != "localhost"
+  shell: echo "host    all    all    {{ item }}/24    trust" >>  /usr/local/pgsql/data/pg_hba.conf
+  become: true
+  become_user: postgres
+  with_items: groups.apiserver
+
+- name: Allow incoming database connections step two
+  when: db_fqdn != "localhost"
+  shell: echo "listen_addresses = '*'" >>  /usr/local/pgsql/data/postgresql.conf
+  become: true
+  become_user: postgres
+
+- name: Ensure postgres is running (and enable it at boot)
+  service: name=postgres state=restarted enabled=yes
+  become: true
+  ignore_errors: true
+
+- name: Wait up to two minutes for the database to start
+  shell: /usr/bin/timeout 120 bash -c 'until /usr/local/pgsql/bin/pg_isready -q ; do echo "Waiting for postgres ..."; sleep 15; done' 
+  become: true
+  become_user: postgres
+
+# TODO: Password?
+# Ignore errors - ok if this user already exists
+- name: Create a new database user
+  command: /usr/local/pgsql/bin/createuser ozp_user
+  become: true
+  become_user: postgres
+  ignore_errors: true
+
+# Ignore errors - ok if this db already exists
+- name: Create a new database
+  command: /usr/local/pgsql/bin/createdb ozp
+  become: true
+  become_user: postgres
+  ignore_errors: true
+
+
+- name: Grant user permissions on new database
+  command: /usr/local/pgsql/bin/psql -c 'GRANT ALL PRIVILEGES ON DATABASE ozp TO ozp_user;'
+  become: true
+  become_user: postgres

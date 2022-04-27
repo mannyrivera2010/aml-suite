@@ -1,0 +1,9 @@
+---
+- name: Copy files
+  when: offline
+  copy:
+    src: ../files/
+    dest: "{{ download_dir }}"
+    owner: ozp
+    force: yes
+  become: true

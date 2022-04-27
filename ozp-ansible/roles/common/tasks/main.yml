@@ -1,0 +1,77 @@
+---
+# Note that even if "offline" is set to true, we assume there is a local
+# yum mirror
+
+- name: Install prereqs
+  yum: name={{ item }} state=present
+  with_items:
+    - epel-release
+    - vim
+    - git
+    - zlib-devel
+    - bzip2-devel
+    - openssl-devel
+    - ncurses-devel
+    - sqlite-devel
+    - readline-devel
+    - tk-devel
+    - gdbm-devel
+    - db4-devel
+    - libpcap-devel
+    - xz-devel
+    - libjpeg-devel
+    - libselinux-python # required for ansible i guess
+    - nfs-utils
+    - nfs-utils-lib
+
+  become: true
+
+- name: Create ozp user
+  user:
+    name: ozp
+    comment: "ozp"
+    # group: ozp
+    password: "password"
+  become: true
+
+- name: Create download directory
+  file:
+    path: "{{ download_dir }}"
+    owner: ozp
+    state: directory
+  become: true
+
+- name: Check if pip is installed
+  command: bash -c "pip --version"
+  register: pip_check
+  ignore_errors: yes
+
+- name: RedHat/CentOS - Install pip
+  command: bash -c "curl https://bootstrap.pypa.io/get-pip.py | python -"
+  args:
+    chdir: "{{ download_dir }}"
+  become: true
+  when: pip_check.stderr.find('command not found') != -1
+
+- name: Install httplib2  # required to use uri module in ansible
+  pip: name=httplib2
+  become: true
+
+# - name: Install httplib2 (or other things from the epel)
+#   yum: name={{ item }} state=present
+#   with_items:
+#     - python-httplib2  # required to use uri module in ansible
+#   become: true
+
+- name: Install development tools
+  yum: name='@development'
+  become: true
+
+- name: Create /usr/local/ozp directory
+  file:
+    path: /usr/local/ozp
+    owner: ozp
+    mode: 0755
+    recurse: true
+    state: directory
+  become: true

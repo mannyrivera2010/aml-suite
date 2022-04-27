@@ -1,0 +1,66 @@
+---
+# create all the directories to prevent error messages
+
+- name: Create the directory for center
+  file:
+    path: /usr/local/ozp/frontend/center
+    recurse: true
+    state: directory
+    owner: nginx
+  become: true
+
+- name: Create the directory for hud
+  file:
+    path: /usr/local/ozp/frontend/hud
+    recurse: true
+    state: directory
+    owner: nginx
+  become: true
+
+- name: Create the directory for webtop
+  file:
+    path: /usr/local/ozp/frontend/webtop
+    recurse: true
+    state: directory
+    owner: nginx
+  become: true
+
+- name: Create the directory for help
+  file:
+    path: /usr/local/ozp/frontend/help
+    recurse: true
+    state: directory
+    owner: nginx
+  become: true
+
+- name: Copy OzoneConfig.js to Center
+  template:
+    src: OzoneConfig.js.j2
+    dest: /usr/local/ozp/frontend/center/OzoneConfig.js
+    owner: nginx
+  become: true
+  ignore_errors: true
+
+- name: Copy OzoneConfig.js to HUD
+  template:
+    src: OzoneConfig.js.j2
+    dest: /usr/local/ozp/frontend/hud/OzoneConfig.js
+    owner: nginx
+  become: true
+  ignore_errors: true
+
+- name: Copy OzoneConfig.js to Help
+  template:
+    src: OzoneConfig.js.j2
+    dest: /usr/local/ozp/frontend/help/OzoneConfig.js
+    owner: nginx
+  become: true
+  ignore_errors: true
+
+- name: Copy OzoneConfig.js to Webtop
+  template:
+    src: OzoneConfig.js.j2
+    dest: /usr/local/ozp/frontend/webtop/OzoneConfig.js
+    owner: nginx
+  become: true
+  ignore_errors: true
