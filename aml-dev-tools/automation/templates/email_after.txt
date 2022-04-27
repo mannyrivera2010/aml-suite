@@ -1,0 +1,14 @@
+Subject: Release Build Completed - {{ today_date }}
+Body:
+The build was completed this afternoon at {{ time }} pm.
+
+The following PR's were part of the build:
+
+Backend
+332, 333
+
+
+If your PR was part of the build, please test it before stand-up tomorrow morning.
+
+Thank you,
+{{ name }}
